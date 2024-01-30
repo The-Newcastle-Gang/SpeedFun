@@ -29,6 +29,8 @@ namespace NCL {
 			ShaderBase*		LoadShader(const string& vertex, const string& fragment);
             std::unique_ptr<Font> LoadFont(const string& fontName);
 
+            void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+
 		protected:
 			void NewRenderLines();
 			void NewRenderText();
@@ -63,6 +65,12 @@ namespace NCL {
 			GLuint		shadowFBO;
 			Matrix4     shadowMatrix;
 
+            std::unique_ptr<Font> debugFont;
+            std::shared_ptr<OGLShader> textShader;
+
+            // Ortho for UI
+            Matrix4 uiOrthoView;
+
 			Vector4		lightColour;
 			float		lightRadius;
 			Vector3		lightPosition;
@@ -83,7 +91,9 @@ namespace NCL {
 			GLuint textColourVBO;
 			GLuint textTexVBO;
 			size_t textCount;
-		};
+
+
+        };
 	}
 }
 

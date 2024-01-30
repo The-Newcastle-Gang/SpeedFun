@@ -6,7 +6,11 @@
 #define CSC8503_FONT_H
 
 #include <map>
-#include "glad/glad.h"
+#include "Matrix4.h"
+#include "OGLShader.h"
+
+using namespace NCL;
+using namespace Rendering;
 
 class Font {
 public:
@@ -16,15 +20,17 @@ public:
     };
 
     struct Character {
-        unsigned int TextureID;  // ID handle of the glyph texture
-        Vector2i   Size;       // Size of glyph
-        Vector2i  Bearing;    // Offset from baseline to left/top of glyph
-        unsigned int Advance;    // Offset to advance to next glyph
+        unsigned int textureId;
+        Vector2i glyphSize;
+        Vector2i baselineOffset;
+        unsigned int advanceOffset;
     };
 
     std::map<char, Character> characters;
-    GLuint textVAO;
-    GLuint textVBO;
+    unsigned int textVAO;
+    unsigned int textVBO;
+
+    std::shared_ptr<OGLShader> fontShader;
 };
 
 
