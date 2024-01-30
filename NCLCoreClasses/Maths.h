@@ -108,5 +108,17 @@ namespace NCL {
 		float FloatAreaOfTri(const Vector3 &a, const Vector3 &b, const Vector3 & c);
 
 		float CrossAreaOfTri(const Vector3 &a, const Vector3 &b, const Vector3 & c);
+
+
+		//ed headers
+		Vector3 MClamp(const Vector3& input, const Vector3& mins, const Vector3& maxs);
+
+		float fClamp(float input, float lower, float upper);
+
+		Vector3 vectorAbs(const Vector3& inVec);
+
+		float SqDistPointSegment(const Vector3& a, const Vector3& b, const Vector3& c);
+
+		Vector3 ClosestPointLineSegment(const Vector3& a, const Vector3& b, const Vector3& c);
 	}
 }
