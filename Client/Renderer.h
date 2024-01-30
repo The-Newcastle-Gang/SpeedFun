@@ -8,6 +8,12 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Vector2.h"
+#include "Font.h"
+
+#include "Assets.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 namespace NCL {
 	namespace CSC8503 {
@@ -21,6 +27,7 @@ namespace NCL {
 			MeshGeometry*	LoadMesh(const string& name);
 			TextureBase*	LoadTexture(const string& name);
 			ShaderBase*		LoadShader(const string& vertex, const string& fragment);
+            std::unique_ptr<Font> LoadFont(const string& fontName);
 
 		protected:
 			void NewRenderLines();

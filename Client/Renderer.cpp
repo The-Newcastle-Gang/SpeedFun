@@ -3,6 +3,7 @@
 #include "RenderObject.h"
 #include "Camera.h"
 #include "TextureLoader.h"
+
 using namespace NCL;
 using namespace Rendering;
 using namespace CSC8503;
@@ -463,4 +464,84 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
 
 		glBindVertexArray(0);
 	}
+}
+
+std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string &fontName) {
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+    {
+        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        return nullptr;
+    }
+
+    std::string filePath = std::string(Assets::FONTSSDIR) + fontName;
+
+    FT_Face face;
+    if (FT_New_Face(ft, filePath.c_str(), 0, &face))
+    {
+        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        return nullptr;
+    }
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+
+    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
+    {
+        std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+        return nullptr;
+    }
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+
+    auto font = std::make_unique<Font>();
+
+    for (unsigned char c = 0; c < 128; c++)
+    {
+        // load character glyph
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+        {
+            std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+            continue;
+        }
+        // generate texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+                GL_TEXTURE_2D,
+                0,
+                GL_RED,
+                face->glyph->bitmap.width,
+                face->glyph->bitmap.rows,
+                0,
+                GL_RED,
+                GL_UNSIGNED_BYTE,
+                face->glyph->bitmap.buffer
+        );
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // now store character for later use
+        font->characters = {
+                texture,
+                Font::Vector2i(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                Font::Vector2i(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                (unsigned int)face->glyph->advance.x
+        };
+        font->characters.insert(std::pair<char, Character>(c, character));
+
+        glGenVertexArrays(1, &betterTextVAO);
+        glGenBuffers(1, &betterTextVBO);
+        glBindVertexArray(betterTextVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, betterTextVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+    }
+
 }
