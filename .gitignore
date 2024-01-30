@@ -1,0 +1,9 @@
+﻿*.vsidx
+*.ipch
+*.db
+/.vs/CSC8503/FileContentIndex/read.lock
+/.vs
+/Build
+/out/build/x64-Debug
+/build
+/.idea
