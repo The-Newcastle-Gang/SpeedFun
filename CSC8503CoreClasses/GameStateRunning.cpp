@@ -14,5 +14,5 @@ Running::~Running()
 
 void Running::Update(float dt)
 {
-	std::cout << "SERVER RUNNING\n";
+
 }

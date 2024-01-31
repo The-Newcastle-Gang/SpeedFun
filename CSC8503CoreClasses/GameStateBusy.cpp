@@ -14,5 +14,5 @@ Busy::~Busy()
 
 void Busy::Update(float dt)
 {
-	std::cout << "SERVER BUSY\n";
+
 }
