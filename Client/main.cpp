@@ -36,6 +36,8 @@ using namespace CSC8503;
 #include <thread>
 #include <sstream>
 
+#include <../Replicated/StageTimer.cpp>
+
 void TestPathfinding() {
 }
 
