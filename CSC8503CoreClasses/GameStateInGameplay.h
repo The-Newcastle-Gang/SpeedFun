@@ -2,11 +2,11 @@
 #include "State.h"
 namespace NCL {
 	namespace CSC8503 {
-		class GameStateInGameplay: public State
+		class InGameplay: public State
 		{
 		public:
-			GameStateInGameplay();
-			~GameStateInGameplay();
+			InGameplay();
+			~InGameplay();
 			void Update(float dt);
 		protected:
 

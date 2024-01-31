@@ -2,17 +2,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameStateLoading::GameStateLoading() : State()
+Loading::Loading() : State()
 {
 
 }
 
-GameStateLoading::~GameStateLoading()
+Loading::~Loading()
 {
 
 }
 
-void GameStateLoading::Update(float dt)
+void Loading::Update(float dt)
 {
-
+	std::cout << "LOADING\n";
 }

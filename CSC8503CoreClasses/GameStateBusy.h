@@ -2,11 +2,11 @@
 #include "State.h"
 namespace NCL {
 	namespace CSC8503 {
-		class Loading : public State
+		class Busy : public State
 		{
 		public:
-			Loading();
-			~Loading();
+			Busy();
+			~Busy();
 			void Update(float dt);
 		protected:
 

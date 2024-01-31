@@ -9,7 +9,7 @@ using namespace NCL;
 using namespace CSC8503;
 ClientGameStateMachine::ClientGameStateMachine() : StateMachine()
 {
-	currentClientState = ClientStates::Inactive;
+	currentClientState = ClientStates::InactiveState;
 	InitialiseClientStateMachine();
 }
 
@@ -20,16 +20,16 @@ ClientGameStateMachine::~ClientGameStateMachine()
 void ClientGameStateMachine::InitialiseClientStateMachine()
 {
 	//*
-	GameStateInactive* clientInactive = new GameStateInactive();
-	GameStateLoading* clientLoading = new GameStateLoading();
-	GameStateMenu* clientMenu = new GameStateMenu();
-	GameStateInGameplay* clientInGameplay = new GameStateInGameplay();
+	Inactive* clientInactive = new Inactive();
+	Loading* clientLoading = new Loading();
+	Menu* clientMenu = new Menu();
+	InGameplay* clientInGameplay = new InGameplay();
 
-	StateTransition* inactiveToLoading = new StateTransition(clientInactive, clientLoading, [&](void)->bool { return currentClientState == ClientStates::Loading; });
-	StateTransition* loadingToMenu = new StateTransition(clientLoading, clientMenu, [&](void)->bool { return currentClientState == ClientStates::Menu; });
-	StateTransition* menuToLoading = new StateTransition(clientMenu, clientLoading, [&](void)->bool { return currentClientState == ClientStates::Loading; });
-	StateTransition* loadingToInGameplay = new StateTransition(clientLoading, clientInGameplay, [&](void)->bool { return currentClientState == ClientStates::InGameplay; });
-	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { return currentClientState == ClientStates::Loading; });
+	StateTransition* inactiveToLoading = new StateTransition(clientInactive, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
+	StateTransition* loadingToMenu = new StateTransition(clientLoading, clientMenu, [&](void)->bool { return currentClientState == ClientStates::MenuState; });
+	StateTransition* menuToLoading = new StateTransition(clientMenu, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
+	StateTransition* loadingToInGameplay = new StateTransition(clientLoading, clientInGameplay, [&](void)->bool { return currentClientState == ClientStates::InGameplayState; });
+	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
 
 	this->AddState(clientInactive);
 	this->AddState(clientLoading);
@@ -41,5 +41,4 @@ void ClientGameStateMachine::InitialiseClientStateMachine()
 	this->AddTransition(menuToLoading);
 	this->AddTransition(loadingToInGameplay);
 	this->AddTransition(inGameplayToLoading);
-	//*/
 }

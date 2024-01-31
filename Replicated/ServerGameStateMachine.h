@@ -4,10 +4,9 @@
 namespace NCL {
 	namespace CSC8503 {
 		enum ServerStates {
-			Inactive,
-			Loading,
-			Menu,
-			InGameplay
+			BusyState,
+			WaitingPlayersState,
+			RunningState
 		};
 		class ServerGameStateMachine : public StateMachine {
 		public:
@@ -21,10 +20,6 @@ namespace NCL {
 			ServerStates currentServerState;
 			std::vector<State*> availableLevels;
 			void InitialiseServerStateMachine();
-			void UpdateInactive();
-			void UpdateLoading();
-			void UpdateMenu();
-			void UpdateInGameplay();
 		};
 	}
 }

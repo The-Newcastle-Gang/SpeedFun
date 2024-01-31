@@ -2,17 +2,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameStateInactive::GameStateInactive() : State()
+Inactive::Inactive() : State()
 {
 
 }
 
-GameStateInactive::~GameStateInactive()
+Inactive::~Inactive()
 {
 
 }
 
-void GameStateInactive::Update(float dt)
+void Inactive::Update(float dt)
 {
-
+	std::cout << "INACTIVE\n";
 }

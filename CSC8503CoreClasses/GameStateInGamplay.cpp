@@ -2,17 +2,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameStateInGameplay::GameStateInGameplay() : State()
+InGameplay::InGameplay() : State()
 {
 
 }
 
-GameStateInGameplay::~GameStateInGameplay()
+InGameplay::~InGameplay()
 {
 
 }
 
-void GameStateInGameplay::Update(float dt)
+void InGameplay::Update(float dt)
 {
 
 }

@@ -2,16 +2,16 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameStateMenu::GameStateMenu() : State()
+Menu::Menu() : State()
 {
 
 }
 
-GameStateMenu::~GameStateMenu()
+Menu::~Menu()
 {
 
 }
 
-void GameStateMenu::Update(float dt)
+void Menu::Update(float dt)
 {
 }

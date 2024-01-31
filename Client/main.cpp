@@ -29,6 +29,7 @@
 #include "BehaviourSequence.h"
 #include "BehaviourAction.h"
 
+#include "ClientGameStateMachine.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -55,6 +56,9 @@ hide or show the
 
 */
 int main() {
+
+
+
     Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
 
     if (!w->HasInitialised()) {
@@ -66,12 +70,15 @@ int main() {
 
     TutorialGame* g = new TutorialGame();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
+
+    ClientGameStateMachine* clientStateMachine = new ClientGameStateMachine;
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
             std::cout << "Skipping large time delta" << std::endl;
             continue; //must have hit a breakpoint or something to have a 1 second frame time!
         }
+
         if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
             w->ShowConsole(true);
         }
@@ -86,6 +93,7 @@ int main() {
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
         g->UpdateGame(dt);
+      
     }
     Window::DestroyGameWindow();
 }
