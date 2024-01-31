@@ -22,6 +22,10 @@ namespace NCL {
 			}
 
 			void SetGravity(const Vector3& g);
+
+			void SetDebugDrawingCollision(bool b) {
+				isDebugDrawingCollision = b;
+			}
 		protected:
 			void BasicCollisionDetection();
 			void BroadPhase();
@@ -38,6 +42,9 @@ namespace NCL {
 			void UpdateObjectAABBs();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
+			void DrawAllObjectCollision();
+
+			bool isDebugDrawingCollision = false;
 
 			GameWorld& gameWorld;
 

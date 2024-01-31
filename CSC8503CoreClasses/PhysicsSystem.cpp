@@ -100,7 +100,7 @@ void PhysicsSystem::Update(float dt) {
 		else {
 			BasicCollisionDetection();
 		}
-
+		DrawAllObjectCollision();
 		//This is our simple iterative solver - 
 		//we just run things multiple times, slowly moving things forward
 		//and then rechecking that the constraints have been met		
@@ -471,6 +471,13 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		angVel = angVel * frameAngDamp;
 		object->SetAngularVelocity(angVel);
 	}
+}
+void PhysicsSystem::DrawAllObjectCollision() {
+	gameWorld.OperateOnContents(
+		[](GameObject* o) {
+			o->DrawCollision();
+		}
+	);
 }
 
 
