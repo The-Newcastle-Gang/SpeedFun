@@ -100,7 +100,7 @@ void PhysicsSystem::Update(float dt) {
 		else {
 			BasicCollisionDetection();
 		}
-		DrawAllObjectCollision();
+		if(isDebugDrawingCollision) DrawAllObjectCollision();
 		//This is our simple iterative solver - 
 		//we just run things multiple times, slowly moving things forward
 		//and then rechecking that the constraints have been met		
