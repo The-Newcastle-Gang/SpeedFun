@@ -28,6 +28,7 @@
 #include "BehaviourSelector.h"
 #include "BehaviourSequence.h"
 #include "BehaviourAction.h"
+#include "LevelReader.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -63,6 +64,12 @@ int main() {
 
     w->ShowOSPointer(false);
     w->LockMouseToWindow(true);
+    
+
+    LevelReader* lv = new LevelReader();
+    lv->ReadLevel();
+
+
 
     TutorialGame* g = new TutorialGame();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!

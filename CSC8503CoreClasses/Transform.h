@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Matrix4.h"
 using std::vector;
 
 using namespace NCL::Maths;
@@ -8,6 +8,7 @@ using namespace NCL::Maths;
 namespace NCL {
 	namespace CSC8503 {
 		class Transform
+
 		{
 		public:
 			Transform();
