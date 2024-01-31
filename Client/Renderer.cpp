@@ -17,6 +17,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	debugShader  = new OGLShader("debug.vert", "debug.frag");
 	shadowShader = new OGLShader("shadow.vert", "shadow.frag");
 
+	lineCount = 0;
+	textCount = 0;
+
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -321,16 +324,15 @@ void GameTechRenderer::NewRenderLines() {
 
 	debugLineData.clear();
 
-	int frameLineCount = lines.size() * 2;
+	size_t frameLineCount = lines.size() * 2;
 
 	SetDebugLineBufferSizes(frameLineCount);
 
 	glBindBuffer(GL_ARRAY_BUFFER, lineVertVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, frameLineCount * sizeof(Debug::DebugLineEntry), lines.data());
+	glBufferSubData(GL_ARRAY_BUFFER, 0, lines.size() * sizeof(Debug::DebugLineEntry), lines.data());
 	
-
 	glBindVertexArray(lineVAO);
-	glDrawArrays(GL_LINES, 0, frameLineCount);
+	glDrawArrays(GL_LINES, 0, (GLsizei)frameLineCount);
 	glBindVertexArray(0);
 }
 

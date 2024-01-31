@@ -1,8 +1,9 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
-#include "Component.h"
+#include "../Replicated/Component.h"
 using std::vector;
+using NCL::CSC8503::Component;
 
 namespace NCL::CSC8503 {
 	class NetworkObject;
@@ -18,16 +19,16 @@ namespace NCL::CSC8503 {
 		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
 		virtual void Start() { StartAllComponents(); }
 
-		virtual void OnCollisionBegin(const std::shared_ptr<GameObject>& otherObject) {
-			for (std::shared_ptr<Component>& component : components)component->OnCollisionEnter(otherObject);
+		virtual void OnCollisionBegin(const GameObject* otherObject) {
+			for (const std::shared_ptr<Component>& component : components)component->OnCollisionEnter(otherObject);
 		}
 
-		virtual void OnCollisionEnd(const std::shared_ptr<GameObject>&  otherObject) {
-			for (std::shared_ptr<Component>& component : components)component->OnCollisionEnd(otherObject);
+		virtual void OnCollisionEnd(const GameObject* otherObject) {
+			for (const std::shared_ptr<Component>& component : components)component->OnCollisionEnd(otherObject);
 		}
 
-		virtual void OnCollisionStay(const std::shared_ptr<GameObject>& otherObject) {
-			for (std::shared_ptr<Component>& component : components)component->OnCollisionStay(otherObject);
+		virtual void OnCollisionStay(const GameObject* otherObject) {
+			for (const std::shared_ptr<Component>& component : components)component->OnCollisionStay(otherObject);
 		}
 
 		void UpdateAllComponents(float dt) { for (const std::shared_ptr<Component>& component : components)component->Update(dt); }
