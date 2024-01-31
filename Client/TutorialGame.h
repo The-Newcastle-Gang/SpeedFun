@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "PhysicsSystem.h"
+#include "lua.hpp"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -80,7 +81,9 @@ namespace NCL {
 			}
 
 			GameObject* objClosest = nullptr;
-		};
+
+            void LoadScripting();
+        };
 	}
 }
 
