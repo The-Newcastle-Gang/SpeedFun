@@ -1,3 +1,7 @@
+///<summary>
+/// Reads from leveljson and populates on variables
+///</summary>
+
 #include "LevelReader.h"
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
@@ -14,12 +18,12 @@ void LevelReader::ReadLevel() {
 
 	for (auto& item : jData["GroundBlocks"].items()) {
 
-		auto curposref = item.value()["position"];
-		auto curdimref = item.value()["dimensions"];
+		auto& curposref = item.value()["position"];
+		auto& curdimref = item.value()["dimensions"];
 
 		tempgroundprim->pos = new Vector3(curposref["x"], curposref["y"], curposref["z"]);
 		tempgroundprim->dims = new Vector3(curdimref["x"], curdimref["y"], curdimref["z"]);
-		GroundCubes.emplace_back(&tempgroundprim);
+		GroundCubes.emplace_back(tempgroundprim);
 
 	}
 
