@@ -27,6 +27,6 @@ public:
 protected:
 	Vector3* StartPosition;
 	Vector3* EndPosition;
-	vector<GroundCubePrimitive> GroundCubes;
+	std::vector<GroundCubePrimitive*> GroundCubes;
 
 };
