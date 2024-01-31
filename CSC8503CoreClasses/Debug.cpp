@@ -38,6 +38,7 @@ void Debug::DrawLine(const Vector3& startpoint, const Vector3& endpoint, const V
 
 	lineEntries.emplace_back(newEntry);
 }
+
 void Debug::DrawAABBLines(const Vector3& centre, const Vector3& halfSizes, const Vector4& colour, float time)
 {
 	float scalarX[4] = { 1,1,-1,-1 };
@@ -129,6 +130,7 @@ void Debug::DrawOBBLines(const Vector3& centre, const Quaternion& rotaiton, cons
 	}
 
 }
+
 void Debug::DrawAxisLines(const Matrix4& modelMatrix, float scaleBoost, float time) {
 	Matrix4 local = modelMatrix;
 	local.SetPositionVector({ 0, 0, 0 });
