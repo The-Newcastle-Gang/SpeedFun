@@ -1,7 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
-
+#include "Component.h"
 using std::vector;
 
 namespace NCL::CSC8503 {
@@ -9,10 +9,33 @@ namespace NCL::CSC8503 {
 	class RenderObject;
 	class PhysicsObject;
 
-	class GameObject	{
+	class GameObject{
 	public:
 		GameObject(std::string name = "");
 		~GameObject();
+
+		virtual void Update(float dt) { UpdateAllComponents(dt);}
+		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
+		virtual void Start() { StartAllComponents(); }
+
+		virtual void OnCollisionBegin(const std::shared_ptr<GameObject>& otherObject) {
+			for (std::shared_ptr<Component>& component : components)component->OnCollisionEnter(otherObject);
+		}
+
+		virtual void OnCollisionEnd(const std::shared_ptr<GameObject>&  otherObject) {
+			for (std::shared_ptr<Component>& component : components)component->OnCollisionEnd(otherObject);
+		}
+
+		virtual void OnCollisionStay(const std::shared_ptr<GameObject>& otherObject) {
+			for (std::shared_ptr<Component>& component : components)component->OnCollisionStay(otherObject);
+		}
+
+		void UpdateAllComponents(float dt) { for (const std::shared_ptr<Component>& component : components)component->Update(dt); }
+
+		void PhysicsUpdateAllComponents(float dt) { for (const std::shared_ptr<Component>& component : components)component->PhysicsUpdate(dt); }
+
+		void StartAllComponents() { for (const std::shared_ptr<Component>& component : components)component->Start(); }
+
 
 		void SetBoundingVolume(CollisionVolume* vol) {
 			boundingVolume = vol;
@@ -54,14 +77,6 @@ namespace NCL::CSC8503 {
 			return name;
 		}
 
-		virtual void OnCollisionBegin(GameObject* otherObject) {
-			//std::cout << "OnCollisionBegin event occured!\n";
-		}
-
-		virtual void OnCollisionEnd(GameObject* otherObject) {
-			//std::cout << "OnCollisionEnd event occured!\n";
-		}
-
 		bool GetBroadphaseAABB(Vector3&outsize) const;
 
 		void UpdateBroadphaseAABB();
@@ -74,7 +89,26 @@ namespace NCL::CSC8503 {
 			return worldID;
 		}
 
+		//returns true if component found, false if not
+		template <typename T>
+		bool TryGetComponent(std::shared_ptr<T>& returnPointer) {
+			for (std::shared_ptr<Component> component : components) {
+				std::shared_ptr<T> typeCast = dynamic_cast<std::shared_ptr<T>>(component);
+				if (typeCast) {
+					returnPointer = typeCast;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		void AddComponent(std::shared_ptr<Component> component) {
+			components.push_back(component);
+		}
+
 	protected:
+		std::vector<std::shared_ptr<Component>> components; //shared pointers as components may reference eachother
+
 		Transform			transform;
 
 		CollisionVolume*	boundingVolume;
