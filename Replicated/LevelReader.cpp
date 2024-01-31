@@ -12,12 +12,15 @@ void LevelReader::ReadLevel() {
 	//cout << jData["StartPoint"]["x"] + 1; 
 	StartPosition = new Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"]);
 	EndPosition = new Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"]);
+	cout << "SP: " << *StartPosition <<endl;
+	cout << "EP: " << *EndPosition << endl;
+	GroundCubePrimitive* gp = new GroundCubePrimitive();
 
-	for (auto& x : jData.items()) {
-		cout << "key" << x.key() << "value" << x.value() << endl;
+	for (const auto& item : jData["GroundBlocks"].items()) {
+		for (const auto& x : item.value().items()) {
+			cout << x << "\n";
+		}
+		//cout << item << "\n";
 	}
 
-
-	/*cout << *StartPosition;
-	cout << "hehehhehe";*/
 }
