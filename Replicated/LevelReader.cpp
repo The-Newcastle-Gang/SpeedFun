@@ -9,6 +9,12 @@ using json = nlohmann::json;
 void LevelReader::ReadLevel() {
 
 	std::ifstream jFileStream(Assets::LEVELDIR +"level.json");
+
+	if (!jFileStream) {
+		cerr << "No file available. Check " + Assets::LEVELDIR;
+		return;
+	}
+
 	json jData = json::parse(jFileStream);
 
 	StartPosition = new Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"]);
@@ -26,8 +32,5 @@ void LevelReader::ReadLevel() {
 		GroundCubes.emplace_back(tempgroundprim);
 
 	}
-
-	cout << GroundCubes.size();
-	
 
 }
