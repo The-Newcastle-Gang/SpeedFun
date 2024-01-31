@@ -14,4 +14,5 @@ Menu::~Menu()
 
 void Menu::Update(float dt)
 {
+	std::cout << "MAIN MENU\n";
 }

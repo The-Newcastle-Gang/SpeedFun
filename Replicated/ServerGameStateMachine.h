@@ -16,6 +16,10 @@ namespace NCL {
 			{
 				availableLevels = levels;
 			}
+			void SetServerState(ServerStates serverState)
+			{
+				currentServerState = serverState;
+			}
 		protected:
 			ServerStates currentServerState;
 			std::vector<State*> availableLevels;

@@ -14,5 +14,5 @@ WaitingPlayers::~WaitingPlayers()
 
 void WaitingPlayers::Update(float dt)
 {
-
+	std::cout << "SERVER WAITING FOR PLAYERS\n";
 }
