@@ -9,13 +9,6 @@
 #include "Debug.h"
 
 #include "StateMachine.h"
-#include "StateTransition.h"
-#include "State.h"
-
-#include "GameServer.h"
-#include "GameClient.h"
-
-#include "NavigationGrid.h"
 #include "NavigationMesh.h"
 
 #include "TutorialGame.h"
@@ -31,31 +24,11 @@
 
 #include "ClientGameStateMachine.h"
 #include "ServerGameStateMachine.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
-#include <chrono>
-#include <thread>
-#include <sstream>
 
-void TestPathfinding() {
-}
-
-void DisplayPathfinding() {
-}
-
-/*
-
-The main function should look pretty familar to you!
-We make a window, and then go into a while loop that repeatedly
-runs our 'game' until we press escape. Instead of making a 'renderer'
-and updating it, we instead make a whole game, and repeatedly update that,
-instead.
-
-This time, we've added some extra functionality to the window class - we can
-hide or show the
-
-*/
 int main() {
 
 
