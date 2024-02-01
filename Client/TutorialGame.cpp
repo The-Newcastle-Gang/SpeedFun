@@ -254,7 +254,7 @@ void TutorialGame::InitWorld() {
 
 	//InitGameExamples();
 	//InitDefaultFloor();
-	BuildLevelFromJSON();
+	BuildLevelFromJSON("level");
 }
 
 /*
@@ -402,10 +402,14 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	return apple;
 }
 
-void NCL::CSC8503::TutorialGame::BuildLevelFromJSON()
+void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 {
 	levelReader = new LevelReader();
-	levelReader->ReadLevel("level.json");
+	if (!levelReader->ReadLevel(levelName + ".json"))
+	{
+		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		return;
+	}
 
 	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
 	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });

@@ -85,7 +85,7 @@ namespace NCL {
 
 			// test stuff
 			LevelReader* levelReader;
-			void BuildLevelFromJSON();
+			void BuildLevelFromJSON(std::string levelName);
 		};
 	}
 }

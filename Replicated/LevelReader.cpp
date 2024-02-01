@@ -6,13 +6,12 @@
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
-void LevelReader::ReadLevel(std::string source) {
+bool LevelReader::ReadLevel(std::string source) {
 
 	std::ifstream jFileStream(Assets::LEVELDIR + source);
 
 	if (!jFileStream) {
-		cerr << "No file available. Check " + Assets::LEVELDIR;
-		return;
+		return false;
 	}
 
 	json jData = json::parse(jFileStream);
@@ -33,6 +32,5 @@ void LevelReader::ReadLevel(std::string source) {
 
 	}
 
-	cout << groundCubes.size();
-
+	return true;
 }
