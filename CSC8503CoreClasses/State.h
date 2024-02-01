@@ -1,5 +1,7 @@
 #pragma once
 #include <functional>
+#include <iostream>
+
 namespace NCL {
 	namespace CSC8503 {
 		typedef std::function<void(float)> StateUpdateFunction;
@@ -11,6 +13,9 @@ namespace NCL {
 				func		= someFunc;
 			}
 			virtual void Update(float dt) = 0;
+
+			virtual void OnEnter() { std::cout << "On Enter"; }
+			virtual void OnExit() { std::cout << "On Exit"; }
 		protected:
 			StateUpdateFunction func;
 		};
