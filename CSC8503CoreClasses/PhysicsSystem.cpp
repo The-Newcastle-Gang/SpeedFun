@@ -240,7 +240,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Transform& transformA = a.GetTransform();
 	Transform& transformB = b.GetTransform();
 
-	float cRestitution = physA->GetElasticity() / physB->GetElasticity();
+	float cRestitution = physA->GetElasticity() + physB->GetElasticity() * 0.5;
 
 	//there is probably a better way of doing this
 	/*if (physA->isPlayerRet() || physB->isPlayerRet()) {
