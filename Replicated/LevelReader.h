@@ -22,12 +22,12 @@ public:
 
 class LevelReader {
 public:
-	void ReadLevel();
 
 	Vector3 GetStartPosition() { return startPosition; }
 	Vector3 GetEndPosition() { return endPosition; }
 	std::vector<GroundCubePrimitive*> GetGroundCubes() { return groundCubes; }
 
+	void ReadLevel(std::string src);
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;

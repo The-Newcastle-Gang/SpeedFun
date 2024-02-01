@@ -67,7 +67,7 @@ int main() {
     
 
     LevelReader* lv = new LevelReader();
-    lv->ReadLevel();
+    lv->ReadLevel("level.json");
 
 
 
