@@ -30,6 +30,7 @@
 #include "BehaviourAction.h"
 
 #include "ClientGameStateMachine.h"
+#include "ServerGameStateMachine.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -71,14 +72,14 @@ int main() {
     TutorialGame* g = new TutorialGame();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 
-    ClientGameStateMachine* clientStateMachine = new ClientGameStateMachine;
+    //ClientGameStateMachine* client = new ClientGameStateMachine;
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
             std::cout << "Skipping large time delta" << std::endl;
             continue; //must have hit a breakpoint or something to have a 1 second frame time!
         }
-
+        //*
         if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
             w->ShowConsole(true);
         }
@@ -91,7 +92,18 @@ int main() {
         }
 
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
-
+        //*/
+        /*
+        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM1))
+        {
+            client->SetClientState(ClientStates::LoadingState);
+        }
+        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM2))
+        {
+            client->SetClientState(ClientStates::MenuState);
+        }
+        client->Update(dt);
+        */
         g->UpdateGame(dt);
       
     }
