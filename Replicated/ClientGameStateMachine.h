@@ -1,6 +1,8 @@
 #pragma once
 #include "StateMachine.h"
 #include <vector>
+#include "./../Client/Renderer.h"
+#include "./../CSC8503CoreClasses/GameWorld.h"
 namespace NCL {
 	namespace CSC8503 {
 		enum ClientStates {
@@ -25,6 +27,14 @@ namespace NCL {
 			ClientStates currentClientState;
 			std::vector<State*> availableLevels;
 			void InitialiseClientStateMachine();
+
+#ifdef USEVULKAN
+			GameTechVulkanRenderer* renderer;
+#else
+			GameTechRenderer* renderer;
+#endif
+
+			GameWorld* gameWorld;
 		};
 	}
 }

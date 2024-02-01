@@ -3,12 +3,13 @@
 #include <iostream>
 #include "./../Client/Renderer.h"
 #include "PhysicsSystem.h"
+#include "GameWorld.h"
 namespace NCL {
 	namespace CSC8503 {
 		class InGameplay: public State
 		{
 		public:
-			InGameplay();
+			InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
 			~InGameplay();
 			void Update(float dt);
 

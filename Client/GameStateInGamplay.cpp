@@ -9,9 +9,10 @@
 using namespace NCL;
 using namespace CSC8503;
 #
-InGameplay::InGameplay() : State()
+InGameplay::InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
 {
-
+	renderer = rendererRef;
+	world = gameWorldRef;
 }
 
 InGameplay::~InGameplay()
@@ -27,20 +28,12 @@ InGameplay::~InGameplay()
 	delete basicShader;
 
 	delete physics;
-	delete renderer;
-	delete world;
 }
 
 void InGameplay::OnEnter()
 {
+	std::cout << "GAME LOADED\n";
 	//g = new TutorialGame();
-
-	world = new GameWorld();
-#ifdef USEVULKAN
-	renderer = new GameTechVulkanRenderer(*world);
-#else 
-	renderer = new GameTechRenderer(*world);
-#endif
 
 	physics = new PhysicsSystem(*world);
 
@@ -53,7 +46,10 @@ void InGameplay::OnEnter()
 void InGameplay::OnExit()
 {
 	this->~InGameplay();
+	world->ClearAndErase();
+	renderer->Render();
 }
+
 void InGameplay::Update(float dt)
 {
 	if (!inSelectionMode) {
