@@ -412,7 +412,7 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON()
 
 	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
 	{
-		AddCubeToWorld(x->pos, x->dims/2);
+		AddCubeToWorld(x->pos, x->dims);
 	}
 }
 
