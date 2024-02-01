@@ -48,7 +48,7 @@ namespace NCL {
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
 			void DrawAllObjectCollision();
 
-			bool isDebugDrawingCollision = true;
+			bool isDebugDrawingCollision = false;
 
 			GameWorld& gameWorld;
 
