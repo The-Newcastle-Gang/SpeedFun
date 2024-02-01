@@ -37,6 +37,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 
 	glClearColor(1, 1, 1, 1);
 
+	textCount = 0;
+	lineCount = 0;
+
 	//Set up the light properties
 	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
 	lightRadius = 1000.0f;
