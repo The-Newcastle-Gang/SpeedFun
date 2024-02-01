@@ -58,7 +58,7 @@ bool CollisionDetection::RayBoxIntersection(const Ray&r, const Vector3& boxPos, 
 
 	Vector3 tVals(-1, -1, -1);
 
-	for (int i = 0; i < 3; ++i) {                                   //this should leave us with the best 3 intersections
+	for (int i = 0; i < 3; ++i) {                                   
 		if (rayDir[i] > 0) {
 			tVals[i] = (boxMin[i] - raypos[i]) / rayDir[i];
 		}
@@ -67,15 +67,15 @@ bool CollisionDetection::RayBoxIntersection(const Ray&r, const Vector3& boxPos, 
 		}
 	}
 
-	float bestT = tVals.GetMaxElement();                        //getting the last value of each of the collison points
-	if (bestT < 0.0f) {                                           //this happens if the ray is backwards appaerntly
+	float bestT = tVals.GetMaxElement();                      
+	if (bestT < 0.0f) {                                           
 		return false;
 	}
 
-	Vector3 intersection = raypos + (rayDir * bestT);          //projecting the besT value onto the rayDir and storing in intersection
-	const float epsilon = 0.0001f;                             //error we're allowing in the calc / leway or whatever
+	Vector3 intersection = raypos + (rayDir * bestT);          
+	const float epsilon = 0.0001f;                             
 
-	for (int i = 0; i < 3; ++i) {                                   //best intersection doesn't touch the box lol ecksdee
+	for (int i = 0; i < 3; ++i) {                                   
 		if (intersection[i] + epsilon < boxMin[i] || intersection[i] - epsilon > boxMax[i]) {
 			return false;
 		}
@@ -101,11 +101,11 @@ bool CollisionDetection::RayOBBIntersection(const Ray&r, const Transform& worldT
 	Vector3 position = worldTransform.GetPosition();
 
 	Matrix3 transform = Matrix3(orientation);
-	Matrix3 invTransform = Matrix3(orientation.Conjugate());                                          //
+	Matrix3 invTransform = Matrix3(orientation.Conjugate());                                          
 
-	Vector3 localRayPos = r.GetPosition() - position;                                                     //self explanatory getting a new ray position by removing the boxes position
+	Vector3 localRayPos = r.GetPosition() - position;                                                    
 
-	Ray tempRay(invTransform * localRayPos, invTransform * r.GetDirection());                //transforming our sent in ray to the localspace of the box
+	Ray tempRay(invTransform * localRayPos, invTransform * r.GetDirection());                
 
 	bool collided = RayBoxIntersection(tempRay, Vector3(), volume.GetHalfDimensions(), collision);
 
@@ -186,12 +186,10 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	VolumeType pairType = (VolumeType)((int)volA->type | (int)volB->type);
 
 	//Two AABBs
-	//done
 	if (pairType == VolumeType::AABB) {
 		return AABBIntersection((AABBVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
 	}
 	//Two Spheres
-	//done
 	if (pairType == VolumeType::Sphere) {
 		return SphereIntersection((SphereVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
@@ -205,7 +203,6 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	}
 
 	//AABB vs Sphere pairs
-	//done
 	if (volA->type == VolumeType::AABB && volB->type == VolumeType::Sphere) {
 		return AABBSphereIntersection((AABBVolume&)*volA, transformA, (SphereVolume&)*volB, transformB, collisionInfo);
 	}
@@ -363,7 +360,7 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
 	//center to center vector
 	Vector3 delta = worldTransformB.GetPosition() - worldTransformA.GetPosition();
 	//getting the closest point between the two objects
-	Vector3 closestPointOnBox = Maths::MClamp(delta, -boxSize, boxSize);
+	Vector3 closestPointOnBox = Maths::Clamp(delta, -boxSize, boxSize);
 
 	//now we get how far along this vector the closest point is
 	Vector3 localPoint = delta - closestPointOnBox;
@@ -407,9 +404,8 @@ bool  CollisionDetection::OBBSphereIntersection(const OBBVolume& volumeA, const 
 	return collided;
 }
 
-bool CollisionDetection::OBBAABBIntersection(const NCL::OBBVolume& volumeA, const NCL::CSC8503::Transform& worldTransformA,
-	const NCL::AABBVolume& volumeB, const NCL::CSC8503::Transform& worldTransformB,
-	NCL::CollisionDetection::CollisionInfo& collisionInfo) {
+bool CollisionDetection::OBBAABBIntersection(const OBBVolume& volumeA, const Transform& worldTransformA,
+	const AABBVolume& volumeB, const Transform& worldTransformB, CollisionDetection::CollisionInfo& collisionInfo) {
 	OBBVolume temp = OBBVolume(volumeB.GetHalfDimensions());
 	Transform tempTransform;
 
@@ -439,7 +435,7 @@ bool CollisionDetection::AABBCapsuleIntersection(
 
 	Vector3 delta = worldTransformA.GetPosition() - worldTransformB.GetPosition();
 	Vector3 boxSize = volumeB.GetHalfDimensions();
-	Vector3 closestBoxPoint = worldTransformB.GetPosition() + Maths::MClamp(delta, -boxSize, boxSize);
+	Vector3 closestBoxPoint = worldTransformB.GetPosition() + Maths::Clamp(delta, -boxSize, boxSize);
 
 	Vector3 pointToCapsuleDir = closestBoxPoint - worldTransformA.GetPosition();
 	float proj = Vector3::Dot(capsuleDir, pointToCapsuleDir);
@@ -495,17 +491,15 @@ bool CollisionDetection::SphereCapsuleIntersection(
 	const CapsuleVolume& volumeA, const Transform& worldTransformA,
 	const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
 
-	//get Squared dist between sphere center adn cabsule line seg
 	Vector3 sphCen = worldTransformB.GetPosition();
 	Vector3 capCenter = worldTransformA.GetPosition();
-	Quaternion capRota = worldTransformA.GetOrientation().Normalised();
+	Quaternion capRot = worldTransformA.GetOrientation().Normalised();
 
-	Vector3 capsuleDir = Matrix3(capRota) * Vector3(0, 1, 0);
+	Vector3 capsuleDir = Matrix3(capRot) * Vector3(0, 1, 0);
 	Vector3 capTop = capCenter + capsuleDir * volumeA.GetHalfHeight();
 	Vector3 capBottom = capCenter - capsuleDir * volumeA.GetHalfHeight();;
 
 	float dist = Maths::SqDistPointSegment(capTop, capBottom, sphCen);
-	//if(squared) dist smaller than (squared) sum of radii they collide
 
 	float radiusSum = volumeB.GetRadius() + volumeA.GetRadius();
 
@@ -553,7 +547,7 @@ bool CollisionDetection::CapsuleIntersection(const CapsuleVolume& volumeA, const
 	return collided;
 }
 
-Vector3* CollisionDetection::CalculateEdgeNormal(const Transform& inTransform,
+Vector3* CollisionDetection::CalculateEdgeNormals(const Transform& inTransform,
 	const Transform& inBTransform) {
 
 	Vector3* edgeNormals = new Vector3[15];
@@ -611,7 +605,7 @@ Vector3* CollisionDetection::CalculateVerticesOBB(const OBBVolume& inVolume, con
 bool CollisionDetection::OBBIntersection(const OBBVolume& volumeA, const Transform& worldTransformA,
 	const OBBVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
 
-	Vector3* VolumeEdgeNormals = CalculateEdgeNormal(worldTransformA, worldTransformB); //Get axis of A and B
+	Vector3* VolumeEdgeNormals = CalculateEdgeNormals(worldTransformA, worldTransformB); //Get axis of A and B
 	Vector3* volAvertices = CalculateVerticesOBB(volumeA, worldTransformA); //Get vertices A
 	Vector3* volBverices = CalculateVerticesOBB(volumeB, worldTransformB); // Get vertices B
 

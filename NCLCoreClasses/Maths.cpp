@@ -38,16 +38,16 @@ namespace NCL {
 		}
 	
 
-		Vector3 Clamp(const Vector3& a, const Vector3 &mins, const Vector3& maxs) {
+		/*Vector3 Clamp(const Vector3& a, const Vector3 &mins, const Vector3& maxs) {
 			return Vector3(
 				Clamp(a.x, mins.x, maxs.x),
 				Clamp(a.y, mins.y, maxs.y),
 				Clamp(a.z, mins.z, maxs.z)
 			);
-		}
+		}*/
 
 		//ed function
-		Vector3 MClamp(const Vector3& input, const Vector3& mins, const Vector3& maxs) {
+		Vector3 Clamp(const Vector3& input, const Vector3& mins, const Vector3& maxs) {
 
 			return Vector3(
 				std::clamp(input.x, mins.x, maxs.x),
