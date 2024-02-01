@@ -6,14 +6,12 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameServer::GameServer(int onPort, int maxClients, std::function<void(int)>&& cb, std::function<void(int)>&& cb2)	{
+GameServer::GameServer(int onPort, int maxClients)	{
     port		= onPort;
     clientMax	= maxClients;
     clientCount = 0;
     netHandle	= nullptr;
     currentSnapshot = 0;
-    connectCallback = cb;
-    leaveCallback = cb2;
 
     Initialise();
 }
@@ -29,11 +27,11 @@ void GameServer::Shutdown() {
 }
 
 bool GameServer::Initialise() {
-    ENetAddress address;
+    ENetAddress address = {0};
     address.host = ENET_HOST_ANY;
     address.port = port;
 
-    netHandle = enet_host_create(&address, clientMax, 1, 0, 0);
+    netHandle = enet_host_create(&address, clientMax, 2, 0, 0);
 
     if (!netHandle) {
         std::cout << __FUNCTION__ << " failed to create network handle!" << std::endl;
@@ -73,12 +71,10 @@ void GameServer::UpdateServer() {
         if (type == ENetEventType::ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Server: New client connected" << std::endl;
             idToPeer[peer] = p;
-            connectCallback(peer);
         }
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_DISCONNECT) {
             std::cout << "Server: A client has disconnected" << std::endl;
-            leaveCallback(peer);
             idToPeer.erase(peer);
         }
 

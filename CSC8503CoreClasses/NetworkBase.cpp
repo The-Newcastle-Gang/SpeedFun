@@ -1,5 +1,6 @@
 #include "NetworkBase.h"
 #include "enet.h"
+
 NetworkBase::NetworkBase()	{
 	netHandle = nullptr;
 }
@@ -11,7 +12,9 @@ NetworkBase::~NetworkBase()	{
 }
 
 void NetworkBase::Initialise() {
-	enet_initialize();
+	if (enet_initialize() != 0) {
+        std::cout << "Error occured while intiliasing enet" << std::endl;
+    }
 }
 
 void NetworkBase::Destroy() {

@@ -4,6 +4,9 @@
 
 #pragma comment(lib, "winmm.lib")
 
+#define ENET_IMPLEMENTATION
+#include <enet.h>
+
 #include "GameTimer.h"
 #include "Server.h"
 
@@ -15,7 +18,6 @@ int main() {
     auto timer = GameTimer();
     auto server = std::make_unique<Server>();
     server->ServerInit();
-    //Resets delta time so one massive from at the start doesn't go off.
     timer.Tick();
 
     while (true) {

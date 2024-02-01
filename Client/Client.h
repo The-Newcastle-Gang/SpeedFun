@@ -18,12 +18,22 @@ using namespace NCL;
 using namespace CSC8503;
 
 class Client {
-private:
-    std::unique_ptr<GameClient> baseClient;
 public:
     void InitClient();
     std::string GetAddress();
     void UpdateClient(float dt);
+private:
+    std::unique_ptr<GameClient> baseClient;
+    std::unique_ptr<GameWorld> world;
+    std::unique_ptr<GameTechRenderer> renderer;
+
+    void InitNetworking();
+
+    void InitGame();
+
+    void InitCamera();
+
+    void InitialiseAssets();
 };
 
 

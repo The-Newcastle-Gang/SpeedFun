@@ -1,5 +1,4 @@
 #pragma once
-//#include "./enet/enet.h"
 #include <map>
 struct _ENetHost;
 struct _ENetPeer;
@@ -47,7 +46,7 @@ public:
 	static void Destroy();
 
 	static int GetDefaultPort() {
-		return 1234;
+		return 7777;
 	}
 
 	void RegisterPacketHandler(int msgID, PacketReceiver* receiver) {

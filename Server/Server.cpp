@@ -3,16 +3,15 @@
 //
 
 #include "Server.h"
+#include "enet.h"
 
 
 void Server::ServerInit() {
-    NetworkBase::Initialise();
-    serverBase = std::make_unique<GameServer>(NetworkBase::GetDefaultPort(), 4);
-    std::cout << "Server starting up" << std::endl;
 
+    NetworkBase::Initialise();
+    serverBase = std::make_unique<GameServer>(NetworkBase::GetDefaultPort(), 32);
 }
 
 void Server::UpdateServer(float dt) {
-
     serverBase->UpdateServer();
 }

@@ -38,6 +38,7 @@ void RunTutorialGame(Window* w)
 
 
     auto c = std::make_unique<Client>();
+    c->InitClient();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
