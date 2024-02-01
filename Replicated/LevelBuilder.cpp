@@ -1,5 +1,19 @@
 #include "LevelBuilder.h"
 
+LevelBuilder::LevelBuilder()
+{
+	InitialiseAssets();
+}
+
+LevelBuilder::~LevelBuilder()
+{
+	delete cubeMesh;
+
+	delete basicTex;
+
+	delete basicShader;
+}
+
 void LevelBuilder::BuildLevel()
 {
 	/*
@@ -26,4 +40,17 @@ void LevelBuilder::BuildLevel()
 	These will be used to create the cubes in the level
 
 	*/
+}
+
+void LevelBuilder::InitialiseAssets()
+{
+	// initialise the meshes, textures and shaders here
+	// This may be moved elsewhere, later in the project.
+	// Currently it is here, as the assets need to be initialised for the
+	// add cube to world function
+}
+
+GameObject* LevelBuilder::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass, GameWorld* world)
+{
+	return nullptr;
 }
