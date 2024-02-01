@@ -3,4 +3,4 @@ project(server)
 
 add_executable(server Server.cpp main.cpp)
 target_include_directories(server PUBLIC ../NCLCoreClasses ../CSC8503CoreClasses ../OpenGLRendering ../Replicated ./)
-target_link_libraries(server PUBLIC NCLCoreClasses CSC8503CoreClasses OpenGLRendering replicated)
+target_link_libraries(server PUBLIC NCLCoreClasses CSC8503CoreClasses OpenGLRendering replicated enet)

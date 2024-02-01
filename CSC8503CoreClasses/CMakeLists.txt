@@ -135,7 +135,7 @@ set(ALL_FILES
     ${Collision_Detection}
     ${Networking}
     ${Physics}
-    ${enet_Files}   
+    #${enet_Files}
 )
 
 set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
@@ -179,6 +179,8 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "NCLCoreClasses"
         "ws2_32.lib"
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE enet)
 
 
 
