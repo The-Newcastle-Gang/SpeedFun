@@ -6,7 +6,6 @@
 #include <GameObject.h>
 #include <Assets.h>
 #include <json.hpp>
-#include <GameObject.h>
 #include <set>
 
 using namespace std;
