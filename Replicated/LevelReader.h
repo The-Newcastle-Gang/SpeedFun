@@ -23,7 +23,7 @@ public:
 
 class LevelReader {
 public:
-	void ReadLevel();
+	void ReadLevel(std::string src);
 protected:
 	Vector3* StartPosition;
 	Vector3* EndPosition;

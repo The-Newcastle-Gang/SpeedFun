@@ -6,9 +6,9 @@
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
-void LevelReader::ReadLevel() {
+void LevelReader::ReadLevel(std::string source) {
 
-	std::ifstream jFileStream(Assets::LEVELDIR +"level.json");
+	std::ifstream jFileStream(Assets::LEVELDIR + source);
 
 	if (!jFileStream) {
 		cerr << "No file available. Check " + Assets::LEVELDIR;
