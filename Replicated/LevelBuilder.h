@@ -19,20 +19,4 @@ public:
 	void BuildLevel();
 protected:
 
-	void InitialiseAssets();
-
-	// Functions to add objects to the game world
-	GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f, GameWorld* world);
-
-
-	// Meshes
-	MeshGeometry* cubeMesh = nullptr;
-
-
-	// Textures
-	TextureBase* basicTex = nullptr;
-
-
-	// Shaders
-	ShaderBase* basicShader = nullptr;
 };

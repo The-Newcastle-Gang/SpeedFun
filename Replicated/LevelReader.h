@@ -16,16 +16,21 @@ using namespace std;
 
 class GroundCubePrimitive {
 public:
-	Vector3* pos;
-	Vector3* dims;
+	Vector3 pos;
+	Vector3 dims;
 };
 
 class LevelReader {
 public:
 	void ReadLevel();
+
+	Vector3 GetStartPosition() { return startPosition; }
+	Vector3 GetEndPosition() { return endPosition; }
+	std::vector<GroundCubePrimitive*> GetGroundCubes() { return groundCubes; }
+
 protected:
-	Vector3* StartPosition;
-	Vector3* EndPosition;
-	std::vector<GroundCubePrimitive*> GroundCubes;
+	Vector3 startPosition;
+	Vector3 endPosition;
+	std::vector<GroundCubePrimitive*> groundCubes;
 
 };

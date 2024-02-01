@@ -64,6 +64,8 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete levelReader;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -248,10 +250,11 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(15, 15, 3.5f, 3.5f);
+	//InitMixedGridWorld(15, 15, 3.5f, 3.5f);
 
-	InitGameExamples();
-	InitDefaultFloor();
+	//InitGameExamples();
+	//InitDefaultFloor();
+	BuildLevelFromJSON();
 }
 
 /*
@@ -397,6 +400,20 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+void NCL::CSC8503::TutorialGame::BuildLevelFromJSON()
+{
+	levelReader = new LevelReader();
+	levelReader->ReadLevel();
+
+	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
+	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });
+
+	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
+	{
+		AddCubeToWorld(x->pos, x->dims/2);
+	}
 }
 
 void TutorialGame::InitDefaultFloor() {
