@@ -268,9 +268,10 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
 	//who cares?  i surely don't
-	if (contactVelocity.Length() < 8.0f) {
-		cRestitution = 0.0f;
-	}
+    //re: this unironically came to bite me back in my behind, funny.
+//	if (contactVelocity.Length() < 8.0f) {
+//		cRestitution = 0.0f;
+//	}
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
@@ -443,22 +444,20 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 			continue;
 		}
 
-		//UpdatePhysicsState(*object, dt);
-		//if (object->GetType() == PhysObjType::Static || object->GetType() == PhysObjType::Sleeping) { continue; }
-		//if (!(*i)->IsActive()) { continue; }
 
-		Transform& transform = (*i)->GetTransform();                       //gets the transform component of the obvject
 
-		Vector3 position = transform.GetPosition();                         //gets the original position before the application of the velocity
+		Transform& transform = (*i)->GetTransform();
+
+		Vector3 position = transform.GetPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
 
-		position += linearVel * dt;                                         // dp = int(v(t)dt)
+		position += linearVel * dt;
 		transform.SetPosition(position);
 
-		linearVel = linearVel * frameLinearDamping;                         //damping the value by a certain amount
-		object->SetLinearVelocity(linearVel);                            //setting that value to something
+		linearVel = linearVel * frameLinearDamping;
+		object->SetLinearVelocity(linearVel);
 
-		Quaternion orientation = transform.GetOrientation();                //QUATERNION STUFF
+		Quaternion orientation = transform.GetOrientation();
 		Vector3 angVel = object->GetAngularVelocity();
 
 		orientation = orientation +
