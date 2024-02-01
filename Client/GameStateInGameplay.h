@@ -4,6 +4,7 @@
 #include "./../Client/Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
+#include "ClientGameStateMachine.h"
 namespace NCL {
 	namespace CSC8503 {
 		class InGameplay: public State
@@ -15,8 +16,10 @@ namespace NCL {
 
 			void OnEnter();
 			void OnExit();
+
+			bool IfGameEnded();
 		protected:
-			//TutorialGame* g = nullptr;
+			
 			void InitialiseAssets();
 
 			void InitCamera();
@@ -24,11 +27,6 @@ namespace NCL {
 
 			void InitWorld();
 
-			/*
-			These are some of the world/object creation functions I created when testing the functionality
-			in the module. Feel free to mess around with them to see different objects being created in different
-			test scenarios (constraints, collision types, and so on).
-			*/
 			void InitGameExamples();
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
@@ -49,6 +47,7 @@ namespace NCL {
 			GameObject* AddPlayerToWorld(const Vector3& position);
 			GameObject* AddEnemyToWorld(const Vector3& position);
 			GameObject* AddBonusToWorld(const Vector3& position);
+
 
 #ifdef USEVULKAN
 			GameTechVulkanRenderer* renderer;

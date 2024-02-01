@@ -9,14 +9,12 @@
 using namespace NCL;
 using namespace CSC8503;
 #
-InGameplay::InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
-{
+InGameplay::InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
 }
 
-InGameplay::~InGameplay()
-{
+InGameplay::~InGameplay() {
 
 	delete cubeMesh;
 	delete sphereMesh;
@@ -30,8 +28,7 @@ InGameplay::~InGameplay()
 	delete physics;
 }
 
-void InGameplay::OnEnter()
-{
+void InGameplay::OnEnter() {
 	std::cout << "GAME LOADED\n";
 	//g = new TutorialGame();
 
@@ -43,15 +40,23 @@ void InGameplay::OnEnter()
 
 	InitialiseAssets();
 }
-void InGameplay::OnExit()
-{
+void InGameplay::OnExit() {
 	this->~InGameplay();
 	world->ClearAndErase();
 	renderer->Render();
 }
 
-void InGameplay::Update(float dt)
-{
+bool InGameplay::IfGameEnded() {
+
+	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L))
+	{
+		std::cout << "GAME ENDED\n";
+		return true;
+	}
+	return false;
+}
+
+void InGameplay::Update(float dt) {
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}

@@ -31,7 +31,11 @@ void ClientGameStateMachine::InitialiseClientStateMachine()
 	StateTransition* loadingToMenu = new StateTransition(clientLoading, clientMenu, [&](void)->bool { return currentClientState == ClientStates::MenuState; });
 	StateTransition* menuToLoading = new StateTransition(clientMenu, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
 	StateTransition* loadingToInGameplay = new StateTransition(clientLoading, clientInGameplay, [&](void)->bool { return currentClientState == ClientStates::InGameplayState; });
-	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
+	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { 
+		bool hasGameEnded = clientInGameplay->IfGameEnded();
+		if (hasGameEnded) currentClientState = ClientStates::LoadingState;
+		return hasGameEnded; 
+		});
 
 	this->AddState(clientInactive);
 	this->AddState(clientLoading);

@@ -12,11 +12,12 @@ Loading::~Loading() {
 }
 
 void Loading::Update(float dt) {
-	std::cout << "LOADING\n";
+	
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
 void Loading::OnEnter() {
+	std::cout << "LOADING\n";
 }
 
 void Loading::OnExit() {
