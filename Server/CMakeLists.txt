@@ -7,6 +7,20 @@ main.cpp
 "States/GameStateBusy.cpp" 
 "States/GameStateRunning.cpp" 
 "States/GameStateWaitingPlayers.cpp" 
-"ServerGameStateMachine.cpp" )
-target_include_directories(server PUBLIC ../NCLCoreClasses ../CSC8503CoreClasses ../OpenGLRendering ../Replicated ./ ./States)
-target_link_libraries(server PUBLIC NCLCoreClasses CSC8503CoreClasses OpenGLRendering replicated)
+"ServerGameStateMachine.cpp"
+)
+
+target_include_directories(server PUBLIC
+../NCLCoreClasses
+../CSC8503CoreClasses
+../OpenGLRendering
+../Replicated
+./
+./States)
+target_link_libraries(server PUBLIC
+NCLCoreClasses
+CSC8503CoreClasses
+OpenGLRendering
+replicated
+enet
+)

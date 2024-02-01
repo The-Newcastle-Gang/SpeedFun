@@ -2,21 +2,19 @@
 // Created by c3042750 on 30/01/2024.
 //
 #include <iostream>
+#include <chrono>
+#include <thread>
+#include <sstream>
+
 #include "Replicated.h"
-
+#include "Client.h"
 #include "Window.h"
-
 #include "Debug.h"
-
 #include "StateMachine.h"
 #include "NavigationMesh.h"
-
 #include "TutorialGame.h"
-
 #include "PushdownMachine.h"
-
 #include "PushdownState.h"
-
 #include "BehaviourNode.h"
 #include "BehaviourSelector.h"
 #include "BehaviourSequence.h"
@@ -39,7 +37,7 @@ void RunTutorialGame(Window* w)
 
 
 
-    TutorialGame* g = new TutorialGame();
+    auto c = std::make_unique<Client>();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -60,7 +58,7 @@ void RunTutorialGame(Window* w)
 
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-        g->UpdateGame(dt);
+        c->UpdateClient(dt);
     }
     Window::DestroyGameWindow();
 }
@@ -100,7 +98,6 @@ int main() {
         return -1;
     }
 
-    //RunTutorialGame(w);
     RunClientGameStateMachine(w);
 
 }

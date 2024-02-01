@@ -1,5 +1,6 @@
 #pragma once
 //#include "./enet/enet.h"
+#include <map>
 struct _ENetHost;
 struct _ENetPeer;
 struct _ENetEvent;
