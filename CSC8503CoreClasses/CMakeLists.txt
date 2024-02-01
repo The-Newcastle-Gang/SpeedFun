@@ -143,7 +143,7 @@ set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
 ################################################################################
 # Target
 ################################################################################
-add_library(${PROJECT_NAME} STATIC ${ALL_FILES}   "GameStateLoading.h" "GameStateInactive.h" "GameStateMenu.h" "GameStateInGameplay.h" "GameStateLoading.cpp" "GameStateInGameplay.cpp" "GameStateInactive.cpp" "GameStateMenu.cpp" "GameStateWaitingPlayers.h" "GameStateWaitingPlayers.cpp" "GameStateRunning.h" "GameStateRunning.cpp" "GameStateBusy.h" "GameStateBusy.cpp")
+add_library(${PROJECT_NAME} STATIC ${ALL_FILES}   "GameStateLoading.h" "GameStateInactive.h" "GameStateMenu.h" "GameStateInGameplay.h" "GameStateLoading.cpp" "GameStateInGamplay.cpp" "GameStateInactive.cpp" "GameStateMenu.cpp" "GameStateWaitingPlayers.h" "GameStateWaitingPlayers.cpp" "GameStateRunning.h" "GameStateRunning.cpp" "GameStateBusy.h" "GameStateBusy.cpp")
 
 #set(CMAKE_CXX_SOURCE_FILE_EXTENSIONS c;C;M;c++;cc;cpp;cxx;m;mm;mpp;CPP;ixx;cppm)
 ################################################################################
