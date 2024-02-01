@@ -104,9 +104,12 @@ int main() {
         {
             client->SetClientState(ClientStates::MenuState);
         }
+        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM3))
+        {
+            client->SetClientState(ClientStates::InGameplayState);
+        }
         client->Update(dt);
         
-        g->UpdateGame(dt);
       
     }
     Window::DestroyGameWindow();
