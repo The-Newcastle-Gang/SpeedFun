@@ -12,7 +12,6 @@ namespace NCL {
 
 			void OnEnter() { std::cout << "On Enter"; }
 			void OnExit() { std::cout << "On Exit"; }
-
 		protected:
 
 		};

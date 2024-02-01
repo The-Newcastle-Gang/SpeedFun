@@ -15,7 +15,6 @@ namespace NCL {
 
 			void OnEnter();
 			void OnExit();
-
 		protected:
 #ifdef USEVULKAN
 			GameTechVulkanRenderer* renderer;

@@ -7,6 +7,12 @@
 #include "ClientGameStateMachine.h"
 namespace NCL {
 	namespace CSC8503 {
+		enum ExitStates {
+			Invalid = 0,
+			Win = 1,
+			Loss = 2,
+			Other = 3
+		};
 		class InGameplay: public State
 		{
 		public:
@@ -17,7 +23,9 @@ namespace NCL {
 			void OnEnter();
 			void OnExit();
 
-			bool IfGameEnded();
+			int ExitType();
+
+
 		protected:
 			
 			void InitialiseAssets();

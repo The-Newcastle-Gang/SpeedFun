@@ -46,14 +46,13 @@ void InGameplay::OnExit() {
 	renderer->Render();
 }
 
-bool InGameplay::IfGameEnded() {
+int InGameplay::ExitType() {
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L))
 	{
-		std::cout << "GAME ENDED\n";
-		return true;
+		return ExitStates::Win;
 	}
-	return false;
+	return ExitStates::Invalid;
 }
 
 void InGameplay::Update(float dt) {

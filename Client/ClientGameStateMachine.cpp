@@ -40,7 +40,8 @@ void ClientGameStateMachine::InitialiseClientStateMachine()
 		return ForceTransition(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE), ClientStates::InGameplayState);
 		});
 	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { 
-		return ForceTransition(clientInGameplay->IfGameEnded(), ClientStates::LoadingState);
+		int tester = clientInGameplay->ExitType();
+		return ForceTransition(tester != ExitStates::Invalid, ClientStates::LoadingState);
 		});
 
 	this->AddState(clientInactive);
