@@ -24,6 +24,8 @@ void LevelReader::ReadLevel() {
 
 	}
 
+	
+
 
 	cout << GroundCubes.size();
 

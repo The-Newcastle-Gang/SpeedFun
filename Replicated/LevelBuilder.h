@@ -1,4 +1,6 @@
 #pragma once
+#include <GameObject.h>
+#include <Vector3.h>
 
 using namespace std;
 using namespace NCL;
@@ -10,5 +12,11 @@ class LevelBuilder
 public:
 	void BuildLevel();
 protected:
+	
+
+
+	
+
+
 	bool levelBuilt = false;
 };
