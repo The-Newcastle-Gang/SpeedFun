@@ -26,6 +26,10 @@ namespace NCL {
 			void SetDebugDrawingCollision(bool b) {
 				isDebugDrawingCollision = b;
 			}
+
+			bool GetDebugDrawingCollision() {
+				return isDebugDrawingCollision;
+			}
 		protected:
 			void BasicCollisionDetection();
 			void BroadPhase();
@@ -44,7 +48,7 @@ namespace NCL {
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
 			void DrawAllObjectCollision();
 
-			bool isDebugDrawingCollision = false;
+			bool isDebugDrawingCollision = true;
 
 			GameWorld& gameWorld;
 
