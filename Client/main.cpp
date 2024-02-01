@@ -72,7 +72,9 @@ int main() {
     TutorialGame* g = new TutorialGame();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 
-    //ClientGameStateMachine* client = new ClientGameStateMachine;
+    ClientGameStateMachine* client = new ClientGameStateMachine;
+
+
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
@@ -93,7 +95,7 @@ int main() {
 
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
         //*/
-        /*
+        
         if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM1))
         {
             client->SetClientState(ClientStates::LoadingState);
@@ -103,7 +105,7 @@ int main() {
             client->SetClientState(ClientStates::MenuState);
         }
         client->Update(dt);
-        */
+        
         g->UpdateGame(dt);
       
     }
