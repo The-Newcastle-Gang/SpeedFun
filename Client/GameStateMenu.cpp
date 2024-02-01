@@ -8,22 +8,19 @@ Menu::Menu(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
 	world = gameWorldRef;
 }
 
-Menu::~Menu()
-{
+Menu::~Menu() {
 
 }
 
-void Menu::Update(float dt)
-{
+void Menu::Update(float dt) {
 	std::cout << "MENU\n";
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
-void Menu::OnEnter()
-{
+void Menu::OnEnter() {
 }
-void Menu::OnExit()
-{
+
+void Menu::OnExit() {
 	world->ClearAndErase();
 	renderer->Render();
 }

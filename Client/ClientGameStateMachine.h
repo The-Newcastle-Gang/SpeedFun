@@ -1,7 +1,7 @@
 #pragma once
 #include "StateMachine.h"
 #include <vector>
-#include "./../Client/Renderer.h"
+#include "Renderer.h"
 #include "./../CSC8503CoreClasses/GameWorld.h"
 namespace NCL {
 	namespace CSC8503 {

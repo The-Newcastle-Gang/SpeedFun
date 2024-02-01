@@ -1,10 +1,10 @@
 #include "ClientGameStateMachine.h"
 #include "State.h"
 #include "StateTransition.h"
-#include "./../Client/GameStateInactive.h"
-#include "./../Client/GameStateLoading.h"
-#include "./../Client/GameStateMenu.h"
-#include "./../Client/GameStateInGameplay.h"
+#include "GameStateInactive.h"
+#include "GameStateLoading.h"
+#include "GameStateMenu.h"
+#include "GameStateInGameplay.h"
 using namespace NCL;
 using namespace CSC8503;
 ClientGameStateMachine::ClientGameStateMachine() : StateMachine()
