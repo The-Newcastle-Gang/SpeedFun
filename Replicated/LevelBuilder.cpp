@@ -14,6 +14,7 @@ void LevelBuilder::BuildLevel()
 {
 	/*
 	TODO:
+	Clear the level
 
 	Set what the current game world is (on server?)
 
