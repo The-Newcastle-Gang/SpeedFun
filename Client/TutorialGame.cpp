@@ -254,7 +254,7 @@ void TutorialGame::InitWorld() {
 
 	//InitGameExamples();
 	//InitDefaultFloor();
-	BuildLevelFromJSON("level");
+	BuildLevelFromJSON("level2");
 }
 
 /*
