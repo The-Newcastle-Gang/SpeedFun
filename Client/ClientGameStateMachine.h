@@ -31,6 +31,8 @@ namespace NCL {
 			std::vector<State*> availableLevels;
 			void InitialiseClientStateMachine();
 
+			bool ForceTransition(bool hasConidtionMet, ClientStates stateSwitchTo);
+
 #ifdef USEVULKAN
 			GameTechVulkanRenderer* renderer;
 #else

@@ -57,6 +57,7 @@ bool InGameplay::IfGameEnded() {
 }
 
 void InGameplay::Update(float dt) {
+	Debug::Print("PRESS L TO END GAME", Vector2(10, 20));
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}

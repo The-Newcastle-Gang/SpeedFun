@@ -12,7 +12,8 @@ Inactive::~Inactive() {
 }
 
 void Inactive::Update(float dt) {
-	std::cout << "INACTIVE\n";
+	Debug::Print("INACTIVE MENU", Vector2(10, 10));
+	Debug::Print("PRESS SPACE TO MENU", Vector2(10, 20));
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }

@@ -27,14 +27,20 @@ void ClientGameStateMachine::InitialiseClientStateMachine()
 	Menu* clientMenu = new Menu(renderer, gameWorld);
 	InGameplay* clientInGameplay = new InGameplay(renderer, gameWorld);
 
-	StateTransition* inactiveToLoading = new StateTransition(clientInactive, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
-	StateTransition* loadingToMenu = new StateTransition(clientLoading, clientMenu, [&](void)->bool { return currentClientState == ClientStates::MenuState; });
-	StateTransition* menuToLoading = new StateTransition(clientMenu, clientLoading, [&](void)->bool { return currentClientState == ClientStates::LoadingState; });
-	StateTransition* loadingToInGameplay = new StateTransition(clientLoading, clientInGameplay, [&](void)->bool { return currentClientState == ClientStates::InGameplayState; });
+	StateTransition* inactiveToLoading = new StateTransition(clientInactive, clientLoading, [&](void)->bool { 
+		return ForceTransition(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE), ClientStates::LoadingState);
+		});
+	StateTransition* loadingToMenu = new StateTransition(clientLoading, clientMenu, [&](void)->bool { 
+		return ForceTransition(Window::GetKeyboard()->KeyPressed(KeyboardKeys::L), ClientStates::MenuState);
+		});
+	StateTransition* menuToLoading = new StateTransition(clientMenu, clientLoading, [&](void)->bool {
+		return ForceTransition(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE), ClientStates::LoadingState);
+		});
+	StateTransition* loadingToInGameplay = new StateTransition(clientLoading, clientInGameplay, [&](void)->bool {
+		return ForceTransition(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE), ClientStates::InGameplayState);
+		});
 	StateTransition* inGameplayToLoading = new StateTransition(clientInGameplay, clientLoading, [&](void)->bool { 
-		bool hasGameEnded = clientInGameplay->IfGameEnded();
-		if (hasGameEnded) currentClientState = ClientStates::LoadingState;
-		return hasGameEnded; 
+		return ForceTransition(clientInGameplay->IfGameEnded(), ClientStates::LoadingState);
 		});
 
 	this->AddState(clientInactive);
@@ -47,4 +53,10 @@ void ClientGameStateMachine::InitialiseClientStateMachine()
 	this->AddTransition(menuToLoading);
 	this->AddTransition(loadingToInGameplay);
 	this->AddTransition(inGameplayToLoading);
+}
+
+
+bool ClientGameStateMachine::ForceTransition(bool hasConidtionMet, ClientStates stateSwitchTo){
+	if (hasConidtionMet) currentClientState = stateSwitchTo;
+	return hasConidtionMet;
 }

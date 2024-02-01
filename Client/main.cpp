@@ -96,18 +96,6 @@ int main() {
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
         //*/
         
-        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM1))
-        {
-            client->SetClientState(ClientStates::LoadingState);
-        }
-        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM2))
-        {
-            client->SetClientState(ClientStates::MenuState);
-        }
-        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM3))
-        {
-            client->SetClientState(ClientStates::InGameplayState);
-        }
         client->Update(dt);
         
       

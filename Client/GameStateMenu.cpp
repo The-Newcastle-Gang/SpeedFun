@@ -13,11 +13,14 @@ Menu::~Menu() {
 }
 
 void Menu::Update(float dt) {
-	std::cout << "MENU\n";
+	
+	Debug::Print("MENU", Vector2(10, 10));
+	Debug::Print("PRESS SPACE TO LOADING", Vector2(10, 20));
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
 void Menu::OnEnter() {
+	std::cout << "MENU\n";
 }
 
 void Menu::OnExit() {
