@@ -1,5 +1,7 @@
 #pragma once
+#include <functional>
 #include "NetworkBase.h"
+#include "entt.hpp"
 
 namespace NCL {
     namespace CSC8503 {
@@ -7,7 +9,7 @@ namespace NCL {
         typedef _ENetPeer ENetPeer;
         class GameServer : public NetworkBase {
         public:
-            GameServer(int onPort, int maxClients, std::function<void(int)>&& cb, std::function<void(int)>&& cb2);
+            GameServer(int onPort, int maxClients);
             ~GameServer();
 
             bool Initialise();

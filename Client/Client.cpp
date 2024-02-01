@@ -5,9 +5,12 @@
 #include "Client.h"
 
 void Client::InitClient() {
+    InitNetworking();
+    InitGame();
+}
 
+void Client::InitNetworking() {
     NetworkBase::Initialise();
-
 
     auto address = GetAddress();
 
@@ -15,8 +18,20 @@ void Client::InitClient() {
     baseClient->Connect(address, NetworkBase::GetDefaultPort());
 
     std::cout << "Client starting up!" << std::endl;
+}
 
+void Client::InitGame() {
+    world = std::make_unique<GameWorld>();
+    renderer = std::make_unique<GameTechRenderer>(*world);
+    InitCamera();
+}
 
+void Client::InitCamera() {
+    world->GetMainCamera()->SetNearPlane(0.1f);
+    world->GetMainCamera()->SetFarPlane(500.0f);
+    world->GetMainCamera()->SetPitch(-15.0f);
+    world->GetMainCamera()->SetYaw(315.0f);
+    world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
 }
 
 std::string Client::GetAddress() {
@@ -25,5 +40,5 @@ std::string Client::GetAddress() {
 }
 
 void Client::UpdateClient(float dt) {
-
+    baseClient->UpdateClient();
 }

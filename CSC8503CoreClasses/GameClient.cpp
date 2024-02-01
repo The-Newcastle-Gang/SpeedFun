@@ -5,6 +5,7 @@ using namespace NCL;
 using namespace CSC8503;
 
 GameClient::GameClient()	{
+    netPeer = {0};
     netHandle = enet_host_create(nullptr, 1, 1, 0, 0);
     lastServerSnapshot = 0;
 }
@@ -14,7 +15,7 @@ GameClient::~GameClient()	{
 }
 
 bool GameClient::Connect(std::string ip, int portNum) {
-    ENetAddress address;
+    ENetAddress address = {0};
     enet_address_set_host(&address, ip.c_str());
     address.port = portNum;
 
@@ -35,9 +36,7 @@ void GameClient::UpdateClient() {
     while (enet_host_service(netHandle, &event, 0) > 0) {
         if (event.type == ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Connected to server!" << std::endl;
-            connectCallback();
         } else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
-            //std::cout << "Client: Packet recieved..." << std::endl;
             GamePacket *packet = (GamePacket*)event.packet->data;
             ProcessPacket(packet);
         }

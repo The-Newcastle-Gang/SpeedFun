@@ -12,6 +12,7 @@ if(MSVC)
 endif()
 
 include_directories(enet)
+include_directories(entt)
 
 add_subdirectory(enet)
 add_subdirectory(NCLCoreClasses)
