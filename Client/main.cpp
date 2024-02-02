@@ -13,7 +13,17 @@
 
 #include "TutorialGame.h"
 
+#include "PushdownMachine.h"
+
+#include "PushdownState.h"
+
+#include "BehaviourNode.h"
+#include "BehaviourSelector.h"
+#include "BehaviourSequence.h"
+#include "BehaviourAction.h"
+#include "LevelReader.h"
 #include "ClientGameStateMachine.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -22,6 +32,12 @@ void RunTutorialGame(Window* w)
 {
     w->ShowOSPointer(false);
     w->LockMouseToWindow(true);
+    
+
+    LevelReader* lv = new LevelReader();
+    lv->ReadLevel("level.json");
+
+
 
     TutorialGame* g = new TutorialGame();
     w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
