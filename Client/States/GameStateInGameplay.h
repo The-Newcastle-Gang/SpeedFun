@@ -40,7 +40,7 @@ namespace NCL {
 			// remove these later!!!!!!!!!!!!!!!!!!!!!!!!!
 
 			void BuildLevelFromJSON(std::string levelName);
-			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 
 
 #ifdef USEVULKAN

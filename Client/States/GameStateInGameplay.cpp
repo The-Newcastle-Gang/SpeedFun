@@ -134,12 +134,12 @@ void NCL::CSC8503::InGameplay::BuildLevelFromJSON(std::string levelName)
 		return;
 	}
 
-	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 }, 0);
-	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 }, 0);
+	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
+	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });
 
 	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
 	{
-		AddCubeToWorld(x->pos, x->dims, 0);
+		AddCubeToWorld(x->pos, x->dims);
 	}
 
 	//levelBuilder->BuildLevel(world);
