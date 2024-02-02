@@ -4,6 +4,10 @@
 
 #include "Replicated.h"
 
-void Replicated::CreateObject(GameObject *g, GameWorld &world) {
+void Replicated::CreateObject(GameObject *g, GameWorld& world) {
 
+}
+
+void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
+    constexpr float meshSize = 1.0f;
 }
