@@ -11,6 +11,7 @@
 #include "Font.h"
 
 #include "Assets.h"
+#include "HUDElement.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -97,7 +98,7 @@ namespace NCL {
             //debug
             OGLMesh* UIMesh;
             OGLShader* uiShader;
-
+            HUDElement* hudElement;
 
         };
 	}

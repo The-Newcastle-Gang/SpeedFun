@@ -584,6 +584,8 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 }
 
 void GameTechRenderer::GenerateUI() {
+
+    hudElement = new HUDElement(0.5f,0.5f, HudType::STATIC_RECT);
     UIMesh = new OGLMesh();
     UIMesh->SetVertexPositions({Vector3(-0.25, 0.25,-0.25), Vector3(-0.25,-0.25,-0.25) , Vector3(0.25,-0.25,-0.25) , Vector3(0.25,0.25,-0.25) });
     UIMesh->SetVertexIndices({0,1,2,2,3,0});
