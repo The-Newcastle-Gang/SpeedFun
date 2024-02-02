@@ -10,11 +10,11 @@ namespace NCL {
 			State(StateUpdateFunction someFunc) {
 				func		= someFunc;
 			}
-			void Update(float dt)  {
-				if (func != nullptr) {
-					func(dt);
-				}
-			}
+			
+			virtual void Update(float dt) = 0;
+
+			virtual void OnEnter() { std::cout << "On Enter"; }
+			virtual void OnExit() { std::cout << "On Exit"; }
 		protected:
 			StateUpdateFunction func;
 		};
