@@ -7,16 +7,18 @@
 
 
 #include "GameWorld.h"
+#include "NetworkObject.h"
 #include <string>
+
 using namespace NCL;
 using namespace CSC8503;
 
 class Replicated {
 public:
     static void CreateObject(GameObject* g, GameWorld& world);
-    static void CreatePlayer(GameObject *g, GameWorld &world);]
+    static void CreatePlayer(GameObject *g, GameWorld &world);
 
-    static int NetworkIds = 0;
+    static int NetworkIds;
 };
 
 
