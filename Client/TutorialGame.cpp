@@ -131,7 +131,7 @@ void TutorialGame::UpdateGame(float dt) {
 	physics->Update(dt);
 
 
-	debugMode->DisplayDebug();
+	debugMode->DisplayDebug(dt);
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);

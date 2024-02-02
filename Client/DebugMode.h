@@ -9,9 +9,9 @@ namespace NCL {
 
 
 		public:
-			void DisplayDebug();
+			void DisplayDebug(float dt);
 		protected:
-			void GetFPSCount();
+			float GetFPSCount(float dt);
 			void GetCollisionInfo();
 			void GetMemoryUsage();
 			void GetFeatureCosts();
