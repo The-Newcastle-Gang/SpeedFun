@@ -20,15 +20,15 @@ bool LevelReader::ReadLevel(std::string source) {
 	endPosition = Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"] * -1);
 
 	for (auto& item : jData["GroundBlocks"].items()) {
-		GroundCubePrimitive* tempgroundprim = new GroundCubePrimitive();
-		auto& curposref = item.value()["position"];
-		auto& curdimref = item.value()["dimensions"];
+		auto tempGroundPrimitive = new GroundCubePrimitive();
+		auto& curPosRef = item.value()["position"];
+		auto& curDimRef = item.value()["dimensions"];
 
 
-		tempgroundprim->pos = Vector3(curposref["x"], curposref["y"], curposref["z"] * -1);
-		tempgroundprim->dims = Vector3(curdimref["x"], curdimref["y"], curdimref["z"]);
-		tempgroundprim->dims *= 0.5f;
-		groundCubes.push_back(tempgroundprim);
+		tempGroundPrimitive->pos = Vector3(curPosRef["x"], curPosRef["y"], curPosRef["z"] * -1);
+		tempGroundPrimitive->dims = Vector3(curDimRef["x"], curDimRef["y"], curDimRef["z"]);
+		tempGroundPrimitive->dims *= 0.5f;
+		groundCubes.push_back(tempGroundPrimitive);
 
 	}
 

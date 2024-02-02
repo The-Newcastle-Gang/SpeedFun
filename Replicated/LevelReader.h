@@ -14,7 +14,7 @@ using namespace CSC8503;
 using namespace std;
 
 
-class GroundCubePrimitive {
+struct GroundCubePrimitive {
 public:
 	Vector3 pos;
 	Vector3 dims;
