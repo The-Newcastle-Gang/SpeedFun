@@ -12,12 +12,65 @@
 #include "NavigationMesh.h"
 
 #include "TutorialGame.h"
+#include "entt.hpp"
 
 using namespace NCL;
 using namespace CSC8503;
 
+struct PlayerValuesComponent {
+    int hp;
+    float speed;
+
+    PlayerValuesComponent() {
+        hp = 100;
+        speed = 1.5f;
+    }
+
+    PlayerValuesComponent(int c, float a) {
+        hp = c;
+        speed = a;
+    }
+};
+
+void OperateOnPlayerComponent(PlayerValuesComponent& epic) {
+    epic.hp += 1;
+    epic.hp += sqrt(2.0f / 3.0f);
+}
+
+
+void TestECS() {
+    entt::registry registry;
+    std::cout << "START!" << "\n";
+    entt::entity player1 = registry.create();
+    entt::entity player2 = registry.create();
+    entt::entity player3 = registry.create();
+    entt::entity player4 = registry.create();
+    entt::entity player5 = registry.create();
+    entt::entity player6 = registry.create();
+    entt::entity player7 = registry.create();
+
+    registry.emplace<PlayerValuesComponent>(player1,300,4.5f);
+    registry.emplace<PlayerValuesComponent>(player4);
+    registry.emplace<PlayerValuesComponent>(player5);
+
+
+    auto epicView = registry.view<PlayerValuesComponent>();
+
+    for (int i = 0; i < 1000000; i++) {
+        for (auto entity : epicView) {
+            auto& epicComponent = epicView.get<PlayerValuesComponent>(entity);
+            OperateOnPlayerComponent(epicComponent);
+        }
+    }
+    std::cout << "END!" << "\n";
+
+}
+
 
 int main() {
+
+
+    TestECS();
     Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
 
     if (!w->HasInitialised()) {
@@ -52,3 +105,5 @@ int main() {
     }
     Window::DestroyGameWindow();
 }
+
+

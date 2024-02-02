@@ -3,6 +3,7 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "entt.hpp"
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
