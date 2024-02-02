@@ -10,6 +10,8 @@ namespace NCL {
     namespace CSC8503 {
         class GameObject;
         class GameClient : public NetworkBase {
+
+
         public:
             GameClient();
             ~GameClient();
@@ -23,7 +25,6 @@ namespace NCL {
             void UpdateClient();
 
             int lastServerSnapshot;
-            std::function<void()> connectCallback;
         protected:
             _ENetPeer*	netPeer;
         };

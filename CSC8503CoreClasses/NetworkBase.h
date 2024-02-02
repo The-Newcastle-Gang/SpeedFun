@@ -11,7 +11,7 @@ enum BasicNetworkMessages {
 	String_Message,
 	Delta_State,	//1 byte per channel since the last state
 	Full_State,		//Full transform etc
-	Received_State, //received from a client, informs that its received packet n
+	Received_State, // Player Input
 	Player_Connected,
 	Player_Disconnected,
 	Shutdown

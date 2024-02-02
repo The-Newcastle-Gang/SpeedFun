@@ -12,6 +12,7 @@ GameClient::GameClient()	{
 
 GameClient::~GameClient()	{
     enet_host_destroy(netHandle);
+    netHandle = nullptr;
 }
 
 bool GameClient::Connect(std::string ip, int portNum) {
