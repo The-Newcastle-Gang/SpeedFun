@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "PhysicsSystem.h"
+#include "LevelBuilder.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -80,6 +81,12 @@ namespace NCL {
 			}
 
 			GameObject* objClosest = nullptr;
+
+
+			// test stuff
+			LevelReader* levelReader;
+            LevelBuilder* levelBuilder;
+			void BuildLevelFromJSON(std::string levelName);
 		};
 	}
 }
