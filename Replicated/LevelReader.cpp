@@ -1,36 +1,36 @@
 ///<summary>
-/// Reads from leveljson and populates on variables
+/// Reads from levelSource and populates on variables
 ///</summary>
 
 #include "LevelReader.h"
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
-void LevelReader::ReadLevel(std::string source) {
+bool LevelReader::ReadLevel(const std::string& levelSource) {
 
-	std::ifstream jFileStream(Assets::LEVELDIR + source);
+	std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
 
 	if (!jFileStream) {
-		cerr << "No file available. Check " + Assets::LEVELDIR;
-		return;
+		return false;
 	}
 
 	json jData = json::parse(jFileStream);
 
-	StartPosition = new Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"]);
-	EndPosition = new Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"]);
-
-	GroundCubePrimitive* tempgroundprim = new GroundCubePrimitive();
+	startPosition = Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"] * -1);
+	endPosition = Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"] * -1);
 
 	for (auto& item : jData["GroundBlocks"].items()) {
+		auto tempGroundPrimitive = new GroundCubePrimitive();
+		auto& curPosRef = item.value()["position"];
+		auto& curDimRef = item.value()["dimensions"];
 
-		auto& curposref = item.value()["position"];
-		auto& curdimref = item.value()["dimensions"];
 
-		tempgroundprim->pos = new Vector3(curposref["x"], curposref["y"], curposref["z"]);
-		tempgroundprim->dims = new Vector3(curdimref["x"], curdimref["y"], curdimref["z"]);
-		GroundCubes.emplace_back(tempgroundprim);
+		tempGroundPrimitive->pos = Vector3(curPosRef["x"], curPosRef["y"], curPosRef["z"] * -1);
+		tempGroundPrimitive->dims = Vector3(curDimRef["x"], curDimRef["y"], curDimRef["z"]);
+		tempGroundPrimitive->dims *= 0.5f;
+		groundCubes.push_back(tempGroundPrimitive);
 
 	}
 
+	return true;
 }
