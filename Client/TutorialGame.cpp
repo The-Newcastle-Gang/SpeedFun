@@ -7,6 +7,8 @@
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
 
+#include "DebugMode.h"
+
 
 
 using namespace NCL;
@@ -64,6 +66,9 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete debugMode;
+
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -124,6 +129,9 @@ void TutorialGame::UpdateGame(float dt) {
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
 	physics->Update(dt);
+
+
+	debugMode->DisplayDebug();
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);

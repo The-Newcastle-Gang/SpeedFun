@@ -4,6 +4,8 @@
 
 namespace NCL {
 	namespace CSC8503 {
+		class DebugMode;
+
 		class TutorialGame		{
 		public:
 			TutorialGame();
@@ -78,6 +80,8 @@ namespace NCL {
 			void LockCameraToObject(GameObject* o) {
 				lockedObject = o;
 			}
+
+			DebugMode* debugMode;
 
 			GameObject* objClosest = nullptr;
 		};
