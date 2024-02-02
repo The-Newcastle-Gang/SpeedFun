@@ -10,7 +10,7 @@ LevelBuilder::~LevelBuilder()
 
 }
 
-void LevelBuilder::BuildLevel()
+void LevelBuilder::BuildLevel(GameWorld* w)
 {
 	/*
 	TODO:

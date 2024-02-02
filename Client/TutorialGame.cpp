@@ -402,9 +402,11 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	return apple;
 }
 
+//refactor
 void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 {
 	levelReader = new LevelReader();
+    levelBuilder = new LevelBuilder();
 	if (!levelReader->ReadLevel(levelName + ".json"))
 	{
 		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
@@ -418,6 +420,8 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 	{
 		AddCubeToWorld(x->pos, x->dims);
 	}
+
+    levelBuilder->BuildLevel(world);
 }
 
 void TutorialGame::InitDefaultFloor() {

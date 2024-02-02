@@ -4,6 +4,7 @@
 #include "GameWorld.h"
 #include "PhysicsObject.h"
 #include "RenderObject.h"
+#include "LevelReader.h"
 
 using namespace std;
 using namespace NCL;
@@ -16,7 +17,7 @@ public:
 	LevelBuilder();
 	~LevelBuilder();
 
-	void BuildLevel();
+	void BuildLevel(GameWorld* w);
 protected:
 
 };
