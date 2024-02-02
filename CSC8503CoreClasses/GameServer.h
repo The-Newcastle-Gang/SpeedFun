@@ -7,6 +7,7 @@ namespace NCL {
     namespace CSC8503 {
         class GameWorld;
         typedef _ENetPeer ENetPeer;
+        typedef entt::sigh<void(int)> PlayerSignalH;
         class GameServer : public NetworkBase {
         public:
             GameServer(int onPort, int maxClients);
@@ -28,6 +29,9 @@ namespace NCL {
             std::function<void(int)> connectCallback;
             std::function<void(int)> leaveCallback;
 
+            entt::sink<PlayerSignalH> OnPlayerJoined {playerJoined};
+            entt::sink<PlayerSignalH> OnPlayerLeft {playerLeft};
+
         protected:
             int			port;
             int			clientMax;
@@ -39,6 +43,9 @@ namespace NCL {
 
             std::map<int, int> lastPlayerUpdate;
             std::unordered_map<int, ENetPeer*> idToPeer;
+
+            PlayerSignalH playerJoined;
+            PlayerSignalH playerLeft;
 
         };
     }

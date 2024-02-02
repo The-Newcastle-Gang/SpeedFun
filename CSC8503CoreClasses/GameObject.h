@@ -50,6 +50,10 @@ namespace NCL::CSC8503 {
 			physicsObject = newObject;
 		}
 
+        void SetNetworkObject(NetworkObject* newObject) {
+            networkObject = newObject;
+        }
+
 		const std::string& GetName() const {
 			return name;
 		}
@@ -74,6 +78,7 @@ namespace NCL::CSC8503 {
 			return worldID;
 		}
 
+		void DrawCollision();
 	protected:
 		Transform			transform;
 

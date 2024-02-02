@@ -2,6 +2,7 @@
 // Created by c3042750 on 30/01/2024.
 //
 
+#include <NetworkObject.h>
 #include "Client.h"
 
 void Client::InitClient() {
@@ -17,6 +18,8 @@ void Client::InitNetworking() {
     baseClient = std::make_unique<GameClient>();
     baseClient->Connect(address, NetworkBase::GetDefaultPort());
 
+    RegisterPackets();
+
     std::cout << "Client starting up!" << std::endl;
 }
 
@@ -24,6 +27,10 @@ void Client::InitGame() {
     world = std::make_unique<GameWorld>();
     renderer = std::make_unique<GameTechRenderer>(*world);
     InitCamera();
+}
+
+void Client::RegisterPackets() {
+    baseClient->RegisterPacketHandler(Full_State, this);
 }
 
 void Client::InitCamera() {
@@ -84,7 +91,11 @@ void Client::SendInputData() {
 }
 
 void Client::ReceivePacket(int type, GamePacket *payload, int source) {
-
+    switch (type) {
+        case Full_State: {
+            auto packet = reinterpret_cast<FullPacket*>(payload);
+        }
+    }
 }
 
 
