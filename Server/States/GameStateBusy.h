@@ -11,8 +11,8 @@ namespace NCL {
 			~Busy();
 			void Update(float dt);
 
-			void OnEnter();
-			void OnExit();
+			void OnEnter() {}
+			void OnExit() {}
 		protected:
 
 		};
