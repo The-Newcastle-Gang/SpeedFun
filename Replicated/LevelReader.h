@@ -8,10 +8,8 @@
 #include <json.hpp>
 #include <set>
 
-using namespace std;
 using namespace NCL;
 using namespace CSC8503;
-using namespace std;
 
 
 struct GroundCubePrimitive {
