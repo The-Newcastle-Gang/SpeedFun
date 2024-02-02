@@ -13,11 +13,12 @@ void NCL::CSC8503::DebugMode::GetFPSCount(float dt)
 
 void NCL::CSC8503::DebugMode::GetMemoryUsage()
 {
+
 	MEMORYSTATUSEX memoryStatus;
 	memoryStatus.dwLength = sizeof(memoryStatus);
 	GlobalMemoryStatusEx(&memoryStatus);
 
-	Debug::Print("Percentage used: " + std::to_string(memoryStatus.dwMemoryLoad) + "%", Vector2(3, 5), Debug::GREEN);
+	Debug::Print("Percentage of memory used: " + std::to_string(memoryStatus.dwMemoryLoad) + "%", Vector2(3, 5), Debug::GREEN);
 
 	DWORDLONG physMemoryUsed = (memoryStatus.ullTotalPhys - memoryStatus.ullAvailPhys) / 1024;
 	Debug::Print("Physical memory used: " + std::to_string(physMemoryUsed) + " KB", Vector2(3, 10), Debug::RED);
