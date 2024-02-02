@@ -3,3 +3,7 @@
 //
 
 #include "Replicated.h"
+
+void Replicated::CreateObject(GameObject *g, GameWorld &world) {
+
+}

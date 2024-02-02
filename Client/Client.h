@@ -30,11 +30,15 @@ private:
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
 
+    std::vector<NetworkObject*> networkObjects;
+
     void InitNetworking();
     void InitGame();
     void SendInputData();
     void InitCamera();
     void InitialiseAssets();
+
+    void RegisterPackets();
 };
 
 

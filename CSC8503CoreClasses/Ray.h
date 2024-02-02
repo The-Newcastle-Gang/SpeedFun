@@ -7,7 +7,7 @@ namespace NCL {
 			Vector3		collidedAt;		//WORLD SPACE position of the collision!
 			float		rayDistance;
 
-			RayCollision(void*node, Vector3 collidedAt) {
+			RayCollision(void *node, Vector3 collidedAt) {
 				this->node			= node;
 				this->collidedAt	= collidedAt;
 				this->rayDistance	= 0.0f;

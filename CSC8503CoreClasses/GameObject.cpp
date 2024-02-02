@@ -10,10 +10,11 @@ GameObject::GameObject(string objectName)	{
 	name			= objectName;
 	worldID			= -1;
 	isActive		= true;
-	boundingVolume	= nullptr;
-	physicsObject	= nullptr;
-	renderObject	= nullptr;
-	networkObject	= nullptr;
+	boundingVolume	= nullptr; // Replicated
+    networkObject	= nullptr; // Replicated
+	physicsObject	= nullptr; // Server
+	renderObject	= nullptr; // Client
+
 }
 
 GameObject::~GameObject()	{
