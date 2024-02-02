@@ -134,7 +134,10 @@ void TutorialGame::UpdateKeys() {
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 	}
-
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
+		physics->SetDebugDrawingCollision(!physics->GetDebugDrawingCollision());
+	}
+	
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
@@ -248,7 +251,7 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(15, 15, 3.5f, 3.5f);
+	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 
 	InitGameExamples();
 	InitDefaultFloor();

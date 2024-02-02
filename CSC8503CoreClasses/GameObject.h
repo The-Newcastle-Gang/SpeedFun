@@ -74,6 +74,7 @@ namespace NCL::CSC8503 {
 			return worldID;
 		}
 
+		void DrawCollision();
 	protected:
 		Transform			transform;
 

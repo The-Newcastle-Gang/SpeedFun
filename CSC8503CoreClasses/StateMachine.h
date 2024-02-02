@@ -1,7 +1,7 @@
 #pragma once
 
 #include <map>
-
+#include <vector>
 namespace NCL {
 	namespace CSC8503 {
 		class State;
