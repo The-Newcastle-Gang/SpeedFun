@@ -6,11 +6,11 @@
 #include "GameWorld.h"
 namespace NCL {
 	namespace CSC8503 {
-		class Inactive : public State
+		class Loading : public State
 		{
 		public:
-			Inactive(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
-			~Inactive();
+			Loading(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
+			~Loading();
 			void Update(float dt);
 
 			void OnEnter();
