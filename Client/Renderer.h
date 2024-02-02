@@ -30,6 +30,8 @@ namespace NCL {
             std::unique_ptr<Font> LoadFont(const string& fontName);
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+            void GenerateUI();
+            void RenderUI();
 
 		protected:
 			void NewRenderLines();
@@ -91,6 +93,10 @@ namespace NCL {
 			GLuint textColourVBO;
 			GLuint textTexVBO;
 			size_t textCount;
+
+            //debug
+            OGLMesh* UIMesh;
+            OGLShader* uiShader;
 
 
         };

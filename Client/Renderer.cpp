@@ -69,6 +69,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
     debugFont->fontShader = textShader;
 
+
+
+    GenerateUI();
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -133,6 +136,7 @@ void GameTechRenderer::RenderFrame() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	NewRenderLines();
 	NewRenderText();
+    RenderUI();
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -577,4 +581,23 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     FT_Done_FreeType(ft);
 
     return font;
+}
+
+void GameTechRenderer::GenerateUI() {
+    UIMesh = new OGLMesh();
+    UIMesh->SetVertexPositions({Vector3(-0.25, 0.25,-0.25), Vector3(-0.25,-0.25,-0.25) , Vector3(0.25,-0.25,-0.25) , Vector3(0.25,0.25,-0.25) });
+    UIMesh->SetVertexIndices({0,1,2,2,3,0});
+    UIMesh->UploadToGPU();
+
+    uiShader = new OGLShader("debug.vert", "debug.frag");
+
+
+}
+
+void GameTechRenderer::RenderUI(){
+    BindShader(uiShader);
+    glUniformMatrix4fv(glGetUniformLocation(uiShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+    glActiveTexture(GL_TEXTURE0);
+    BindMesh(UIMesh);
+    DrawBoundMesh();
 }
