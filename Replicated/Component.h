@@ -1,16 +1,16 @@
 #pragma once
-#include <memory>
 
 namespace NCL::CSC8503 {
 	class GameObject;
 	class GameWorld;
 	class Component
 	{
-		//mixing shared pointers and raw pointers is extremely ugly and awful but the codebase uses raw pointers soooooooo
 	public:
 		Component() { };
 		~Component() {};
-		Component(std::shared_ptr<GameObject>  gameObject) { this->gameObject = gameObject;}
+		Component(GameObject*  gameObject) { this->gameObject = gameObject;}
+
+		//all virtual, not the best approach but works
 		virtual void Update(float dt) {};
 		virtual void PhysicsUpdate(float dt) {};
 		virtual void Start() {};
@@ -19,7 +19,7 @@ namespace NCL::CSC8503 {
 		virtual void OnCollisionEnd(const GameObject* otherObject) {};
 
 	protected:
-		std::shared_ptr<GameObject> gameObject;
+		GameObject* gameObject; //gameObject this component is attached to
 	};
 }
 

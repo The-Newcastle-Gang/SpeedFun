@@ -4,6 +4,7 @@
 #include "RenderObject.h"
 #include "TextureLoader.h"
 #include "entt.hpp"
+#include "TestComponent.h"
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
@@ -253,6 +254,8 @@ void TutorialGame::InitWorld() {
 
 	InitGameExamples();
 	InitDefaultFloor();
+
+	world->StartWorld(); // must be done AFTER all objects are created
 }
 
 /*
@@ -352,6 +355,10 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->InitSphereInertia();
 
 	world->AddGameObject(character);
+
+	TestComponent* t = new TestComponent(character);
+
+	character->AddComponent(t);
 
 	return character;
 }

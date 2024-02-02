@@ -1,7 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
-#include "../Replicated/Component.h"
+#include "Component.h"
 using std::vector;
 using NCL::CSC8503::Component;
 
@@ -20,22 +20,22 @@ namespace NCL::CSC8503 {
 		virtual void Start() { StartAllComponents(); }
 
 		virtual void OnCollisionBegin(const GameObject* otherObject) {
-			for (const std::shared_ptr<Component>& component : components)component->OnCollisionEnter(otherObject);
+			for (Component* component : components)component->OnCollisionEnter(otherObject);
 		}
 
 		virtual void OnCollisionEnd(const GameObject* otherObject) {
-			for (const std::shared_ptr<Component>& component : components)component->OnCollisionEnd(otherObject);
+			for (Component* component : components)component->OnCollisionEnd(otherObject);
 		}
 
 		virtual void OnCollisionStay(const GameObject* otherObject) {
-			for (const std::shared_ptr<Component>& component : components)component->OnCollisionStay(otherObject);
+			for (Component* component : components)component->OnCollisionStay(otherObject);
 		}
 
-		void UpdateAllComponents(float dt) { for (const std::shared_ptr<Component>& component : components)component->Update(dt); }
+		void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
 
-		void PhysicsUpdateAllComponents(float dt) { for (const std::shared_ptr<Component>& component : components)component->PhysicsUpdate(dt); }
+		void PhysicsUpdateAllComponents(float dt) { for (Component*& component : components)component->PhysicsUpdate(dt); }
 
-		void StartAllComponents() { for (const std::shared_ptr<Component>& component : components)component->Start(); }
+		void StartAllComponents() { for (Component* component : components)component->Start(); }
 
 
 		void SetBoundingVolume(CollisionVolume* vol) {
@@ -92,9 +92,9 @@ namespace NCL::CSC8503 {
 
 		//returns true if component found, false if not
 		template <typename T>
-		bool TryGetComponent(std::shared_ptr<T>& returnPointer) {
-			for (std::shared_ptr<Component> component : components) {
-				std::shared_ptr<T> typeCast = dynamic_cast<std::shared_ptr<T>>(component);
+		bool TryGetComponent(T*& returnPointer) {
+			for (Component* component : components) {
+				T* typeCast = dynamic_cast<std::shared_ptr<T>>(component);
 				if (typeCast) {
 					returnPointer = typeCast;
 					return true;
@@ -103,12 +103,12 @@ namespace NCL::CSC8503 {
 			return false;
 		}
 
-		void AddComponent(std::shared_ptr<Component> component) {
+		void AddComponent(Component* component) {
 			components.push_back(component);
 		}
 
 	protected:
-		std::vector<std::shared_ptr<Component>> components; //shared pointers as components may reference eachother
+		std::vector<Component*> components;
 
 		Transform			transform;
 
