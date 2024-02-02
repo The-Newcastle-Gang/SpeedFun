@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vector3.h"
+
 namespace NCL {
 	namespace Maths {
 		struct RayCollision {
