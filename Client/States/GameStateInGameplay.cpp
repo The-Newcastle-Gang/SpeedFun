@@ -120,4 +120,49 @@ void InGameplay::InitCamera() {
 void InGameplay::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+
+	BuildLevelFromJSON("level2");
+}
+
+void NCL::CSC8503::InGameplay::BuildLevelFromJSON(std::string levelName)
+{
+	levelReader = new LevelReader();
+	levelBuilder = new LevelBuilder();
+	if (!levelReader->ReadLevel(levelName + ".json"))
+	{
+		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		return;
+	}
+
+	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 }, 0);
+	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 }, 0);
+
+	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
+	{
+		AddCubeToWorld(x->pos, x->dims, 0);
+	}
+
+	//levelBuilder->BuildLevel(world);
+}
+
+GameObject* NCL::CSC8503::InGameplay::AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass)
+{
+	GameObject* cube = new GameObject();
+
+	AABBVolume* volume = new AABBVolume(dimensions);
+	cube->SetBoundingVolume((CollisionVolume*)volume);
+
+	cube->GetTransform()
+		.SetPosition(position)
+		.SetScale(dimensions * 2);
+
+	cube->SetRenderObject(new RenderObject(&cube->GetTransform(), cubeMesh, basicTex, basicShader));
+	cube->SetPhysicsObject(new PhysicsObject(&cube->GetTransform(), cube->GetBoundingVolume()));
+
+	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
+	cube->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(cube);
+
+	return cube;
 }

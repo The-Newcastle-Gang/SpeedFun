@@ -4,6 +4,9 @@
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
+#include "LevelBuilder.h"
+
+
 namespace NCL {
 	namespace CSC8503 {
 		enum ExitStates {
@@ -33,6 +36,11 @@ namespace NCL {
 			void UpdateKeys();
 
 			void InitWorld();
+
+			// remove these later!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			void BuildLevelFromJSON(std::string levelName);
+			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass);
 
 
 #ifdef USEVULKAN
@@ -69,6 +77,8 @@ namespace NCL {
 				lockedObject = o;
 			}
 
+			LevelReader* levelReader;
+			LevelBuilder* levelBuilder;
 			GameObject* objClosest = nullptr;
 		};
 	}
