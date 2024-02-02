@@ -1,14 +1,14 @@
 ///<summary>
-/// Reads from leveljson and populates on variables
+/// Reads from levelSource and populates on variables
 ///</summary>
 
 #include "LevelReader.h"
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
-bool LevelReader::ReadLevel(std::string source) {
+bool LevelReader::ReadLevel(const std::string& levelSource) {
 
-	std::ifstream jFileStream(Assets::LEVELDIR + source);
+	std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
 
 	if (!jFileStream) {
 		return false;
