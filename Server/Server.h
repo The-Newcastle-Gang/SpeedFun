@@ -13,6 +13,7 @@
 #include "GameWorld.h"
 #include "PhysicsSystem.h"
 #include "NetworkObject.h"
+#include "PhysicsObject.h"
 
 #include <iostream>
 #include <memory>
@@ -22,30 +23,35 @@ using namespace CSC8503;
 
 class Server : public PacketReceiver {
 public:
+    Server();
+    ~Server();
     void ServerInit();
     void UpdateServer(float dt);
-    void ReceivePacket(int type, GamePacket* payload, int source);
+    void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 private:
     std::unique_ptr<GameServer> serverBase;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<PhysicsSystem> physics;
+    std::unique_ptr<Replicated> replicated;
 
+    std::array<GameObject*, 4> players;
 
-
-    constexpr static int SERVERHERTZ = 30;
+    constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     float packetTimer;
     int sceneSnapshotId;
 
     void RegisterPackets();
-
     void InitGame();
-
     void Tick(float dt);
-
     void SendWorldToClient();
-
     void CreateServerObject(GameObject *g);
+    void CreatePlayers();
+    GameObject* GetPlayerFromPeerId(int peerId);
+
+    void AssignPlayer(int peerId);
+
+    void SendFunction(int peerId, int functionId, FunctionData *d);
 };
 
 

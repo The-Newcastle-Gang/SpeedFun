@@ -71,6 +71,7 @@ void GameServer::UpdateServer() {
         if (type == ENetEventType::ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Server: New client connected" << std::endl;
             idToPeer[peer] = p;
+            playerJoined.publish(peer);
         }
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_DISCONNECT) {

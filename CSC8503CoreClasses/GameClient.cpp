@@ -5,7 +5,7 @@ using namespace NCL;
 using namespace CSC8503;
 
 GameClient::GameClient()	{
-    netPeer = {0};
+    netPeer = { 0 };
     netHandle = enet_host_create(nullptr, 1, 1, 0, 0);
     lastServerSnapshot = 0;
 }

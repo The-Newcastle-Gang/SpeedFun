@@ -16,6 +16,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	debugShader  = new OGLShader("debug.vert", "debug.frag");
 	shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
+    defaultShader = new OGLShader("scene.vert", "scene.frag");
 
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
@@ -77,6 +78,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 GameTechRenderer::~GameTechRenderer()	{
 	glDeleteTextures(1, &shadowTex);
 	glDeleteFramebuffers(1, &shadowFBO);
+    delete defaultShader;
 }
 
 void GameTechRenderer::LoadSkybox() {
@@ -252,9 +254,15 @@ void GameTechRenderer::RenderCamera() {
 
 	for (const auto&i : activeObjects) {
 		OGLShader* shader = (OGLShader*)(*i).GetShader();
-		BindShader(shader);
+        if (!shader) {
+            shader = defaultShader;
+        }
 
-		BindTextureToShader((OGLTexture*)(*i).GetDefaultTexture(), "mainTex", 0);
+        BindShader(shader);
+
+        if (i->GetDefaultTexture()) {
+            BindTextureToShader((OGLTexture*)(*i).GetDefaultTexture(), "mainTex", 0);
+        }
 
 		if (activeShader != shader) {
 			projLocation	= glGetUniformLocation(shader->GetProgramID(), "projMatrix");

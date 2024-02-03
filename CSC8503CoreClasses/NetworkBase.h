@@ -14,7 +14,8 @@ enum BasicNetworkMessages {
 	Received_State, // Player Input
 	Player_Connected,
 	Player_Disconnected,
-	Shutdown
+	Shutdown,
+    Function
 };
 
 struct GamePacket {

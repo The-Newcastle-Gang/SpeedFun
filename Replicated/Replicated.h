@@ -8,6 +8,7 @@
 
 #include "GameWorld.h"
 #include "NetworkObject.h"
+#include <vector>
 #include <string>
 
 using namespace NCL;
@@ -15,10 +16,23 @@ using namespace CSC8503;
 
 class Replicated {
 public:
-    static void CreateObject(GameObject* g, GameWorld& world);
-    static void CreatePlayer(GameObject *g, GameWorld &world);
+    enum RemoteClientCalls {
+        AssignPlayer
+    };
 
-    static int NetworkIds;
+    enum RemoteServerCalls {
+
+    };
+    Replicated();
+    void CreateObject(GameObject *g, GameWorld& world);
+    void CreatePlayer(GameObject *g);
+
+    constexpr static int PLAYERCOUNT = 4;
+    std::vector<NetworkObject*> networkObjects;
+
+private:
+    int networkIdCounter;
+
 };
 
 

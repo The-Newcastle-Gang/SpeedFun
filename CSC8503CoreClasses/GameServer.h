@@ -26,8 +26,6 @@ namespace NCL {
             virtual void UpdateServer();
 
             int currentSnapshot;
-            std::function<void(int)> connectCallback;
-            std::function<void(int)> leaveCallback;
 
             entt::sink<PlayerSignalH> OnPlayerJoined {playerJoined};
             entt::sink<PlayerSignalH> OnPlayerLeft {playerLeft};
