@@ -2,9 +2,10 @@
 using namespace NCL;
 using namespace CSC8503;
 
-LoadingState::LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
+LoadingState::LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
+    baseClient = clientRef;
 }
 
 LoadingState::~LoadingState() {

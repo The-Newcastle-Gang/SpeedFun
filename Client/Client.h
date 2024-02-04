@@ -13,6 +13,11 @@
 #include "PacketTypes.h"
 #include "Quaternion.h"
 #include "RenderObject.h"
+#include "StateMachine.h"
+#include "State.h"
+#include "GameplayState.h"
+#include "LoadingState.h"
+#include "MenuState.h"
 
 #include <iostream>
 #include <memory>
@@ -30,12 +35,15 @@ public:
     void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 private:
+    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameClient> baseClient;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
 
     GameObject* thisPlayer;
+
+
 
     void InitNetworking();
     void InitGame();
@@ -52,6 +60,10 @@ private:
     std::unordered_map<std::string, ShaderBase*> shaders;
 
     void AssignPlayer(unsigned char *data);
+
+    void TemporaryLevelLoad();
+
+    void InitStateManager();
 };
 
 

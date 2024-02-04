@@ -4,12 +4,14 @@
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
+#include "GameClient.h"
+
 namespace NCL {
 	namespace CSC8503 {
 		class LoadingState : public State
 		{
 		public:
-			LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
+			LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
 			~LoadingState();
 			void Update(float dt);
 
@@ -23,6 +25,7 @@ namespace NCL {
 #endif
 			PhysicsSystem* physics;
 			GameWorld* world;
+            GameClient* baseClient;
 		};
 	}
 }

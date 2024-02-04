@@ -4,23 +4,27 @@
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
+#include "GameClient.h"
+
 namespace NCL {
 	namespace CSC8503 {
 		enum ExitStates {
-			Invalid = 0,
-			Win = 1,
-			Loss = 2,
-			Other = 3
+			Invalid,
+			Win,
+			Loss,
+			Other
 		};
 		class GameplayState : public State
 		{
 		public:
-			GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
+			GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
 			~GameplayState();
 			void Update(float dt);
 
 			void OnEnter();
 			void OnExit();
+
+            bool IsDisconnected();
 
 			int ExitType();
 
@@ -42,6 +46,8 @@ namespace NCL {
 #endif
 			PhysicsSystem* physics;
 			GameWorld* world;
+
+            GameClient* baseClient;
 
 			bool useGravity;
 			bool inSelectionMode;

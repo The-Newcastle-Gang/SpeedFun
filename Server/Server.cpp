@@ -7,12 +7,24 @@
 
 Server::Server() {
     NetworkBase::Initialise();
+    stateManager = std::make_unique<StateMachine>();
     serverBase = std::make_unique<GameServer>(NetworkBase::GetDefaultPort(), 32);
     replicated = std::make_unique<Replicated>();
+    InitStateMachine();
     RegisterPackets();
 }
 
 Server::~Server() {
+
+}
+
+void Server::InitStateMachine() {
+    auto serverWaitingPlayers = new WaitingPlayers(serverBase.get());
+    auto serverRunning = new Running(serverBase.get());
+
+
+    stateManager->AddState(serverWaitingPlayers);
+    stateManager->AddState(serverRunning);
 
 }
 

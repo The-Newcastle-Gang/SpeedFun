@@ -6,7 +6,6 @@ add_executable(client
         Client.cpp
         Renderer.cpp
         TutorialGame.cpp
-        ClientMachine.cpp
         States/InactiveState.cpp
         States/GameplayState.cpp
         States/LoadingState.cpp

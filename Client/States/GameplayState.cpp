@@ -8,10 +8,11 @@
 #include "OrientationConstraint.h"
 using namespace NCL;
 using namespace CSC8503;
-#
-GameplayState::GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
+
+GameplayState::GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
+    baseClient = clientRef;
 }
 
 GameplayState::~GameplayState() {
@@ -120,4 +121,8 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+}
+
+bool GameplayState::IsDisconnected() {
+    return false;
 }

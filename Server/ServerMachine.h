@@ -3,13 +3,15 @@
 #include <vector>
 namespace NCL {
 	namespace CSC8503 {
-		enum ServerStates {
-			BusyState,
-			WaitingPlayersState,
-			RunningState
-		};
 		class ServerMachine : public StateMachine {
 		public:
+
+            enum ServerStates {
+                Busy,
+                Waiting,
+                Running
+            };
+
 			ServerMachine();
 			~ServerMachine() override = default;
             // Assuming this is the only place these levels are stored use rvalue reference.
@@ -20,7 +22,7 @@ namespace NCL {
 		protected:
 			ServerStates currentServerState;
 			std::vector<State*> availableLevels;
-			void InitialiseServerStateMachine();
+			void InitMachine();
 		};
 	}
 }

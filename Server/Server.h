@@ -14,6 +14,11 @@
 #include "PhysicsSystem.h"
 #include "NetworkObject.h"
 #include "PhysicsObject.h"
+#include "StateMachine.h"
+#include "StateTransition.h"
+#include "BusyState.h"
+#include "RunningState.h"
+#include "WaitingState.h"
 
 #include <iostream>
 #include <memory>
@@ -22,6 +27,7 @@ using namespace NCL;
 using namespace CSC8503;
 
 class Server : public PacketReceiver {
+    friend class State;
 public:
     Server();
     ~Server();
@@ -30,6 +36,7 @@ public:
     void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 private:
+    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameServer> serverBase;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<PhysicsSystem> physics;
@@ -52,6 +59,8 @@ private:
     void AssignPlayer(int peerId);
 
     void SendFunction(int peerId, int functionId, FunctionData *d);
+
+    void InitStateMachine();
 };
 
 

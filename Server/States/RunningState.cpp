@@ -1,10 +1,10 @@
-#include "GameStateRunning.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
-Running::Running() : State()
+Running::Running(GameServer* pBaseServer) : State()
 {
-
+    baseServer = pBaseServer;
 }
 
 Running::~Running()

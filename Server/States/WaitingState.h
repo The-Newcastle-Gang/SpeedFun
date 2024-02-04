@@ -1,5 +1,6 @@
 #pragma once
 #include "State.h"
+#include "GameServer.h"
 #include <iostream>
 
 namespace NCL {
@@ -7,14 +8,14 @@ namespace NCL {
 		class WaitingPlayers : public State
 		{
 		public:
-			WaitingPlayers();
+			WaitingPlayers(GameServer* pServerBase);
 			~WaitingPlayers();
 			void Update(float dt);
 
 			void OnEnter() { std::cout << "On Enter"; }
 			void OnExit() { std::cout << "On Exit"; }
 		protected:
-
+            GameServer* serverBase;
 		};
 	}
 }

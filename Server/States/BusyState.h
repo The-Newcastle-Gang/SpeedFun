@@ -4,11 +4,11 @@
 
 namespace NCL {
 	namespace CSC8503 {
-		class Busy : public State
+		class BusyState : public State
 		{
 		public:
-			Busy();
-			~Busy();
+			BusyState();
+			~BusyState();
 			void Update(float dt);
 
 			void OnEnter() {}

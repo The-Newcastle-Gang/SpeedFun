@@ -2,14 +2,19 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
+MenuState::MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef) : State()
 {
 	renderer = rendererRef;
 	world = gameWorldRef;
+    baseClient = clientRef;
 }
 
 MenuState::~MenuState() {
 
+}
+
+bool MenuState::IsConnected() {
+    return false;
 }
 
 void MenuState::Update(float dt) {

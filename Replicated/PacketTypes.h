@@ -18,9 +18,31 @@ struct FunctionData {
     unsigned char data[MAXFUNCTIONDATA];
 };
 
+class DataHandler {
+public:
+    DataHandler(FunctionData* fd) {
+        block = fd;
+        ptr = block->data;
+    }
+    // Please avoid calling this with structs.
+    template <typename T>
+    void Pack(T value) {
+
+    }
+    
+    template <typename T>
+    T Unpack() {
+
+    }
+private:
+    unsigned char *ptr;
+    FunctionData* block;
+};
+
 struct InputPacket : public GamePacket {
     Quaternion playerRotation;
     Vector2 playerDirection;
+    // Put any more necessary client inputs here
 
     InputPacket() {
         type = Received_State;

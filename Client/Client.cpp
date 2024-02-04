@@ -9,10 +9,32 @@ Client::Client() {
     NetworkBase::Initialise();
     replicated = std::make_unique<Replicated>();
     baseClient = std::make_unique<GameClient>();
+    stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
     renderer = std::make_unique<GameTechRenderer>(*world);
-
+    InitStateManager();
     thisPlayer = nullptr;
+}
+
+void Client::InitStateManager() {
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
+
+    auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [&]()->bool {
+        clientMenu->IsConnected();
+    });
+
+    auto gameplayToMenu = new StateTransition(clientGameplay, clientMenu, [&]()->bool {
+        clientGameplay->IsDisconnected();
+    });
+
+
+    stateManager->AddState(clientMenu);
+    stateManager->AddState(clientGameplay);
+
+    stateManager->AddTransition(menuToGameplay);
+    stateManager->AddTransition(gameplayToMenu);
+
 }
 
 void Client::InitClient() {
@@ -48,6 +70,11 @@ void Client::InitCamera() {
 }
 
 void Client::InitialiseAssets() {
+    TemporaryLevelLoad();
+}
+
+// Remove this when level loading is introduced.
+void Client::TemporaryLevelLoad() {
     CreatePlayers();
 }
 
@@ -57,6 +84,8 @@ std::string Client::GetAddress() {
 }
 
 void Client::Update(float dt) {
+
+    stateManager->Update(dt);
 
     SendInputData();
     world->UpdateWorld(dt);
