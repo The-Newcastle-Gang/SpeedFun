@@ -1,29 +1,29 @@
-#include "GameStateMenu.h"
+#include "MenuState.h"
 using namespace NCL;
 using namespace CSC8503;
 
-Menu::Menu(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
+MenuState::MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State()
 {
 	renderer = rendererRef;
 	world = gameWorldRef;
 }
 
-Menu::~Menu() {
+MenuState::~MenuState() {
 
 }
 
-void Menu::Update(float dt) {
+void MenuState::Update(float dt) {
 
 	Debug::Print("MENU", Vector2(10, 10));
 	Debug::Print("PRESS SPACE TO LOADING", Vector2(10, 20));
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
-void Menu::OnEnter() {
+void MenuState::OnEnter() {
 	std::cout << "MENU\n";
 }
 
-void Menu::OnExit() {
+void MenuState::OnExit() {
 	world->ClearAndErase();
 	renderer->Render();
 }

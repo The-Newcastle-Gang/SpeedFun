@@ -20,14 +20,14 @@
 #include "BehaviourSequence.h"
 #include "BehaviourAction.h"
 #include "LevelReader.h"
-#include "ClientGameStateMachine.h"
+#include "ClientMachine.h"
 
 using namespace NCL;
 using namespace CSC8503;
 
 void RunClientGameStateMachine(Window* w) {
     Window::GetTimer()->GetTimeDeltaSeconds();
-    auto* client = new Client();
+    auto client = new Client();
     client->InitClient();
 
     Window::GetWindow()->LockMouseToWindow(true);

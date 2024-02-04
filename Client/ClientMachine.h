@@ -6,24 +6,26 @@
 
 namespace NCL {
 	namespace CSC8503 {
-		enum ClientStates {
-			InactiveState,
-			LoadingState,
-			MenuState,
-			InGameplayState
-		};
-		class ClientGameStateMachine : public StateMachine {
+
+		class ClientMachine : public StateMachine {
 		public:
-			ClientGameStateMachine();
-			virtual ~ClientGameStateMachine();
-			std::vector<State*> GetAvailableLevels()
-			{
+            enum ClientStates {
+                InactiveState,
+                LoadingState,
+                MenuState,
+                InGameplayState
+            };
+
+			ClientMachine();
+			~ClientMachine() override = default;
+			std::vector<State*> GetAvailableLevels() {
 				return availableLevels;
 			}
-			void SetClientState(ClientStates clientState)
-			{
+			void SetClientState(ClientStates clientState) {
 				currentClientState = clientState;
 			}
+
+
 		protected:
 
 
@@ -31,7 +33,7 @@ namespace NCL {
 			std::vector<State*> availableLevels;
 			void InitialiseClientStateMachine();
 
-			bool ForceTransition(bool hasConidtionMet, ClientStates stateSwitchTo);
+			bool ForceTransition(bool hasConditionMet, ClientStates stateSwitchTo);
 
 #ifdef USEVULKAN
 			GameTechVulkanRenderer* renderer;

@@ -1,27 +1,27 @@
-#include "GameStateInactive.h"
+#include "InactiveState.h"
 using namespace NCL;
 using namespace CSC8503;
 
-Inactive::Inactive(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
+InactiveState::InactiveState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
 }
 
-Inactive::~Inactive() {
+InactiveState::~InactiveState() {
 
 }
 
-void Inactive::Update(float dt) {
+void InactiveState::Update(float dt) {
 	Debug::Print("INACTIVE MENU", Vector2(10, 10));
 	Debug::Print("PRESS SPACE TO MENU", Vector2(10, 20));
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
 
-void Inactive::OnEnter() {
+void InactiveState::OnEnter() {
 }
 
-void Inactive::OnExit() {
+void InactiveState::OnExit() {
 	world->ClearAndErase();
 	renderer->Render();
 }

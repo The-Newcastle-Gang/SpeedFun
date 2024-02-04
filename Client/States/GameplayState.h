@@ -12,11 +12,11 @@ namespace NCL {
 			Loss = 2,
 			Other = 3
 		};
-		class InGameplay : public State
+		class GameplayState : public State
 		{
 		public:
-			InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
-			~InGameplay();
+			GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
+			~GameplayState();
 			void Update(float dt);
 
 			void OnEnter();

@@ -81,6 +81,7 @@ void Server::Tick(float dt) {
 }
 
 void Server::SendWorldToClient() {
+    // Test swapping this with iterators instead of lambda callback for performance.
     world->OperateOnContents([this](GameObject* obj) {
         if (!obj->IsActive()) {
             return;

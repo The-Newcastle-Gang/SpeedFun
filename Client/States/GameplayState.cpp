@@ -1,4 +1,4 @@
-#include "GameStateInGameplay.h"
+#include "GameplayState.h"
 #include "GameWorld.h"
 #include "PhysicsObject.h"
 #include "RenderObject.h"
@@ -9,12 +9,12 @@
 using namespace NCL;
 using namespace CSC8503;
 #
-InGameplay::InGameplay(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
+GameplayState::GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
 }
 
-InGameplay::~InGameplay() {
+GameplayState::~GameplayState() {
 
 	delete cubeMesh;
 	delete sphereMesh;
@@ -28,7 +28,7 @@ InGameplay::~InGameplay() {
 	delete physics;
 }
 
-void InGameplay::OnEnter() {
+void GameplayState::OnEnter() {
 	physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
@@ -37,13 +37,13 @@ void InGameplay::OnEnter() {
 
 	InitialiseAssets();
 }
-void InGameplay::OnExit() {
-	this->~InGameplay();
+void GameplayState::OnExit() {
+	this->~GameplayState();
 	world->ClearAndErase();
 	renderer->Render();
 }
 
-int InGameplay::ExitType() {
+int GameplayState::ExitType() {
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L))
 	{
@@ -52,7 +52,7 @@ int InGameplay::ExitType() {
 	return ExitStates::Invalid;
 }
 
-void InGameplay::Update(float dt) {
+void GameplayState::Update(float dt) {
 
 	Debug::Print("PRESS L TO END GAME", Vector2(10, 20));
 	Window::GetWindow()->ShowOSPointer(false);
@@ -83,7 +83,7 @@ void InGameplay::Update(float dt) {
 }
 
 
-void InGameplay::InitialiseAssets() {
+void GameplayState::InitialiseAssets() {
 	cubeMesh = renderer->LoadMesh("cube.msh");
 	sphereMesh = renderer->LoadMesh("sphere.msh");
 	charMesh = renderer->LoadMesh("goat.msh");
@@ -99,7 +99,7 @@ void InGameplay::InitialiseAssets() {
 }
 
 
-void InGameplay::UpdateKeys() {
+void GameplayState::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
 	}
@@ -109,7 +109,7 @@ void InGameplay::UpdateKeys() {
 	}
 }
 
-void InGameplay::InitCamera() {
+void GameplayState::InitCamera() {
 	world->GetMainCamera()->SetNearPlane(0.1f);
 	world->GetMainCamera()->SetFarPlane(500.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
@@ -117,7 +117,7 @@ void InGameplay::InitCamera() {
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
 }
 
-void InGameplay::InitWorld() {
+void GameplayState::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 }

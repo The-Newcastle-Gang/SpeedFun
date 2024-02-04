@@ -1,28 +1,28 @@
-#include "GameStateLoading.h"
+#include "LoadingState.h"
 using namespace NCL;
 using namespace CSC8503;
 
-Loading::Loading(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
+LoadingState::LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef) : State() {
 	renderer = rendererRef;
 	world = gameWorldRef;
 }
 
-Loading::~Loading() {
+LoadingState::~LoadingState() {
 
 }
 
-void Loading::Update(float dt) {
+void LoadingState::Update(float dt) {
 	Debug::Print("LOADING", Vector2(10, 10));
 	Debug::Print("PRESS SPACE TO GAMEPLAY", Vector2(10, 20));
 	Debug::Print("PRESS L TO MENU", Vector2(10, 30));
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
-void Loading::OnEnter() {
-	std::cout << "LOADING\n";
+void LoadingState::OnEnter() {
+	std::cout << "LOADING" << std::endl;
 }
 
-void Loading::OnExit() {
+void LoadingState::OnExit() {
 	world->ClearAndErase();
 	renderer->Render();
 }

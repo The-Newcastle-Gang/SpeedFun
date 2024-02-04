@@ -6,11 +6,11 @@
 #include "GameWorld.h"
 namespace NCL {
 	namespace CSC8503 {
-		class Menu : public State
+		class MenuState : public State
 		{
 		public:
-			Menu(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
-			~Menu();
+			MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef);
+			~MenuState();
 			void Update(float dt);
 
 			void OnEnter();

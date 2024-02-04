@@ -5,8 +5,7 @@
 using std::vector;
 
 namespace NCL::CSC8503 {
-	class Networ
-            kObject;
+	class NetworkObject;
 	class RenderObject;
 	class PhysicsObject;
 

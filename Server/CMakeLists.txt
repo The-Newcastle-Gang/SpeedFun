@@ -7,7 +7,7 @@ main.cpp
 "States/GameStateBusy.cpp"
 "States/GameStateRunning.cpp"
 "States/GameStateWaitingPlayers.cpp"
-"ServerGameStateMachine.cpp"
+"ServerMachine.cpp"
 )
 
 target_include_directories(server PUBLIC

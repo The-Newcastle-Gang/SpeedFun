@@ -73,7 +73,7 @@ void Client::Update(float dt) {
 void Client::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         // Raise discussion on how to manage gameworld entities and who should own their lifecycle.
-        auto* player = new GameObject();
+        auto player = new GameObject();
         replicated->CreatePlayer(player);
         player->SetRenderObject(new RenderObject(&player->GetTransform(), GetMesh("Goat.msh"), nullptr, nullptr));
         world->AddGameObject(player);
@@ -119,13 +119,13 @@ void Client::SendInputData() {
 void Client::ReceivePacket(int type, GamePacket *payload, int source) {
     switch (type) {
         case Full_State: {
-            auto* packet = reinterpret_cast<FullPacket*>(payload);
+            auto packet = reinterpret_cast<FullPacket*>(payload);
             replicated->networkObjects[packet->objectID]->ReadPacket(*payload);
 
         } break;
 
         case Function: {
-            auto* packet = reinterpret_cast<FunctionPacket*>(payload);
+            auto packet = reinterpret_cast<FunctionPacket*>(payload);
             if (packet->functionId == Replicated::AssignPlayer) {
                 AssignPlayer(packet->data.data);
             }

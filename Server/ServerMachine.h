@@ -8,11 +8,12 @@ namespace NCL {
 			WaitingPlayersState,
 			RunningState
 		};
-		class ServerGameStateMachine : public StateMachine {
+		class ServerMachine : public StateMachine {
 		public:
-			ServerGameStateMachine();
-			virtual ~ServerGameStateMachine();
-			void SetAvailableLevels(std::vector<State*> levels)
+			ServerMachine();
+			~ServerMachine() override = default;
+            // Assuming this is the only place these levels are stored use rvalue reference.
+			void SetAvailableLevels(std::vector<State*>&& levels)
 			{
 				availableLevels = levels;
 			}

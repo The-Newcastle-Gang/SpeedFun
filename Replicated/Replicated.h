@@ -16,6 +16,10 @@ using namespace CSC8503;
 
 class Replicated {
 public:
+    Replicated();
+    void CreateObject(GameObject *g, GameWorld& world);
+    void CreatePlayer(GameObject *g);
+
     enum RemoteClientCalls {
         AssignPlayer
     };
@@ -23,9 +27,6 @@ public:
     enum RemoteServerCalls {
 
     };
-    Replicated();
-    void CreateObject(GameObject *g, GameWorld& world);
-    void CreatePlayer(GameObject *g);
 
     constexpr static int PLAYERCOUNT = 4;
     std::vector<NetworkObject*> networkObjects;

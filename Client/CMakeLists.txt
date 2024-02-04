@@ -6,11 +6,11 @@ add_executable(client
         Client.cpp
         Renderer.cpp
         TutorialGame.cpp
-        ClientGameStateMachine.cpp
-        States/GameStateInactive.cpp
-        States/GameStateInGameplay.cpp
-        States/GameStateLoading.cpp
-        States/GameStateMenu.cpp
+        ClientMachine.cpp
+        States/InactiveState.cpp
+        States/GameplayState.cpp
+        States/LoadingState.cpp
+        States/MenuState.cpp
 )
 
 target_include_directories(client PUBLIC
