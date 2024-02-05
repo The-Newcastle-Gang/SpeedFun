@@ -34,8 +34,7 @@ void RunTutorialGame(Window* w)
     w->LockMouseToWindow(true);
     
 
-    LevelReader* lv = new LevelReader();
-    lv->ReadLevel("level.json");
+
 
 
 
@@ -94,12 +93,21 @@ void RunClientGameStateMachine(Window* w)
 
 
 int main() {
+
+    LevelReader* lv = new LevelReader();
+    lv->ReadLevel("finaltest.json");
+    if(lv->GetPrimitiveList().empty()){
+        std::cout << "not working!!";
+    }
+
     Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
 
     if (!w->HasInitialised()) {
         return -1;
     }
 
+//    LevelReader* lv = new LevelReader();
+//    lv->ReadLevel("level.json");
     //RunTutorialGame(w);
     RunClientGameStateMachine(w);
 
