@@ -69,7 +69,6 @@ void RunningState::SendWorldToClient() {
 }
 
 void RunningState::AssignPlayer(int peerId, GameObject* object) {
-    playerObjects[peerId] = object;
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
@@ -77,13 +76,14 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 }
 
 void RunningState::CreatePlayers() {
+    // For each player in the game create a player for them.
     for (auto pair : serverBase->GetPlayerInfo()) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume()));
         player->GetPhysicsObject()->InitSphereInertia();
-        AssignPlayer(pair.first, player);
+        playerObjects[pair.first] = player;
     }
 }
 
@@ -93,7 +93,13 @@ void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
             auto packet = reinterpret_cast<InputPacket*>(payload);
             GameObject* player = GetPlayerObjectFromId(source);
             player->GetTransform().SetOrientation(packet->playerRotation);
-            break;
+
+        } break;
+        case Function: {
+            auto packet = reinterpret_cast<FunctionPacket*>(payload);
+            if (packet->functionId == Replicated::RemoteServerCalls::GameLoaded) {
+                AssignPlayer(source, GetPlayerObjectFromId(source));
+            }
         }
     }
 }

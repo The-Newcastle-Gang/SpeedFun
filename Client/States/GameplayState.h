@@ -54,6 +54,8 @@ namespace NCL {
 
             void SendInputData();
             void CreatePlayers();
+
+            void FinishLoading();
         };
 	}
 }

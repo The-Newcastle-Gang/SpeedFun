@@ -8,7 +8,7 @@ add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}")
 
 if(MSVC)
     add_compile_definitions("NOMINMAX")
-    add_compile_definitions("WIN32_LEAN_AND_MEAN")
+    add_compile_options(/wd4293 /wd4018 /wd4244)
 endif()
 
 include_directories(enet)

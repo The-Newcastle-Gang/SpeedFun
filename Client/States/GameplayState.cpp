@@ -8,7 +8,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 	world = pGameworld;
     baseClient = pClient;
     resources = std::make_unique<Resources>(renderer);
-    baseClient->networkPlayerId = -1;
 }
 
 GameplayState::~GameplayState() {}
@@ -18,17 +17,12 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
 
-    if (baseClient->networkPlayerId != -1) {
-        AssignPlayer(baseClient->networkPlayerId);
-    }
-
     firstPersonPosition = nullptr;
 	InitialiseAssets();
 }
 void GameplayState::OnExit() {
 	world->ClearAndErase();
 	renderer->Render();
-    baseClient->networkPlayerId = -1;
 }
 
 void GameplayState::Update(float dt) {
@@ -78,6 +72,11 @@ void GameplayState::SendInputData() {
 void GameplayState::InitialiseAssets() {
 	InitCamera();
 	InitWorld();
+    FinishLoading();
+}
+
+void GameplayState::FinishLoading() {
+    baseClient->RemoteFunction(Replicated::RemoteServerCalls::GameLoaded, nullptr);
 }
 
 void GameplayState::InitCamera() {

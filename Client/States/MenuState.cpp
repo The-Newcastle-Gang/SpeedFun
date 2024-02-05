@@ -59,10 +59,8 @@ void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
             auto packet = reinterpret_cast<FunctionPacket*>(payload);
             if (packet->functionId == Replicated::RemoteClientCalls::LoadGame) {
                 isGameStarted = true;
-            }
-            if (packet->functionId == Replicated::RemoteClientCalls::AssignPlayer) {
-                baseClient->networkPlayerId = 1;
-            }
+            };
+
         } break;
     }
 
