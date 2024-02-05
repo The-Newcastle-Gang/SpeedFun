@@ -19,7 +19,7 @@ void WaitingPlayers::Update(float dt) {
 void WaitingPlayers::AddPlayer(int peerId) {
     PlayerInfo info{};
     info.peerId = peerId;
-    serverBase->AddPlayerInfo(info);
+    serverBase->AddPlayerInfo(peerId, info);
 }
 
 void WaitingPlayers::StartGame() {

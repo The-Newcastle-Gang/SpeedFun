@@ -1,112 +1,83 @@
 #include "GameplayState.h"
-#include "GameWorld.h"
-#include "PhysicsObject.h"
-#include "RenderObject.h"
-#include "TextureLoader.h"
 
-#include "PositionConstraint.h"
-#include "OrientationConstraint.h"
 using namespace NCL;
 using namespace CSC8503;
 
-GameplayState::GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef) : State() {
-	renderer = rendererRef;
-	world = gameWorldRef;
-    baseClient = clientRef;
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
+	renderer = pRenderer;
+	world = pGameworld;
+    baseClient = pClient;
+    resources = std::make_unique<Resources>(renderer);
+    baseClient->networkPlayerId = -1;
 }
 
-GameplayState::~GameplayState() {
-
-	delete cubeMesh;
-	delete sphereMesh;
-	delete charMesh;
-	delete enemyMesh;
-	delete bonusMesh;
-
-	delete basicTex;
-	delete basicShader;
-
-	delete physics;
-}
+GameplayState::~GameplayState() {}
 
 void GameplayState::OnEnter() {
 
-	forceMagnitude = 10.0f;
-	useGravity = false;
-	inSelectionMode = false;
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
 
+    if (baseClient->networkPlayerId != -1) {
+        AssignPlayer(baseClient->networkPlayerId);
+    }
+
+    firstPersonPosition = nullptr;
 	InitialiseAssets();
 }
 void GameplayState::OnExit() {
-	this->~GameplayState();
 	world->ClearAndErase();
 	renderer->Render();
-}
-
-int GameplayState::ExitType() {
-
-	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L))
-	{
-		return ExitStates::Win;
-	}
-	return ExitStates::Invalid;
+    baseClient->networkPlayerId = -1;
 }
 
 void GameplayState::Update(float dt) {
 
-	Debug::Print("PRESS L TO END GAME", Vector2(10, 20));
-	Window::GetWindow()->ShowOSPointer(false);
-	Window::GetWindow()->LockMouseToWindow(true);
+    if (firstPersonPosition) {
+        world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+    }
+
 	world->GetMainCamera()->UpdateCamera(dt);
-	if (lockedObject != nullptr) {
-		
-		Vector3 objPos = lockedObject->GetTransform().GetPosition();
-		Vector3 camPos = objPos + lockedOffset;
-
-		Matrix4 temp = Matrix4::BuildViewMatrix(camPos, objPos, Vector3(0, 1, 0));
-
-		Matrix4 modelMat = temp.Inverse();
-
-		Quaternion q(modelMat);
-		Vector3 angles = q.ToEuler(); //nearly there now!
-
-		world->GetMainCamera()->SetPosition(camPos);
-		world->GetMainCamera()->SetPitch(angles.x);
-		world->GetMainCamera()->SetYaw(angles.y);
-	}
+    SendInputData();
 	world->UpdateWorld(dt);
-	renderer->Update(dt);
-	physics->Update(dt);
-
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
 }
 
+void GameplayState::SendInputData() {
+    InputPacket input;
 
-void GameplayState::InitialiseAssets() {
-	cubeMesh = renderer->LoadMesh("cube.msh");
-	sphereMesh = renderer->LoadMesh("sphere.msh");
-	charMesh = renderer->LoadMesh("goat.msh");
-	enemyMesh = renderer->LoadMesh("Keeper.msh");
-	bonusMesh = renderer->LoadMesh("apple.msh");
-	capsuleMesh = renderer->LoadMesh("capsule.msh");
+    Camera* mainCamera = world->GetMainCamera();
+    float cameraPitch = mainCamera->GetPitch();
+    float cameraYaw = mainCamera->GetYaw();
 
-	basicTex = renderer->LoadTexture("checkerboard.png");
-	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
+    input.playerRotation = Quaternion::EulerAnglesToQuaternion(cameraPitch, cameraYaw, 0);
 
-	InitCamera();
-	InitWorld();
+    Vector2 playerDirection;
+
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+        playerDirection.y += 1;
+    }
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+        playerDirection.y += -1;
+    }
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+        playerDirection.x += -1;
+    }
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+        playerDirection.x += 1;
+    }
+
+    playerDirection.Normalise();
+    input.playerDirection = playerDirection;
+
+    baseClient->SendPacket(input);
 }
 
 
-void GameplayState::UpdateKeys() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld(); //We can reset the simulation at any time with F1
-	}
-
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
-		InitCamera(); //F2 will reset the camera to a specific default place
-	}
+void GameplayState::InitialiseAssets() {
+	InitCamera();
+	InitWorld();
 }
 
 void GameplayState::InitCamera() {
@@ -118,10 +89,36 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-	world->ClearAndErase();
-	physics->Clear();
+    CreatePlayers();
 }
+
+void GameplayState::CreatePlayers() {
+    for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
+        auto player = new GameObject();
+        replicated->CreatePlayer(player, *world);
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+    }
+}
+
 
 bool GameplayState::IsDisconnected() {
     return false;
+}
+
+
+void GameplayState::AssignPlayer(int netObject) {
+    auto player = world->GetObjectByNetworkId(netObject);
+    player->SetRenderObject(nullptr);
+    firstPersonPosition = &player->GetTransform();
+}
+
+void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
+    if (type == Function) {
+        auto functionPacket = reinterpret_cast<FunctionPacket*>(payload);
+        if (functionPacket->type == Replicated::AssignPlayer) {
+            DataHandler handler(&functionPacket->data);
+            auto networkId = handler.Unpack<int>();
+            AssignPlayer(networkId);
+        }
+    }
 }

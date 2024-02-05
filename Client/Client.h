@@ -49,15 +49,9 @@ private:
     void InitCamera();
     void InitialiseAssets();
     void RegisterPackets();
-    void CreatePlayers();
-
-    ShaderBase *GetShader(const string &shader);
-    MeshGeometry* GetMesh(const std::string& name);
 
     std::unordered_map<std::string, MeshGeometry*> meshes;
     std::unordered_map<std::string, ShaderBase*> shaders;
-
-    void AssignPlayer(unsigned char *data);
 
     void TemporaryLevelLoad();
 

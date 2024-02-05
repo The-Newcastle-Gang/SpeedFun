@@ -60,9 +60,15 @@ namespace NCL {
 				return worldStateCounter;
 			}
 
+            GameObject* GetObjectByNetworkId(int networkId) {
+                return networkObjects[networkId]->GetParent();
+            }
+
 		protected:
 			std::vector<GameObject*> gameObjects;
 			std::vector<Constraint*> constraints;
+
+            std::vector<NetworkObject*> networkObjects;
 
 			Camera* mainCamera;
 

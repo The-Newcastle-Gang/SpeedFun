@@ -28,6 +28,8 @@ namespace NCL {
 			State *activeState;
 			std::vector<State*> allStates;
 			TransitionContainer allTransitions;
-		};
+
+            void Transition(State *destinationState);
+        };
 	}
 }

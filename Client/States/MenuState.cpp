@@ -13,7 +13,6 @@ void MenuState::OnEnter() {
     isGameStarted = false;
     statusText = "Press L to connect to localhost";
     connectState = 0;
-
 }
 
 MenuState::~MenuState() {
@@ -41,11 +40,11 @@ void MenuState::StartGame() {
 }
 
 void MenuState::Update(float dt) {
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::L) && connectState == 0) {
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L) && connectState == 0) {
         ConnectToGame("127.0.0.1");
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::R) && connectState == 2) {
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::R) && connectState == 2) {
         StartGame();
     }
 
@@ -55,6 +54,18 @@ void MenuState::Update(float dt) {
 }
 
 void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
+    switch(type) {
+        case Function: {
+            auto packet = reinterpret_cast<FunctionPacket*>(payload);
+            if (packet->functionId == Replicated::RemoteClientCalls::LoadGame) {
+                isGameStarted = true;
+            }
+            if (packet->functionId == Replicated::RemoteClientCalls::AssignPlayer) {
+                baseClient->networkPlayerId = 1;
+            }
+        } break;
+    }
+
 
 }
 

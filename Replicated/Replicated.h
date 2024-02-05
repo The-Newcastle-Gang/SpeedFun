@@ -18,7 +18,7 @@ class Replicated {
 public:
     enum RemoteClientCalls {
         AssignPlayer,
-        LoadGame
+        LoadGame,
     };
 
     enum RemoteServerCalls {

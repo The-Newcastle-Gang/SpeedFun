@@ -45,7 +45,8 @@ void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
 	worldStateCounter++;
 
 	if (isNetworked) {
-		o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));
+		o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));\
+        networkObjects.push_back(o->GetNetworkObject());
 	}
 }
 

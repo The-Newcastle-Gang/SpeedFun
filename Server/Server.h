@@ -30,7 +30,7 @@ class Server : public PacketReceiver {
 public:
     Server();
     ~Server();
-    void ServerInit();
+//    void ServerInit();
     void UpdateServer(float dt);
     void ReceivePacket(int type, GamePacket *payload, int source) override;
 
@@ -45,16 +45,16 @@ private:
     int sceneSnapshotId;
 
     void RegisterPackets();
-    void InitGame();
-    void Tick(float dt);
-    void SendWorldToClient();
-    void CreateServerObject(GameObject *g);
-    void CreatePlayers();
-    GameObject* GetPlayerFromPeerId(int peerId);
+//    void InitGame();
+//    void Tick(float dt);
+//    void SendWorldToClient();
+//    void CreateServerObject(GameObject *g);
+//    void CreatePlayers();
+//    GameObject* GetPlayerFromPeerId(int peerId);
+//
+//    void AssignPlayer(int peerId);
 
-    void AssignPlayer(int peerId);
-
-    void SendFunction(int peerId, int functionId, FunctionData *d);
+//    void SendFunction(int peerId, int functionId, FunctionData *d);
 
     void InitStateMachine();
 };

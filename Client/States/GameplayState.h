@@ -1,23 +1,25 @@
 #pragma once
 #include "State.h"
-#include <iostream>
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
 #include "GameClient.h"
+#include "GameWorld.h"
+#include "PhysicsObject.h"
+#include "RenderObject.h"
+#include "TextureLoader.h"
+#include "PositionConstraint.h"
+#include "OrientationConstraint.h"
+#include "Resources.h"
+
+#include <iostream>
 
 namespace NCL {
 	namespace CSC8503 {
-		enum ExitStates {
-			Invalid,
-			Win,
-			Loss,
-			Other
-		};
 		class GameplayState : public State
 		{
 		public:
-			GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
+			GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient);
 			~GameplayState();
 			void Update(float dt) override;
 
@@ -26,17 +28,15 @@ namespace NCL {
 
             bool IsDisconnected();
 
-			int ExitType();
+            void ReceivePacket(int type, GamePacket* payload, int source);
 
 
 		protected:
 
 			void InitialiseAssets();
-
 			void InitCamera();
-			void UpdateKeys();
-
 			void InitWorld();
+            void AssignPlayer(int netObject);
 
 
 #ifdef USEVULKAN
@@ -44,38 +44,16 @@ namespace NCL {
 #else
 			GameTechRenderer* renderer;
 #endif
-			PhysicsSystem* physics;
 			GameWorld* world;
-
             GameClient* baseClient;
+            std::unique_ptr<Resources> resources;
+            std::unique_ptr<Replicated> replicated;
 
-			bool useGravity;
-			bool inSelectionMode;
+            Transform* firstPersonPosition;
 
-			float		forceMagnitude;
 
-			GameObject* selectionObject = nullptr;
-
-			MeshGeometry* capsuleMesh = nullptr;
-			MeshGeometry* cubeMesh = nullptr;
-			MeshGeometry* sphereMesh = nullptr;
-
-			TextureBase* basicTex = nullptr;
-			ShaderBase* basicShader = nullptr;
-
-			//Coursework Meshes
-			MeshGeometry* charMesh = nullptr;
-			MeshGeometry* enemyMesh = nullptr;
-			MeshGeometry* bonusMesh = nullptr;
-
-			//Coursework Additional functionality	
-			GameObject* lockedObject = nullptr;
-			Vector3 lockedOffset = Vector3(0, 14, 20);
-			void LockCameraToObject(GameObject* o) {
-				lockedObject = o;
-			}
-
-			GameObject* objClosest = nullptr;
-		};
+            void SendInputData();
+            void CreatePlayers();
+        };
 	}
 }

@@ -24,6 +24,7 @@ void RunningState::OnEnter() {
 void RunningState::OnExit() {
     world->ClearAndErase();
     physics->Clear();
+    playerObjects.clear();
 }
 
 
@@ -67,16 +68,22 @@ void RunningState::SendWorldToClient() {
     sceneSnapshotId++;
 }
 
-void RunningState::AssignPlayer() {}
+void RunningState::AssignPlayer(int peerId, GameObject* object) {
+    playerObjects[peerId] = object;
+    FunctionData data{};
+    DataHandler handler(&data);
+    handler.Pack(object->GetNetworkObject()->GetNetworkId());
+    serverBase->CallRemote(Replicated::AssignPlayer, &data, peerId);
+}
 
 void RunningState::CreatePlayers() {
-    for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
+    for (auto pair : serverBase->GetPlayerInfo()) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume()));
         player->GetPhysicsObject()->InitSphereInertia();
-
+        AssignPlayer(pair.first, player);
     }
 }
 
@@ -84,7 +91,7 @@ void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
     switch (type) {
         case Received_State: {
             auto packet = reinterpret_cast<InputPacket*>(payload);
-            GameObject* player = GetPlayerFromPeerId(source);
+            GameObject* player = GetPlayerObjectFromId(source);
             player->GetTransform().SetOrientation(packet->playerRotation);
             break;
         }

@@ -114,4 +114,8 @@ PlayerInfo GameServer::GetPlayerByPeerId(int peerId) {
     return players[peerId];
 }
 
+std::unordered_map<int, PlayerInfo> &GameServer::GetPlayerInfo() {
+    return players;
+}
+
 

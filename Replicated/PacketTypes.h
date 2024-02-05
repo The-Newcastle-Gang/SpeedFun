@@ -34,11 +34,12 @@ public:
     template <typename T>
     T Unpack() {
         T val = *(T*)ptr;
+        ptr += sizeof(T);
         return val;
     }
 private:
     unsigned char *ptr;
-    FunctionData* block;
+    FunctionData *block;
 };
 
 struct InputPacket : public GamePacket {

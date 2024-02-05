@@ -9,7 +9,6 @@ Server::Server() {
     NetworkBase::Initialise();
     stateManager = std::make_unique<StateMachine>();
     serverBase = std::make_unique<GameServer>(NetworkBase::GetDefaultPort(), 32);
-    replicated = std::make_unique<Replicated>();
     InitStateMachine();
     RegisterPackets();
 }
@@ -28,7 +27,6 @@ void Server::InitStateMachine() {
     stateManager->AddTransition(new StateTransition(waitingPlayers, running, [=]()->bool {
         return waitingPlayers->CheckPlayersReady();
     }));
-
 }
 
 //void Server::AssignPlayer(int peerId) {
@@ -65,14 +63,11 @@ void Server::RegisterPackets() {
 }
 
 void Server::UpdateServer(float dt) {
-
     stateManager->Update(dt);
     serverBase->UpdateServer();
 }
 
 
 void Server::ReceivePacket(int type, GamePacket *payload, int source) {
-
     stateManager->ReceivePacket(type, payload, source);
-
 }

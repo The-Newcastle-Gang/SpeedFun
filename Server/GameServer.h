@@ -35,6 +35,7 @@ namespace NCL {
             bool SendPacket(GamePacket& packet, int peerId);
 
             void AddPlayerInfo(int peerId, PlayerInfo& info);
+            std::unordered_map<int, PlayerInfo>& GetPlayerInfo();
             PlayerInfo GetPlayerByPeerId(int peerId);
 
 

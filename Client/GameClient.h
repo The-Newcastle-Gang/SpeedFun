@@ -27,16 +27,15 @@ namespace NCL {
             void UpdateClient();
 
             int lastServerSnapshot;
+            // This is a shitty workaround because sometimes the assign player bug comes in too early.
+            int networkPlayerId;
 
             entt::sink<ConnectionH> OnServerConnected;
-
             void RemoteFunction(int functionId, FunctionData *data);
 
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
-
-
         };
     }
 }
