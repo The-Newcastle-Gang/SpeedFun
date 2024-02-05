@@ -69,9 +69,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
     debugFont->fontShader = textShader;
 
-
-
     GenerateUI();
+
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -227,7 +226,8 @@ void GameTechRenderer::RenderSkybox() {
 	glEnable(GL_DEPTH_TEST);
 }
 
-void GameTechRenderer::RenderCamera() {
+void GameTechRenderer::RenderCamera()
+{
 	float screenAspect = (float)windowWidth / (float)windowHeight;
 	Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
 	Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -583,17 +583,18 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     return font;
 }
 
-void GameTechRenderer::GenerateUI() {
-
-    hudElement = new HUDElement(0.5f,0.5f, HudType::STATIC_RECT);
+void GameTechRenderer::GenerateUI()
+{
+    hudElement = new HUDElement(0.5f,0.5f, HUDElement::HudType::STATIC_RECT);
     UIMesh = new OGLMesh();
-    UIMesh->SetVertexPositions({Vector3(-0.25, 0.25,-0.25), Vector3(-0.25,-0.25,-0.25) , Vector3(0.25,-0.25,-0.25) , Vector3(0.25,0.25,-0.25) });
-    UIMesh->SetVertexIndices({0,1,2,2,3,0});
+    UIMesh->SetVertexPositions({Vector3(0.5f, 0.5f, 0.0f),
+                                Vector3(0.5f, -0.25f, 0.0f),
+                                Vector3(0.75f, -0.25f, 0.0f),
+                                Vector3(0.75f, 0.5f,0.0f) });
+    UIMesh->SetVertexIndices({0, 1, 2, 2, 3, 0});
     UIMesh->UploadToGPU();
 
     uiShader = new OGLShader("debug.vert", "debug.frag");
-
-
 }
 
 void GameTechRenderer::RenderUI(){

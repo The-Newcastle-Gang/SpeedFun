@@ -34,6 +34,8 @@ namespace NCL {
             void GenerateUI();
             void RenderUI();
 
+            OGLMesh* GetUIMesh() {return UIMesh;}
+
 		protected:
 			void NewRenderLines();
 			void NewRenderText();
@@ -99,7 +101,6 @@ namespace NCL {
             OGLMesh* UIMesh;
             OGLShader* uiShader;
             HUDElement* hudElement;
-
         };
 	}
 }

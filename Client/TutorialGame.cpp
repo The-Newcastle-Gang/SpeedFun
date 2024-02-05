@@ -120,6 +120,7 @@ void TutorialGame::UpdateGame(float dt) {
 
 	SelectObject();
 	MoveSelectedObject();
+    ClickTestFunc();
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);
@@ -502,6 +503,22 @@ bool TutorialGame::SelectObject() {
 		Debug::Print("Press Q to change to select mode!", Vector2(5, 85));
 	}
 	return false;
+}
+
+void TutorialGame::ClickTestFunc()
+{
+    OGLMesh* HUD = renderer->GetUIMesh();
+    std::vector<Vector3> hudPositions = HUD->GetPositionData();
+
+    if (Window::GetMouse()->ButtonDown(NCL::MouseButtons::LEFT))
+    {
+        std::cout << "Mouse Relative Pos: " << Window::GetMouse()->GetAbsolutePosition() << std::endl;
+        for (Vector3 pos : hudPositions)
+        {
+            std::cout << pos << std::endl;
+        }
+    }
+
 }
 
 /*
