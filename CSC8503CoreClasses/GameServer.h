@@ -6,8 +6,14 @@
 namespace NCL {
     namespace CSC8503 {
         class GameWorld;
+
         typedef _ENetPeer ENetPeer;
         typedef entt::sigh<void(int)> PlayerSignalH;
+
+        struct PlayerInfo {
+            int peerId;
+        };
+
         class GameServer : public NetworkBase {
         public:
             GameServer(int onPort, int maxClients);
@@ -22,6 +28,8 @@ namespace NCL {
             bool SendGlobalPacket(GamePacket& packet);
 
             bool SendPacket(GamePacket& packet, int peerId);
+
+            void AddPlayerInfo(const PlayerInfo& info);
 
             virtual void UpdateServer();
 
@@ -38,6 +46,8 @@ namespace NCL {
 
             int incomingDataRate;
             int outgoingDataRate;
+
+            std::vector<PlayerInfo> players;
 
             std::map<int, int> lastPlayerUpdate;
             std::unordered_map<int, ENetPeer*> idToPeer;

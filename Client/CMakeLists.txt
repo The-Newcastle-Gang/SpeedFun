@@ -4,6 +4,7 @@ project(client)
 add_executable(client
         main.cpp
         Client.cpp
+        GameClient.cpp
         Renderer.cpp
         TutorialGame.cpp
         States/InactiveState.cpp
@@ -20,6 +21,7 @@ target_include_directories(client PUBLIC
         ../Replicated
         ../FreetypeRenderer/Include
         ./States
+        ../enet/include
 )
 
 target_link_libraries(client PUBLIC

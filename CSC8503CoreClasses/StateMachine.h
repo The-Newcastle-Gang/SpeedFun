@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include "entt.hpp"
+#include "NetworkBase.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -21,9 +22,10 @@ namespace NCL {
 			void AddTransition(StateTransition* t);
 
 			void Update(float dt);
+			void ReceivePacket(int type, GamePacket *payload, int source);
 
 		protected:
-			State * activeState;
+			State *activeState;
 			std::vector<State*> allStates;
 			TransitionContainer allTransitions;
 		};

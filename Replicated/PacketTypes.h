@@ -24,15 +24,17 @@ public:
         block = fd;
         ptr = block->data;
     }
-    // Please avoid calling this with structs.
-    template <typename T>
-    void Pack(T value) {
 
+    template <typename T>
+    void Pack(const T& value) {
+        memcpy(ptr, &value, sizeof(T));
+        ptr += sizeof(T);
     }
     
     template <typename T>
     T Unpack() {
-
+        T val = *(T*)ptr;
+        return val;
     }
 private:
     unsigned char *ptr;
@@ -53,10 +55,13 @@ struct InputPacket : public GamePacket {
 struct FunctionPacket : public GamePacket {
     FunctionData data;
     int functionId;
-    FunctionPacket(int id, FunctionData *d) {
+    FunctionPacket(int id, FunctionData* d) {
+        if (d) {
+            // Not sure if copy constructor works here, test afterward.
+            memcpy(&data, d, sizeof(FunctionData));
+        }
         type = Function;
         functionId = id;
-        memcpy(&data, d, sizeof(FunctionData));
         size = sizeof(FunctionPacket) - sizeof(GamePacket);
     }
 };

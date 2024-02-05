@@ -91,3 +91,7 @@ void GameServer::UpdateServer() {
 void GameServer::SetGameWorld(GameWorld &g) {
     gameWorld = &g;
 }
+
+void GameServer::AddPlayerInfo(const PlayerInfo& info) {
+    players.push_back(info);
+}

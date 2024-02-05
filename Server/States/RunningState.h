@@ -12,8 +12,8 @@ namespace NCL {
 			~Running();
 			void Update(float dt);
 
-			void OnEnter() { std::cout << "On Enter"; }
-			void OnExit() { std::cout << "On Exit"; }
+			void OnEnter() { std::cout << "Game Running" << std::endl; }
+			void OnExit() {}
 		protected:
             GameServer* baseServer;
 		};

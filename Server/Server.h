@@ -27,13 +27,12 @@ using namespace NCL;
 using namespace CSC8503;
 
 class Server : public PacketReceiver {
-    friend class State;
 public:
     Server();
     ~Server();
     void ServerInit();
     void UpdateServer(float dt);
-    void ReceivePacket(int type, GamePacket* payload, int source) override;
+    void ReceivePacket(int type, GamePacket *payload, int source) override;
 
 private:
     std::unique_ptr<StateMachine> stateManager;

@@ -43,8 +43,6 @@ private:
 
     GameObject* thisPlayer;
 
-
-
     void InitNetworking();
     void InitGame();
     void SendInputData();

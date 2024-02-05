@@ -19,17 +19,20 @@ Server::~Server() {
 }
 
 void Server::InitStateMachine() {
-    auto serverWaitingPlayers = new WaitingPlayers(serverBase.get());
-    auto serverRunning = new Running(serverBase.get());
+    auto waitingPlayers = new WaitingPlayers(serverBase.get());
+    auto running = new Running(serverBase.get());
 
+    stateManager->AddState(waitingPlayers);
+    stateManager->AddState(running);
 
-    stateManager->AddState(serverWaitingPlayers);
-    stateManager->AddState(serverRunning);
+    stateManager->AddTransition(new StateTransition(waitingPlayers, running, [=]()->bool {
+        return waitingPlayers->CheckPlayersReady();
+    }));
 
 }
 
 void Server::ServerInit() {
-    serverBase->OnPlayerJoined.connect<&Server::AssignPlayer>(this);
+    //serverBase->OnPlayerJoined.connect<&Server::AssignPlayer>(this);
     sceneSnapshotId = 0;
     packetTimer = SERVERHERTZ;
     InitGame();
@@ -75,12 +78,14 @@ void Server::CreatePlayers() {
 
 void Server::RegisterPackets() {
     serverBase->RegisterPacketHandler(Received_State, this);
+    serverBase->RegisterPacketHandler(Function, this);
 }
 
 void Server::UpdateServer(float dt) {
-    world->UpdateWorld(dt);
-    physics->Update(dt);
-    Tick(dt);
+//    world->UpdateWorld(dt);
+//    physics->Update(dt);
+//    Tick(dt);
+    stateManager->Update(dt);
     serverBase->UpdateServer();
 }
 
@@ -113,19 +118,20 @@ void Server::SendWorldToClient() {
 }
 
 void Server::ReceivePacket(int type, GamePacket *payload, int source) {
-    switch (type) {
-        case Received_State: {
-            auto packet = reinterpret_cast<InputPacket*>(payload);
-            GameObject* player = GetPlayerFromPeerId(source);
-            player->GetTransform().SetOrientation(packet->playerRotation);
-            break;
-        }
-    }
+
+    stateManager->ReceivePacket(type, payload, source);
+
+//    switch (type) {
+//        case Received_State: {
+//            auto packet = reinterpret_cast<InputPacket*>(payload);
+//            GameObject* player = GetPlayerFromPeerId(source);
+//            player->GetTransform().SetOrientation(packet->playerRotation);
+//            break;
+//        }
+//    }
 }
 
 // This is dangerous, I'm not sure if enet will stack peer ids like 0,1,2,3? Array could break.
 GameObject *Server::GetPlayerFromPeerId(int peerId) {
     return players[peerId];
 }
-
-

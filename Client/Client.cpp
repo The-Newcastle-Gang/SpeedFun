@@ -6,26 +6,29 @@
 #include "Client.h"
 
 Client::Client() {
+    thisPlayer = nullptr;
     NetworkBase::Initialise();
+
     replicated = std::make_unique<Replicated>();
     baseClient = std::make_unique<GameClient>();
     stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
     renderer = std::make_unique<GameTechRenderer>(*world);
+
     InitStateManager();
-    thisPlayer = nullptr;
+    RegisterPackets();
 }
 
 void Client::InitStateManager() {
     auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
     auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
 
-    auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [&]()->bool {
-        clientMenu->IsConnected();
+    auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
+        return clientMenu->CheckConnected();
     });
 
-    auto gameplayToMenu = new StateTransition(clientGameplay, clientMenu, [&]()->bool {
-        clientGameplay->IsDisconnected();
+    auto gameplayToMenu = new StateTransition(clientGameplay, clientMenu, [=]()->bool {
+        return clientGameplay->IsDisconnected();
     });
 
 
@@ -43,14 +46,7 @@ void Client::InitClient() {
     InitGame();
 }
 
-void Client::InitNetworking() {
-    auto address = GetAddress();
-    baseClient->Connect(address, NetworkBase::GetDefaultPort());
-
-    RegisterPackets();
-
-    std::cout << "Client starting up!" << std::endl;
-}
+void Client::InitNetworking() {}
 
 void Client::InitGame() {
     InitCamera();
@@ -87,14 +83,14 @@ void Client::Update(float dt) {
 
     stateManager->Update(dt);
 
-    SendInputData();
-    world->UpdateWorld(dt);
-    renderer->Update(dt);
-    renderer->Render();
-    world->GetMainCamera()->UpdateCamera(dt);
-    if (thisPlayer) {
-        world->GetMainCamera()->SetPosition(thisPlayer->GetTransform().GetPosition());
-    }
+//    SendInputData();
+//    world->UpdateWorld(dt);
+//    renderer->Update(dt);
+//    renderer->Render();
+//    world->GetMainCamera()->UpdateCamera(dt);
+//    if (thisPlayer) {
+//        world->GetMainCamera()->SetPosition(thisPlayer->GetTransform().GetPosition());
+//    }
     baseClient->UpdateClient();
 }
 
@@ -146,21 +142,24 @@ void Client::SendInputData() {
 }
 
 void Client::ReceivePacket(int type, GamePacket *payload, int source) {
-    switch (type) {
-        case Full_State: {
-            auto packet = reinterpret_cast<FullPacket*>(payload);
-            replicated->networkObjects[packet->objectID]->ReadPacket(*payload);
 
-        } break;
+    stateManager->ReceivePacket(type, payload, source);
 
-        case Function: {
-            auto packet = reinterpret_cast<FunctionPacket*>(payload);
-            if (packet->functionId == Replicated::AssignPlayer) {
-                AssignPlayer(packet->data.data);
-            }
-
-        } break;
-    }
+//    switch (type) {
+//        case Full_State: {
+//            auto packet = reinterpret_cast<FullPacket*>(payload);
+//            replicated->networkObjects[packet->objectID]->ReadPacket(*payload);
+//
+//        } break;
+//
+//        case Function: {
+//            auto packet = reinterpret_cast<FunctionPacket*>(payload);
+//            if (packet->functionId == Replicated::AssignPlayer) {
+//                AssignPlayer(packet->data.data);
+//            }
+//
+//        } break;
+//    }
 }
 
 MeshGeometry *Client::GetMesh(const std::string& name) {

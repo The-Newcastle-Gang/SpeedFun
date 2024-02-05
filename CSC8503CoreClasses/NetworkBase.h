@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include "entt.hpp"
 struct _ENetHost;
 struct _ENetPeer;
 struct _ENetEvent;

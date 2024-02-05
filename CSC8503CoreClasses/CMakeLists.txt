@@ -58,8 +58,6 @@ set(Collision_Detection
 source_group("Collision Detection" FILES ${Collision_Detection})
 
 set(Networking
-    "GameClient.h"  
-    "GameClient.cpp"
     "GameServer.h"
     "GameServer.cpp"
     "NetworkBase.h"

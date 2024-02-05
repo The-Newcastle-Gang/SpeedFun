@@ -19,10 +19,10 @@ namespace NCL {
 		public:
 			GameplayState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
 			~GameplayState();
-			void Update(float dt);
+			void Update(float dt) override;
 
-			void OnEnter();
-			void OnExit();
+			void OnEnter() override;
+			void OnExit() override;
 
             bool IsDisconnected();
 
