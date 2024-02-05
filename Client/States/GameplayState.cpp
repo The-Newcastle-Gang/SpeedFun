@@ -30,7 +30,6 @@ GameplayState::~GameplayState() {
 }
 
 void GameplayState::OnEnter() {
-	physics = new PhysicsSystem(*world);
 
 	forceMagnitude = 10.0f;
 	useGravity = false;

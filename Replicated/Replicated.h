@@ -23,16 +23,14 @@ public:
 
     enum RemoteServerCalls {
         StartGame,
+        GameLoaded,
     };
 
     Replicated();
     void CreateObject(GameObject *g, GameWorld& world);
-    void CreatePlayer(GameObject *g);
+    void CreatePlayer(GameObject *g, GameWorld& world);
     constexpr static int PLAYERCOUNT = 4;
-    std::vector<NetworkObject*> networkObjects;
-
-private:
-    int networkIdCounter;
+    constexpr static float SERVERHERTZ = 1.0f / 60.0f;
 
 };
 

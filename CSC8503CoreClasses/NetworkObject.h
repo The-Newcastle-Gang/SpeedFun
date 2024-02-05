@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "NetworkBase.h"
 #include "NetworkState.h"
+#include "NetworkObject.h"
 
 namespace NCL::CSC8503 {
 	class GameObject;

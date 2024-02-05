@@ -4,6 +4,7 @@ project(server)
 add_executable(server
         Server.cpp
         main.cpp
+        GameServer.cpp
         "States/BusyState.cpp"
         "States/RunningState.cpp"
         "States/WaitingState.cpp"

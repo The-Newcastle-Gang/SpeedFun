@@ -15,6 +15,7 @@ GameWorld::GameWorld()	{
 	shuffleObjects		= false;
 	worldIDCounter		= 0;
 	worldStateCounter	= 0;
+	networkIdCounter    = 0;
 }
 
 GameWorld::~GameWorld()	{
@@ -25,6 +26,7 @@ void GameWorld::Clear() {
 	constraints.clear();
 	worldIDCounter		= 0;
 	worldStateCounter	= 0;
+	networkIdCounter    = 0;
 }
 
 void GameWorld::ClearAndErase() {
@@ -37,10 +39,14 @@ void GameWorld::ClearAndErase() {
 	Clear();
 }
 
-void GameWorld::AddGameObject(GameObject* o) {
+void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
 	gameObjects.emplace_back(o);
 	o->SetWorldID(worldIDCounter++);
 	worldStateCounter++;
+
+	if (isNetworked) {
+		o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));
+	}
 }
 
 void GameWorld::RemoveGameObject(GameObject* o, bool andDelete) {

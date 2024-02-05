@@ -1,8 +1,6 @@
 #include "GameServer.h"
-
-#include <utility>
-#include "GameWorld.h"
 #include "enet.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -18,6 +16,17 @@ GameServer::GameServer(int onPort, int maxClients)	{
 
 GameServer::~GameServer()	{
     Shutdown();
+}
+
+void GameServer::CallRemote(int functionId, FunctionData* data, int peer) {
+    // Can later optimize this to adjust packet size based on argument size.
+    FunctionPacket packet(functionId, data);
+    SendPacket(packet, peer);
+}
+
+void GameServer::CallRemoteAll(int functionId, FunctionData* data) {
+    FunctionPacket packet(functionId, data);
+    SendGlobalPacket(packet);
 }
 
 void GameServer::Shutdown() {
@@ -70,6 +79,8 @@ void GameServer::UpdateServer() {
 
         if (type == ENetEventType::ENET_EVENT_TYPE_CONNECT) {
             std::cout << "Server: New client connected" << std::endl;
+            PlayerInfo info{};
+            AddPlayerInfo(peer, info);
             idToPeer[peer] = p;
             playerJoined.publish(peer);
         }
@@ -77,6 +88,8 @@ void GameServer::UpdateServer() {
         else if (type == ENetEventType::ENET_EVENT_TYPE_DISCONNECT) {
             std::cout << "Server: A client has disconnected" << std::endl;
             idToPeer.erase(peer);
+            RemovePlayerInfo(peer);
+            playerLeft.publish(peer);
         }
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_RECEIVE) {
@@ -88,10 +101,17 @@ void GameServer::UpdateServer() {
     }
 }
 
-void GameServer::SetGameWorld(GameWorld &g) {
-    gameWorld = &g;
+void GameServer::AddPlayerInfo(int peerId, PlayerInfo &info) {
+    players.insert(std::make_pair(peerId, info));
 }
 
-void GameServer::AddPlayerInfo(const PlayerInfo& info) {
-    players.push_back(info);
+void GameServer::RemovePlayerInfo(int peerId) {
+    players.erase(peerId);
 }
+
+
+PlayerInfo GameServer::GetPlayerByPeerId(int peerId) {
+    return players[peerId];
+}
+
+

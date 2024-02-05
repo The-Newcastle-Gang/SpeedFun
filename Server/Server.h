@@ -41,9 +41,6 @@ private:
     std::unique_ptr<PhysicsSystem> physics;
     std::unique_ptr<Replicated> replicated;
 
-    std::array<GameObject*, 4> players;
-
-    constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     float packetTimer;
     int sceneSnapshotId;
 

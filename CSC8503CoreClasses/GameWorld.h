@@ -5,6 +5,7 @@
 #include "Ray.h"
 #include "CollisionDetection.h"
 #include "QuadTree.h"
+#include "NetworkObject.h"
 namespace NCL {
 		class Camera;
 		using Maths::Ray;
@@ -23,7 +24,7 @@ namespace NCL {
 			void Clear();
 			void ClearAndErase();
 
-			void AddGameObject(GameObject* o);
+			void AddGameObject(GameObject* o, bool isNetworked);
 			void RemoveGameObject(GameObject* o, bool andDelete = false);
 
 			void AddConstraint(Constraint* c);
@@ -69,6 +70,8 @@ namespace NCL {
 			bool shuffleObjects;
 			int		worldIDCounter;
 			int		worldStateCounter;
+
+            int networkIdCounter;
 		};
 	}
 }

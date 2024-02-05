@@ -1,7 +1,12 @@
 #pragma once
+
 #include <functional>
+#include <utility>
 #include "NetworkBase.h"
 #include "entt.hpp"
+#include "GameWorld.h"
+#include "Replicated.h"
+#include "PacketTypes.h"
 
 namespace NCL {
     namespace CSC8503 {
@@ -10,6 +15,8 @@ namespace NCL {
         typedef _ENetPeer ENetPeer;
         typedef entt::sigh<void(int)> PlayerSignalH;
 
+        // Put any player info needed by multiple states here.
+        // This can be extracted into it's own class at some point.
         struct PlayerInfo {
             int peerId;
         };
@@ -22,16 +29,19 @@ namespace NCL {
             bool Initialise();
             void Shutdown();
 
-            void SetGameWorld(GameWorld &g);
-
             bool SendGlobalPacket(int msgID);
             bool SendGlobalPacket(GamePacket& packet);
 
             bool SendPacket(GamePacket& packet, int peerId);
 
-            void AddPlayerInfo(const PlayerInfo& info);
+            void AddPlayerInfo(int peerId, PlayerInfo& info);
+            PlayerInfo GetPlayerByPeerId(int peerId);
+
 
             virtual void UpdateServer();
+
+            void CallRemote(int functionId, FunctionData *data, int peer);
+            void CallRemoteAll(int functionId, FunctionData *data);
 
             int currentSnapshot;
 
@@ -47,7 +57,7 @@ namespace NCL {
             int incomingDataRate;
             int outgoingDataRate;
 
-            std::vector<PlayerInfo> players;
+            std::unordered_map<int, PlayerInfo> players;
 
             std::map<int, int> lastPlayerUpdate;
             std::unordered_map<int, ENetPeer*> idToPeer;
@@ -55,6 +65,7 @@ namespace NCL {
             PlayerSignalH playerJoined;
             PlayerSignalH playerLeft;
 
+            void RemovePlayerInfo(int peerId);
         };
     }
 }
