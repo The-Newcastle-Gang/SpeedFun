@@ -131,6 +131,7 @@ namespace NCL {
 	private:
 		CollisionDetection()	{}
 		~CollisionDetection()	{}
-	};
+
+    };
 }
 

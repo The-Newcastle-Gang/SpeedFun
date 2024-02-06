@@ -2,6 +2,9 @@
 
 #include <map>
 #include <vector>
+#include "entt.hpp"
+#include "NetworkBase.h"
+
 namespace NCL {
 	namespace CSC8503 {
 		class State;
@@ -13,18 +16,20 @@ namespace NCL {
 		class StateMachine	{
 		public:
 			StateMachine();
-			virtual ~StateMachine(); //made it virtual!
+			virtual ~StateMachine();
 
 			void AddState(State* s);
 			void AddTransition(StateTransition* t);
 
-			virtual void Update(float dt); //made it virtual!
+			void Update(float dt);
+			void ReceivePacket(int type, GamePacket *payload, int source);
 
 		protected:
-			State * activeState;
-
+			State *activeState;
 			std::vector<State*> allStates;
 			TransitionContainer allTransitions;
-		};
+
+            void Transition(State *destinationState);
+        };
 	}
 }

@@ -2,12 +2,12 @@
 
 #include "StateMachine.h"
 #include "StateTransition.h"
+#include "NetworkBase.h"
 
 
 namespace NCL {
 	namespace CSC8503 {
 		typedef std::function<void(float)> StateUpdateFunction;
-
 		class  State		{
 		public:
 			State() {}
@@ -16,6 +16,7 @@ namespace NCL {
 			}
 			
 			virtual void Update(float dt) = 0;
+            virtual void ReceivePacket(int type, GamePacket *payload, int source) { }
 
 			virtual void OnEnter() {  }
 			virtual void OnExit() {  }
