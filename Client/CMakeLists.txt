@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(client)
 
 set(UI "UI/HUDElement.cpp")
-
 add_executable(client
         main.cpp
         Client.cpp
@@ -36,6 +35,7 @@ target_link_libraries(client PUBLIC
         OpenGLRendering
         replicated
         freetype
+        lua
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE

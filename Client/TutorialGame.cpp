@@ -50,6 +50,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
 
 	InitCamera();
+    LoadScripting();
 	InitWorld();
 }
 
@@ -131,6 +132,18 @@ void TutorialGame::UpdateGame(float dt) {
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
+}
+
+void TutorialGame::LoadScripting() {
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    auto status = luaL_dofile(L, ASSETROOTLOCATION "Lua/hehe.lua");
+
+    if (status) {
+        std::cerr << "Lua file giga dead: " << lua_tostring(L, -1);
+        exit(1);
+    }
 }
 
 void TutorialGame::UpdateKeys() {
