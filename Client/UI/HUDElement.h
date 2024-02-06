@@ -25,19 +25,20 @@ public:
         DYNAMIC_RECT
     };
 
-    struct HudScreenPosition{
-        float x;
-        float y;
-    };
 
 
-    HUDElement(float x, float y, HudType hd,std::shared_ptr<OGLMesh> PMesh);
+//    HUDElement(float x, float y);
+    HUDElement(Vector2 position, float xSize, float ySize);
     ~HUDElement();
+    void CalculateVertexPositions(float xPos, float yPos, float xSize, float ySize);
+    OGLMesh* GetHUDQuad();
+    std::vector<Vector3> GetVertices() const { return vertices;}
 
-    HudScreenPosition           screenPosition;
+
+    Vector2                     screenPosition;
     std::shared_ptr<OGLMesh>    mesh;
     HUDElement::HudType         type;
-    std::vector<Vector2>        vertices;
+    std::vector<Vector3>        vertices;
     GLuint                      tex;
 
 
