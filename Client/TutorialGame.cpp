@@ -65,6 +65,8 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+
+	delete levelReader;
 }
 
 void TutorialGame::UpdateGame(float dt) {
@@ -147,7 +149,10 @@ void TutorialGame::UpdateKeys() {
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 	}
-
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
+		physics->SetDebugDrawingCollision(!physics->GetDebugDrawingCollision());
+	}
+	
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
@@ -261,10 +266,11 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(15, 15, 3.5f, 3.5f);
 
-	InitGameExamples();
-	InitDefaultFloor();
+	//InitMixedGridWorld(15, 15, 3.5f, 3.5f);
+	//InitGameExamples();
+	//InitDefaultFloor();
+	BuildLevelFromJSON("level2");
 }
 
 /*
@@ -410,6 +416,28 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+//refactor
+void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
+{
+	levelReader = new LevelReader();
+    levelBuilder = new LevelBuilder();
+	if (!levelReader->ReadLevel(levelName + ".json"))
+	{
+		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		return;
+	}
+
+	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
+	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });
+
+	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
+	{
+		AddCubeToWorld(x->pos, x->dims);
+	}
+
+    levelBuilder->BuildLevel(world);
 }
 
 void TutorialGame::InitDefaultFloor() {

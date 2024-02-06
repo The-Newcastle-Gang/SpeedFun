@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "lua.hpp"
+#include "LevelBuilder.h"
+
 
 namespace NCL {
 	namespace CSC8503 {
@@ -82,8 +84,16 @@ namespace NCL {
 
 			GameObject* objClosest = nullptr;
 
-            void LoadScripting();
-        };
+
+       void LoadScripting();
+    };
+
+			// test stuff
+			LevelReader* levelReader;
+      LevelBuilder* levelBuilder;
+			void BuildLevelFromJSON(std::string levelName);
+		};
+
 	}
 }
 
