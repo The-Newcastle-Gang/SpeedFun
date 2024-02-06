@@ -9,6 +9,9 @@
 #include <sstream>
 
 
+const float LERP_MULTIPLIER = 0.15f;
+
+
 namespace NCL
 {
 	namespace CSC8503

@@ -3,8 +3,6 @@
 using namespace NCL;
 using namespace CSC8503;
 
-const float LERP_MULTIPLIER = 0.15f;
-
 void CinematicCamera::GetCameraInfo(Camera* camera)
 {
     // print camera information to the console
@@ -42,6 +40,8 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
         ss >> tempVec.x >> _ >> tempVec.y >> _ >> tempVec.z >> _ >> tempPitch >> _ >> tempYaw;
 
         cameraPositions.emplace_back(tempVec);
+        pitches.emplace_back(tempPitch);
+        yaws.emplace_back(tempYaw);
 
     }
 
