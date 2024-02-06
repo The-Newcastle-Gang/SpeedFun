@@ -7,6 +7,7 @@ Client.cpp
 Renderer.cpp 
 TutorialGame.cpp 
 Font.cpp 
+CinematicCamera.cpp
 "States/GameStateInGameplay.cpp" 
 "States/GameStateInactive.cpp" 
 "States/GameStateLoading.cpp" 

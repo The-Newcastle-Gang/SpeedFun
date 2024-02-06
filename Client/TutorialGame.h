@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "PhysicsSystem.h"
 #include "LevelBuilder.h"
+#include "CinematicCamera.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -87,6 +88,8 @@ namespace NCL {
 			LevelReader* levelReader;
             LevelBuilder* levelBuilder;
 			void BuildLevelFromJSON(std::string levelName);
+
+			CinematicCamera* cineCamera;
 		};
 	}
 }

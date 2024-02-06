@@ -100,7 +100,7 @@ int main() {
         return -1;
     }
 
-    //RunTutorialGame(w);
-    RunClientGameStateMachine(w);
+    RunTutorialGame(w);
+    //RunClientGameStateMachine(w);
 
 }
