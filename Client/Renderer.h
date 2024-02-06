@@ -11,6 +11,7 @@
 #include "Font.h"
 
 #include "Assets.h"
+#include "HUDElement.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -30,6 +31,10 @@ namespace NCL {
             std::unique_ptr<Font> LoadFont(const string& fontName);
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+            void GenerateUI();
+            void RenderUI();
+
+            OGLMesh* GetUIMesh() {return UIMesh;}
 
         protected:
             void NewRenderLines();
@@ -82,6 +87,11 @@ namespace NCL {
             vector<Vector4> debugTextColours;
             vector<Vector2> debugTextUVs;
 
+            //debug
+            std::vector<OGLMesh*> UIQuads;
+            OGLMesh* UIMesh;
+            OGLShader* uiShader;
+
             GLuint lineVAO;
             GLuint lineVertVBO;
             size_t lineCount = 0;
@@ -91,6 +101,7 @@ namespace NCL {
             GLuint textColourVBO;
             GLuint textTexVBO;
             size_t textCount = 0;
+
         };
     }
 }

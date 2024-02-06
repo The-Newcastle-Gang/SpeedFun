@@ -76,6 +76,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
     debugFont->fontShader = textShader;
 
+    GenerateUI();
+
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -128,22 +130,24 @@ void GameTechRenderer::RenderFrame() {
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
 
-    glEnable(GL_CULL_FACE);
-    glClearColor(1, 1, 1, 1);
-    BuildObjectList();
-    SortObjectList();
-    RenderShadowMap();
-    RenderSkybox();
-    RenderCamera();
-    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    NewRenderLines();
-    NewRenderText();
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_CULL_FACE);
+	glClearColor(1, 1, 1, 1);
+	BuildObjectList();
+	SortObjectList();
+	RenderShadowMap();
+	RenderSkybox();
+	RenderCamera();
+	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	NewRenderLines();
+	NewRenderText();
+  RenderUI(); //TODO: Call this only when UI update happens
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void GameTechRenderer::BuildObjectList() {
@@ -258,6 +262,7 @@ void GameTechRenderer::RenderCamera() {
         if (!shader) {
             shader = defaultShader;
         }
+
 
         BindShader(shader);
 
@@ -587,4 +592,28 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     FT_Done_FreeType(ft);
 
     return font;
+}
+
+void GameTechRenderer::GenerateUI(){
+    UIMesh = HUDElement::GetHUDQuad({50,50}, 10.0f,10.0f);
+    UIQuads.emplace_back(UIMesh);
+
+    //debug for testing
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,0}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,90}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({95,91}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,0}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,90}, 10.0f,10.0f));
+    uiShader = new OGLShader("debug.vert", "debug.frag");
+}
+
+void GameTechRenderer::RenderUI(){
+    BindShader(uiShader);
+    glUniformMatrix4fv(glGetUniformLocation(uiShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+    glActiveTexture(GL_TEXTURE0);
+
+    for(auto x : UIQuads){
+        BindMesh(x);
+        DrawBoundMesh();
+    }
 }
