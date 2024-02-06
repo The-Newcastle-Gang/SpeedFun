@@ -42,7 +42,7 @@ bool GameServer::Initialise() {
     address.host = ENET_HOST_ANY;
     address.port = port;
 
-    netHandle = enet_host_create(&address, clientMax, 2, 0, 0);
+    netHandle = enet_host_create(&address, clientMax, Replicated::CHANNELCOUNT, 0, 0);
 
     if (!netHandle) {
         std::cout << __FUNCTION__ << " failed to create network handle!" << std::endl;
@@ -73,7 +73,10 @@ bool GameServer::UpdateDiagnostics() {
         packetsSent.maxPacketTime = timeSinceLastPacket;
     }
 
-    //std::cout << "Packet sent: " << timeSinceLastPacket << ", ";
+    if (timeSinceLastPacket > 0.1) {
+        std::cout << "Delay in packets sent" << std::endl;
+    }
+
     return true;
 }
 

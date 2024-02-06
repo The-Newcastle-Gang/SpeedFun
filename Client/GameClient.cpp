@@ -20,7 +20,7 @@ bool GameClient::Connect(const std::string& ip, int portNum) {
     enet_address_set_host(&address, ip.c_str());
     address.port = portNum;
 
-    netPeer = enet_host_connect(netHandle, &address, 2, 0);
+    netPeer = enet_host_connect(netHandle, &address, Replicated::CHANNELCOUNT, 0);
     return netPeer != nullptr;
 }
 
@@ -34,6 +34,9 @@ void GameClient::UpdateDiagnostics(Diagnostics& d) {
     d.gameTimer->Tick();
     d.packetCount++;
     auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
+    if (timeSinceLastPacket > 0.1) {
+        std::cout << "Delay in packets recieved: " << timeSinceLastPacket << std::endl;
+    }
 }
 
 
