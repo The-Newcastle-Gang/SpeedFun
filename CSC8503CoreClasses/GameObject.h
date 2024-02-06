@@ -6,9 +6,9 @@ using std::vector;
 using NCL::CSC8503::Component;
 
 namespace NCL::CSC8503 {
-	class NetworkObject;
-	class RenderObject;
-	class PhysicsObject;
+    class NetworkObject;
+    class RenderObject;
+    class PhysicsObject;
 
 	class GameObject{
 	public:
@@ -42,55 +42,62 @@ namespace NCL::CSC8503 {
 			boundingVolume = vol;
 		}
 
-		const CollisionVolume* GetBoundingVolume() const {
-			return boundingVolume;
-		}
+        const CollisionVolume* GetBoundingVolume() const {
+            return boundingVolume;
+        }
 
-		bool IsActive() const {
-			return isActive;
-		}
+        bool IsActive() const {
+            return isActive;
+        }
 
-		Transform& GetTransform() {
-			return transform;
-		}
+        Transform& GetTransform() {
+            return transform;
+        }
 
-		RenderObject* GetRenderObject() const {
-			return renderObject;
-		}
+        RenderObject* GetRenderObject() const {
+            return renderObject;
+        }
 
-		PhysicsObject* GetPhysicsObject() const {
-			return physicsObject;
-		}
+        PhysicsObject* GetPhysicsObject() const {
+            return physicsObject;
+        }
 
-		NetworkObject* GetNetworkObject() const {
-			return networkObject;
-		}
+        NetworkObject* GetNetworkObject() const {
+            return networkObject;
+        }
 
-		void SetRenderObject(RenderObject* newObject) {
-			renderObject = newObject;
-		}
+        void SetRenderObject(RenderObject* newObject) {
+            renderObject = newObject;
+        }
 
-		void SetPhysicsObject(PhysicsObject* newObject) {
-			physicsObject = newObject;
-		}
+        void SetPhysicsObject(PhysicsObject* newObject) {
+            physicsObject = newObject;
+        }
 
-		const std::string& GetName() const {
-			return name;
-		}
+        void SetNetworkObject(NetworkObject* newObject) {
+            networkObject = newObject;
+        }
 
-		bool GetBroadphaseAABB(Vector3&outsize) const;
+        const std::string& GetName() const {
+            return name;
+        }
 
-		void UpdateBroadphaseAABB();
+        bool GetBroadphaseAABB(Vector3&outsize) const;
 
-		void SetWorldID(int newID) {
-			worldID = newID;
-		}
+        void UpdateBroadphaseAABB();
 
-		int		GetWorldID() const {
-			return worldID;
-		}
+        void SetWorldID(int newID) {
+            worldID = newID;
+        }
+    
+        virtual void OnCollisionBegin(GameObject* otherObject) {
+            //std::cout << "OnCollisionBegin event occured!\n";
+        }
 
-		//returns true if component found, false if not
+        virtual void OnCollisionEnd(GameObject* otherObject) {
+            //std::cout << "OnCollisionEnd event occured!\n";
+        }
+
 		template <typename T>
 		bool TryGetComponent(T*& returnPointer) {
 			for (Component* component : components) {
@@ -110,18 +117,26 @@ namespace NCL::CSC8503 {
 	protected:
 		std::vector<Component*> components;
 
-		Transform			transform;
+		Transform transform;
+        
+    int GetWorldID() const {    
+      return worldID;
+    }
 
-		CollisionVolume*	boundingVolume;
-		PhysicsObject*		physicsObject;
-		RenderObject*		renderObject;
-		NetworkObject*		networkObject;
+        void DrawCollision();
+    protected:
+        Transform			transform;
 
-		bool		isActive;
-		int			worldID;
-		std::string	name;
+        CollisionVolume*	boundingVolume;
+        PhysicsObject*		physicsObject;
+        RenderObject*		renderObject;
+        NetworkObject*		networkObject;
 
-		Vector3 broadphaseAABB;
-	};
+        bool		isActive;
+        int			worldID;
+        std::string	name;
+
+        Vector3 broadphaseAABB;
+    };
 }
 

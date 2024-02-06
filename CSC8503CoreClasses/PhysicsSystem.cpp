@@ -7,8 +7,9 @@
 #include "Constraint.h"
 
 #include "Debug.h"
-#include "Window.h"
 #include <functional>
+#include <GameTimer.h>
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -64,23 +65,7 @@ being at a low rate.
 int realHZ		= idealHZ;
 float realDT	= idealDT;
 
-void PhysicsSystem::Update(float dt) {	
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::B)) {
-		useBroadPhase = !useBroadPhase;
-		std::cout << "Setting broadphase to " << useBroadPhase << std::endl;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::N)) {
-		useSimpleContainer = !useSimpleContainer;
-		std::cout << "Setting broad container to " << useSimpleContainer << std::endl;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {
-		constraintIterationCount--;
-		std::cout << "Setting constraint iterations to " << constraintIterationCount << std::endl;
-	}
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
-		constraintIterationCount++;
-		std::cout << "Setting constraint iterations to " << constraintIterationCount << std::endl;
-	}
+void PhysicsSystem::Update(float dt) {
 
 	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
 
