@@ -41,20 +41,8 @@ private:
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
 
-    GameObject* thisPlayer;
 
-    void InitNetworking();
-    void InitGame();
-    void SendInputData();
-    void InitCamera();
-    void InitialiseAssets();
     void RegisterPackets();
-
-    std::unordered_map<std::string, MeshGeometry*> meshes;
-    std::unordered_map<std::string, ShaderBase*> shaders;
-
-    void TemporaryLevelLoad();
-
     void InitStateManager();
 };
 

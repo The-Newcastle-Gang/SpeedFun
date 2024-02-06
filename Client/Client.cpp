@@ -6,7 +6,6 @@
 #include "Client.h"
 
 Client::Client() {
-    thisPlayer = nullptr;
     NetworkBase::Initialise();
 
     baseClient = std::make_unique<GameClient>();
@@ -30,8 +29,6 @@ void Client::InitStateManager() {
         return clientGameplay->IsDisconnected();
     });
 
-
-
     stateManager->AddState(clientMenu);
     stateManager->AddState(clientGameplay);
 
@@ -40,88 +37,21 @@ void Client::InitStateManager() {
 
 }
 
-void Client::InitClient() {
-    InitialiseAssets();
-    InitNetworking();
-    InitGame();
-}
-
-void Client::InitNetworking() {}
-
-void Client::InitGame() {
-    InitCamera();
-}
-
 void Client::RegisterPackets() {
     baseClient->RegisterPacketHandler(Full_State, this);
     baseClient->RegisterPacketHandler(Function, this);
 }
 
-void Client::InitCamera() {
-    world->GetMainCamera()->SetNearPlane(0.1f);
-    world->GetMainCamera()->SetFarPlane(500.0f);
-    world->GetMainCamera()->SetPitch(-15.0f);
-    world->GetMainCamera()->SetYaw(315.0f);
-    world->GetMainCamera()->SetPosition(Vector3( -60, 40, 60));
-}
-
-void Client::InitialiseAssets() {
-    TemporaryLevelLoad();
-}
-
-// Remove this when level loading is introduced.
-void Client::TemporaryLevelLoad() {
-//    CreatePlayers();
-}
-
-std::string Client::GetAddress() {
-    // TODO: Replace this with a way to input a certain address.
-    return "127.0.0.1";
-}
-
 void Client::Update(float dt) {
 
     stateManager->Update(dt);
-
-//    SendInputData();
-//    world->UpdateWorld(dt);
-//    renderer->Update(dt);
-//    renderer->Render();
-//    world->GetMainCamera()->UpdateCamera(dt);
-//    if (thisPlayer) {
-//        world->GetMainCamera()->SetPosition(thisPlayer->GetTransform().GetPosition());
-//    }
     baseClient->UpdateClient();
 }
-
-// Not saying we should keep this (though we can) just wanted to get a demonstration.
-
-//void Client::AssignPlayer(unsigned char* data) {
-//    auto playerObject = replicated->networkObjects[*((int*)data)]->GetParent();
-//    thisPlayer = playerObject;
-//    playerObject->SetRenderObject(nullptr);
-//}
 
 
 void Client::ReceivePacket(int type, GamePacket *payload, int source) {
 
     stateManager->ReceivePacket(type, payload, source);
-
-//    switch (type) {
-//        case Full_State: {
-//            auto packet = reinterpret_cast<FullPacket*>(payload);
-//            replicated->networkObjects[packet->objectID]->ReadPacket(*payload);
-//
-//        } break;
-//
-//        case Function: {
-//            auto packet = reinterpret_cast<FunctionPacket*>(payload);
-//            if (packet->functionId == Replicated::AssignPlayer) {
-//                AssignPlayer(packet->data.data);
-//            }
-//
-//        } break;
-//    }
 }
 
 

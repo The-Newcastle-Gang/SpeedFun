@@ -15,36 +15,36 @@
 #include <iostream>
 
 namespace NCL {
-	namespace CSC8503 {
-		class GameplayState : public State
-		{
-		public:
-			GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient);
-			~GameplayState();
-			void Update(float dt) override;
+    namespace CSC8503 {
+        class GameplayState : public State
+        {
+        public:
+            GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient);
+            ~GameplayState();
+            void Update(float dt) override;
 
-			void OnEnter() override;
-			void OnExit() override;
+            void OnEnter() override;
+            void OnExit() override;
 
             bool IsDisconnected();
 
-            void ReceivePacket(int type, GamePacket* payload, int source);
+            void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 
-		protected:
+        protected:
 
-			void InitialiseAssets();
-			void InitCamera();
-			void InitWorld();
+            void InitialiseAssets();
+            void InitCamera();
+            void InitWorld();
             void AssignPlayer(int netObject);
 
 
 #ifdef USEVULKAN
-			GameTechVulkanRenderer* renderer;
+            GameTechVulkanRenderer* renderer;
 #else
-			GameTechRenderer* renderer;
+            GameTechRenderer* renderer;
 #endif
-			GameWorld* world;
+            GameWorld* world;
             GameClient* baseClient;
             std::unique_ptr<Resources> resources;
             std::unique_ptr<Replicated> replicated;
@@ -57,5 +57,5 @@ namespace NCL {
 
             void FinishLoading();
         };
-	}
+    }
 }
