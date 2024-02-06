@@ -1,22 +1,46 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
-
+#include "Component.h"
 using std::vector;
+using NCL::CSC8503::Component;
 
 namespace NCL::CSC8503 {
     class NetworkObject;
     class RenderObject;
     class PhysicsObject;
 
-    class GameObject	{
-    public:
-        GameObject(std::string name = "");
-        ~GameObject();
+	class GameObject{
+	public:
+		GameObject(std::string name = "");
+		~GameObject();
 
-        void SetBoundingVolume(CollisionVolume* vol) {
-            boundingVolume = vol;
-        }
+		virtual void Update(float dt) { UpdateAllComponents(dt);}
+		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
+		virtual void Start() { StartAllComponents(); }
+
+		virtual void OnCollisionBegin(const GameObject* otherObject) {
+			for (Component* component : components)component->OnCollisionEnter(otherObject);
+		}
+
+		virtual void OnCollisionEnd(const GameObject* otherObject) {
+			for (Component* component : components)component->OnCollisionEnd(otherObject);
+		}
+
+		virtual void OnCollisionStay(const GameObject* otherObject) {
+			for (Component* component : components)component->OnCollisionStay(otherObject);
+		}
+
+		void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
+
+		void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
+
+		void StartAllComponents() { for (Component* component : components)component->Start(); }
+
+
+		void SetBoundingVolume(CollisionVolume* vol) {
+			boundingVolume = vol;
+		}
 
         const CollisionVolume* GetBoundingVolume() const {
             return boundingVolume;
@@ -58,6 +82,14 @@ namespace NCL::CSC8503 {
             return name;
         }
 
+        bool GetBroadphaseAABB(Vector3&outsize) const;
+
+        void UpdateBroadphaseAABB();
+
+        void SetWorldID(int newID) {
+            worldID = newID;
+        }
+    
         virtual void OnCollisionBegin(GameObject* otherObject) {
             //std::cout << "OnCollisionBegin event occured!\n";
         }
@@ -66,17 +98,30 @@ namespace NCL::CSC8503 {
             //std::cout << "OnCollisionEnd event occured!\n";
         }
 
-        bool GetBroadphaseAABB(Vector3&outsize) const;
+		template <typename T>
+		bool TryGetComponent(T*& returnPointer) {
+			for (Component* component : components) {
+				T* typeCast = dynamic_cast<T*>(component);
+				if (typeCast) {
+					returnPointer = typeCast;
+					return true;
+				}
+			}
+			return false;
+		}
 
-        void UpdateBroadphaseAABB();
+		void AddComponent(Component* component) {
+			components.push_back(component);
+		}
 
-        void SetWorldID(int newID) {
-            worldID = newID;
-        }
+	protected:
+		std::vector<Component*> components;
 
-        int		GetWorldID() const {
-            return worldID;
-        }
+		Transform transform;
+        
+    int GetWorldID() const {    
+      return worldID;
+    }
 
         void DrawCollision();
     protected:

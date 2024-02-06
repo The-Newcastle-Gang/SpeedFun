@@ -3,6 +3,8 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "entt.hpp"
+#include "TestComponent.h"
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
@@ -252,12 +254,10 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-
-
-	//InitMixedGridWorld(15, 15, 3.5f, 3.5f);
-	//InitGameExamples();
-	//InitDefaultFloor();
+  
 	BuildLevelFromJSON("level2");
+
+	world->StartWorld(); // must be done AFTER all objects are created
 }
 
 /*
@@ -357,6 +357,10 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->InitSphereInertia();
 
 	world->AddGameObject(character);
+
+	TestComponent* t = new TestComponent(character);
+
+	character->AddComponent(t);
 
 	return character;
 }

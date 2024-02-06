@@ -73,10 +73,12 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 }
 
 void GameWorld::UpdateWorld(float dt) {
-    auto rng = std::default_random_engine{};
 
-    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine e(seed);
+	for (GameObject* gameObject : gameObjects)gameObject->Update(dt);
+
+	auto rng = std::default_random_engine{};
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::default_random_engine e(seed);
 
     if (shuffleObjects) {
         std::shuffle(gameObjects.begin(), gameObjects.end(), e);
@@ -85,6 +87,14 @@ void GameWorld::UpdateWorld(float dt) {
     if (shuffleConstraints) {
         std::shuffle(constraints.begin(), constraints.end(), e);
     }
+}
+
+void GameWorld::UpdateWorldPhysics(float dt) {
+	for (GameObject* gameObject : gameObjects)gameObject->PhysicsUpdate(dt);
+}
+
+void GameWorld::StartWorld() {
+	for (GameObject* gameObject : gameObjects)gameObject->Start();
 }
 
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject, GameObject* ignoreThis) const {

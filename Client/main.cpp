@@ -14,20 +14,19 @@ using namespace CSC8503;
 
 
 int main() {
-    Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+    Window *w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
 
     if (!w->HasInitialised()) {
         return -1;
     }
 
-
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
 
     auto client = new Client();
-
+  
     Window::GetWindow()->LockMouseToWindow(true);
-
+  
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
@@ -47,5 +46,5 @@ int main() {
         client->Update(dt);
     }
     Window::DestroyGameWindow();
-
 }
+

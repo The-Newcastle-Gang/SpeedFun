@@ -18,56 +18,59 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
 
-    glGenTextures(1, &shadowTex);
-    glBindTexture(GL_TEXTURE_2D, shadowTex);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	lineCount = 0;
+	textCount = 0;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                 SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glGenTextures(1, &shadowTex);
+	glBindTexture(GL_TEXTURE_2D, shadowTex);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			     SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	glGenFramebuffers(1, &shadowFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
+	glDrawBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glGenFramebuffers(1, &shadowFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
-    glDrawBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(1, 1, 1, 1);
 
-    glClearColor(1, 1, 1, 1);
+	textCount = 0;
+	lineCount = 0;
 
-    textCount = 0;
-    lineCount = 0;
+	//Set up the light properties
+	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+	lightRadius = 1000.0f;
+	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
-    //Set up the light properties
-    lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-    lightRadius = 1000.0f;
-    lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
+	//Skybox!
+	skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
+	skyboxMesh = new OGLMesh();
+	skyboxMesh->SetVertexPositions({Vector3(-1, 1,-1), Vector3(-1,-1,-1) , Vector3(1,-1,-1) , Vector3(1,1,-1) });
+	skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
+	skyboxMesh->UploadToGPU();
 
-    //Skybox!
-    skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
-    skyboxMesh = new OGLMesh();
-    skyboxMesh->SetVertexPositions({Vector3(-1, 1,-1), Vector3(-1,-1,-1) , Vector3(1,-1,-1) , Vector3(1,1,-1) });
-    skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
-    skyboxMesh->UploadToGPU();
+	textCount = 0;
+	lineCount = 0;
 
-    textCount = 0;
-    lineCount = 0;
+	LoadSkybox();
 
-    LoadSkybox();
+	glGenVertexArrays(1, &lineVAO);
+	glGenVertexArrays(1, &textVAO);
 
-    glGenVertexArrays(1, &lineVAO);
-    glGenVertexArrays(1, &textVAO);
+	glGenBuffers(1, &lineVertVBO);
+	glGenBuffers(1, &textVertVBO);
+	glGenBuffers(1, &textColourVBO);
+	glGenBuffers(1, &textTexVBO);
 
-    glGenBuffers(1, &lineVertVBO);
-    glGenBuffers(1, &textVertVBO);
-    glGenBuffers(1, &textColourVBO);
-    glGenBuffers(1, &textTexVBO);
-
-    SetDebugStringBufferSizes(10000);
-    SetDebugLineBufferSizes(1000);
+	SetDebugStringBufferSizes(10000);
+	SetDebugLineBufferSizes(1000);
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
@@ -339,19 +342,17 @@ void GameTechRenderer::NewRenderLines() {
 
     glUniformMatrix4fv(matSlot, 1, false, (float*)viewProj.array);
 
+	  size_t frameLineCount = lines.size() * 2;
     debugLineData.clear();
-
-    int frameLineCount = lines.size() * 2;
-
+  
     SetDebugLineBufferSizes(frameLineCount);
 
-    glBindBuffer(GL_ARRAY_BUFFER, lineVertVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, frameLineCount * sizeof(Debug::DebugLineEntry), lines.data());
-
-
-    glBindVertexArray(lineVAO);
-    glDrawArrays(GL_LINES, 0, frameLineCount);
-    glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, lineVertVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, lines.size() * sizeof(Debug::DebugLineEntry), lines.data());
+	
+	glBindVertexArray(lineVAO);
+	glDrawArrays(GL_LINES, 0, (GLsizei)frameLineCount);
+	glBindVertexArray(0);
 }
 
 void GameTechRenderer::NewRenderText() {
