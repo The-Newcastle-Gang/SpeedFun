@@ -38,7 +38,7 @@ void GameClient::UpdateDiagnostics(Diagnostics& d) {
         d.maxPacketTime = timeSinceLastPacket;
     }
 
-    std::cout << "Packet recieved: " << timeSinceLastPacket << ", ";
+    //std::cout << "Packet recieved: " << timeSinceLastPacket << ", ";
 }
 
 
