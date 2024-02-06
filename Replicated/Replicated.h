@@ -8,6 +8,7 @@
 
 #include "GameWorld.h"
 #include "NetworkObject.h"
+#include "GameTimer.h"
 #include <vector>
 #include <string>
 
@@ -32,6 +33,22 @@ public:
     constexpr static int PLAYERCOUNT = 4;
     constexpr static float SERVERHERTZ = 1.0f / 30.0f;
 
+};
+
+struct Diagnostics {
+    float averagePacketTime;
+    float maxPacketTime;
+    float minPacketTime;
+    float packetCount;
+    GameTimer* gameTimer;
+
+    Diagnostics() {
+        gameTimer = new GameTimer();
+    }
+
+    ~Diagnostics() {
+        delete gameTimer;
+    }
 };
 
 

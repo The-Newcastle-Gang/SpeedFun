@@ -30,10 +30,14 @@ namespace NCL {
 
             entt::sink<ConnectionH> OnServerConnected;
             void RemoteFunction(int functionId, FunctionData *data);
+            Diagnostics packetsReceived{};
+            Diagnostics packetsSent{};
 
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
+
+            void UpdateDiagnostics(Diagnostics &d);
         };
     }
 }

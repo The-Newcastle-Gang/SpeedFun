@@ -30,6 +30,18 @@ void GameClient::RemoteFunction(int functionId, FunctionData* data) {
     SendPacket(packet);
 }
 
+void GameClient::UpdateDiagnostics(Diagnostics& d) {
+    d.gameTimer->Tick();
+    d.packetCount++;
+    auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
+    if (timeSinceLastPacket > d.maxPacketTime) {
+        d.maxPacketTime = timeSinceLastPacket;
+    }
+
+    std::cout << "Packet recieved: " << timeSinceLastPacket << ", ";
+}
+
+
 void GameClient::Disconnect() {
     enet_peer_disconnect_now(netPeer, 0);
 }
@@ -47,6 +59,7 @@ void GameClient::UpdateClient() {
             serverConnected.publish();
         } else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
             auto packet = (GamePacket*)event.packet->data;
+            UpdateDiagnostics(packetsReceived);
             ProcessPacket(packet);
         }
         enet_packet_destroy(event.packet);

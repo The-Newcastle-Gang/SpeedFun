@@ -66,7 +66,11 @@ namespace NCL {
             PlayerSignalH playerJoined;
             PlayerSignalH playerLeft;
 
+            Diagnostics packetsSent{};
+
             void RemovePlayerInfo(int peerId);
+
+            bool UpdateDiagnostics();
         };
     }
 }

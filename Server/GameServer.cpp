@@ -11,6 +11,8 @@ GameServer::GameServer(int onPort, int maxClients)	{
     netHandle	= nullptr;
     currentSnapshot = 0;
 
+
+
     Initialise();
 }
 
@@ -59,6 +61,19 @@ bool GameServer::SendGlobalPacket(int msgID) {
 bool GameServer::SendGlobalPacket(GamePacket& packet) {
     ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
     enet_host_broadcast(netHandle, 0, dataPacket);
+    UpdateDiagnostics();
+    return true;
+}
+
+bool GameServer::UpdateDiagnostics() {
+    packetsSent.gameTimer->Tick();
+    packetsSent.packetCount++;
+    auto timeSinceLastPacket = packetsSent.gameTimer->GetTimeDeltaSeconds();
+    if (timeSinceLastPacket > packetsSent.maxPacketTime) {
+        packetsSent.maxPacketTime = timeSinceLastPacket;
+    }
+
+    //std::cout << "Packet sent: " << timeSinceLastPacket << ", ";
     return true;
 }
 
@@ -66,6 +81,9 @@ bool GameServer::SendGlobalPacket(GamePacket& packet) {
 bool GameServer::SendPacket(GamePacket &packet, int peerId) {
     ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
     enet_peer_send(idToPeer[peerId], 0, dataPacket);
+
+    UpdateDiagnostics();
+
     return true;
 }
 
