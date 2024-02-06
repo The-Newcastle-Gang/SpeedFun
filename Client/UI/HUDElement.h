@@ -15,25 +15,28 @@ using namespace NCL;
 using namespace Rendering;
 using namespace Maths;
 
-//hud element class, will contain mesh, texture, shader, and maybe type.
-//will be passed into renderer to be rendered lol
 
 class HUDElement {
 public:
-    enum HudType {
-        STATIC_RECT,
-        DYNAMIC_RECT
+
+    //TODO: add these so they can be passed as arguments instead of having to manually set things
+    enum preSetPositions {
+        CENTER,
+        TOP_LEFT,
+        TOP_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_RIGHT
     };
 
 
-    HUDElement(Vector2 position, float xSize, float ySize);
+    HUDElement();
     ~HUDElement();
     static void CalculateVertexPositions(float xPos, float yPos, float xSize, float ySize);
     static OGLMesh* GetHUDQuad(Vector2 position, float xSize, float ySize);
 
-    Vector2                     screenPosition;
+    static Vector2                     screenPosition;
     static std::vector<Vector3>        vertices;
-
+    static int                         padding;
 
 
 };

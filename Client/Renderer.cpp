@@ -584,9 +584,15 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 }
 
 void GameTechRenderer::GenerateUI(){
+    UIMesh = HUDElement::GetHUDQuad({50,50}, 10.0f,10.0f);
+    UIQuads.emplace_back(UIMesh);
 
-//    hudElement= new HUDElement({50,50}, 40.0f,30.0f);
-    UIMesh = HUDElement::GetHUDQuad({50,50}, 40.0f,30.0f);
+    //debug for testing
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,0}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,90}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({95,91}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,0}, 10.0f,10.0f));
+//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,90}, 10.0f,10.0f));
     uiShader = new OGLShader("debug.vert", "debug.frag");
 }
 
@@ -594,6 +600,9 @@ void GameTechRenderer::RenderUI(){
     BindShader(uiShader);
     glUniformMatrix4fv(glGetUniformLocation(uiShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
     glActiveTexture(GL_TEXTURE0);
-    BindMesh(UIMesh);
-    DrawBoundMesh();
+
+    for(auto x : UIQuads){
+        BindMesh(x);
+        DrawBoundMesh();
+    }
 }
