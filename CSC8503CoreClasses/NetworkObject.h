@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "NetworkBase.h"
 #include "NetworkState.h"
+#include "NetworkObject.h"
 
 namespace NCL::CSC8503 {
 	class GameObject;
@@ -46,6 +47,13 @@ namespace NCL::CSC8503 {
 		virtual bool ReadPacket(GamePacket& p);
 		//Called by servers
 		virtual bool WritePacket(GamePacket** p, bool deltaFrame, int stateID);
+		int GetNetworkId() const {
+			return networkID;
+		}
+
+		GameObject* GetParent() const {
+			return &object;
+		}
 
 		void UpdateStateHistory(int minID);
 
