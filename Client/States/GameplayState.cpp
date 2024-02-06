@@ -95,7 +95,7 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Male_Guard.msh"), nullptr, nullptr));
     }
 }
 

@@ -6,6 +6,7 @@
 #define CSC8503_RESOURCES_H
 
 #include "RendererBase.h"
+#include "MeshAnimation.h"
 #include "Renderer.h"
 
 class Resources {
@@ -14,10 +15,13 @@ public:
 
     MeshGeometry *GetMesh(const string &name);
     ShaderBase *GetShader(const string &name);
+    MeshAnimation *GetAnimation(const string &name);
+
 private:
     GameTechRenderer* renderer;
     std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> meshes;
     std::unordered_map<std::string, std::unique_ptr<ShaderBase>> shaders;
+    std::unordered_map<std::string, std::unique_ptr<MeshAnimation>> animations;
 };
 
 

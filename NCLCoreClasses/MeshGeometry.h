@@ -9,6 +9,7 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Vector3.h"
 
@@ -26,6 +27,7 @@ namespace NCL {
 	namespace Rendering {
 		class RendererBase;
 	}
+    class MeshAnimation;
 	using namespace Maths;
 
 	enum GeometryPrimitive {
@@ -103,6 +105,13 @@ namespace NCL {
 			}
 			return &subMeshes[i];
 		}
+
+        MeshAnimation* GetAnimation(std::string animationName) {
+            if (animations.find(animationName) != animations.end()) {
+                return animations[animationName];
+            }
+            return nullptr;
+        }
 
 		void AddSubMesh(int startIndex, int indexCount, int baseVertex) {
 			SubMesh m;
@@ -213,5 +222,7 @@ namespace NCL {
 
 		std::vector<int>			bindPoseIndices; //New!
 		std::vector<SubMeshPoses>	bindPoseStates;  //New!
+
+        std::map<std::string, MeshAnimation*> animations;
 	};
 }
