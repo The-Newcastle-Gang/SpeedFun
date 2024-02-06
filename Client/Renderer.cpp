@@ -55,6 +55,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
 	skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
 	skyboxMesh->UploadToGPU();
 
+	textCount = 0;
+	lineCount = 0;
+
 	LoadSkybox();
 
 	glGenVertexArrays(1, &lineVAO);

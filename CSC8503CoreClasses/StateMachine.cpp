@@ -38,7 +38,9 @@ void StateMachine::Update(float dt) {
 		for (auto& i = range.first; i != range.second; ++i) {
 			if (i->second->CanTransition()) {
 				State* newState = i->second->GetDestinationState();
+				activeState->OnExit();
 				activeState = newState;
+				newState->OnEnter();
 			}
 		}
 	}

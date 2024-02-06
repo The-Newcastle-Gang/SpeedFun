@@ -1,5 +1,9 @@
 #pragma once
 
+#include "StateMachine.h"
+#include "StateTransition.h"
+
+
 namespace NCL {
 	namespace CSC8503 {
 		typedef std::function<void(float)> StateUpdateFunction;
@@ -10,11 +14,11 @@ namespace NCL {
 			State(StateUpdateFunction someFunc) {
 				func		= someFunc;
 			}
-			void Update(float dt)  {
-				if (func != nullptr) {
-					func(dt);
-				}
-			}
+			
+			virtual void Update(float dt) = 0;
+
+			virtual void OnEnter() {  }
+			virtual void OnExit() {  }
 		protected:
 			StateUpdateFunction func;
 		};
