@@ -73,7 +73,7 @@ struct FunctionPacket : public GamePacket {
         }
         type = Function;
         functionId = id;
-        size = sizeof(FunctionPacket) - sizeof(GamePacket) + 20;
+        size = sizeof(FunctionPacket) - sizeof(GamePacket);
     }
 };
 
