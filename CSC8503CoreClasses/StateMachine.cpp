@@ -21,7 +21,15 @@ void StateMachine::AddState(State* s) {
 	allStates.emplace_back(s);
 	if (activeState == nullptr) {
 		activeState = s;
+        activeState->OnEnter();
 	}
+}
+
+void StateMachine::Transition(State *destinationState) {
+    State* newState = destinationState;
+    activeState->OnExit();
+    activeState = newState;
+    newState->OnEnter();
 }
 
 void StateMachine::AddTransition(StateTransition* t) {
@@ -31,17 +39,21 @@ void StateMachine::AddTransition(StateTransition* t) {
 void StateMachine::Update(float dt) {
 	if (activeState) {
 		activeState->Update(dt);
-	
-		//Get the transition set starting from this state node;
+
 		std::pair<TransitionIterator, TransitionIterator> range = allTransitions.equal_range(activeState);
 
 		for (auto& i = range.first; i != range.second; ++i) {
 			if (i->second->CanTransition()) {
-				State* newState = i->second->GetDestinationState();
-				activeState->OnExit();
-				activeState = newState;
-				newState->OnEnter();
+                Transition(i->second->GetDestinationState());
 			}
 		}
 	}
+}
+
+void StateMachine::ReceivePacket(int type, GamePacket *payload, int source) {
+    if (activeState) {
+        activeState->ReceivePacket(type, payload, source);
+        return;
+    }
+    std::cerr << "No state to handle packet" << std::endl;
 }

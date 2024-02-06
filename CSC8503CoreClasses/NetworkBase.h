@@ -1,5 +1,6 @@
 #pragma once
-//#include "./enet/enet.h"
+#include <map>
+#include "entt.hpp"
 struct _ENetHost;
 struct _ENetPeer;
 struct _ENetEvent;
@@ -11,10 +12,11 @@ enum BasicNetworkMessages {
 	String_Message,
 	Delta_State,	//1 byte per channel since the last state
 	Full_State,		//Full transform etc
-	Received_State, //received from a client, informs that its received packet n
+	Received_State, // Player Input
 	Player_Connected,
 	Player_Disconnected,
-	Shutdown
+	Shutdown,
+    Function
 };
 
 struct GamePacket {
@@ -46,7 +48,7 @@ public:
 	static void Destroy();
 
 	static int GetDefaultPort() {
-		return 1234;
+		return 7777;
 	}
 
 	void RegisterPacketHandler(int msgID, PacketReceiver* receiver) {
