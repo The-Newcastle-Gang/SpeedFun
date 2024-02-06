@@ -33,7 +33,7 @@ namespace NCL::CSC8503 {
 
 		void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
 
-		void PhysicsUpdateAllComponents(float dt) { for (Component*& component : components)component->PhysicsUpdate(dt); }
+		void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
 
 		void StartAllComponents() { for (Component* component : components)component->Start(); }
 
@@ -94,7 +94,7 @@ namespace NCL::CSC8503 {
 		template <typename T>
 		bool TryGetComponent(T*& returnPointer) {
 			for (Component* component : components) {
-				T* typeCast = dynamic_cast<std::shared_ptr<T>>(component);
+				T* typeCast = dynamic_cast<T*>(component);
 				if (typeCast) {
 					returnPointer = typeCast;
 					return true;

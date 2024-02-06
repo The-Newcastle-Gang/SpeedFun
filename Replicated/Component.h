@@ -12,7 +12,7 @@ namespace NCL::CSC8503 {
 
 		//all virtual, not the best approach but works
 		virtual void Update(float dt) {};
-		virtual void PhysicsUpdate(float dt) {};
+		virtual void PhysicsUpdate(float fixedTime) {};
 		virtual void Start() {};
 		virtual void OnCollisionEnter(const GameObject* otherObject) {};
 		virtual void OnCollisionStay(const GameObject* otherObject) {};
