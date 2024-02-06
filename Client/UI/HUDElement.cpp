@@ -27,6 +27,7 @@ void HUDElement::CalculateVertexPositions(float xPos, float yPos, float xSize, f
                 Vector3(absX + xSize/100,absY,              0.0f)};
 }
 
+//returns a OGLMesh* with vertices set and uploaded to gpu
 OGLMesh* HUDElement::GetHUDQuad(Vector2 position, float xSize, float ySize){
     screenPosition = position;
 
