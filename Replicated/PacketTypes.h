@@ -54,8 +54,8 @@ struct InputPacket : public GamePacket {
 };
 
 struct FunctionPacket : public GamePacket {
-    FunctionData data;
     int functionId;
+    FunctionData data{};
     FunctionPacket(int id, FunctionData* d) {
         if (d) {
             // Not sure if copy constructor works here, test afterward.
@@ -63,7 +63,7 @@ struct FunctionPacket : public GamePacket {
         }
         type = Function;
         functionId = id;
-        size = sizeof(FunctionPacket) - sizeof(GamePacket);
+        size = sizeof(FunctionPacket) - sizeof(GamePacket) + 20;
     }
 };
 

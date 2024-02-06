@@ -100,6 +100,6 @@ void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
             if (packet->functionId == Replicated::RemoteServerCalls::GameLoaded) {
                 AssignPlayer(source, GetPlayerObjectFromId(source));
             }
-        }
+        } break;
     }
 }

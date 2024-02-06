@@ -105,10 +105,6 @@ void Client::Update(float dt) {
 
 void Client::ReceivePacket(int type, GamePacket *payload, int source) {
 
-    if (type == Function) {
-        std::cout << "Hello!" << std::endl;
-    }
-
     stateManager->ReceivePacket(type, payload, source);
 
 //    switch (type) {

@@ -22,8 +22,8 @@ public:
     };
 
     enum RemoteServerCalls {
-        StartGame,
-        GameLoaded,
+        StartGame = 40,
+        GameLoaded = 41,
     };
 
     Replicated();

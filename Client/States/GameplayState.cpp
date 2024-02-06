@@ -76,7 +76,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::FinishLoading() {
-    baseClient->RemoteFunction(Replicated::RemoteServerCalls::GameLoaded, nullptr);
+    baseClient->RemoteFunction(Replicated::GameLoaded, nullptr);
 }
 
 void GameplayState::InitCamera() {
@@ -114,7 +114,7 @@ void GameplayState::AssignPlayer(int netObject) {
 void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
     if (type == Function) {
         auto functionPacket = reinterpret_cast<FunctionPacket*>(payload);
-        if (functionPacket->type == Replicated::AssignPlayer) {
+        if (functionPacket->functionId == Replicated::AssignPlayer) {
             DataHandler handler(&functionPacket->data);
             auto networkId = handler.Unpack<int>();
             AssignPlayer(networkId);
