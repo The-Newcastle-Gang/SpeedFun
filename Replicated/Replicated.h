@@ -30,7 +30,7 @@ public:
     Replicated();
     void CreateObject(GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
-    constexpr static int PLAYERCOUNT = 4;
+    constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 30.0f;
 
 };

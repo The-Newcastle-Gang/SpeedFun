@@ -34,11 +34,6 @@ void GameClient::UpdateDiagnostics(Diagnostics& d) {
     d.gameTimer->Tick();
     d.packetCount++;
     auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
-    if (timeSinceLastPacket > d.maxPacketTime) {
-        d.maxPacketTime = timeSinceLastPacket;
-    }
-
-    //std::cout << "Packet recieved: " << timeSinceLastPacket << ", ";
 }
 
 
