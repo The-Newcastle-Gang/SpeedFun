@@ -3,18 +3,18 @@
 #include <iostream>
 
 namespace NCL {
-	namespace CSC8503 {
-		class BusyState : public State
-		{
-		public:
-			BusyState();
-			~BusyState();
-			void Update(float dt);
+    namespace CSC8503 {
+        class BusyState : public State
+        {
+        public:
+            BusyState();
+            ~BusyState();
+            void Update(float dt);
 
-			void OnEnter() {}
-			void OnExit() {}
-		protected:
+            void OnEnter() {}
+            void OnExit() {}
+        protected:
 
-		};
-	}
+        };
+    }
 }

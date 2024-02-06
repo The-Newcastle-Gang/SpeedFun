@@ -5,7 +5,7 @@ using namespace CSC8503;
 MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State()
 {
     renderer = pRenderer;
-	world = pGameworld;
+    world = pGameworld;
     baseClient = pClient;
 }
 
@@ -48,9 +48,9 @@ void MenuState::Update(float dt) {
         StartGame();
     }
 
-	Debug::Print(statusText, Vector2(10, 20));
-	renderer->Render();
-	Debug::UpdateRenderables(dt);
+    Debug::Print(statusText, Vector2(10, 20));
+    renderer->Render();
+    Debug::UpdateRenderables(dt);
 }
 
 void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {

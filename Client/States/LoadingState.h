@@ -7,25 +7,25 @@
 #include "GameClient.h"
 
 namespace NCL {
-	namespace CSC8503 {
-		class LoadingState : public State
-		{
-		public:
-			LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
-			~LoadingState();
-			void Update(float dt);
+    namespace CSC8503 {
+        class LoadingState : public State
+        {
+        public:
+            LoadingState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
+            ~LoadingState();
+            void Update(float dt);
 
-			void OnEnter();
-			void OnExit();
-		protected:
+            void OnEnter();
+            void OnExit();
+        protected:
 #ifdef USEVULKAN
-			GameTechVulkanRenderer* renderer;
+            GameTechVulkanRenderer* renderer;
 #else
-			GameTechRenderer* renderer;
+            GameTechRenderer* renderer;
 #endif
-			PhysicsSystem* physics;
-			GameWorld* world;
+            PhysicsSystem* physics;
+            GameWorld* world;
             GameClient* baseClient;
-		};
-	}
+        };
+    }
 }

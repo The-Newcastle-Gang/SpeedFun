@@ -7,24 +7,24 @@
 #include <iostream>
 
 namespace NCL {
-	namespace CSC8503 {
-		class WaitingPlayers : public State
-		{
-		public:
-			WaitingPlayers(GameServer* pServerBase);
-			~WaitingPlayers();
-			void Update(float dt);
+    namespace CSC8503 {
+        class WaitingPlayers : public State
+        {
+        public:
+            WaitingPlayers(GameServer* pServerBase);
+            ~WaitingPlayers();
+            void Update(float dt);
 
-			void OnEnter() override;
-			void OnExit() override;
+            void OnEnter() override;
+            void OnExit() override;
             void ReceivePacket(int type, GamePacket* payload, int source) override;
             bool CheckPlayersReady();
 
-		protected:
+        protected:
             GameServer* serverBase;
             bool isReady;
             void StartGame();
             void AddPlayer(int peerId);
         };
-	}
+    }
 }

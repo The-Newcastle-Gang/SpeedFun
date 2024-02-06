@@ -4,8 +4,8 @@ using namespace NCL;
 using namespace CSC8503;
 
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
-	renderer = pRenderer;
-	world = pGameworld;
+    renderer = pRenderer;
+    world = pGameworld;
     baseClient = pClient;
     resources = std::make_unique<Resources>(renderer);
 }
@@ -18,11 +18,11 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
 
     firstPersonPosition = nullptr;
-	InitialiseAssets();
+    InitialiseAssets();
 }
 void GameplayState::OnExit() {
-	world->ClearAndErase();
-	renderer->Render();
+    world->ClearAndErase();
+    renderer->Render();
 }
 
 void GameplayState::Update(float dt) {
@@ -31,11 +31,11 @@ void GameplayState::Update(float dt) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
 
-	world->GetMainCamera()->UpdateCamera(dt);
+    world->GetMainCamera()->UpdateCamera(dt);
     SendInputData();
-	world->UpdateWorld(dt);
-	renderer->Render();
-	Debug::UpdateRenderables(dt);
+    world->UpdateWorld(dt);
+    renderer->Render();
+    Debug::UpdateRenderables(dt);
 }
 
 void GameplayState::SendInputData() {
@@ -70,8 +70,8 @@ void GameplayState::SendInputData() {
 
 
 void GameplayState::InitialiseAssets() {
-	InitCamera();
-	InitWorld();
+    InitCamera();
+    InitWorld();
     FinishLoading();
 }
 
@@ -80,11 +80,11 @@ void GameplayState::FinishLoading() {
 }
 
 void GameplayState::InitCamera() {
-	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(500.0f);
-	world->GetMainCamera()->SetPitch(-15.0f);
-	world->GetMainCamera()->SetYaw(315.0f);
-	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+    world->GetMainCamera()->SetNearPlane(0.1f);
+    world->GetMainCamera()->SetFarPlane(500.0f);
+    world->GetMainCamera()->SetPitch(-15.0f);
+    world->GetMainCamera()->SetYaw(315.0f);
+    world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
 }
 
 void GameplayState::InitWorld() {

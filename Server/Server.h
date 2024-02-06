@@ -45,17 +45,6 @@ private:
     int sceneSnapshotId;
 
     void RegisterPackets();
-//    void InitGame();
-//    void Tick(float dt);
-//    void SendWorldToClient();
-//    void CreateServerObject(GameObject *g);
-//    void CreatePlayers();
-//    GameObject* GetPlayerFromPeerId(int peerId);
-//
-//    void AssignPlayer(int peerId);
-
-//    void SendFunction(int peerId, int functionId, FunctionData *d);
-
     void InitStateMachine();
 };
 
