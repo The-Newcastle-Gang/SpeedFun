@@ -3,11 +3,11 @@
 //
 #include "HUDElement.h"
 
-HUDElement::HUDElement(float x, float y, HudType hd) {
-    //do some calcs to convert into %
-    screenPosition.x = x;
-    screenPosition.y = y;
+HUDElement::HUDElement(float x, float y, HudType hd, std::shared_ptr<OGLMesh> PMesh) {
+    mesh = std::move(PMesh);
     type = hd;
+
+
 }
 
 HUDElement::~HUDElement(){

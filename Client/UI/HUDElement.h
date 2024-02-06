@@ -31,14 +31,15 @@ public:
     };
 
 
-    HUDElement(float x, float y, HudType ht);
+    HUDElement(float x, float y, HudType hd,std::shared_ptr<OGLMesh> PMesh);
     ~HUDElement();
 
     HudScreenPosition           screenPosition;
-    std::shared_ptr<OGLShader>  hudShader;
-    std::shared_ptr<OGLMesh>    hudMesh;
+    std::shared_ptr<OGLMesh>    mesh;
     HUDElement::HudType         type;
     std::vector<Vector2>        vertices;
+    GLuint                      tex;
+
 
 };
 

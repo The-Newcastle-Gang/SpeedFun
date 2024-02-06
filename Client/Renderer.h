@@ -98,7 +98,7 @@ namespace NCL {
 			size_t textCount;
 
             //debug
-            OGLMesh* UIMesh;
+            std::shared_ptr<OGLMesh> UIMesh;
             OGLShader* uiShader;
             HUDElement* hudElement;
         };
