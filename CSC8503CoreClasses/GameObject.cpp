@@ -14,6 +14,7 @@ GameObject::GameObject(string objectName)	{
     networkObject	= nullptr; // Replicated
     physicsObject	= nullptr; // Server
     renderObject	= nullptr; // Client
+    animatorObject = nullptr;
 
 }
 

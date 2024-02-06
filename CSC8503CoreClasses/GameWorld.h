@@ -6,6 +6,8 @@
 #include "CollisionDetection.h"
 #include "QuadTree.h"
 #include "NetworkObject.h"
+#include "AnimatorObject.h"
+
 namespace NCL {
         class Camera;
         using Maths::Ray;

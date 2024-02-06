@@ -46,12 +46,6 @@ namespace NCL {
 				return colour;
 			}
 
-            void SetAnimation(std::string animationName) {
-                MeshAnimation* newAnim = mesh->GetAnimation(animationName);
-                if (newAnim) {
-                    currentAnim = newAnim;
-                }
-            }
 
 		protected:
 			MeshGeometry*	mesh;
@@ -59,10 +53,6 @@ namespace NCL {
 			ShaderBase*		shader;
 			Transform*		transform;
 			Vector4			colour;
-
-            MeshAnimation* currentAnim;
-            int currentFrame;
-            bool isAnimated;
 		};
 	}
 }

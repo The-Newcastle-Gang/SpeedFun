@@ -15,6 +15,30 @@ namespace NCL {
 		class Matrix4;
 	}
 
+    struct MeshAnimationInfo {
+        int currentFrame;
+        float frameTimer;
+        float animationSpeed; //used to modify frameRate of an animation
+
+        MeshAnimationInfo() {
+            frameTimer = 0;
+            currentFrame = 0;
+            animationSpeed = 1;
+        }
+
+        MeshAnimationInfo(float animationSpeed) {
+            frameTimer = 0;
+            currentFrame = 0;
+            this->animationSpeed = animationSpeed;
+        }
+
+        void Reset() {
+            frameTimer = 0;
+            currentFrame = 0;
+            animationSpeed = 1;
+        }
+    };
+
 	class MeshAnimation	{
 	public:
 		MeshAnimation();
@@ -42,6 +66,7 @@ namespace NCL {
 		unsigned int	jointCount;
 		unsigned int	frameCount;
 		float			frameRate;
+        float frameTimeDelta;
 
 		std::vector<Maths::Matrix4>		allJoints;
 	};
