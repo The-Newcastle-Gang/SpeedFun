@@ -27,12 +27,22 @@ public:
 
     template <typename T>
     void Pack(const T& value) {
+
+        if (ptr - block->data + sizeof(T) > MAXFUNCTIONDATA) {
+            std::cerr << "Trying to pack too much!" << std::endl;
+        }
+
         memcpy(ptr, &value, sizeof(T));
         ptr += sizeof(T);
     }
     
     template <typename T>
     T Unpack() {
+
+        if (ptr - block->data + sizeof(T) > MAXFUNCTIONDATA) {
+            std::cerr << "Trying to unpack too much!" << std::endl;
+        }
+
         T val = *(T*)ptr;
         ptr += sizeof(T);
         return val;
