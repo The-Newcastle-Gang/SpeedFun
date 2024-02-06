@@ -3,7 +3,7 @@
 //
 #include "HUDElement.h"
 
-
+std::vector<Vector3> HUDElement::vertices;
 
 
 HUDElement::HUDElement(Vector2 position, float xSize, float ySize) {
@@ -23,6 +23,12 @@ void HUDElement::CalculateVertexPositions(float xPos, float yPos, float xSize, f
 
 OGLMesh* HUDElement::GetHUDQuad(Vector2 position, float xSize, float ySize){
     auto temp = new OGLMesh();
+    CalculateVertexPositions(position.x,position.y,xSize, ySize);
+
+    if(vertices.empty()){
+        std::cerr << "UI Build failed, check HUDElement.";
+    }
+
     temp->SetVertexPositions({vertices[0],vertices[1],vertices[2],vertices[3]});
     temp->SetVertexIndices({0,1,2,2,3,0});
     temp->UploadToGPU();

@@ -585,8 +585,8 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 
 void GameTechRenderer::GenerateUI(){
 
-    hudElement= new HUDElement({50,50}, 40.0f,30.0f);
-    UIMesh = hudElement->GetHUDQuad({50,50}, 40.0f,30.0f);
+//    hudElement= new HUDElement({50,50}, 40.0f,30.0f);
+    UIMesh = HUDElement::GetHUDQuad({50,50}, 40.0f,30.0f);
     uiShader = new OGLShader("debug.vert", "debug.frag");
 }
 

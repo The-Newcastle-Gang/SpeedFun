@@ -28,13 +28,11 @@ public:
 
     HUDElement(Vector2 position, float xSize, float ySize);
     ~HUDElement();
-    void CalculateVertexPositions(float xPos, float yPos, float xSize, float ySize);
-    OGLMesh* GetHUDQuad(Vector2 position, float xSize, float ySize);
-
-    static void TestFunction();
+    static void CalculateVertexPositions(float xPos, float yPos, float xSize, float ySize);
+    static OGLMesh* GetHUDQuad(Vector2 position, float xSize, float ySize);
 
     Vector2                     screenPosition;
-    std::vector<Vector3>        vertices;
+    static std::vector<Vector3>        vertices;
 
 
 
