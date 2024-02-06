@@ -135,7 +135,7 @@ void GameTechRenderer::RenderFrame() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	NewRenderLines();
 	NewRenderText();
-    RenderUI();
+    RenderUI(); //TODO: Call this only when UI update happens
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -584,8 +584,9 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 }
 
 void GameTechRenderer::GenerateUI(){
-    auto HUD = new HUDElement({50,50}, 40.0f,30.0f);
-    UIMesh = HUD->GetHUDQuad();
+
+    hudElement= new HUDElement({50,50}, 40.0f,30.0f);
+    UIMesh = hudElement->GetHUDQuad({50,50}, 40.0f,30.0f);
     uiShader = new OGLShader("debug.vert", "debug.frag");
 }
 

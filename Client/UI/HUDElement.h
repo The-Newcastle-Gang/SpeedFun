@@ -26,20 +26,16 @@ public:
     };
 
 
-
-//    HUDElement(float x, float y);
     HUDElement(Vector2 position, float xSize, float ySize);
     ~HUDElement();
     void CalculateVertexPositions(float xPos, float yPos, float xSize, float ySize);
-    OGLMesh* GetHUDQuad();
-    std::vector<Vector3> GetVertices() const { return vertices;}
+    OGLMesh* GetHUDQuad(Vector2 position, float xSize, float ySize);
 
+    static void TestFunction();
 
     Vector2                     screenPosition;
-    std::shared_ptr<OGLMesh>    mesh;
-    HUDElement::HudType         type;
     std::vector<Vector3>        vertices;
-    GLuint                      tex;
+
 
 
 };
