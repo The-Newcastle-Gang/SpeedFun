@@ -13,10 +13,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 GameplayState::~GameplayState() {}
 
 void GameplayState::OnEnter() {
-
-    Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
-
     firstPersonPosition = nullptr;
     InitialiseAssets();
 }
@@ -119,5 +115,11 @@ void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
             auto networkId = handler.Unpack<int>();
             AssignPlayer(networkId);
         }
+    }
+
+    if (type == Full_State) {
+        auto statePacket = reinterpret_cast<FullPacket*>(payload);
+        auto id = statePacket->objectID;
+        world->GetNetworkObject(id)->ReadPacket(*statePacket);
     }
 }

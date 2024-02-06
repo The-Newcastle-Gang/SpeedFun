@@ -30,7 +30,7 @@ public:
     void CreateObject(GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
     constexpr static int PLAYERCOUNT = 4;
-    constexpr static float SERVERHERTZ = 1.0f / 60.0f;
+    constexpr static float SERVERHERTZ = 1.0f / 30.0f;
 
 };
 

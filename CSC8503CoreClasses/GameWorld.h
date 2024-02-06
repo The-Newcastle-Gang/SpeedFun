@@ -64,6 +64,10 @@ namespace NCL {
                 return networkObjects[networkId]->GetParent();
             }
 
+            [[nodiscard]] NetworkObject* GetNetworkObject(int networkId) const {
+                return networkObjects[networkId];
+            }
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;

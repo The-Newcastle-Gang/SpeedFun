@@ -26,7 +26,8 @@ int main() {
 
     auto client = new Client();
 
-    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(true);
+    Window::GetWindow()->LockMouseToWindow(false);
 
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();

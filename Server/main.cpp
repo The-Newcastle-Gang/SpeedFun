@@ -17,7 +17,6 @@
 int main() {
     auto timer = GameTimer();
     auto server = std::make_unique<Server>();
-//    server->ServerInit();
     timer.Tick();
 
     while (true) {
