@@ -2,8 +2,6 @@
 #include "Transform.h"
 #include "CollisionVolume.h"
 #include "Component.h"
-using std::vector;
-using NCL::CSC8503::Component;
 
 namespace NCL::CSC8503 {
     class NetworkObject;
@@ -114,18 +112,17 @@ namespace NCL::CSC8503 {
 			components.push_back(component);
 		}
 
-	protected:
 		std::vector<Component*> components;
 
 		Transform transform;
         
-    int GetWorldID() const {    
-      return worldID;
-    }
+        int GetWorldID() const {
+          return worldID;
+        }
 
         void DrawCollision();
+
     protected:
-        Transform			transform;
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;
