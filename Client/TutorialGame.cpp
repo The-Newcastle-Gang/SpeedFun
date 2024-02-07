@@ -73,7 +73,7 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 	if (!inSelectionMode) {
-		world->GetMainCamera()->UpdateCamera(dt);
+		//world->GetMainCamera()->UpdateCamera(dt);
 		cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
 	}
 	if (lockedObject != nullptr) {
@@ -126,8 +126,6 @@ void TutorialGame::UpdateGame(float dt) {
 
 	SelectObject();
 	MoveSelectedObject();
-
-	cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
 
 	world->UpdateWorld(dt);
 	renderer->Update(dt);

@@ -30,8 +30,8 @@ namespace NCL
 			std::vector<float> yaws;
 
 
-
 			int currentCamera = 0;
+
 			int maxCameras;
 
 
