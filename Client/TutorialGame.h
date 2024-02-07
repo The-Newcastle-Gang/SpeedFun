@@ -8,6 +8,8 @@
 namespace NCL {
     namespace CSC8503 {
         class TutorialGame {
+		    class DebugMode;
+          
         public:
             TutorialGame();
 
@@ -93,20 +95,20 @@ namespace NCL {
             GameObject *lockedObject = nullptr;
             Vector3 lockedOffset = Vector3(0, 14, 20);
 
+
             void LockCameraToObject(GameObject *o) {
                 lockedObject = o;
             }
 
             GameObject *objClosest = nullptr;
 
-            // test stuff
             LevelReader *levelReader;
             LevelBuilder *levelBuilder;
-
             void BuildLevelFromJSON(std::string levelName);
-
-
             void LoadScripting();
+            
+            DebugMode* debugMode;
+            
         };
     }
 }

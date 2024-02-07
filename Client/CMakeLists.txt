@@ -14,6 +14,7 @@ add_executable(client
         States/MenuState.cpp
         Resources.cpp
         Font.cpp
+        DebugMode.cpp
         ${UI}
 )
 
