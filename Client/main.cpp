@@ -23,6 +23,7 @@ int main() {
     w->UpdateWindow();
 
     auto client = new Client();
+    auto g = new TutorialGame();
   
     Window::GetWindow()->LockMouseToWindow(true);
   
@@ -41,9 +42,16 @@ int main() {
         if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::T)) {
             w->SetWindowPosition(0, 0);
         }
+
+        if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)){
+            g->UpdateGame(dt);
+        }
+        if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)){
+            client->Update(dt);
+        }
        
       w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
-      client->Update(dt);
     }
+
     Window::DestroyGameWindow();
 }
