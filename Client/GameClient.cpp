@@ -47,8 +47,14 @@ void GameClient::Disconnect() {
 
 void GameClient::UpdateClient() {
 
+
     if (netHandle == nullptr) {
         return;
+    }
+
+    updateCalled.gameTimer->Tick();
+    if (updateCalled.gameTimer->GetTimeDeltaSeconds() > 0.1) {
+        std::cout << "Delay in update client function: " << updateCalled.gameTimer->GetTimeDeltaSeconds() << std::endl;
     }
 
     ENetEvent event;
@@ -66,6 +72,6 @@ void GameClient::UpdateClient() {
 }
 
 void GameClient::SendPacket(GamePacket& payload) {
-    ENetPacket *dataPacket = enet_packet_create(&payload, payload.GetTotalSize(), 0);
+    ENetPacket *dataPacket = enet_packet_create(&payload, payload.GetTotalSize(), Replicated::BASICPACKETTYPE);
     enet_peer_send(netPeer, 0, dataPacket);
 }

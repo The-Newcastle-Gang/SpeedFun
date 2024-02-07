@@ -31,8 +31,9 @@ public:
     void CreateObject(GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
     constexpr static int PLAYERCOUNT = 2;
-    constexpr static float SERVERHERTZ = 1.0f / 30.0f;
-    constexpr static int CHANNELCOUNT = 1;
+    constexpr static float SERVERHERTZ = 1.0f / 60.0f;
+    constexpr static int CHANNELCOUNT = 2;
+    constexpr static int BASICPACKETTYPE = 2;
 
 };
 

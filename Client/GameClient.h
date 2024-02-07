@@ -32,6 +32,7 @@ namespace NCL {
             void RemoteFunction(int functionId, FunctionData *data);
             Diagnostics packetsReceived{};
             Diagnostics packetsSent{};
+            Diagnostics updateCalled{};
 
         protected:
             _ENetPeer*	netPeer;
