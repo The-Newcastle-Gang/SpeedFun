@@ -8,17 +8,41 @@
 #include "TutorialGame.h"
 #include "PushdownMachine.h"
 #include "LevelReader.h"
+#include "fmod_studio.hpp"
 
 using namespace NCL;
 using namespace CSC8503;
 
+void TestFMod()
+{
+    FMOD_RESULT result;
+    FMOD::Studio::System* system = NULL;
+
+    result = FMOD::Studio::System::create(&system); // Create the Studio System object.
+    if (result != FMOD_OK)
+    {
+        printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+        exit(-1);
+    }
+
+    // Initialize FMOD Studio, which will also initialize FMOD Core
+    result = system->initialize(512, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, 0);
+    if (result != FMOD_OK)
+    {
+        printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+        exit(-1);
+    }
+}
+
+
 int main() {  
+   
     Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1280, 720);
 
     if (!w->HasInitialised()) {
         return -1;
     }
-
+    TestFMod();
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
 
