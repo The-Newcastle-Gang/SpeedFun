@@ -58,6 +58,6 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera)
 {
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], timer));
-    camera->SetPitch(pitches[currentCamera]);
-    camera->SetYaw(yaws[currentCamera]);
+    camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera], timer));
+    camera->SetYaw(std::lerp(yaws[currentCamera], yaws[currentCamera], timer));
 }
