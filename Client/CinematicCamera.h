@@ -9,7 +9,7 @@
 #include <sstream>
 
 
-const float LERP_MULTIPLIER = 0.15f;
+const float LERP_MULTIPLIER = 0.05f;
 
 
 namespace NCL
@@ -20,7 +20,7 @@ namespace NCL
 		{
 		public:
 			void ReadPositionsFromFile(std::string filename);
-			void UpdateCinematicCamera(Camera* camera);
+			void UpdateCinematicCamera(Camera* camera, float dt);
 			void WriteCameraInfo(Camera* camera, std::string filename);
 		protected:
 			Vector3 LerpVector3(Vector3& start, Vector3 end, float time);
@@ -35,7 +35,7 @@ namespace NCL
 			int maxCameras;
 
 
-			float timer;
+			float timer = 0;
 		};
 	}
 }
