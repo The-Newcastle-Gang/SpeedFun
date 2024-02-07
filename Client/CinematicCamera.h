@@ -24,6 +24,7 @@ namespace NCL
 			void WriteCameraInfo(Camera* camera, std::string filename);
 		protected:
 			Vector3 LerpVector3(Vector3& start, Vector3 end, float time);
+			float CustomLerp(float start, float end, float timer);
 
 			std::vector<Vector3> cameraPositions;
 			std::vector<float> pitches;

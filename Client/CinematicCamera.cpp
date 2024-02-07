@@ -22,6 +22,22 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float time)
     return newPos;
 }
 
+float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float timer)
+{
+
+    // TODO: Detect when to lerp other direction, and implement it
+    if ((end - start) >= 45)
+    {
+        std::cout << "we are here!\n";
+        return start + timer * (end + start) * LERP_MULTIPLIER;
+    }
+    else
+    {
+        return start + timer * (end - start) * LERP_MULTIPLIER;
+    }
+}
+
+
 void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 {
     cameraPositions.clear();
@@ -52,10 +68,10 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
 {
     timer += dt;
-    std::cout << currentCamera << std::endl;
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], timer));
-    camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera], timer));
-    camera->SetYaw(std::lerp(yaws[currentCamera], yaws[currentCamera], timer));
+
+    camera->SetPitch(CustomLerp(pitches[currentCamera], pitches[currentCamera + 1], timer));
+    camera->SetYaw(CustomLerp(yaws[currentCamera], yaws[currentCamera + 1], timer));
 
     if (timer >= 5.0f)
     {
