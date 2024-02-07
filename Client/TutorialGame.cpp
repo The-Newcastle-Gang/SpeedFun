@@ -169,6 +169,10 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F)) {
+		cineCamera->WriteCameraInfo(world->GetMainCamera(), "test.txt");
+	}
+
 	if (lockedObject) {
 		LockedObjectMovement();
 	}

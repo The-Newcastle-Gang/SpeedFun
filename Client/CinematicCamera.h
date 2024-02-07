@@ -21,9 +21,9 @@ namespace NCL
 		public:
 			void ReadPositionsFromFile(std::string filename);
 			void UpdateCinematicCamera(Camera* camera);
-			void GetCameraInfo(Camera* camera);
+			void WriteCameraInfo(Camera* camera, std::string filename);
 		protected:
-			Vector3 Lerp(Vector3& start, Vector3 end, float time);
+			Vector3 LerpVector3(Vector3& start, Vector3 end, float time);
 
 			std::vector<Vector3> cameraPositions;
 			std::vector<float> pitches;
