@@ -75,4 +75,4 @@ StageTimer::StageTimer(double goldTime, double silverTime, double bronzeTime)
         else {
               Debug::Print("You got bronze", Vector2(35, 50), Debug::RED);
         }
-    }#include <StageTimer.h>
+    }
