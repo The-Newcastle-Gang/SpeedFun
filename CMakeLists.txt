@@ -21,7 +21,6 @@ add_subdirectory(OpenGLRendering)
 add_subdirectory(NotLua)
 add_subdirectory(FreetypeRenderer)
 add_subdirectory(Replicated)
-add_subdirectory(studio)
 add_subdirectory(Client)
 
 add_subdirectory(External)
