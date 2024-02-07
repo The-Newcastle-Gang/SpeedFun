@@ -5,11 +5,6 @@ using namespace CSC8503;
 
 void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename)
 {
-    // print camera information to the console
-    std::cout << "Position: " << camera->GetPosition() << std::endl;
-    std::cout << "Pitch: " << camera->GetPitch() << std::endl;
-    std::cout << "Yaw: " << camera->GetYaw() << std::endl;
-
     std::ofstream file;
     file.open(Assets::LEVELDIR + filename, std::ios_base::app);
     file << camera->GetPosition().x << "," << camera->GetPosition().y << "," << camera->GetPosition().z
