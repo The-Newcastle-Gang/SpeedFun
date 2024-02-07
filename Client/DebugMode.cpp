@@ -2,16 +2,16 @@
 
 void NCL::CSC8503::DebugMode::DisplayDebug(float dt)
 {
-	GetFPSCount(dt);
-	GetMemoryUsage();
+	DisplayFPSCount(dt);
+    DisplayMemoryUsage();
 }
 
-void NCL::CSC8503::DebugMode::GetFPSCount(float dt)
+void NCL::CSC8503::DebugMode::DisplayFPSCount(float dt)
 {
 	Debug::Print("FPS: " + std::to_string(1/dt), Vector2(3, 50), Debug::MAGENTA);
 }
 
-void NCL::CSC8503::DebugMode::GetMemoryUsage()
+void NCL::CSC8503::DebugMode::DisplayMemoryUsage()
 {
 
 	MEMORYSTATUSEX memoryStatus;
