@@ -65,6 +65,12 @@ void RunningState::SendWorldToClient() {
         delete newPacket;
     });
 
+    dia.gameTimer->Tick();
+
+    if (dia.gameTimer->GetTimeDeltaSeconds() > 0.5f) {
+        std::cout << "Delay in packets sent: " << dia.gameTimer->GetTimeDeltaSeconds() << std::endl;
+    }
+    dia.packetCount++;
     sceneSnapshotId++;
 }
 

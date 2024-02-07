@@ -67,10 +67,10 @@ namespace NCL {
             PlayerSignalH playerLeft;
 
             Diagnostics packetsSent{};
+            Diagnostics packetsRecieved{};
 
             void RemovePlayerInfo(int peerId);
-
-            bool UpdateDiagnostics();
+            bool UpdateDiagnostics(Diagnostics &d);
         };
     }
 }

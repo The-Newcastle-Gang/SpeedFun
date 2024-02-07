@@ -59,18 +59,18 @@ bool GameServer::SendGlobalPacket(int msgID) {
 }
 
 bool GameServer::SendGlobalPacket(GamePacket& packet) {
-    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), ENET_PACKET_FLAG_RELIABLE);
     enet_host_broadcast(netHandle, 0, dataPacket);
-    UpdateDiagnostics();
+    UpdateDiagnostics(packetsSent);
     return true;
 }
 
-bool GameServer::UpdateDiagnostics() {
-    packetsSent.gameTimer->Tick();
-    packetsSent.packetCount++;
-    auto timeSinceLastPacket = packetsSent.gameTimer->GetTimeDeltaSeconds();
-    if (timeSinceLastPacket > packetsSent.maxPacketTime) {
-        packetsSent.maxPacketTime = timeSinceLastPacket;
+bool GameServer::UpdateDiagnostics(Diagnostics& d) {
+    d.gameTimer->Tick();
+    d.packetCount++;
+    auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
+    if (timeSinceLastPacket > d.maxPacketTime) {
+        d.maxPacketTime = timeSinceLastPacket;
     }
 
     if (timeSinceLastPacket > 0.1) {
@@ -82,10 +82,10 @@ bool GameServer::UpdateDiagnostics() {
 
 
 bool GameServer::SendPacket(GamePacket &packet, int peerId) {
-    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(idToPeer[peerId], 0, dataPacket);
 
-    UpdateDiagnostics();
+    UpdateDiagnostics(packetsSent);
 
     return true;
 }
@@ -115,6 +115,7 @@ void GameServer::UpdateServer() {
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_RECEIVE) {
             GamePacket* packet = (GamePacket*)event.packet->data;
+            UpdateDiagnostics(packetsRecieved);
             ProcessPacket(packet, peer);
         }
 

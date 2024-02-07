@@ -38,6 +38,8 @@ namespace NCL {
 
             void SendWorldToClient();
 
+            Diagnostics dia{};
+
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
         };

@@ -31,7 +31,7 @@ void GameplayState::Update(float dt) {
     SendInputData();
     world->UpdateWorld(dt);
     renderer->Render();
-    Debug::UpdateRenderables(dt);
+    //Debug::UpdateRenderables(dt);
 }
 
 void GameplayState::SendInputData() {
@@ -60,6 +60,11 @@ void GameplayState::SendInputData() {
 
     playerDirection.Normalise();
     input.playerDirection = playerDirection;
+
+    packetsSent.gameTimer->Tick();
+    if (packetsSent.gameTimer->GetTimeDeltaSeconds() > 0.5f) {
+        std::cout << "Delay in packets sent: " << packetsSent.gameTimer->GetTimeDeltaSeconds() << std::endl;
+    }
 
     baseClient->SendPacket(input);
 }

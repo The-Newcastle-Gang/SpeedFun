@@ -44,8 +44,13 @@ void Client::RegisterPackets() {
 
 void Client::Update(float dt) {
 
-    stateManager->Update(dt);
     baseClient->UpdateClient();
+
+    stateManager->Update(dt);
+
+    if (dt > 0.04) {
+        std::cout << "Overly large dt" << std::endl;
+    }
 }
 
 

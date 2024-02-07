@@ -51,6 +51,7 @@ namespace NCL {
 
             Transform* firstPersonPosition;
 
+            Diagnostics packetsSent{};
 
             void SendInputData();
             void CreatePlayers();

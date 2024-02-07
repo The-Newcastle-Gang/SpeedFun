@@ -19,30 +19,19 @@ int main() {
     if (!w->HasInitialised()) {
         return -1;
     }
-
-
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
 
     auto client = new Client();
 
-    Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(true);
+    Window::GetWindow()->LockMouseToWindow(false);
 
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
             std::cout << "Skipping large time delta" << std::endl;
             continue;
-        }
-        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
-            w->ShowConsole(true);
-        }
-        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
-            w->ShowConsole(false);
-        }
-        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::T)) {
-            w->SetWindowPosition(0, 0);
         }
 
         client->Update(dt);

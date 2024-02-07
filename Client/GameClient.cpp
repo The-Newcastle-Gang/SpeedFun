@@ -46,6 +46,7 @@ void GameClient::Disconnect() {
 
 
 void GameClient::UpdateClient() {
+
     if (netHandle == nullptr) {
         return;
     }
