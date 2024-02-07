@@ -11,59 +11,64 @@
 #include "Font.h"
 
 #include "Assets.h"
+#include "HUDElement.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 namespace NCL {
-	namespace CSC8503 {
-		class RenderObject;
+    namespace CSC8503 {
+        class RenderObject;
 
-		class GameTechRenderer : public OGLRenderer	{
-		public:
-			GameTechRenderer(GameWorld& world);
-			~GameTechRenderer();
+        class GameTechRenderer : public OGLRenderer	{
+        public:
+            GameTechRenderer(GameWorld& world);
+            ~GameTechRenderer();
 
-			MeshGeometry*	LoadMesh(const string& name);
-			TextureBase*	LoadTexture(const string& name);
-			ShaderBase*		LoadShader(const string& vertex, const string& fragment);
+            MeshGeometry*	LoadMesh(const string& name);
+            TextureBase*	LoadTexture(const string& name);
+            ShaderBase*		LoadShader(const string& vertex, const string& fragment);
             std::unique_ptr<Font> LoadFont(const string& fontName);
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+            void GenerateUI();
+            void RenderUI();
 
-		protected:
-			void NewRenderLines();
-			void NewRenderText();
+            OGLMesh* GetUIMesh() {return UIMesh;}
 
-			void RenderFrame()	override;
+        protected:
+            void NewRenderLines();
+            void NewRenderText();
 
-			OGLShader*		defaultShader;
+            void RenderFrame()	override;
 
-			GameWorld&	gameWorld;
+            OGLShader*	defaultShader;
 
-			void BuildObjectList();
-			void SortObjectList();
-			void RenderShadowMap();
-			void RenderCamera(); 
-			void RenderSkybox();
+            GameWorld&	gameWorld;
 
-			void LoadSkybox();
+            void BuildObjectList();
+            void SortObjectList();
+            void RenderShadowMap();
+            void RenderCamera();
+            void RenderSkybox();
 
-			void SetDebugStringBufferSizes(size_t newVertCount);
-			void SetDebugLineBufferSizes(size_t newVertCount);
+            void LoadSkybox();
 
-			vector<const RenderObject*> activeObjects;
+            void SetDebugStringBufferSizes(size_t newVertCount);
+            void SetDebugLineBufferSizes(size_t newVertCount);
 
-			OGLShader*  debugShader;
-			OGLShader*  skyboxShader;
-			OGLMesh*	skyboxMesh;
-			GLuint		skyboxTex;
+            vector<const RenderObject*> activeObjects;
 
-			//shadow mapping things
-			OGLShader*	shadowShader;
-			GLuint		shadowTex;
-			GLuint		shadowFBO;
-			Matrix4     shadowMatrix;
+            OGLShader*  debugShader;
+            OGLShader*  skyboxShader;
+            OGLMesh*	skyboxMesh;
+            GLuint		skyboxTex;
+
+            //shadow mapping things
+            OGLShader*	shadowShader;
+            GLuint		shadowTex;
+            GLuint		shadowFBO;
+            Matrix4     shadowMatrix;
 
             std::unique_ptr<Font> debugFont;
             std::shared_ptr<OGLShader> textShader;
@@ -71,29 +76,33 @@ namespace NCL {
             // Ortho for UI
             Matrix4 uiOrthoView;
 
-			Vector4		lightColour;
-			float		lightRadius;
-			Vector3		lightPosition;
+            Vector4		lightColour;
+            float		lightRadius;
+            Vector3		lightPosition;
 
-			//Debug data storage things
-			vector<Vector3> debugLineData;
+            //Debug data storage things
+            vector<Vector3> debugLineData;
 
-			vector<Vector3> debugTextPos;
-			vector<Vector4> debugTextColours;
-			vector<Vector2> debugTextUVs;
+            vector<Vector3> debugTextPos;
+            vector<Vector4> debugTextColours;
+            vector<Vector2> debugTextUVs;
 
-			GLuint lineVAO;
-			GLuint lineVertVBO;
-			size_t lineCount;
+            //debug
+            std::vector<OGLMesh*> UIQuads;
+            OGLMesh* UIMesh;
+            OGLShader* uiShader;
 
-			GLuint textVAO;
-			GLuint textVertVBO;
-			GLuint textColourVBO;
-			GLuint textTexVBO;
-			size_t textCount;
+            GLuint lineVAO;
+            GLuint lineVertVBO;
+            size_t lineCount = 0;
 
+            GLuint textVAO;
+            GLuint textVertVBO;
+            GLuint textColourVBO;
+            GLuint textTexVBO;
+            size_t textCount = 0;
 
         };
-	}
+    }
 }
 

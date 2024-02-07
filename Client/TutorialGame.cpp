@@ -3,6 +3,8 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "entt.hpp"
+#include "TestComponent.h"
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
@@ -50,6 +52,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
 
 	InitCamera();
+    LoadScripting();
 	InitWorld();
 }
 
@@ -68,6 +71,8 @@ TutorialGame::~TutorialGame()	{
 	delete world;
 
 	delete debugMode;
+
+	delete levelReader;
 
 }
 
@@ -137,12 +142,27 @@ void TutorialGame::UpdateGame(float dt) {
 	Debug::UpdateRenderables(dt);
 }
 
+void TutorialGame::LoadScripting() {
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    auto status = luaL_dofile(L, ASSETROOTLOCATION "Lua/hehe.lua");
+
+    if (status) {
+        std::cerr << "Lua file giga dead: " << lua_tostring(L, -1);
+        exit(1);
+    }
+}
+
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
 		InitWorld(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 	}
-
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F3)) {
+		physics->SetDebugDrawingCollision(!physics->GetDebugDrawingCollision());
+	}
+	
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
 		InitCamera(); //F2 will reset the camera to a specific default place
 	}
@@ -255,11 +275,10 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+  
+	BuildLevelFromJSON("level2");
 
-	InitMixedGridWorld(15, 15, 3.5f, 3.5f);
-
-	InitGameExamples();
-	InitDefaultFloor();
+	world->StartWorld(); // must be done AFTER all objects are created
 }
 
 /*
@@ -360,6 +379,10 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 
 	world->AddGameObject(character);
 
+	TestComponent* t = new TestComponent(character);
+
+	character->AddComponent(t);
+
 	return character;
 }
 
@@ -405,6 +428,28 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	world->AddGameObject(apple);
 
 	return apple;
+}
+
+//refactor
+void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
+{
+	levelReader = new LevelReader();
+    levelBuilder = new LevelBuilder();
+	if (!levelReader->ReadLevel(levelName + ".json"))
+	{
+		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		return;
+	}
+
+	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
+	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });
+
+	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
+	{
+		AddCubeToWorld(x->pos, x->dims);
+	}
+
+    levelBuilder->BuildLevel(world);
 }
 
 void TutorialGame::InitDefaultFloor() {
