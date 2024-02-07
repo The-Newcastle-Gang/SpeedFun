@@ -9,7 +9,21 @@
 Replicated::Replicated() {
 }
 
-void Replicated::CreateObject(GameObject *g, GameWorld& world) {
+void Replicated::CreateLevel(GameWorld& world){
+
+    auto lr = new LevelReader();
+    if(!lr->HasReadLevel("finaltest.json")){
+        return;
+    }
+    auto pl = lr->GetPrimitiveList();
+
+    for(auto x: pl){
+        
+    }
+
+}
+
+void Replicated::CreateObject(GameObject *g, GameWorld& world, Vector3 position) {
 
 }
 

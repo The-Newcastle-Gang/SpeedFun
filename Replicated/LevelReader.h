@@ -42,12 +42,11 @@ public:
 
     std::vector<GroundCubePrimitive*> GetGroundCubes() { return groundCubes; }
 
-	bool ReadLevel(const std::string& source);
+	bool HasReadLevel(const std::string& source);
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;
     std::vector<PrimitiveGameObject*> primGOList;
-
     std::vector<GroundCubePrimitive*> groundCubes;
 
 };

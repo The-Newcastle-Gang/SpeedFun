@@ -1,15 +1,11 @@
 #pragma once
-#include "GameObject.h"
-#include "Vector3.h"
-#include "GameWorld.h"
-#include "PhysicsObject.h"
-#include "RenderObject.h"
-#include "LevelReader.h"
 
-using namespace std;
+#include "Vector3.h"
+#include "LevelReader.h"
+#include "Replicated.h"
+
 using namespace NCL;
 using namespace CSC8503;
-using namespace std;
 
 class LevelBuilder
 {

@@ -12,6 +12,8 @@
 #include "OrientationConstraint.h"
 #include "Resources.h"
 
+#include "LevelBuilder.h"
+
 #include <iostream>
 
 namespace NCL {
@@ -37,6 +39,7 @@ namespace NCL {
             void InitCamera();
             void InitWorld();
             void AssignPlayer(int netObject);
+            void InitLevel();
 
 
 #ifdef USEVULKAN

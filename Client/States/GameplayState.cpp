@@ -89,6 +89,7 @@ void GameplayState::InitCamera() {
 
 void GameplayState::InitWorld() {
     CreatePlayers();
+    InitLevel();
 }
 
 void GameplayState::CreatePlayers() {
@@ -97,6 +98,11 @@ void GameplayState::CreatePlayers() {
         replicated->CreatePlayer(player, *world);
         player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
     }
+}
+
+void GameplayState::InitLevel(){
+    auto test = new GameObject();
+    replicated->CreateLevel(*world);
 }
 
 
