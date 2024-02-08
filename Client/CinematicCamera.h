@@ -21,6 +21,9 @@ namespace NCL
 			void ReadPositionsFromFile(std::string filename);
 			void UpdateCinematicCamera(Camera* camera, float dt);
 			void WriteCameraInfo(Camera* camera, std::string filename);
+
+			void SetIsContinuous(bool continuous) { isContinuous = continuous; }
+
 		protected:
 			Vector3 LerpVector3(Vector3& start, Vector3 end, float p);
 			float CustomLerp(float start, float end, float p);
