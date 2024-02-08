@@ -63,7 +63,14 @@ namespace NCL {
 
             GameObject *AddBonusToWorld(const Vector3 &position);
 
-            void ClickTestFunc();
+            bool GetCineMachineMode() const
+            {
+                return inCinemachineMode;
+            }
+            void SetCineMachineMode(bool b)
+            {
+                inCinemachineMode = b;
+            }
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer*	renderer;
@@ -75,6 +82,7 @@ namespace NCL {
 
             bool useGravity;
             bool inSelectionMode;
+            bool inCinemachineMode = false;
 
             float forceMagnitude;
 

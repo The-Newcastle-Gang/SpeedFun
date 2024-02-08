@@ -80,9 +80,12 @@ TutorialGame::~TutorialGame()	{
 
 void TutorialGame::UpdateGame(float dt) {
 	if (!inSelectionMode) {
-		//world->GetMainCamera()->UpdateCamera(dt);
-		cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+		world->GetMainCamera()->UpdateCamera(dt);
 	}
+    if(!inSelectionMode && GetCineMachineMode())
+    {
+        cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+    }
 	if (lockedObject != nullptr) {
 		Vector3 objPos = lockedObject->GetTransform().GetPosition();
 		Vector3 camPos = objPos + lockedOffset;
@@ -192,8 +195,9 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F)) {
-		cineCamera->WriteCameraInfo(world->GetMainCamera(), "test.txt");
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F))
+    {
+        SetCineMachineMode(!GetCineMachineMode());
 	}
 
 	if (lockedObject) {
