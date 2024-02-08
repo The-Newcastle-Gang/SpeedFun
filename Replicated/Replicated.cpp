@@ -7,23 +7,10 @@
 
 
 Replicated::Replicated() {
-
 }
 
-int Replicated::GetCurrentLevelLen(){
-    return levelReader->GetLevelSize();
-}
+void Replicated::CreateObject(GameObject *g, GameWorld& world) {
 
-
-void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
-
-    world.AddGameObject(g, currentPrimitive->shouldNetwork);
-    auto volume = new AABBVolume(currentPrimitive->colliderExtents);
-    g->SetBoundingVolume((CollisionVolume*)volume);
-
-    g->GetTransform()
-        .SetScale(currentPrimitive->dimensions)
-        .SetPosition(currentPrimitive->position);
 }
 
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
