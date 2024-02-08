@@ -9,8 +9,7 @@
 #include <sstream>
 
 
-const float LERP_MULTIPLIER = 0.05f;
-
+const float MAX_TIMER = 5.0f;
 
 namespace NCL
 {
@@ -23,8 +22,8 @@ namespace NCL
 			void UpdateCinematicCamera(Camera* camera, float dt);
 			void WriteCameraInfo(Camera* camera, std::string filename);
 		protected:
-			Vector3 LerpVector3(Vector3& start, Vector3 end, float time);
-			float CustomLerp(float start, float end, float timer);
+			Vector3 LerpVector3(Vector3& start, Vector3 end, float p);
+			float CustomLerp(float start, float end, float p);
 
 			std::vector<Vector3> cameraPositions;
 			std::vector<float> pitches;

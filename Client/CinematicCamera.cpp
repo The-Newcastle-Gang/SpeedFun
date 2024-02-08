@@ -12,29 +12,20 @@ void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename)
     file.close();
 }
 
-Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float time)
+Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
 {
     Vector3 newPos = Vector3(
-        start.x + (end.x - start.x) * time * LERP_MULTIPLIER,
-        start.y + (end.y - start.y) * time * LERP_MULTIPLIER,
-        start.z + (end.z - start.z) * time * LERP_MULTIPLIER
+        start.x + (end.x - start.x) * p,
+        start.y + (end.y - start.y) * p,
+        start.z + (end.z - start.z) * p
     );
     return newPos;
 }
 
-float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float timer)
+float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float p)
 {
-
     // TODO: Detect when to lerp other direction, and implement it
-    if ((end - start) >= 45)
-    {
-        std::cout << "we are here!\n";
-        return start + timer * (end + start) * LERP_MULTIPLIER;
-    }
-    else
-    {
-        return start + timer * (end - start) * LERP_MULTIPLIER;
-    }
+    return 0;
 }
 
 
@@ -68,12 +59,13 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
 {
     timer += dt;
-    camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], timer));
+    float percentage = timer / MAX_TIMER;
+    camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
 
-    camera->SetPitch(CustomLerp(pitches[currentCamera], pitches[currentCamera + 1], timer));
-    camera->SetYaw(CustomLerp(yaws[currentCamera], yaws[currentCamera + 1], timer));
+    camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
+    camera->SetYaw(std::lerp(yaws[currentCamera], yaws[currentCamera + 1], percentage));
 
-    if (timer >= 5.0f)
+    if (timer >= MAX_TIMER)
     {
         timer = 0;
         currentCamera += 2;
