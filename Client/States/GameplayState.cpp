@@ -61,9 +61,8 @@ void GameplayState::SendInputData() {
     playerDirection.Normalise();
     input.playerDirection = playerDirection;
 
-    packetsSent.gameTimer->Tick();
-    if (packetsSent.gameTimer->GetTimeDeltaSeconds() > 0.5f) {
-        std::cout << "Delay in packets sent: " << packetsSent.gameTimer->GetTimeDeltaSeconds() << std::endl;
+    if (playerDirection.Length() != 0) {
+        std::cout << "Packet input logged at: " << std::chrono::system_clock::now() << std::endl;
     }
 
     baseClient->SendPacket(input);

@@ -70,6 +70,8 @@ namespace NCL {
 				return elasticity;
 			}
 
+            void SetForce(const Vector3 &forceSet);
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -87,7 +89,7 @@ namespace NCL {
 			Vector3 torque;
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
-		};
+        };
 	}
 }
 

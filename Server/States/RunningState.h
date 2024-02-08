@@ -42,6 +42,8 @@ namespace NCL {
 
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
+
+            void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
         };
     }
 }

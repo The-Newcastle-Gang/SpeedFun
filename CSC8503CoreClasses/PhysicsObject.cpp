@@ -29,6 +29,10 @@ void PhysicsObject::AddForce(const Vector3& addedForce) {
 	force += addedForce;
 }
 
+void PhysicsObject::SetForce(const Vector3& forceSet) {
+    force = forceSet;
+}
+
 void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3& position) {
 	Vector3 localPos = position - transform->GetPosition();
 

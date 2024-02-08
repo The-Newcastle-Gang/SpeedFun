@@ -76,28 +76,28 @@ void PhysicsSystem::Update(float dt) {
 		UpdateObjectAABBs();
 	}
 	int iteratorCount = 0;
-	while(dTOffset > realDT) {
-		IntegrateAccel(realDT); //Update accelerations from external forces
-		if (useBroadPhase) {
-			BroadPhase();
-			NarrowPhase();
-		}
-		else {
-			BasicCollisionDetection();
-		}
-		if(isDebugDrawingCollision) DrawAllObjectCollision();
-		//This is our simple iterative solver - 
-		//we just run things multiple times, slowly moving things forward
-		//and then rechecking that the constraints have been met		
-		float constraintDt = realDT /  (float)constraintIterationCount;
-		for (int i = 0; i < constraintIterationCount; ++i) {
-			UpdateConstraints(constraintDt);	
-		}
-		IntegrateVelocity(realDT); //update positions from new velocity changes
+	//while(true) {  // dTOffset > realDT) {
+    IntegrateAccel(dt);//realDT); //Update accelerations from external forces
+    if (useBroadPhase) {
+        BroadPhase();
+        NarrowPhase();
+    }
+    else {
+        BasicCollisionDetection();
+    }
+    if(isDebugDrawingCollision) DrawAllObjectCollision();
+    //This is our simple iterative solver -
+    //we just run things multiple times, slowly moving things forward
+    //and then rechecking that the constraints have been met
+    float constraintDt = dt / (float)constraintIterationCount;//realDT /  (float)constraintIterationCount;
+    for (int i = 0; i < constraintIterationCount; ++i) {
+        UpdateConstraints(constraintDt);
+    }
+    IntegrateVelocity(dt); //update positions from new velocity changes
 
-		dTOffset -= realDT;
-		iteratorCount++;
-	}
+		//dTOffset -= realDT;
+        // iteratorCount++;
+	//}
 
 	ClearForces();	//Once we've finished with the forces, reset them to zero
 
@@ -416,6 +416,8 @@ the world, looking for collisions.
 */
 void PhysicsSystem::IntegrateVelocity(float dt) {
 
+    constexpr float SPEEDMAX = 10.0f;
+
 	std::vector<GameObject*>::const_iterator first;
 	std::vector<GameObject*>::const_iterator last;
 
@@ -429,12 +431,15 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 			continue;
 		}
 
-
-
 		Transform& transform = (*i)->GetTransform();
 
 		Vector3 position = transform.GetPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
+
+        float strength = linearVel.Length();
+        if (strength > SPEEDMAX) {
+            object->SetLinearVelocity(linearVel.Normalised() * SPEEDMAX);
+        }
 
 		position += linearVel * dt;
 		transform.SetPosition(position);

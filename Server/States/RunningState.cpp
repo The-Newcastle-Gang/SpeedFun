@@ -89,17 +89,31 @@ void RunningState::CreatePlayers() {
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume()));
         player->GetPhysicsObject()->InitSphereInertia();
+        player->GetPhysicsObject()->SetInverseMass(1.0f);
         playerObjects[pair.first] = player;
     }
+}
+
+void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
+
+    if (inputInfo.playerDirection.Length() > 0) {
+        std::cout << "Packet recieved logged at: " << std::chrono::system_clock::now() << std::endl;
+    }
+
+    player->GetTransform().SetOrientation(inputInfo.playerRotation);
+    player->GetTransform().SetPosition(player->GetTransform().GetPosition()
+                                        + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
+//    constexpr float forceModifier = 60000.0f;
+//    auto forceToAdd = Vector3(inputInfo.playerDirection.x, 0 ,inputInfo.playerDirection.y) * forceModifier;
+//    player->GetPhysicsObject()->SetForce(forceToAdd);
+//    std::cout << player->GetPhysicsObject()->GetForce() << "\n";
 }
 
 void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
     switch (type) {
         case Received_State: {
             auto packet = reinterpret_cast<InputPacket*>(payload);
-            GameObject* player = GetPlayerObjectFromId(source);
-            player->GetTransform().SetOrientation(packet->playerRotation);
-
+            UpdatePlayerMovement(GetPlayerObjectFromId(source), *packet);
         } break;
         case Function: {
             auto packet = reinterpret_cast<FunctionPacket*>(payload);
