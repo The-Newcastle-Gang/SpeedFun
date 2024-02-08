@@ -6,7 +6,9 @@
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
+LevelReader::LevelReader(){
 
+}
 
 bool LevelReader::HasReadLevel(const std::string &levelSource) {
     std::cout << "TEST";
@@ -44,8 +46,6 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
 
 
         primGOList.emplace_back(tempGOPrimitive);
-//        delete tempGOPrimitive;
 	}
-
     return true;
 }

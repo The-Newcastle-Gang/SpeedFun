@@ -28,12 +28,13 @@ public:
     };
 
     Replicated();
-    void CreateLevel(GameWorld& world);
-    void CreateObject(GameObject *g, GameWorld& world, Vector3 position);
+    void InitLevel();
+    int GetCurrentLevelLen();
+    void AddBlockToLevel(GameObject *g, GameWorld& world, int idx);
     void CreatePlayer(GameObject *g, GameWorld& world);
-    constexpr static int PLAYERCOUNT = 4;
+    constexpr static int PLAYERCOUNT = 1;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
-
+    LevelReader* levelReader;
 };
 
 
