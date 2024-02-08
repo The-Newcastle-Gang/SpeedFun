@@ -454,7 +454,7 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 	}
 
 	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
-	AddCubeToWorld(levelReader->GetEndPosition(), { 1, 1, 1 });
+	AddCubeToWorld(levelReader->GetEndPosition(), { 100, 1, 100 });
 
 	for (GroundCubePrimitive* x : levelReader->GetGroundCubes())
 	{

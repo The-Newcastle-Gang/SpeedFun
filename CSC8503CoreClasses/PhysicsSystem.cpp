@@ -453,7 +453,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
         linearVel.x = linearVel.x * (1.0f - (object->GetLinearDampHorizontal() * dt));
         linearVel.z = linearVel.z * (1.0f - (object->GetLinearDampHorizontal() * dt));
 
-        linearVel.y = linearVel.z * (1.0f - (object->GetLinearDampVertical() * dt));
+        linearVel.y = linearVel.y * (1.0f - (object->GetLinearDampVertical() * dt));
 
 		object->SetLinearVelocity(linearVel);
 
