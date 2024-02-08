@@ -8,6 +8,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     world = pGameworld;
     baseClient = pClient;
     resources = std::make_unique<Resources>(renderer);
+    replicated = std::make_unique<Replicated>();
 }
 
 GameplayState::~GameplayState() {}
@@ -89,6 +90,7 @@ void GameplayState::InitCamera() {
 
 void GameplayState::InitWorld() {
     CreatePlayers();
+    InitLevel();
 }
 
 void GameplayState::CreatePlayers() {
@@ -96,6 +98,18 @@ void GameplayState::CreatePlayers() {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
         player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+    }
+}
+
+void GameplayState::InitLevel(){
+
+    auto lr= new LevelReader();
+    lr->HasReadLevel("finaltest.json");
+    auto plist  = lr->GetPrimitiveList();
+    for(auto x : plist){
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 }
 

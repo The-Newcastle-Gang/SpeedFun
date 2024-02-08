@@ -6,9 +6,13 @@
 using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
-bool LevelReader::ReadLevel(const std::string& levelSource) {
+LevelReader::LevelReader(){
 
-	std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
+}
+
+bool LevelReader::HasReadLevel(const std::string &levelSource) {
+
+    std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
 
 	if (!jFileStream) {
 		return false;
@@ -19,8 +23,8 @@ bool LevelReader::ReadLevel(const std::string& levelSource) {
 	startPosition = Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"] * -1);
 	endPosition = Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"] * -1);
 
-	for (auto& item : jData["primitiveGameObject"].items()) {
 
+	for (auto& item : jData["primitiveGameObject"].items()) {
         auto tempGOPrimitive = new PrimitiveGameObject();
         tempGOPrimitive->meshName = item.value()["mesh"];
 
@@ -29,8 +33,9 @@ bool LevelReader::ReadLevel(const std::string& levelSource) {
         auto& curCollExt    = item.value()["colliderExtents"];
         auto& curRot        = item.value()["rotation"];
 
-        tempGOPrimitive->dimensions         = Vector3(curDimRef["x"], curDimRef["y"], curDimRef["z"] * -1);
-        tempGOPrimitive->position           = Vector3(curPosRef["x"], curPosRef["y"], curPosRef["z"] * -1);
+
+        tempGOPrimitive->dimensions         = Vector3(curDimRef["x"], curDimRef["y"],( curDimRef["z"] * -1));
+        tempGOPrimitive->position           = Vector3(curPosRef["x"], curPosRef["y"],( curPosRef["z"] * -1));
         tempGOPrimitive->colliderExtents    = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
         tempGOPrimitive->rotation           = Quaternion((float)curRot["x"], (float)curRot["y"],(float)curRot["z"],(float)curRot["w"]);
         tempGOPrimitive->shouldNetwork      = item.value()["shouldNetwork"];
@@ -38,9 +43,8 @@ bool LevelReader::ReadLevel(const std::string& levelSource) {
         tempGOPrimitive->inverseMass        = item.value()["inverseMass"];
         tempGOPrimitive->physicsType        = item.value()["physicType"];
 
-        primGOList.push_back(tempGOPrimitive);
-        delete tempGOPrimitive;
-	}
 
-	return true;
+        primGOList.emplace_back(tempGOPrimitive);
+	}
+    return true;
 }
