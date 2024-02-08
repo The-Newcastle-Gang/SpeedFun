@@ -70,6 +70,17 @@ namespace NCL {
 				return elasticity;
 			}
 
+            void SetIsTriggerVolume(bool b)
+            {
+                isTrigger = b;
+            }
+
+            bool GetIsTriggerVolume() const
+            {
+                return isTrigger;
+            }
+
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -87,6 +98,7 @@ namespace NCL {
 			Vector3 torque;
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
+            bool isTrigger = false;
 		};
 	}
 }

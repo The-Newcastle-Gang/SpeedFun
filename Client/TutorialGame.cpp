@@ -50,6 +50,7 @@ void TutorialGame::InitialiseAssets() {
 	capsuleMesh = renderer->LoadMesh("capsule.msh");
 
 	basicTex	= renderer->LoadTexture("checkerboard.png");
+	triggerTex	= renderer->LoadTexture("Solaire!.jpg");
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
 
 	InitCamera();
@@ -65,6 +66,7 @@ TutorialGame::~TutorialGame()	{
 	delete bonusMesh;
 
 	delete basicTex;
+    delete triggerTex;
 	delete basicShader;
 
 	delete physics;
@@ -289,6 +291,7 @@ void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
 	BuildLevelFromJSON("level2");
+    AddTriggerVolumeToWorld(Vector3(0,0,0), Vector3(2,2,2));
 
 	world->StartWorld(); // must be done AFTER all objects are created
 }
@@ -368,6 +371,28 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	world->AddGameObject(cube, false);
 
 	return cube;
+}
+
+GameObject* TutorialGame::AddTriggerVolumeToWorld(const Vector3 &position, Vector3 dimensions, float inverseMass)
+{
+    GameObject* cubeTrigger = new GameObject();
+    AABBVolume* volume = new AABBVolume(dimensions);
+    cubeTrigger->SetBoundingVolume((CollisionVolume*)volume);
+
+    cubeTrigger->GetTransform()
+            .SetPosition(position)
+            .SetScale(dimensions * 2);
+// If you want to see the cube then set the rendering object. See commented out line below:
+//    cubeTrigger->SetRenderObject(new RenderObject(&cubeTrigger->GetTransform(), cubeMesh, triggerTex, basicShader));
+    cubeTrigger->SetPhysicsObject(new PhysicsObject(&cubeTrigger->GetTransform(), cubeTrigger->GetBoundingVolume()));
+
+    cubeTrigger->GetPhysicsObject()->SetInverseMass(inverseMass);
+    cubeTrigger->GetPhysicsObject()->InitCubeInertia();
+    cubeTrigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+
+    world->AddGameObject(cubeTrigger, false);
+
+    return cubeTrigger;
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
@@ -595,5 +620,7 @@ void TutorialGame::MoveSelectedObject() {
 		}
 	}
 }
+
+
 
 

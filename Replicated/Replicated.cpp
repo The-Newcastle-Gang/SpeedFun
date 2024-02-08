@@ -23,5 +23,3 @@ void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
             .SetScale(Vector3(meshSize, meshSize, meshSize))
             .SetPosition(Vector3(0 + (g->GetWorldID()%2) * 10,0,10 * (g->GetWorldID()/2)));
 }
-
-

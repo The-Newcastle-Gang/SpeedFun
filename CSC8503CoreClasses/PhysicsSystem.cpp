@@ -140,13 +140,26 @@ OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a
 rocket launcher, gaining a point when the player hits the gold coin, and so on).
 */
 void PhysicsSystem::UpdateCollisionList() {
-	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); ) {
+	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); )
+    {
+        CollisionDetection::CollisionInfo& in = const_cast<CollisionDetection::CollisionInfo&>(*i);
+
 		if ((*i).framesLeft == numCollisionFrames) {
 			i->a->OnCollisionBegin(i->b);
 			i->b->OnCollisionBegin(i->a);
 		}
+        CollisionDetection::CollisionInfo blank;
+        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume())
+        {
+            in.framesLeft = 4;
 
-		CollisionDetection::CollisionInfo& in = const_cast<CollisionDetection::CollisionInfo&>(*i);
+            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank))
+            {
+                in.framesLeft = 0;
+            }
+        }
+
+
 		in.framesLeft--;
 
 		if ((*i).framesLeft < 0) {
@@ -219,6 +232,17 @@ so that objects separate back out.
 
 */
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
+
+    if(a.GetPhysicsObject()->GetIsTriggerVolume())
+    {
+        a.DrawCollision();
+        return;
+    }
+    if(b.GetPhysicsObject()->GetIsTriggerVolume())
+    {
+        b.DrawCollision();
+        return;
+    }
 
 	PhysicsObject* physA = a.GetPhysicsObject();
 	PhysicsObject* physB = b.GetPhysicsObject();

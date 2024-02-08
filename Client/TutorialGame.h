@@ -56,6 +56,7 @@ namespace NCL {
             GameObject *AddSphereToWorld(const Vector3 &position, float radius, float inverseMass = 10.0f);
 
             GameObject *AddCubeToWorld(const Vector3 &position, Vector3 dimensions, float inverseMass = 10.0f);
+            GameObject *AddTriggerVolumeToWorld(const Vector3 &position, Vector3 dimensions, float inverseMass = 0.0f);
 
             GameObject *AddPlayerToWorld(const Vector3 &position);
 
@@ -71,6 +72,7 @@ namespace NCL {
             {
                 inCinemachineMode = b;
             }
+
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer*	renderer;
@@ -93,6 +95,7 @@ namespace NCL {
             MeshGeometry *sphereMesh = nullptr;
 
             TextureBase *basicTex = nullptr;
+            TextureBase *triggerTex = nullptr;
             ShaderBase *basicShader = nullptr;
 
             //Coursework Meshes

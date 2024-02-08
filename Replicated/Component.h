@@ -22,4 +22,3 @@ namespace NCL::CSC8503 {
 		GameObject* gameObject; //gameObject this component is attached to
 	};
 }
-
