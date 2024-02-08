@@ -1,5 +1,4 @@
 #include "PhysicsSystem.h"
-#include "PhysicsObject.h"
 #include "GameObject.h"
 #include "CollisionDetection.h"
 #include "Quaternion.h"
@@ -19,9 +18,23 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
+    SetupPhysicsMaterials();
 }
 
+
 PhysicsSystem::~PhysicsSystem()	{
+    for (auto pair : physicsMaterials) {
+        delete pair.second;
+    }
+}
+
+void PhysicsSystem::SetupPhysicsMaterials() {
+    PhysicsMaterial* defaultPhysMat = new PhysicsMaterial();
+    physicsMaterials["Default"] = defaultPhysMat;
+
+    PhysicsMaterial* bouncyPhysMat = new PhysicsMaterial();
+    bouncyPhysMat->e = 0.995f;
+    physicsMaterials["Bouncy"] = bouncyPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -421,7 +434,6 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 	std::vector<GameObject*>::const_iterator last;
 
 	gameWorld.GetObjectIterators(first, last);
-	float frameLinearDamping = 1.0f - (globalDamping * dt);                          //this is a drag that will be sent to set linear velocity so it can be damped
 
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
@@ -429,8 +441,6 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		if (object == nullptr) {
 			continue;
 		}
-
-
 
 		Transform& transform = (*i)->GetTransform();
 
@@ -440,7 +450,11 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		position += linearVel * dt;
 		transform.SetPosition(position);
 
-		linearVel = linearVel * frameLinearDamping;
+        linearVel.x = linearVel.x * (1.0f - (object->GetLinearDampHorizontal() * dt));
+        linearVel.z = linearVel.z * (1.0f - (object->GetLinearDampHorizontal() * dt));
+
+        linearVel.y = linearVel.z * (1.0f - (object->GetLinearDampVertical() * dt));
+
 		object->SetLinearVelocity(linearVel);
 
 		Quaternion orientation = transform.GetOrientation();
@@ -452,7 +466,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 
 		transform.SetOrientation((orientation));
 
-		float frameAngDamp = 1.0f - (globalDamping * dt);
+		float frameAngDamp = 1.0f - (object->GetAngularDamp() * dt);
 		angVel = angVel * frameAngDamp;
 		object->SetAngularVelocity(angVel);
 	}

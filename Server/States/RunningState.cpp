@@ -81,7 +81,7 @@ void RunningState::CreatePlayers() {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
-        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume()));
+        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
         playerObjects[pair.first] = player;
     }
