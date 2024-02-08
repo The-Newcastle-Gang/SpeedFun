@@ -25,12 +25,9 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
 float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float p)
 {
     float difference = end - start;
-    if (difference > 180)
-    {
-        difference -= 360.0f;
-        return start + difference * p;
-    }
-    return std::lerp(start, end, p);
+    if (difference > 180.0f) { difference -= 360.0f; }
+    if (difference <= -180.0f) { difference += 360.0f; }
+    return start + difference * p;
 }
 
 
