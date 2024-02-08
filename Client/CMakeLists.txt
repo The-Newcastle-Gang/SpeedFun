@@ -7,7 +7,7 @@ add_executable(client
         Client.cpp
         GameClient.cpp
         Renderer.cpp
-        #TutorialGame.cpp
+        TutorialGame.cpp
         States/InactiveState.cpp
         States/GameplayState.cpp
         States/LoadingState.cpp
