@@ -8,6 +8,7 @@
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
+#include <CinematicCamera.h>
 
 #include "DebugMode.h"
 
@@ -73,13 +74,18 @@ TutorialGame::~TutorialGame()	{
 	delete debugMode;
 
 	delete levelReader;
-
+  
+	delete cineCamera;
 }
 
 void TutorialGame::UpdateGame(float dt) {
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
+    if(!inSelectionMode && GetCineMachineMode())
+    {
+        cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+    }
 	if (lockedObject != nullptr) {
 		Vector3 objPos = lockedObject->GetTransform().GetPosition();
 		Vector3 camPos = objPos + lockedOffset;
@@ -189,6 +195,11 @@ void TutorialGame::UpdateKeys() {
 		world->ShuffleObjects(false);
 	}
 
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F))
+    {
+        SetCineMachineMode(!GetCineMachineMode());
+	}
+
 	if (lockedObject) {
 		LockedObjectMovement();
 	}
@@ -269,13 +280,14 @@ void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	cineCamera = new CinematicCamera;
+	cineCamera->ReadPositionsFromFile("test.txt");
 	lockedObject = nullptr;
 }
 
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-  
 	BuildLevelFromJSON("level2");
 
 	world->StartWorld(); // must be done AFTER all objects are created

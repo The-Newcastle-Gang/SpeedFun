@@ -16,6 +16,7 @@ add_executable(client
         Font.cpp
         DebugMode.cpp
         ${UI}
+        CinematicCamera.cpp
 )
 
 target_include_directories(client PUBLIC
