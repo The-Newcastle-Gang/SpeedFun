@@ -58,10 +58,6 @@ set(Collision_Detection
 source_group("Collision Detection" FILES ${Collision_Detection})
 
 set(Networking
-    "GameClient.h"  
-    "GameClient.cpp"
-    "GameServer.h"
-    "GameServer.cpp"
     "NetworkBase.h"
     "NetworkBase.cpp"
     "NetworkObject.h"
@@ -135,7 +131,7 @@ set(ALL_FILES
     ${Collision_Detection}
     ${Networking}
     ${Physics}
-    ${enet_Files}   
+    #${enet_Files}
 )
 
 set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
@@ -152,7 +148,7 @@ add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC NCLCoreClasses)
-target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ./)
+target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses  ../Replicated ./ )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
     <vector>
@@ -179,6 +175,8 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "NCLCoreClasses"
         "ws2_32.lib"
 )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE enet)
 
 
 

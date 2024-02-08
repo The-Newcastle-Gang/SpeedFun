@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vector3.h"
+
 namespace NCL {
 	namespace Maths {
 		struct RayCollision {
@@ -7,7 +9,7 @@ namespace NCL {
 			Vector3		collidedAt;		//WORLD SPACE position of the collision!
 			float		rayDistance;
 
-			RayCollision(void*node, Vector3 collidedAt) {
+			RayCollision(void *node, Vector3 collidedAt) {
 				this->node			= node;
 				this->collidedAt	= collidedAt;
 				this->rayDistance	= 0.0f;

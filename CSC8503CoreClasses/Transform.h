@@ -1,11 +1,11 @@
 #pragma once
 #include "Matrix4.h"
 
-using std::vector;
-
-using namespace NCL::Maths;
+#include <vector>
 #include "Vector3.h"
 #include "Quaternion.h"
+
+using namespace NCL::Maths;
 
 namespace NCL {
 	namespace CSC8503 {

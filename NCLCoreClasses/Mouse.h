@@ -41,6 +41,8 @@ namespace NCL {
 		//Get the window position of the mouse pointer
 		inline Vector2	GetAbsolutePosition() const { return absolutePosition; }
 
+        inline Vector2 GetScreenPosition() const { absolutePosition.x ; }
+
 		inline Vector2 GetWindowPosition() const {
 			return windowPosition;
 		}
