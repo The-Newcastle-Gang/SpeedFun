@@ -62,22 +62,33 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 
     }
     file.close();
+
     maxCameras = cameraPositions.size();
+    if (isContinuous) { maxCameras--; } // avoid overflow and reset
 }
 
 void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
 {
+    std::cout << currentCamera << " out of max cameras " << maxCameras << std::endl;
     timer += dt;
     float percentage = timer / MAX_TIMER;
-    camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
 
+    camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
     camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
     camera->SetYaw(CustomLerp(yaws[currentCamera], yaws[currentCamera + 1], percentage));
 
     if (timer >= MAX_TIMER)
     {
         timer = 0;
-        currentCamera += 2;
+        if (isContinuous)
+        {
+            currentCamera++;
+        }
+        else
+        {
+            currentCamera += 2;
+        }
+
         if (currentCamera >= maxCameras) { currentCamera = 0; }
     }
 }

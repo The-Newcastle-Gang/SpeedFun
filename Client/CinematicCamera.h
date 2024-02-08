@@ -31,9 +31,8 @@ namespace NCL
 
 
 			int currentCamera = 0;
-
 			int maxCameras;
-
+			bool isContinuous = true;
 
 			float timer = 0;
 		};
