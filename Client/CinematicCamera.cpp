@@ -24,17 +24,13 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
 
 float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float p)
 {
-    // TODO: Detect when to lerp other direction, and implement it
     float difference = end - start;
     if (difference > 180)
     {
         difference -= 360.0f;
         return start + difference * p;
     }
-    else
-    {
-        return std::lerp(start, end, p);
-    }
+    return std::lerp(start, end, p);
 }
 
 
@@ -52,7 +48,6 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
         float tempPitch;
         float tempYaw;
 
-
         std::istringstream ss(line);
         ss >> tempVec.x >> _ >> tempVec.y >> _ >> tempVec.z >> _ >> tempPitch >> _ >> tempYaw;
 
@@ -64,12 +59,11 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
     file.close();
 
     maxCameras = cameraPositions.size();
-    if (isContinuous) { maxCameras--; } // avoid overflow and reset
+    if (isContinuous) { maxCameras--; } // avoid overflow
 }
 
 void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
 {
-    std::cout << currentCamera << " out of max cameras " << maxCameras << std::endl;
     timer += dt;
     float percentage = timer / MAX_TIMER;
 
@@ -79,7 +73,7 @@ void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float 
 
     if (timer >= MAX_TIMER)
     {
-        timer = 0;
+        timer = 0.0f;
         if (isContinuous)
         {
             currentCamera++;
