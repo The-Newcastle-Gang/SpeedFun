@@ -447,9 +447,9 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 {
 	levelReader = new LevelReader();
     levelBuilder = new LevelBuilder();
-	if (!levelReader->ReadLevel(levelName + ".json"))
+	if (!levelReader->HasReadLevel(levelName + ".json"))
 	{
-		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
 		return;
 	}
 

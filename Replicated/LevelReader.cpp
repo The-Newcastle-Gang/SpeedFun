@@ -8,7 +8,11 @@ using json = nlohmann::json;
 
 bool LevelReader::ReadLevel(const std::string& levelSource) {
 
-	std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
+LevelReader::~LevelReader() {}
+
+bool LevelReader::HasReadLevel(const std::string &levelSource) {
+
+    std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
 
 	if (!jFileStream) {
 		return false;
