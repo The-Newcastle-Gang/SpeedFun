@@ -10,25 +10,20 @@ Replicated::Replicated() {
 
 }
 
-void Replicated::InitLevel(){
-    std::cout << "in initintitnitntin";
-
-}
-
 int Replicated::GetCurrentLevelLen(){
     return levelReader->GetLevelSize();
 }
 
 
-void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur) {
+void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
 
-    world.AddGameObject(g, cur->shouldNetwork);
-    auto volume = new AABBVolume(cur->colliderExtents);
+    world.AddGameObject(g, currentPrimitive->shouldNetwork);
+    auto volume = new AABBVolume(currentPrimitive->colliderExtents);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-        .SetScale(cur->dimensions)
-        .SetPosition(cur->position);
+        .SetScale(currentPrimitive->dimensions)
+        .SetPosition(currentPrimitive->position);
 }
 
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
