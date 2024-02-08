@@ -139,7 +139,7 @@ set_source_files_properties(${ALL_FILES} PROPERTIES LANGUAGE CXX)
 ################################################################################
 # Target
 ################################################################################
-add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
+add_library(${PROJECT_NAME} STATIC ${ALL_FILES} "SoundSystem.h" "SoundSystem.cpp")
 
 #set(CMAKE_CXX_SOURCE_FILE_EXTENSIONS c;C;M;c++;cc;cpp;cxx;m;mm;mpp;CPP;ixx;cppm)
 ################################################################################
@@ -148,7 +148,7 @@ add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC NCLCoreClasses)
-target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses  ../Replicated ./ )
+target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses  ../Replicated ../raudio ./ )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
     <vector>

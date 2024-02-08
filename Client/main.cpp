@@ -9,6 +9,7 @@
 #include "PushdownMachine.h"
 #include "LevelReader.h"
 
+#include "SoundSystem.h"
 using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
