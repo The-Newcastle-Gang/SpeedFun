@@ -30,7 +30,7 @@ public:
     Replicated();
     void InitLevel();
     int GetCurrentLevelLen();
-    void AddBlockToLevel(GameObject *g, GameWorld& world, int idx);
+    void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void CreatePlayer(GameObject *g, GameWorld& world);
     constexpr static int PLAYERCOUNT = 1;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;

@@ -102,11 +102,15 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel(){
-    auto temp = new GameObject();
-    replicated->AddBlockToLevel(temp, *world ,1);
-    temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
 
-
+    auto lr= new LevelReader();
+    lr->HasReadLevel("finaltest.json");
+    auto plist  = lr->GetPrimitiveList();
+    for(auto x : plist){
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+    }
 }
 
 

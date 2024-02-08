@@ -20,15 +20,15 @@ int Replicated::GetCurrentLevelLen(){
 }
 
 
-void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, int index) {
-    constexpr float meshSize = 1.0f;
-    world.AddGameObject(g, true);
-    auto volume = new AABBVolume(Vector3(meshSize, meshSize, meshSize));
+void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur) {
+
+    world.AddGameObject(g, cur->shouldNetwork);
+    auto volume = new AABBVolume(cur->colliderExtents);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-        .SetScale(Vector3(1.0f, 1.0f, 1.0f))
-        .SetPosition(Vector3(0 ,10, 0));
+        .SetScale(cur->dimensions)
+        .SetPosition(cur->position);
 }
 
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
