@@ -10,13 +10,13 @@ namespace NCL {
 
         struct PhysicsMaterial {
             float e = 0.8f;
-            float linearDampingVertical = 0.8f;
+            float linearDampingVertical = 0.995f;
             float linearDampingHorizontal = 0.995f;
-            float angularDamping = 0.8f;
+            float angularDamping = 0.995f;
             PhysicsMaterial() {
-                linearDampingVertical = 0.8f;
+                linearDampingVertical = 0.995f;
                 linearDampingHorizontal = 0.995f;
-                angularDamping = 0.8f;
+                angularDamping = 0.995f;
             }
             PhysicsMaterial(float linV, float linH, float ang) {
                 linearDampingVertical = linV;
