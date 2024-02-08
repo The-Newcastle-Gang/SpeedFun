@@ -29,6 +29,8 @@ int main() {
   
     Window::GetWindow()->LockMouseToWindow(true);
   
+    SoundSystem* ss = new SoundSystem();
+
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {

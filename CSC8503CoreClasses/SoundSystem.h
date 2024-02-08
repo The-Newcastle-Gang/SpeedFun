@@ -12,6 +12,8 @@ namespace NCL {
 			SoundSystem();
 			~SoundSystem();
 
+			void Update(float dt);
+
 		protected:
 		};
 	}

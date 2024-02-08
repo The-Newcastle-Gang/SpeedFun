@@ -13,7 +13,9 @@ endif()
 
 include_directories(enet)
 include_directories(entt)
+include_directories(raudio)
 
+add_subdirectory(raudio)
 add_subdirectory(enet)
 add_subdirectory(NCLCoreClasses)
 add_subdirectory(CSC8503CoreClasses)
