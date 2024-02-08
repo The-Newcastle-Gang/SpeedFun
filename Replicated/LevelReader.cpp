@@ -10,6 +10,10 @@ LevelReader::LevelReader(){
 
 }
 
+LevelReader::~LevelReader(){
+
+}
+
 bool LevelReader::HasReadLevel(const std::string &levelSource) {
 
     std::ifstream jFileStream(Assets::LEVELDIR + levelSource);
