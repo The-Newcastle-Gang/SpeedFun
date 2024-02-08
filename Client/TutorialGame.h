@@ -3,6 +3,7 @@
 #include "PhysicsSystem.h"
 #include "lua.hpp"
 #include "LevelBuilder.h"
+#include "CinematicCamera.h"
 
 
 namespace NCL {
@@ -62,7 +63,14 @@ namespace NCL {
 
             GameObject *AddBonusToWorld(const Vector3 &position);
 
-            void ClickTestFunc();
+            bool GetCineMachineMode() const
+            {
+                return inCinemachineMode;
+            }
+            void SetCineMachineMode(bool b)
+            {
+                inCinemachineMode = b;
+            }
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer*	renderer;
@@ -74,6 +82,7 @@ namespace NCL {
 
             bool useGravity;
             bool inSelectionMode;
+            bool inCinemachineMode = false;
 
             float forceMagnitude;
 
@@ -108,7 +117,7 @@ namespace NCL {
             void LoadScripting();
             
             DebugMode* debugMode;
-            
+            CinematicCamera* cineCamera;
         };
     }
 }

@@ -7,7 +7,7 @@ add_executable(client
         Client.cpp
         GameClient.cpp
         Renderer.cpp
-        #TutorialGame.cpp
+        TutorialGame.cpp
         States/InactiveState.cpp
         States/GameplayState.cpp
         States/LoadingState.cpp
@@ -16,6 +16,7 @@ add_executable(client
         Font.cpp
         DebugMode.cpp
         ${UI}
+        CinematicCamera.cpp
 )
 
 target_include_directories(client PUBLIC

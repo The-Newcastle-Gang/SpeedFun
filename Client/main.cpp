@@ -11,6 +11,7 @@
 
 using namespace NCL;
 using namespace CSC8503;
+bool debugMode =false;
 
 int main() {  
     Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1280, 720);
@@ -23,6 +24,7 @@ int main() {
     w->UpdateWindow();
 
     auto client = new Client();
+    auto g = new TutorialGame();
   
     Window::GetWindow()->LockMouseToWindow(true);
   
@@ -41,9 +43,18 @@ int main() {
         if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::T)) {
             w->SetWindowPosition(0, 0);
         }
+        if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)){
+            debugMode = !debugMode;
+        }
        
       w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
-      client->Update(dt);
+
+        if(!debugMode){
+            client->Update(dt);
+        } else {
+            g->UpdateGame(dt);
+        }
+        
     }
     Window::DestroyGameWindow();
 }
