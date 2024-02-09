@@ -75,7 +75,7 @@ void GameplayState::ReadNetworkFunctions() {
     }
 }
 
-// Perhaps replace this with a data structure that won't overlap objects on the same packet. 
+// Perhaps replace this with a data structure that won't overlap objects on the same packet.
 void GameplayState::ReadNetworkPackets() {
     while (!networkData->incomingState.IsEmpty()) {
         FullPacket packet = networkData->incomingState.Pop();
@@ -115,7 +115,7 @@ void GameplayState::SendInputData() {
         std::cout << "Packet input logged at: " << std::chrono::system_clock::now() << std::endl;
     }
 
-    //baseClient->SendPacket(input);
+    networkData->outgoingInput.Push(input);
 }
 
 

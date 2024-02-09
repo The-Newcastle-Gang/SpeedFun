@@ -21,7 +21,11 @@ void ClientThread::ReadPacketsToSend() {
     while (!networkData->outgoingFunctions.IsEmpty()) {
         FunctionPacket f = networkData->outgoingFunctions.Pop();
         baseClient->SendImportantPacket(f);
-        std::cout << "Sending packet from thread!" << std::endl;
+    }
+
+    while (!networkData->outgoingInput.IsEmpty()) {
+        InputPacket packet = networkData->outgoingInput.Pop();
+        baseClient->SendPacket(packet);
     }
 }
 
@@ -33,7 +37,8 @@ void ClientThread::ReceivePacket(int type, GamePacket *payload, int source) {
         auto fp = (FullPacket*)payload;
         networkData->incomingState.Push(*fp);
     }
-}
+}\
+
 
 void ClientThread::Update() {
     ReadPacketsToSend();

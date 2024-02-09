@@ -19,6 +19,7 @@ public:
     SafeQueue<FullPacket> incomingState;
     SafeQueue<FunctionPacket> incomingFunctions;
     SafeQueue<FunctionPacket> outgoingFunctions;
+    SafeQueue<InputPacket> outgoingInput;
 };
 
 
