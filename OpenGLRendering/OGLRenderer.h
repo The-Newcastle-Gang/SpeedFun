@@ -8,9 +8,9 @@ https://research.ncl.ac.uk/game/
 */
 #pragma once
 #include "RendererBase.h"
-
 #include "Vector3.h"
 #include "Vector4.h"
+#include "AnimatorObject.h"
 
 
 #ifdef _WIN32
@@ -78,6 +78,7 @@ namespace NCL {
 			void BindShader(ShaderBase*s);
 			void BindTextureToShader(const TextureBase*t, const std::string& uniform, int texUnit) const;
 			void BindMesh(MeshGeometry*m);
+			void BindAnimation(AnimatorObject*a);
 			void DrawBoundMesh(int subLayer = 0, int numInstances = 1);
 #ifdef _WIN32
 			void InitWithWin32(Window& w);
@@ -104,6 +105,7 @@ namespace NCL {
 
 			OGLMesh*	boundMesh;
 			OGLShader*	boundShader;
+            AnimatorObject* boundAnimation;
 
 			//OGLShader*  debugShader;		
 			//std::vector<DebugString>	debugStrings;

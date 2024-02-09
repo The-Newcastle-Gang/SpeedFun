@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Constraint.h"
 #include "CollisionDetection.h"
+#include "AnimatorObject.h"
 #include "Camera.h"
 
 using namespace NCL;

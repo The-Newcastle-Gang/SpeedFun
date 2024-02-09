@@ -3,13 +3,14 @@
 #include "ShaderBase.h"
 #include "MeshAnimation.h"
 #include "MeshGeometry.h"
+#include "AnimatorObject.h"
 
 namespace NCL {
 	using namespace NCL::Rendering;
-
 	class MeshGeometry;
 	namespace CSC8503 {
 		class Transform;
+        
 		using namespace Maths;
 
 		class RenderObject
@@ -46,12 +47,20 @@ namespace NCL {
 				return colour;
 			}
 
+            void SetAnimatorObject(AnimatorObject* a) {
+                animatorObject = a;
+            }
+            AnimatorObject* GetAnimatorObject() const {
+                return animatorObject;
+            }
+
 
 		protected:
 			MeshGeometry*	mesh;
 			TextureBase*	texture;
 			ShaderBase*		shader;
 			Transform*		transform;
+            AnimatorObject* animatorObject;
 			Vector4			colour;
 		};
 	}

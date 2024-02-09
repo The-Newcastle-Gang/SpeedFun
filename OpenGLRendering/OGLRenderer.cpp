@@ -20,6 +20,7 @@ https://research.ncl.ac.uk/game/
 
 #include "MeshGeometry.h"
 
+
 #ifdef _WIN32
 #include "Win32Window.h"
 
@@ -44,6 +45,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 #endif
 	boundMesh	= nullptr;
 	boundShader = nullptr;
+    boundAnimation = nullptr;
 
 	windowWidth	= (int)w.GetScreenSize().x;
 	windowHeight	= (int)w.GetScreenSize().y;
@@ -51,6 +53,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	if (initState) {
 		TextureLoader::RegisterAPILoadFunction(OGLTexture::RGBATextureFromFilename);
 	}
+
 
 	forceValidDebugState = false;
 }
@@ -118,6 +121,10 @@ void OGLRenderer::BindMesh(MeshGeometry*m) {
 	}
 }
 
+void OGLRenderer::BindAnimation(AnimatorObject* a) {
+    boundAnimation = a;
+}
+
 void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 	if (!boundMesh) {
 		std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
@@ -127,6 +134,14 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
 		return;
 	}
+
+    if (boundAnimation) {
+        const Matrix4* bindPose = boundMesh->GetBindPose().data();
+        const Matrix4* invBindPose = boundMesh->GetInverseBindPose().data();
+        const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
+        const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
+    }
+    boundAnimation = nullptr;
 	GLuint	mode	= 0;
 	int		count	= 0;
 	int		offset	= 0;

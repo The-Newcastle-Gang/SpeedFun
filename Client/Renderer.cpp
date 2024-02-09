@@ -307,6 +307,12 @@ void GameTechRenderer::RenderCamera() {
         glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1:0);
 
         BindMesh((*i).GetMesh());
+
+        if (i->GetAnimatorObject()) {
+            BindAnimation(i->GetAnimatorObject());
+        }
+
+
         int layerCount = (*i).GetMesh()->GetSubMeshCount();
         for (int i = 0; i < layerCount; ++i) {
             DrawBoundMesh(i);

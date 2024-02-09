@@ -92,10 +92,21 @@ void GameplayState::InitWorld() {
 }
 
 void GameplayState::CreatePlayers() {
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "scene.frag");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Male_Guard.msh"), nullptr, nullptr));
+
+        MeshGeometry* playerMesh = resources->GetMesh("Male_Guard.msh");
+        MeshAnimation* testAnimation = resources->GetAnimation("Idle1.anm");
+        playerMesh->AddAnimationToMesh("Idle1.anm", testAnimation);
+
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, nullptr));
+
+        AnimatorObject* newAnimator = new AnimatorObject();
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle1.anm"));
+        player->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetAnimatorObject(newAnimator);
     }
 }
 

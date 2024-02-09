@@ -1,6 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include "AnimatorObject.h"
 
 using std::vector;
 
@@ -8,7 +9,6 @@ namespace NCL::CSC8503 {
     class NetworkObject;
     class RenderObject;
     class PhysicsObject;
-    class AnimatorObject;
 
     class GameObject	{
     public:

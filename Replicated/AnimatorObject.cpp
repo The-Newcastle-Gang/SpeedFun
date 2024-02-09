@@ -1,6 +1,7 @@
 #include "AnimatorObject.h"
+#include <iostream>
 
-namespace NCL::CSC8503 {
+namespace NCL {
     void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
         currentAnimation = newAnimation;
     }
@@ -8,7 +9,9 @@ namespace NCL::CSC8503 {
     void AnimatorObject::UpdateAnimation(float dt) {
         animationInfo.frameTimer += dt;
         if (animationInfo.frameTimer > 1.0f / currentAnimation->GetFrameRate()) {
-            animationInfo.frameTimer -= currentAnimation->GetFrameRate();
+            animationInfo.frameTimer -= 1.0f / currentAnimation->GetFrameRate();
+            animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
         }
+        std::cout << animationInfo.currentFrame << "\n";
     }
 }

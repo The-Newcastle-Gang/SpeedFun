@@ -113,6 +113,10 @@ namespace NCL {
             return nullptr;
         }
 
+        void AddAnimationToMesh(std::string name, MeshAnimation* anim) {
+            animations[name] = anim;
+        }
+
 		void AddSubMesh(int startIndex, int indexCount, int baseVertex) {
 			SubMesh m;
 			m.base = baseVertex;
@@ -160,6 +164,9 @@ namespace NCL {
 
 		const vector<unsigned int>& GetIndexData()			const { return indices;		}
 
+        int* GetBindPoseIndices() {
+            return bindPoseIndices.data();
+        }
 
 		void SetVertexPositions(const vector<Vector3>& newVerts);
 		void SetVertexTextureCoords(const vector<Vector2>& newTex);
