@@ -101,7 +101,7 @@ void GameplayState::CreatePlayers() {
         MeshAnimation* testAnimation = resources->GetAnimation("Idle1.anm");
         playerMesh->AddAnimationToMesh("Idle1.anm", testAnimation);
 
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, nullptr));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
         AnimatorObject* newAnimator = new AnimatorObject();
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle1.anm"));

@@ -141,6 +141,8 @@ namespace NCL {
 		void SetInverseBindPose(std::vector<Matrix4>& newMats);
 		void CalculateInverseBindPose();
 
+        bool GetBindPoseState(int subMesh, SubMeshPoses& pose) const;
+
 
 
 		bool GetTriangle(unsigned int i, Vector3& a, Vector3& b, Vector3& c) const;

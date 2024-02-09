@@ -135,13 +135,7 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		return;
 	}
 
-    if (boundAnimation) {
-        const Matrix4* bindPose = boundMesh->GetBindPose().data();
-        const Matrix4* invBindPose = boundMesh->GetInverseBindPose().data();
-        const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
-        const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
-    }
-    boundAnimation = nullptr;
+    
 	GLuint	mode	= 0;
 	int		count	= 0;
 	int		offset	= 0;
@@ -169,12 +163,35 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		case GeometryPrimitive::Patches:		mode = GL_PATCHES;			break;
 	}
 
+    if (boundAnimation) {
+        const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
+        const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
+        const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
+        const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
+        SubMeshPoses pose;
+        boundMesh->GetBindPoseState(subLayer,pose);
+
+        int j = glGetUniformLocation(boundShader->programID, "joints");
+
+        vector<Matrix4> frameMatrices;
+        for (unsigned int i = 0; i < pose.count; ++i) {
+            int jointID = bindPoseIndices[pose.start + i];
+
+            Matrix4 mat = frameData[jointID] * invBindPose[pose.start + i];
+
+            frameMatrices.emplace_back(mat);
+        }
+        glUniformMatrix4fv(j, frameMatrices.size(), false, (float*)frameMatrices.data());
+
+    }
+
 	if (boundMesh->GetIndexCount() > 0) {
 		glDrawElements(mode, count, GL_UNSIGNED_INT, (const GLvoid*)(offset * sizeof(unsigned int)));
 	}
 	else {
 		glDrawArrays(mode, 0, count);
 	}
+    
 }
 
 void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& uniform, int texUnit) const{

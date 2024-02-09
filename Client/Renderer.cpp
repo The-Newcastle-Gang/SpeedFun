@@ -317,6 +317,7 @@ void GameTechRenderer::RenderCamera() {
         for (int i = 0; i < layerCount; ++i) {
             DrawBoundMesh(i);
         }
+        BindAnimation(nullptr);
     }
 }
 
