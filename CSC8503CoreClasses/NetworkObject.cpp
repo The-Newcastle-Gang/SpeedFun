@@ -41,10 +41,6 @@ bool NetworkObject::ReadFullPacket(FullPacket &p) {
 
     lastFullState = p.fullState;
 
-    if (object.GetTransform().GetPosition() != lastFullState.position) {
-        std::cout << "Position updated on client: " << std::chrono::system_clock::now() << std::endl;
-    }
-
     object.GetTransform().SetPosition(lastFullState.position);
     object.GetTransform().SetOrientation(lastFullState.orientation);
 

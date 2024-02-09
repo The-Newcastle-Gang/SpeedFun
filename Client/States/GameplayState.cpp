@@ -109,10 +109,6 @@ void GameplayState::SendInputData() {
     playerDirection.Normalise();
     input.playerDirection = playerDirection;
 
-    if (playerDirection.Length() != 0) {
-        std::cout << "Packet input logged at: " << std::chrono::system_clock::now() << std::endl;
-    }
-
     networkData->outgoingInput.Push(input);
 }
 
@@ -157,4 +153,6 @@ void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
     player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
+    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
+
 }

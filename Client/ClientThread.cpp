@@ -37,7 +37,7 @@ void ClientThread::ReceivePacket(int type, GamePacket *payload, int source) {
         auto fp = (FullPacket*)payload;
         networkData->incomingState.Push(*fp);
     }
-}\
+}
 
 
 void ClientThread::Update() {

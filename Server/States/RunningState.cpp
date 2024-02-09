@@ -120,16 +120,7 @@ void RunningState::CreatePlayers() {
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
-    if (inputInfo.playerDirection.Length() > 0) {
-        std::cout << "Input recieved logged at: " << std::chrono::system_clock::now() << std::endl;
-
-        player->GetTransform().SetOrientation(inputInfo.playerRotation);
-        player->GetTransform().SetPosition(player->GetTransform().GetPosition()
-                                           + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
-    }
-
-//    constexpr float forceModifier = 60000.0f;
-//    auto forceToAdd = Vector3(inputInfo.playerDirection.x, 0 ,inputInfo.playerDirection.y) * forceModifier;
-//    player->GetPhysicsObject()->SetForce(forceToAdd);
-//    std::cout << player->GetPhysicsObject()->GetForce() << "\n";
+    player->GetTransform().SetOrientation(inputInfo.playerRotation);
+    player->GetTransform().SetPosition(player->GetTransform().GetPosition()
+                                       + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
 }

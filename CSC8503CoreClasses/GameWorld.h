@@ -76,6 +76,8 @@ namespace NCL {
                 return networkObjects.end();
             }
 
+            vector<NetworkObject *> &GetNetworkObjects();
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;
@@ -90,6 +92,8 @@ namespace NCL {
             int		worldStateCounter;
 
             int networkIdCounter;
+
+
         };
     }
 }
