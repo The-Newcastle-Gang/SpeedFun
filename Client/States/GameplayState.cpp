@@ -158,20 +158,3 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
 }
-
-void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
-    if (type == Function) {
-        auto functionPacket = reinterpret_cast<FunctionPacket*>(payload);
-        if (functionPacket->functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&functionPacket->data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
-        }
-    }
-
-    if (type == Full_State) {
-        auto statePacket = reinterpret_cast<FullPacket*>(payload);
-        auto id = statePacket->objectID;
-        world->GetNetworkObject(id)->ReadPacket(*statePacket);
-    }
-}

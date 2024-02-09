@@ -15,9 +15,10 @@ using namespace CSC8503;
 class ServerNetworkData {
 public:
     SafeQueue<FullPacket> outgoingState;
-    SafeQueue<FunctionPacket> outgoingFunctions;
-    SafeQueue<FunctionPacket> incomingFunctions;
-    SafeQueue<InputPacket> incomingInput;
+    SafeQueue<FunctionPacket> outgoingGlobalFunctions;
+    SafeQueue<std::pair<int, FunctionPacket>> outgoingFunctions;
+    SafeQueue<std::pair<int, FunctionPacket>> incomingFunctions;
+    SafeQueue<std::pair<int, InputPacket>> incomingInput;
 };
 
 

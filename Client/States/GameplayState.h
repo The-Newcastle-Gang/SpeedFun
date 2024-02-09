@@ -30,7 +30,6 @@ namespace NCL {
             void OnExit() override;
 
             bool IsDisconnected();
-            void ReceivePacket(int type, GamePacket* payload, int source) override;
 
         protected:
             void InitialiseAssets();

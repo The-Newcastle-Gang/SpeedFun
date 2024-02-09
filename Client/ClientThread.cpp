@@ -14,7 +14,7 @@ ClientThread::ClientThread(GameClient *client, ClientNetworkData *data) {
 
 
 ClientThread::~ClientThread() {
-
+    baseClient->ClearPacketHandlers();
 }
 
 void ClientThread::ReadPacketsToSend() {

@@ -9,19 +9,18 @@
 #include "GameClient.h"
 #include "ClientNetworkData.h"
 
-class ClientThread : NetworkBase, PacketReceiver {
+class ClientThread : PacketReceiver {
 public:
     ClientThread(GameClient* client, ClientNetworkData* data);
     ~ClientThread();
 
     void ReadPacketsToSend();
     void Update();
-    virtual void ReceivePacket(int type, GamePacket* payload, int source);
+    void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 
 
 protected:
-    _ENetPeer *netPeer;
     GameClient* baseClient;
     ClientNetworkData* networkData;
 };

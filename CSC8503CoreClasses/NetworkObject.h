@@ -46,7 +46,7 @@ namespace NCL::CSC8503 {
 		//Called by clients
 		virtual bool ReadPacket(GamePacket& p);
 		//Called by servers
-		virtual bool WritePacket(GamePacket** p, bool deltaFrame, int stateID);
+        bool WritePacket(FullPacket &packet, bool deltaFrame, int stateID);
 		int GetNetworkId() const {
 			return networkID;
 		}
@@ -67,7 +67,7 @@ namespace NCL::CSC8503 {
 		virtual bool ReadFullPacket(FullPacket &p);
 
 		virtual bool WriteDeltaPacket(GamePacket**p, int stateID);
-		virtual bool WriteFullPacket(GamePacket**p);
+        bool WriteFullPacket(FullPacket &packet);
 
 		GameObject& object;
 
@@ -79,5 +79,8 @@ namespace NCL::CSC8503 {
 		int fullErrors;
 
 		int networkID;
-	};
+
+
+
+    };
 }

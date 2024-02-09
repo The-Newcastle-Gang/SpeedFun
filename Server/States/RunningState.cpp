@@ -2,8 +2,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
-RunningState::RunningState(GameServer* pBaseServer) : State()
-{
+RunningState::RunningState(GameServer* pBaseServer) : State() {
+    // DON'T USE THIIIIIS
     serverBase = pBaseServer;
     replicated = std::make_unique<Replicated>();
     world = std::make_unique<GameWorld>();
@@ -17,8 +17,45 @@ RunningState::~RunningState() {
 
 void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
+    playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+    CreateNetworkThread();
     LoadLevel();
+
+}
+
+void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
+    auto threadServer = ServerThread(server, networkData);
+
+    while (server) {
+        threadServer.Update();
+    }
+}
+
+void RunningState::CreateNetworkThread() {
+    GameServer* server = serverBase;
+    // Make sure this isn't used
+    serverBase = nullptr;
+    networkData = std::make_unique<ServerNetworkData>();
+    networkThread = new std::thread(ThreadUpdate, server, networkData.get());
+    networkThread->detach();
+
+}
+
+void RunningState::ReadNetworkFunctions() {
+    while (!networkData->incomingFunctions.IsEmpty()) {
+        auto data = networkData->incomingFunctions.Pop();
+        if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
+            AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
+        }
+    }
+}
+
+void RunningState::ReadNetworkPackets() {
+    while (!networkData->incomingInput.IsEmpty()) {
+        auto data = networkData->incomingInput.Pop();
+        UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
+    }
 }
 
 void RunningState::OnExit() {
@@ -29,6 +66,9 @@ void RunningState::OnExit() {
 
 
 void RunningState::Update(float dt) {
+
+    ReadNetworkFunctions();
+    ReadNetworkPackets();
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -47,30 +87,14 @@ void RunningState::Tick(float dt) {
 }
 
 void RunningState::SendWorldToClient() {
-    // Test swapping this with iterators instead of lambda callback for performance.
-    world->OperateOnContents([this](GameObject* obj) {
-        if (!obj->IsActive()) {
-            return;
+
+    for (auto i = world->GetNetworkIteratorStart(); i < world->GetNetworkIteratorEnd(); i++) {
+        FullPacket newPacket;
+        if ((*i)->WritePacket(newPacket, false, sceneSnapshotId)) {
+            networkData->outgoingState.Push(newPacket);
         }
-
-        auto netObj = obj->GetNetworkObject();
-        if (!netObj) {
-            return;
-        }
-
-        GamePacket* newPacket = nullptr;
-        if (netObj->WritePacket(&newPacket, false, sceneSnapshotId)) {
-            serverBase->SendGlobalPacket(*newPacket);
-        }
-        delete newPacket;
-    });
-
-    dia.gameTimer->Tick();
-
-    if (dia.gameTimer->GetTimeDeltaSeconds() > 0.5f) {
-        std::cout << "Delay in packets sent: " << dia.gameTimer->GetTimeDeltaSeconds() << std::endl;
     }
-    dia.packetCount++;
+
     sceneSnapshotId++;
 }
 
@@ -78,12 +102,12 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
-    serverBase->CallRemote(Replicated::AssignPlayer, &data, peerId);
+    networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    for (auto pair : serverBase->GetPlayerInfo()) {
+    for (auto pair : playerInfo) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
@@ -102,34 +126,10 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         player->GetTransform().SetOrientation(inputInfo.playerRotation);
         player->GetTransform().SetPosition(player->GetTransform().GetPosition()
                                            + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
-
-        GamePacket *packet = nullptr;
-        if (player->GetNetworkObject()->WritePacket(&packet, false, 0)) {
-            serverBase->SendGlobalPacket(*packet);
-            std::cout << "Position sent back logged at: " << std::chrono::system_clock::now() << std::endl;
-        }
-
-        delete packet;
     }
 
 //    constexpr float forceModifier = 60000.0f;
 //    auto forceToAdd = Vector3(inputInfo.playerDirection.x, 0 ,inputInfo.playerDirection.y) * forceModifier;
 //    player->GetPhysicsObject()->SetForce(forceToAdd);
 //    std::cout << player->GetPhysicsObject()->GetForce() << "\n";
-}
-
-void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
-    switch (type) {
-        case Received_State: {
-            auto packet = reinterpret_cast<InputPacket*>(payload);
-            UpdatePlayerMovement(GetPlayerObjectFromId(source), *packet);
-            playerTestId = source;
-        } break;
-        case Function: {
-            auto packet = reinterpret_cast<FunctionPacket*>(payload);
-            if (packet->functionId == Replicated::RemoteServerCalls::GameLoaded) {
-                AssignPlayer(source, GetPlayerObjectFromId(source));
-            }
-        } break;
-    }
 }

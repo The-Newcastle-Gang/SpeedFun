@@ -3,7 +3,11 @@
 #include "GameServer.h"
 #include "PhysicsSystem.h"
 #include "PhysicsObject.h"
+#include "ServerNetworkData.h"
+#include "ServerThread.h"
+
 #include <iostream>
+#include <thread>
 
 namespace NCL {
     namespace CSC8503 {
@@ -29,12 +33,16 @@ namespace NCL {
                 return -1;
             }
 
-            void ReceivePacket(int type, GamePacket *payload, int source) override;
         protected:
             GameServer* serverBase;
             std::unique_ptr<Replicated> replicated;
             std::unique_ptr<PhysicsSystem> physics;
             std::unique_ptr<GameWorld> world;
+            std::unique_ptr<ServerNetworkData> networkData;
+
+            std::thread* networkThread;
+
+            std::unordered_map<int, PlayerInfo> playerInfo;
 
             float packetTimer;
             int sceneSnapshotId;
@@ -54,6 +62,13 @@ namespace NCL {
             void AssignPlayer(int peerId, GameObject *object);
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
+            static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
+
+            void CreateNetworkThread();
+
+            void ReadNetworkFunctions();
+
+            void ReadNetworkPackets();
         };
     }
 }

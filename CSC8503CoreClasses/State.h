@@ -17,8 +17,6 @@ namespace NCL {
 			
 			virtual void Update(float dt) = 0;
 
-            virtual void ReceivePacket(int type, GamePacket* payload, int source) {};
-
 			virtual void OnEnter() {  }
 			virtual void OnExit() {  }
 		protected:

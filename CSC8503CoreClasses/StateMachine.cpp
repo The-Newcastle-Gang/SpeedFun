@@ -49,11 +49,3 @@ void StateMachine::Update(float dt) {
 		}
 	}
 }
-
-void StateMachine::ReceivePacket(int type, GamePacket *payload, int source) {
-    if (activeState) {
-        activeState->ReceivePacket(type, payload, source);
-        return;
-    }
-    std::cerr << "No state to handle packet" << std::endl;
-}

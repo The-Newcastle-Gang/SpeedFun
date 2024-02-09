@@ -68,6 +68,14 @@ namespace NCL {
                 return networkObjects[networkId];
             }
 
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorStart() {
+                return networkObjects.begin();
+            }
+
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorEnd() {
+                return networkObjects.end();
+            }
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;

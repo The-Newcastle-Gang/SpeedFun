@@ -8,6 +8,7 @@ add_executable(server
         "States/BusyState.cpp"
         "States/RunningState.cpp"
         "States/WaitingState.cpp"
+        ServerThread.cpp
 )
 
 target_include_directories(server PUBLIC
