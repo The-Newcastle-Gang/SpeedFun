@@ -19,14 +19,16 @@ using namespace CSC8503;
 
 class Replicated {
 public:
-    enum RemoteClientCalls {
+    // In the situation where the client is the remote (Server to client)
+    enum RemoteClientCalls { 
         AssignPlayer,
         LoadGame,
     };
 
+    // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
-        StartGame = 40,
-        GameLoaded = 41,
+        StartGame,
+        GameLoaded,
     };
 
     Replicated();

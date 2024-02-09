@@ -59,7 +59,6 @@ bool GameServer::SendGlobalPacket(int msgID) {
 bool GameServer::SendGlobalPacket(GamePacket& packet) {
     ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), Replicated::BASICPACKETTYPE);
     enet_host_broadcast(netHandle, 0, dataPacket);
-    //UpdateDiagnostics(packetsSent);
     return true;
 }
 
@@ -88,8 +87,6 @@ bool GameServer::UpdateDiagnostics(Diagnostics& d) {
 bool GameServer::SendPacket(GamePacket &packet, int peerId) {
     ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), Replicated::BASICPACKETTYPE);
     enet_peer_send(idToPeer[peerId], 0, dataPacket);
-
-    //UpdateDiagnostics(packetsSent);
 
     return true;
 }
@@ -126,7 +123,6 @@ void GameServer::UpdateServer() {
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_RECEIVE) {
             GamePacket* packet = (GamePacket*)event.packet->data;
-            //UpdateDiagnostics(packetsRecieved);
             ProcessPacket(packet, peer);
         }
 

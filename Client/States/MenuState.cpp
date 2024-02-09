@@ -6,7 +6,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 {
     renderer = pRenderer;
     world = pGameworld;
-    // DO NOT FUCK WITH THIS. GOTTA BE THREAD SAFE
+    // Please do not change this, has to be thread safe.
     baseClient = pClient;
 }
 

@@ -3,7 +3,7 @@ using namespace NCL;
 using namespace CSC8503;
 
 RunningState::RunningState(GameServer* pBaseServer) : State() {
-    // DON'T USE THIIIIIS
+    // Don't use serverBase without talking to other members of the team.
     serverBase = pBaseServer;
     replicated = std::make_unique<Replicated>();
     world = std::make_unique<GameWorld>();
@@ -16,6 +16,7 @@ RunningState::~RunningState() {
 }
 
 void RunningState::OnEnter() {
+    //serverBase has been called before the network thread has been created.
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
@@ -34,12 +35,11 @@ void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkDa
 
 void RunningState::CreateNetworkThread() {
     GameServer* server = serverBase;
-    // Make sure this isn't used
+    // Again, make sure serverBase isn't used without confirmation.
     serverBase = nullptr;
     networkData = std::make_unique<ServerNetworkData>();
     networkThread = new std::thread(ThreadUpdate, server, networkData.get());
     networkThread->detach();
-
 }
 
 void RunningState::ReadNetworkFunctions() {
@@ -66,7 +66,6 @@ void RunningState::OnExit() {
 
 
 void RunningState::Update(float dt) {
-
     ReadNetworkFunctions();
     ReadNetworkPackets();
     world->UpdateWorld(dt);
@@ -87,7 +86,6 @@ void RunningState::Tick(float dt) {
 }
 
 void RunningState::SendWorldToClient() {
-
     for (auto i = world->GetNetworkIteratorStart(); i < world->GetNetworkIteratorEnd(); i++) {
         FullPacket newPacket;
         if ((*i)->WritePacket(newPacket, false, sceneSnapshotId)) {
