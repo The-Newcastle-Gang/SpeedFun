@@ -22,7 +22,7 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
     return newPos;
 }
 
-float NCL::CSC8503::CinematicCamera::CustomLerp(float start, float end, float p)
+float NCL::CSC8503::CinematicCamera::LerpYaw(float start, float end, float p)
 {
     float difference = end - start;
     if (difference > 180.0f) { difference -= 360.0f; }
@@ -66,7 +66,7 @@ void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float 
 
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
     camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
-    camera->SetYaw(CustomLerp(yaws[currentCamera], yaws[currentCamera + 1], percentage));
+    camera->SetYaw(LerpYaw(yaws[currentCamera], yaws[currentCamera + 1], percentage));
 
     if (timer >= MAX_TIMER)
     {

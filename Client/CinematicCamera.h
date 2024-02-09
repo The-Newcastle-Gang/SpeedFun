@@ -26,7 +26,7 @@ namespace NCL
 
 		protected:
 			Vector3 LerpVector3(Vector3& start, Vector3 end, float p);
-			float CustomLerp(float start, float end, float p);
+			float LerpYaw(float start, float end, float p);
 
 			std::vector<Vector3> cameraPositions;
 			std::vector<float> pitches;
