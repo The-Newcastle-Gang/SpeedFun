@@ -46,8 +46,6 @@ void GameplayState::OnExit() {
 }
 
 void GameplayState::Update(float dt) {
-
-
     SendInputData();
     ReadNetworkFunctions();
 
