@@ -21,6 +21,14 @@ namespace NCL {
                 return playerObjects[peerId];
             }
 
+            int GetIdFromPlayerObject(GameObject* obj) {
+                for (auto p : playerObjects) {
+                    if (p.second == obj) return p.first;
+                }
+
+                return -1;
+            }
+
             void ReceivePacket(int type, GamePacket *payload, int source) override;
         protected:
             GameServer* serverBase;
@@ -30,6 +38,8 @@ namespace NCL {
 
             float packetTimer;
             int sceneSnapshotId;
+
+            int playerTestId = -1;
 
             std::unordered_map<int, GameObject*> playerObjects;
 

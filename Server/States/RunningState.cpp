@@ -97,12 +97,21 @@ void RunningState::CreatePlayers() {
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     if (inputInfo.playerDirection.Length() > 0) {
-        std::cout << "Packet recieved logged at: " << std::chrono::system_clock::now() << std::endl;
+        std::cout << "Input recieved logged at: " << std::chrono::system_clock::now() << std::endl;
+
+        player->GetTransform().SetOrientation(inputInfo.playerRotation);
+        player->GetTransform().SetPosition(player->GetTransform().GetPosition()
+                                           + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
+
+        GamePacket *packet = nullptr;
+        if (player->GetNetworkObject()->WritePacket(&packet, false, 0)) {
+            serverBase->SendGlobalPacket(*packet);
+            std::cout << "Position sent back logged at: " << std::chrono::system_clock::now() << std::endl;
+        }
+
+        delete packet;
     }
 
-    player->GetTransform().SetOrientation(inputInfo.playerRotation);
-    player->GetTransform().SetPosition(player->GetTransform().GetPosition()
-                                        + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
 //    constexpr float forceModifier = 60000.0f;
 //    auto forceToAdd = Vector3(inputInfo.playerDirection.x, 0 ,inputInfo.playerDirection.y) * forceModifier;
 //    player->GetPhysicsObject()->SetForce(forceToAdd);
@@ -114,6 +123,7 @@ void RunningState::ReceivePacket(int type, GamePacket *payload, int source) {
         case Received_State: {
             auto packet = reinterpret_cast<InputPacket*>(payload);
             UpdatePlayerMovement(GetPlayerObjectFromId(source), *packet);
+            playerTestId = source;
         } break;
         case Function: {
             auto packet = reinterpret_cast<FunctionPacket*>(payload);

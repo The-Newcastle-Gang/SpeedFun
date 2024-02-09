@@ -2,19 +2,19 @@
 // Created by c3042750 on 30/01/2024.
 //
 
-#include <NetworkObject.h>
 #include "Client.h"
+
 
 Client::Client() {
     NetworkBase::Initialise();
 
-    baseClient = std::make_unique<GameClient>();
     stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
     renderer = std::make_unique<GameTechRenderer>(*world);
+    networkData = std::make_unique<ClientNetworkData>();
+    baseClient = std::make_unique<GameClient>();
 
     InitStateManager();
-    RegisterPackets();
 }
 
 void Client::InitStateManager() {
@@ -37,26 +37,15 @@ void Client::InitStateManager() {
 
 }
 
-void Client::RegisterPackets() {
-    baseClient->RegisterPacketHandler(Full_State, this);
-    baseClient->RegisterPacketHandler(Function, this);
-}
-
 void Client::Update(float dt) {
 
-    baseClient->UpdateClient();
+    //baseClient->UpdateClient();
 
     stateManager->Update(dt);
 
     if (dt > 0.04) {
         std::cout << "Overly large dt" << std::endl;
     }
-}
-
-
-void Client::ReceivePacket(int type, GamePacket *payload, int source) {
-
-    stateManager->ReceivePacket(type, payload, source);
 }
 
 

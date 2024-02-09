@@ -9,8 +9,10 @@
 #include "GameWorld.h"
 #include "NetworkObject.h"
 #include "GameTimer.h"
+#include "SafeQueue.h"
 #include <vector>
 #include <string>
+#include "enet.h"
 
 using namespace NCL;
 using namespace CSC8503;

@@ -11,7 +11,9 @@ add_executable(client
         States/GameplayState.cpp
         States/LoadingState.cpp
         States/MenuState.cpp
+        ClientThread.cpp
         Resources.cpp
+        ClientNetworkData.cpp
 )
 
 target_include_directories(client PUBLIC
@@ -31,6 +33,7 @@ target_link_libraries(client PUBLIC
         OpenGLRendering
         replicated
         freetype
+        enet
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE

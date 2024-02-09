@@ -36,8 +36,8 @@ void Server::RegisterPackets() {
 
 void Server::UpdateServer(float dt) {
     //std::cout << "Server update loop. \n";
-    stateManager->Update(dt);
     serverBase->UpdateServer();
+    stateManager->Update(dt);
 }
 
 

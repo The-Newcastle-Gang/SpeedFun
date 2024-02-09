@@ -6,6 +6,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 {
     renderer = pRenderer;
     world = pGameworld;
+    // DO NOT FUCK WITH THIS. GOTTA BE THREAD SAFE
     baseClient = pClient;
 }
 
@@ -13,11 +14,14 @@ void MenuState::OnEnter() {
     isGameStarted = false;
     statusText = "Press L to connect to localhost";
     connectState = 0;
+    RegisterPackets();
 }
 
-MenuState::~MenuState() {
 
+void MenuState::RegisterPackets() {
+    baseClient->RegisterPacketHandler(Function, this);
 }
+
 
 bool MenuState::CheckConnected() const {
     return isGameStarted;
@@ -40,6 +44,9 @@ void MenuState::StartGame() {
 }
 
 void MenuState::Update(float dt) {
+
+    baseClient->UpdateClient();
+
     if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L) && connectState == 0) {
         ConnectToGame("127.0.0.1");
     }
@@ -63,13 +70,13 @@ void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
 
         } break;
     }
-
-
 }
-
-
 
 void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
+    baseClient->ClearPacketHandlers();
 }
 
+MenuState::~MenuState() {
+
+}

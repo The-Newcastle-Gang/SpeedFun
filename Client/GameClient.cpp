@@ -74,3 +74,8 @@ void GameClient::SendPacket(GamePacket& payload) {
     ENetPacket *dataPacket = enet_packet_create(&payload, payload.GetTotalSize(), 0);
     enet_peer_send(netPeer, 0, dataPacket);
 }
+
+void GameClient::SendImportantPacket(GamePacket& payload) {
+    ENetPacket *dataPacket = enet_packet_create(&payload, payload.GetTotalSize(), ENET_PACKET_FLAG_RELIABLE);
+    enet_peer_send(netPeer, 0, dataPacket);
+}

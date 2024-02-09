@@ -4,9 +4,6 @@
 
 #pragma comment(lib, "winmm.lib")
 
-#define ENET_IMPLEMENTATION
-#include <enet.h>
-
 #include "GameTimer.h"
 #include "Server.h"
 

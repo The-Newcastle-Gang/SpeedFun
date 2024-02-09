@@ -8,7 +8,7 @@
 namespace NCL {
 	namespace CSC8503 {
 		typedef std::function<void(float)> StateUpdateFunction;
-		class  State		{
+		class  State {
 		public:
 			State() {}
 			State(StateUpdateFunction someFunc) {
@@ -16,7 +16,8 @@ namespace NCL {
 			}
 			
 			virtual void Update(float dt) = 0;
-            virtual void ReceivePacket(int type, GamePacket *payload, int source) { }
+
+            virtual void ReceivePacket(int type, GamePacket* payload, int source) {};
 
 			virtual void OnEnter() {  }
 			virtual void OnExit() {  }

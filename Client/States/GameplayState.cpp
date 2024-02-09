@@ -6,16 +6,40 @@ using namespace CSC8503;
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
     renderer = pRenderer;
     world = pGameworld;
+    // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
     resources = std::make_unique<Resources>(renderer);
 }
 
-GameplayState::~GameplayState() {}
+GameplayState::~GameplayState() {
+    delete networkThread;
+}
+
+void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
+
+    auto threadClient = ClientThread(client, networkData);
+
+    while (client) {
+        threadClient.Update();
+    }
+
+}
 
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
+    CreateNetworkThread();
     InitialiseAssets();
 }
+
+void GameplayState::CreateNetworkThread() {
+    GameClient* client = baseClient;
+    baseClient = nullptr;
+    networkData = std::make_unique<ClientNetworkData>();
+    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
+    networkThread->detach();
+}
+
+
 void GameplayState::OnExit() {
     world->ClearAndErase();
     renderer->Render();
@@ -23,15 +47,41 @@ void GameplayState::OnExit() {
 
 void GameplayState::Update(float dt) {
 
+
+    SendInputData();
+    ReadNetworkFunctions();
+
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
 
     world->GetMainCamera()->UpdateCamera(dt);
-    SendInputData();
     world->UpdateWorld(dt);
+
+    ReadNetworkPackets();
+
     renderer->Render();
-    //Debug::UpdateRenderables(dt);
+    Debug::UpdateRenderables(dt);
+}
+
+void GameplayState::ReadNetworkFunctions() {
+    while (!networkData->incomingFunctions.IsEmpty()) {
+        FunctionPacket packet = networkData->incomingFunctions.Pop();
+        if (packet.functionId == Replicated::AssignPlayer) {
+            DataHandler handler(&packet.data);
+            auto networkId = handler.Unpack<int>();
+            AssignPlayer(networkId);
+        }
+    }
+}
+
+// Perhaps replace this with a data structure that won't overlap objects on the same packet. 
+void GameplayState::ReadNetworkPackets() {
+    while (!networkData->incomingState.IsEmpty()) {
+        FullPacket packet = networkData->incomingState.Pop();
+        auto id = packet.objectID;
+        world->GetNetworkObject(id)->ReadPacket(packet);
+    }
 }
 
 void GameplayState::SendInputData() {
@@ -65,7 +115,7 @@ void GameplayState::SendInputData() {
         std::cout << "Packet input logged at: " << std::chrono::system_clock::now() << std::endl;
     }
 
-    baseClient->SendPacket(input);
+    //baseClient->SendPacket(input);
 }
 
 
@@ -76,7 +126,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::FinishLoading() {
-    baseClient->RemoteFunction(Replicated::GameLoaded, nullptr);
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
 
 void GameplayState::InitCamera() {

@@ -22,7 +22,7 @@ namespace NCL {
             void Disconnect();
 
             void SendPacket(GamePacket& payload);
-            void SendPacket(GamePacket& payload, int something);
+            void SendImportantPacket(GamePacket &payload);
 
             void UpdateClient();
 
@@ -39,6 +39,8 @@ namespace NCL {
             ConnectionH serverConnected;
 
             void UpdateDiagnostics(Diagnostics &d);
+
+
         };
     }
 }

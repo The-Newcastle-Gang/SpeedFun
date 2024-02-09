@@ -11,7 +11,10 @@
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
 #include "Resources.h"
+#include "ClientNetworkData.h"
+#include "ClientThread.h"
 
+#include <thread>
 #include <iostream>
 
 namespace NCL {
@@ -34,6 +37,7 @@ namespace NCL {
             void InitCamera();
             void InitWorld();
             void AssignPlayer(int netObject);
+            void CreateNetworkThread();
 
 
 #ifdef USEVULKAN
@@ -42,9 +46,14 @@ namespace NCL {
             GameTechRenderer* renderer;
 #endif
             GameWorld* world;
+            // DO NOT USE THIS POINTER or suffer a null pointer exception.
             GameClient* baseClient;
             std::unique_ptr<Resources> resources;
             std::unique_ptr<Replicated> replicated;
+            // This one is thread safe, add to the outgoing and fetch from incoming.
+            std::unique_ptr<ClientNetworkData> networkData;
+
+            std::thread* networkThread;
 
             Transform* firstPersonPosition;
 
@@ -54,6 +63,12 @@ namespace NCL {
             void CreatePlayers();
 
             void FinishLoading();
+
+            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+
+            void ReadNetworkFunctions();
+
+            void ReadNetworkPackets();
         };
     }
 }

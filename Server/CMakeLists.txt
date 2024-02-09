@@ -17,6 +17,7 @@ target_include_directories(server PUBLIC
         ../Replicated
         ./
         ./States
+        ../enet/include
 )
 
 target_link_libraries(server PUBLIC

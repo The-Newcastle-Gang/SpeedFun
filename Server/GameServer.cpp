@@ -113,7 +113,7 @@ void GameServer::UpdateServer() {
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_RECEIVE) {
             GamePacket* packet = (GamePacket*)event.packet->data;
-            UpdateDiagnostics(packetsRecieved);
+            //UpdateDiagnostics(packetsRecieved);
             ProcessPacket(packet, peer);
         }
 
