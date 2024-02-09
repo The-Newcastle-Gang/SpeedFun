@@ -5,6 +5,8 @@
 #include "LevelBuilder.h"
 #include "CinematicCamera.h"
 
+#include "InputListener.h"
+
 
 namespace NCL {
     namespace CSC8503 {
@@ -13,7 +15,8 @@ namespace NCL {
           
         public:
             TutorialGame();
-
+            Vector2 HorizontalAxis;
+            Vector2 VerticalAxis;
             ~TutorialGame();
 
             virtual void UpdateGame(float dt);

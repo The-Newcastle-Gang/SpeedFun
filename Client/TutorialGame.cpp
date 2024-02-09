@@ -146,6 +146,8 @@ void TutorialGame::UpdateGame(float dt) {
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
+
+    InputListener::InputUpdate();
 }
 
 void TutorialGame::LoadScripting() {
