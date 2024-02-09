@@ -18,6 +18,7 @@
 #include "GameplayState.h"
 #include "LoadingState.h"
 #include "MenuState.h"
+#include "raudio.h"
 
 #include <iostream>
 #include <memory>

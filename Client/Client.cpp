@@ -18,8 +18,11 @@ Client::Client() {
 }
 
 void Client::InitStateManager() {
+
     auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
     auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
+
+
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
         return clientMenu->CheckConnected();
