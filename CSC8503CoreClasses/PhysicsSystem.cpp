@@ -227,12 +227,6 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Transform& transformB = b.GetTransform();
 
 	float cRestitution = physA->GetElasticity() + physB->GetElasticity() * 0.5;
-
-	//there is probably a better way of doing this
-	/*if (physA->isPlayerRet() || physB->isPlayerRet()) {
-		cRestitution = 0.0f;
-	}*/
-
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
 	if (totalMass == 0) {
@@ -377,8 +371,6 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		if (object == nullptr) {                                //if it's not physical then we go to the next one
 			continue;
 		}
-		//if (object->GetType() == PhysObjType::Static || object->GetType() == PhysObjType::Sleeping) { continue; }
-
 
 		float inverseMass = object->GetInverseMass();       //getting inverse mass
 
@@ -387,9 +379,8 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		Vector3 accel = force * inverseMass;                     //f*m^-1
 
 		if (applyGravity && inverseMass > 0) {
-			//if ((*i)->GetGType() != GameObjType::AI) {
-				accel += gravity;
-			//}
+            accel += gravity;
+
 		}
 
 
@@ -429,8 +420,6 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		if (object == nullptr) {
 			continue;
 		}
-
-
 
 		Transform& transform = (*i)->GetTransform();
 
