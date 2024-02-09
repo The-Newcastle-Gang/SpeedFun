@@ -70,6 +70,14 @@ namespace NCL {
 				return elasticity;
 			}
 
+            Vector3 GetAccelerationAtUpdate(){
+                return accelerationAtUpdate;
+            }
+
+            void SetAccelerationAtUpdate(Vector3 accel){
+                accelerationAtUpdate = accel;
+            }
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -81,6 +89,7 @@ namespace NCL {
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
+            Vector3 accelerationAtUpdate;
 			
 			//angular stuff
 			Vector3 angularVelocity;

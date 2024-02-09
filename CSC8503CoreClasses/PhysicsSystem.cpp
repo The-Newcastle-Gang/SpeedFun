@@ -249,9 +249,9 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	//who cares?  i surely don't
     //re: this unironically came to bite me back in my behind, funny.
-//	if (contactVelocity.Length() < 8.0f) {
-//		cRestitution = 0.0f;
-//	}
+	if (contactVelocity.Length() < velocityThreshold) {
+		cRestitution = 0.0f;
+	}
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
@@ -262,6 +262,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	Vector3 fullImpulse = p.normal * j;
+
 
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
@@ -382,7 +383,6 @@ void PhysicsSystem::IntegrateAccel(float dt) {
             accel += gravity;
 
 		}
-
 
 		linearVel += accel * dt;                                // v = a(t).dt
 		object->SetLinearVelocity(linearVel);
