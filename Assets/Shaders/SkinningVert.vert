@@ -6,11 +6,13 @@ uniform mat4 projMatrix;
 uniform mat4 shadowMatrix;
 uniform mat4 textureMatrix;
 
-in vec3 position;
-in vec2 texCoord;
-in vec3 normal;
-in vec4 jointWeights;
-in ivec4 jointIndices;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec4 colour;
+layout(location = 2) in vec2 texCoord;
+layout(location = 3) in vec3 normal;
+layout(location = 4) in vec3 tangent;
+layout(location = 5) in vec4 jointWeights;
+layout(location = 6) in ivec4 jointIndices;
 
 uniform vec4 		objectColour = vec4(1,1,1,1);
 
@@ -45,7 +47,7 @@ void main(void) {
 	OUT.shadowProj 	=  shadowMatrix * vec4 ( position,1);
 	OUT.worldPos 	= ( modelMatrix * vec4 ( position ,1)). xyz;
 	OUT.normal = normalize ( normalMatrix * normalize ( normal ));
-	OUT.colour		= objectColour;
+	OUT.colour = objectColour;
 
 	mat4 mvp = projMatrix * viewMatrix * modelMatrix;
 	gl_Position = mvp * vec4(skelPos.xyz, 1.0);
