@@ -16,7 +16,6 @@
 #include "StateMachine.h"
 #include "State.h"
 #include "GameplayState.h"
-#include "LoadingState.h"
 #include "MenuState.h"
 #include "raudio.h"
 #include "SafeQueue.h"
@@ -24,6 +23,8 @@
 #include "NetworkObject.h"
 #include "enet.h"
 #include "ClientNetworkData.h"
+#include "Canvas.h"
+#include "Resources.h"
 
 #include <iostream>
 #include <memory>
@@ -49,6 +50,8 @@ private:
     std::unique_ptr<Replicated> replicated;
     std::unique_ptr<ClientNetworkData> networkData;
     std::unique_ptr<GameClient> baseClient;
+    std::unique_ptr<Canvas> canvas;
+    std::unique_ptr<Resources> resources;
     void InitStateManager();
 };
 

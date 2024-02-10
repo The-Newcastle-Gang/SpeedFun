@@ -10,9 +10,11 @@ Client::Client() {
 
     stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
-    renderer = std::make_unique<GameTechRenderer>(*world);
+    canvas = std::make_unique<Canvas>();
+    renderer = std::make_unique<GameTechRenderer>(*world, *canvas);
     networkData = std::make_unique<ClientNetworkData>();
     baseClient = std::make_unique<GameClient>();
+    resources = std::make_unique<Resources>(renderer.get());
 
     InitStateManager();
 }
@@ -20,7 +22,7 @@ Client::Client() {
 void Client::InitStateManager() {
 
     auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
-    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get());
 
 
 

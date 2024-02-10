@@ -3,12 +3,12 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources) : State() {
     renderer = pRenderer;
     world = pGameworld;
     // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
-    resources = std::make_unique<Resources>(renderer);
+    resources = pResources;
     replicated = std::make_unique<Replicated>();
 }
 

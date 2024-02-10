@@ -213,5 +213,5 @@ namespace NCL {
 
 		std::vector<int>			bindPoseIndices; //New!
 		std::vector<SubMeshPoses>	bindPoseStates;  //New!
-	};
+    };
 }

@@ -1,24 +1,20 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(client)
 
-set(UI "UI/HUDElement.cpp")
 add_executable(client
         main.cpp
         Client.cpp
         GameClient.cpp
         Renderer.cpp
-        TutorialGame.cpp
-        States/InactiveState.cpp
         States/GameplayState.cpp
-        States/LoadingState.cpp
         States/MenuState.cpp
         ClientThread.cpp
         Resources.cpp
         ClientNetworkData.cpp
         Font.cpp
-        DebugMode.cpp
-        ${UI}
         CinematicCamera.cpp
+        UI/Canvas.cpp
+        UI/Element.cpp
 )
 
 target_include_directories(client PUBLIC

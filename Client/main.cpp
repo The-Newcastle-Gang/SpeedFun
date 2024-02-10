@@ -4,7 +4,6 @@
 #include <iostream>
 #include "Client.h"
 #include "Window.h"
-#include "TutorialGame.h"
 #include "PushdownMachine.h"
 #include "LevelReader.h"
 
@@ -23,7 +22,6 @@ int main() {
     w->UpdateWindow();
 
     auto client = new Client();
-    auto g = new TutorialGame();
   
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
@@ -51,8 +49,6 @@ int main() {
 
         if(!debugMode){
             client->Update(dt);
-        } else {
-            g->UpdateGame(dt);
         }
         
     }

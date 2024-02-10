@@ -10,13 +10,14 @@ using namespace CSC8503;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5f, 0.5f, 0.5f)) * Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f));
 
-GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetWindow()), gameWorld(world)	{
+GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRenderer(*Window::GetWindow()), gameWorld(world), canvas(canvas)	{
     glEnable(GL_DEPTH_TEST);
 
     debugShader  = new OGLShader("debug.vert", "debug.frag");
     shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
+    defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -76,7 +77,27 @@ GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetW
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
     debugFont->fontShader = textShader;
 
-    GenerateUI();
+    // move to own function.
+    glGenVertexArrays(1, &uiVAO);
+    glGenBuffers(1, &uiVBO);
+    glBindVertexArray(uiVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
+
+    float vertices[6][4] = {
+            { 0,  1,   0.0f, 0.0f },
+            { 0,  0,       0.0f, 1.0f },
+            { 1 , 0,       1.0f, 1.0f },
+
+            { 0, 1,   0.0f, 0.0f },
+            { 1, 0,       1.0f, 1.0f },
+            { 1, 1,   1.0f, 0.0f }
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
 }
 
@@ -130,7 +151,6 @@ void GameTechRenderer::RenderFrame() {
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
 
-
 	glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 1);
 	BuildObjectList();
@@ -144,10 +164,40 @@ void GameTechRenderer::RenderFrame() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	NewRenderLines();
 	NewRenderText();
-  RenderUI(); //TODO: Call this only when UI update happens
+    RenderUI();
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void GameTechRenderer::RenderUI() {
+
+    auto elements = canvas.GetElements();
+    for (auto e : elements) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        BindShader(defaultUIShader);
+
+        auto color = e.GetColor();
+        auto colorAddress = color.array;
+        auto relPos = e.GetDimensions().GetRelativePosition();
+        auto absPos = e.GetDimensions().GetAbsolutePosition();
+        auto relSize = e.GetDimensions().GetRelativeSize();
+        auto absSize = e.GetDimensions().GetAbsoluteSize();
+
+        glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+        glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
+        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
+        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
+        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
+        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+
+
+        glBindVertexArray(uiVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+    }
 }
 
 void GameTechRenderer::BuildObjectList() {
@@ -511,8 +561,7 @@ void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y
 
 std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-    {
+    if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
         return nullptr;
     }
@@ -520,8 +569,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     std::string filePath = std::string(Assets::FONTSSDIR) + fontName;
 
     FT_Face face;
-    if (FT_New_Face(ft, filePath.c_str(), 0, &face))
-    {
+    if (FT_New_Face(ft, filePath.c_str(), 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
         std::cout << filePath.c_str() << std::endl;
         return nullptr;
@@ -530,8 +578,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     FT_Set_Pixel_Sizes(face, 0, 48);
 
 
-    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-    {
+    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
         std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
         return nullptr;
     }
@@ -540,11 +587,9 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 
     auto font = std::make_unique<Font>();
 
-    for (unsigned char c = 0; c < 128; c++)
-    {
+    for (unsigned char c = 0; c < 128; c++) {
 
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-        {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
             continue;
         }
@@ -573,7 +618,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
                 texture,
                 Font::Vector2i(face->glyph->bitmap.width, face->glyph->bitmap.rows),
                 Font::Vector2i(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                (unsigned int)face->glyph->advance.x
+                (unsigned int) face->glyph->advance.x
         };
         font->characters.insert(std::pair<char, Font::Character>(c, character));
 
@@ -592,28 +637,4 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     FT_Done_FreeType(ft);
 
     return font;
-}
-
-void GameTechRenderer::GenerateUI(){
-    UIMesh = HUDElement::GetHUDQuad({50,50}, 10.0f,10.0f);
-    UIQuads.emplace_back(UIMesh);
-
-    //debug for testing
-//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,0}, 10.0f,10.0f));
-//    UIQuads.emplace_back(HUDElement::GetHUDQuad({0,90}, 10.0f,10.0f));
-//    UIQuads.emplace_back(HUDElement::GetHUDQuad({95,91}, 10.0f,10.0f));
-//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,0}, 10.0f,10.0f));
-//    UIQuads.emplace_back(HUDElement::GetHUDQuad({50,90}, 10.0f,10.0f));
-    uiShader = new OGLShader("debug.vert", "debug.frag");
-}
-
-void GameTechRenderer::RenderUI(){
-    BindShader(uiShader);
-    glUniformMatrix4fv(glGetUniformLocation(uiShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
-    glActiveTexture(GL_TEXTURE0);
-
-    for(auto x : UIQuads){
-        BindMesh(x);
-        DrawBoundMesh();
-    }
 }
