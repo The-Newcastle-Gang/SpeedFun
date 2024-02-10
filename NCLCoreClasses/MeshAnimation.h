@@ -19,23 +19,27 @@ namespace NCL {
         int currentFrame;
         float frameTimer;
         float animationSpeed; //used to modify frameRate of an animation
+        float framePercent;
 
         MeshAnimationInfo() {
             frameTimer = 0;
             currentFrame = 0;
-            animationSpeed = 1;
+            animationSpeed = 0.1f;
+            framePercent = 0.0f;
         }
 
         MeshAnimationInfo(float animationSpeed) {
             frameTimer = 0;
             currentFrame = 0;
             this->animationSpeed = animationSpeed;
+            framePercent = 0.0f;
         }
 
         void Reset() {
             frameTimer = 0;
             currentFrame = 0;
             animationSpeed = 1;
+            framePercent = 0.0f;
         }
     };
 
@@ -59,6 +63,10 @@ namespace NCL {
 		float GetFrameRate() const {
 			return frameRate;
 		}
+
+        float GetFrameTimeDelta() const {
+            return frameTimeDelta;
+        }
 
 		const Maths::Matrix4* GetJointData(unsigned int frame) const;
 

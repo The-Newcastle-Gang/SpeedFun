@@ -7,11 +7,12 @@ namespace NCL {
     }
 
     void AnimatorObject::UpdateAnimation(float dt) {
-        animationInfo.frameTimer += dt;
-        if (animationInfo.frameTimer > 1.0f / currentAnimation->GetFrameRate()) {
-            animationInfo.frameTimer -= 1.0f / currentAnimation->GetFrameRate();
+        animationInfo.frameTimer += dt * animationInfo.animationSpeed;
+        if (animationInfo.frameTimer >currentAnimation->GetFrameTimeDelta()) {
+            animationInfo.frameTimer -= currentAnimation->GetFrameTimeDelta();
             animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
         }
-        std::cout << animationInfo.currentFrame << "\n";
+        //std::cout << animationInfo.currentFrame << "\n";
+        animationInfo.framePercent = animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta();
     }
 }

@@ -18,7 +18,7 @@ uniform vec4 		objectColour = vec4(1,1,1,1);
 
 uniform mat4 	joints[110];
 
-//uniform mat4 	otherJoints[128];
+uniform mat4 	nextJoints[110];
 
 uniform float frameLerp;
 
@@ -34,6 +34,7 @@ void main(void) {
 	vec4 localNormal = vec4(normal, 1.0f);
 	vec4 localPos 	= vec4(position, 1.0f);
 	vec4 skelPos 	= vec4(0,0,0,0);
+	vec4 nextSkelPos = vec4(0,0,0,0);
 
 	mat3 normalMatrix = transpose ( inverse ( mat3 ( modelMatrix )));
 
@@ -42,7 +43,10 @@ void main(void) {
 		float jointWeight 	= jointWeights[i];
 
 		skelPos += joints[jointIndex] * localPos * jointWeight;
+		nextSkelPos += nextJoints[jointIndex] * localPos * jointWeight;
 	}
+
+	vec4 lerpedPos = mix(skelPos,nextSkelPos,frameLerp);
 
 	OUT.shadowProj 	=  shadowMatrix * vec4 ( position,1);
 	OUT.worldPos 	= ( modelMatrix * vec4 ( position ,1)). xyz;
@@ -50,7 +54,7 @@ void main(void) {
 	OUT.colour = objectColour;
 
 	mat4 mvp = projMatrix * viewMatrix * modelMatrix;
-	gl_Position = mvp * vec4(skelPos.xyz, 1.0);
+	gl_Position = mvp * vec4(lerpedPos.xyz, 1.0);
 	OUT.texCoord = texCoord;
 
 }

@@ -167,21 +167,32 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
         const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
         const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
         const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
+        const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
         const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
         SubMeshPoses pose;
         boundMesh->GetBindPoseState(subLayer,pose);
 
-        int j = glGetUniformLocation(boundShader->programID, "joints");
+        int jointLoc = glGetUniformLocation(boundShader->programID, "joints");
+        int nextJointLoc = glGetUniformLocation(boundShader->programID, "nextJoints");
+        int frameLerpLoc = glGetUniformLocation(boundShader->programID, "frameLerp");
+
+        float framePercentage = boundAnimation->GetFramePercent();
 
         vector<Matrix4> frameMatrices;
+        vector<Matrix4> nextFrameMatrices;
         for (unsigned int i = 0; i < pose.count; ++i) {
             int jointID = bindPoseIndices[pose.start + i];
 
             Matrix4 mat = frameData[jointID] * invBindPose[pose.start + i];
+            Matrix4 nextMat = nextFrameData[jointID] * invBindPose[pose.start + i];
 
             frameMatrices.emplace_back(mat);
+            nextFrameMatrices.emplace_back(nextMat);
         }
-        glUniformMatrix4fv(j, frameMatrices.size(), false, (float*)frameMatrices.data());
+
+        glUniformMatrix4fv(jointLoc, frameMatrices.size(), false, (float*)frameMatrices.data());
+        glUniformMatrix4fv(nextJointLoc, nextFrameMatrices.size(), false, (float*)nextFrameMatrices.data());
+        glUniform1f(frameLerpLoc, framePercentage);
 
     }
 
