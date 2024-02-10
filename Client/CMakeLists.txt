@@ -12,7 +12,9 @@ add_executable(client
         States/GameplayState.cpp
         States/LoadingState.cpp
         States/MenuState.cpp
+        ClientThread.cpp
         Resources.cpp
+        ClientNetworkData.cpp
         Font.cpp
         DebugMode.cpp
         ${UI}
@@ -38,6 +40,7 @@ target_link_libraries(client PUBLIC
         OpenGLRendering
         replicated
         freetype
+        enet
         lua
         enet
         raudio

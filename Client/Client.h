@@ -19,31 +19,36 @@
 #include "LoadingState.h"
 #include "MenuState.h"
 #include "raudio.h"
+#include "SafeQueue.h"
+#include "ClientThread.h"
+#include "NetworkObject.h"
+#include "enet.h"
+#include "ClientNetworkData.h"
 
 #include <iostream>
 #include <memory>
 #include <array>
 
+
+
 using namespace NCL;
 using namespace CSC8503;
 
-class Client : public PacketReceiver {
+class Client{
 public:
     Client();
     void InitClient();
     std::string GetAddress();
     void Update(float dt);
-    void ReceivePacket(int type, GamePacket* payload, int source) override;
 
 private:
+
     std::unique_ptr<StateMachine> stateManager;
-    std::unique_ptr<GameClient> baseClient;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
-
-
-    void RegisterPackets();
+    std::unique_ptr<ClientNetworkData> networkData;
+    std::unique_ptr<GameClient> baseClient;
     void InitStateManager();
 };
 
