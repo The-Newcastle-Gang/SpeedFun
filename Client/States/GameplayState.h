@@ -13,6 +13,7 @@
 #include "Resources.h"
 #include "ClientNetworkData.h"
 #include "ClientThread.h"
+#include "LevelBuilder.h"
 
 #include <thread>
 #include <iostream>
@@ -37,6 +38,7 @@ namespace NCL {
             void InitWorld();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
+            void InitLevel();
 
 
 #ifdef USEVULKAN

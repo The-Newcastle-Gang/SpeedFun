@@ -148,7 +148,7 @@ add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC NCLCoreClasses enet)
-target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ./ ../enet)
+target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ../Replicated ./ ../enet)
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
     <vector>

@@ -10,9 +10,11 @@
 #include "NetworkObject.h"
 #include "GameTimer.h"
 #include "SafeQueue.h"
+#include "LevelReader.h"
+#include "enet.h"
+
 #include <vector>
 #include <string>
-#include "enet.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -32,13 +34,16 @@ public:
     };
 
     Replicated();
-    void CreateObject(GameObject *g, GameWorld& world);
+    void InitLevel();
+    int GetCurrentLevelLen();
+    void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void CreatePlayer(GameObject *g, GameWorld& world);
+  
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
-
+    LevelReader* levelReader;
 };
 
 struct Diagnostics {

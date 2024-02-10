@@ -10,31 +10,51 @@
 
 using namespace NCL;
 using namespace CSC8503;
+bool debugMode =false;
 
-
-int main() {
-    Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+int main() {  
+    Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1280, 720);
 
     if (!w->HasInitialised()) {
         return -1;
     }
+  
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
 
     auto client = new Client();
-
-    Window::GetWindow()->ShowOSPointer(true);
+    auto g = new TutorialGame();
+  
     Window::GetWindow()->LockMouseToWindow(true);
-
+    Window::GetWindow()->ShowOSPointer(false);
+  
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
             std::cout << "Skipping large time delta" << std::endl;
             continue;
         }
+        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
+            w->ShowConsole(true);
+        }
+        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NEXT)) {
+            w->ShowConsole(false);
+        }
+        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::T)) {
+            w->SetWindowPosition(0, 0);
+        }
+        if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)){
+            debugMode = !debugMode;
+        }
+       
+      w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-        client->Update(dt);
+        if(!debugMode){
+            client->Update(dt);
+        } else {
+            g->UpdateGame(dt);
+        }
+        
     }
     Window::DestroyGameWindow();
-
 }

@@ -3,9 +3,14 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "entt.hpp"
+#include "TestComponent.h"
 
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
+#include <CinematicCamera.h>
+
+#include "DebugMode.h"
 
 
 
@@ -48,6 +53,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
 
 	InitCamera();
+    LoadScripting();
 	InitWorld();
 }
 
@@ -65,13 +71,21 @@ TutorialGame::~TutorialGame()	{
 	delete renderer;
 	delete world;
 
+	delete debugMode;
+
 	delete levelReader;
+  
+	delete cineCamera;
 }
 
 void TutorialGame::UpdateGame(float dt) {
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
 	}
+    if(!inSelectionMode && GetCineMachineMode())
+    {
+        cineCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+    }
 	if (lockedObject != nullptr) {
 		Vector3 objPos = lockedObject->GetTransform().GetPosition();
 		Vector3 camPos = objPos + lockedOffset;
@@ -127,8 +141,23 @@ void TutorialGame::UpdateGame(float dt) {
 	renderer->Update(dt);
 	physics->Update(dt);
 
+
+//	debugMode->DisplayDebug(dt);
+
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
+}
+
+void TutorialGame::LoadScripting() {
+    lua_State *L = luaL_newstate();
+    luaL_openlibs(L);
+
+    auto status = luaL_dofile(L, ASSETROOTLOCATION "Lua/hehe.lua");
+
+    if (status) {
+        std::cerr << "Lua file giga dead: " << lua_tostring(L, -1);
+        exit(1);
+    }
 }
 
 void TutorialGame::UpdateKeys() {
@@ -164,6 +193,11 @@ void TutorialGame::UpdateKeys() {
 	}
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F8)) {
 		world->ShuffleObjects(false);
+	}
+
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F))
+    {
+        SetCineMachineMode(!GetCineMachineMode());
 	}
 
 	if (lockedObject) {
@@ -246,18 +280,17 @@ void TutorialGame::InitCamera() {
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	cineCamera = new CinematicCamera;
+	cineCamera->ReadPositionsFromFile("test.txt");
 	lockedObject = nullptr;
 }
 
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-
-
-	//InitMixedGridWorld(15, 15, 3.5f, 3.5f);
-	//InitGameExamples();
-	//InitDefaultFloor();
 	BuildLevelFromJSON("level2");
+
+	world->StartWorld(); // must be done AFTER all objects are created
 }
 
 /*
@@ -281,7 +314,7 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
 	floor->GetPhysicsObject()->SetInverseMass(0);
 	floor->GetPhysicsObject()->InitCubeInertia();
 
-	world->AddGameObject(floor);
+	world->AddGameObject(floor , false);
 
 	return floor;
 }
@@ -311,7 +344,7 @@ GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius
 	sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
 	sphere->GetPhysicsObject()->InitSphereInertia();
 
-	world->AddGameObject(sphere);
+	world->AddGameObject(sphere, false);
 
 	return sphere;
 }
@@ -332,7 +365,7 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	cube->GetPhysicsObject()->SetInverseMass(inverseMass);
 	cube->GetPhysicsObject()->InitCubeInertia();
 
-	world->AddGameObject(cube);
+	world->AddGameObject(cube, false);
 
 	return cube;
 }
@@ -356,7 +389,11 @@ GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->SetInverseMass(inverseMass);
 	character->GetPhysicsObject()->InitSphereInertia();
 
-	world->AddGameObject(character);
+	world->AddGameObject(character, false);
+
+	TestComponent* t = new TestComponent(character);
+
+	character->AddComponent(t);
 
 	return character;
 }
@@ -380,7 +417,7 @@ GameObject* TutorialGame::AddEnemyToWorld(const Vector3& position) {
 	character->GetPhysicsObject()->SetInverseMass(inverseMass);
 	character->GetPhysicsObject()->InitSphereInertia();
 
-	world->AddGameObject(character);
+	world->AddGameObject(character, false);
 
 	return character;
 }
@@ -400,7 +437,7 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 	apple->GetPhysicsObject()->SetInverseMass(1.0f);
 	apple->GetPhysicsObject()->InitSphereInertia();
 
-	world->AddGameObject(apple);
+	world->AddGameObject(apple, false);
 
 	return apple;
 }
@@ -410,9 +447,9 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 {
 	levelReader = new LevelReader();
     levelBuilder = new LevelBuilder();
-	if (!levelReader->ReadLevel(levelName + ".json"))
+	if (!levelReader->HasReadLevel(levelName + ".json"))
 	{
-		cerr << "No file available. Check " + Assets::LEVELDIR << endl;
+		std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
 		return;
 	}
 

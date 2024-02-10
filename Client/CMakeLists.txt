@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(client)
 
+set(UI "UI/HUDElement.cpp")
 add_executable(client
         main.cpp
         Client.cpp
         GameClient.cpp
         Renderer.cpp
-        #TutorialGame.cpp
+        TutorialGame.cpp
         States/InactiveState.cpp
         States/GameplayState.cpp
         States/LoadingState.cpp
@@ -14,6 +15,10 @@ add_executable(client
         ClientThread.cpp
         Resources.cpp
         ClientNetworkData.cpp
+        Font.cpp
+        DebugMode.cpp
+        ${UI}
+        CinematicCamera.cpp
 )
 
 target_include_directories(client PUBLIC
@@ -25,6 +30,7 @@ target_include_directories(client PUBLIC
         ../FreetypeRenderer/Include
         ./States
         ../enet/include
+        ./UI
 )
 
 target_link_libraries(client PUBLIC
@@ -34,6 +40,7 @@ target_link_libraries(client PUBLIC
         replicated
         freetype
         enet
+        lua
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
