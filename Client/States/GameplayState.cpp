@@ -97,14 +97,14 @@ void GameplayState::CreatePlayers() {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
-        MeshGeometry* playerMesh = resources->GetMesh("Male_Guard.msh");
-        MeshAnimation* testAnimation = resources->GetAnimation("Idle1.anm");
-        playerMesh->AddAnimationToMesh("Idle1.anm", testAnimation);
+        MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+        MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
+        playerMesh->AddAnimationToMesh("Run", testAnimation);
 
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
         AnimatorObject* newAnimator = new AnimatorObject();
-        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle1.anm"));
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
     }
