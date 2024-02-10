@@ -14,11 +14,13 @@ namespace NCL {
             float linearDampingHorizontal = 0.995f;
             float angularDamping = 0.995f;
             PhysicsMaterial() {
+		e = 0.8f
                 linearDampingVertical = 0.995f;
                 linearDampingHorizontal = 0.995f;
                 angularDamping = 0.995f;
             }
-            PhysicsMaterial(float linV, float linH, float ang) {
+            PhysicsMaterial(float coeffOfRest, float linV, float linH, float ang) {
+		e = coeffOfRest;
                 linearDampingVertical = linV;
                 linearDampingHorizontal = linH;
                 angularDamping = ang;
