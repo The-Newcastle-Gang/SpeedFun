@@ -10,7 +10,7 @@
 
 namespace NCL {
     namespace CSC8503 {
-        class MenuState : public State
+        class MenuState : public State, PacketReceiver
         {
         public:
             MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
@@ -40,9 +40,8 @@ namespace NCL {
 
 
             void ConnectToGame(const string &address);
-
+            void RegisterPackets();
             void ConnectedToServer();
-
             void StartGame();
         };
     }

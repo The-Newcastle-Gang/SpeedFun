@@ -22,7 +22,7 @@ namespace NCL {
             void Disconnect();
 
             void SendPacket(GamePacket& payload);
-            void SendPacket(GamePacket& payload, int something);
+            void SendImportantPacket(GamePacket &payload);
 
             void UpdateClient();
 
@@ -30,10 +30,17 @@ namespace NCL {
 
             entt::sink<ConnectionH> OnServerConnected;
             void RemoteFunction(int functionId, FunctionData *data);
+            Diagnostics packetsReceived{};
+            Diagnostics packetsSent{};
+            Diagnostics updateCalled{};
 
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
+
+            void UpdateDiagnostics(Diagnostics &d);
+
+
         };
     }
 }

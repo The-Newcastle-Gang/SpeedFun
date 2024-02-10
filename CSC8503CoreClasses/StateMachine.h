@@ -22,7 +22,6 @@ namespace NCL {
 			void AddTransition(StateTransition* t);
 
 			void Update(float dt);
-			void ReceivePacket(int type, GamePacket *payload, int source);
 
 		protected:
 			State *activeState;
