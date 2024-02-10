@@ -11,6 +11,7 @@ https://research.ncl.ac.uk/game/
 #include "Vector3.h"
 #include "Vector4.h"
 #include "AnimatorObject.h"
+#include "MeshMaterial.h"
 
 
 #ifdef _WIN32
@@ -106,6 +107,7 @@ namespace NCL {
 			OGLMesh*	boundMesh;
 			OGLShader*	boundShader;
             AnimatorObject* boundAnimation;
+            MeshMaterial* boundMaterial;
 
 			//OGLShader*  debugShader;		
 			//std::vector<DebugString>	debugStrings;

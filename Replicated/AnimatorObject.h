@@ -27,5 +27,8 @@ namespace NCL {
     private:
         MeshAnimationInfo animationInfo;
         MeshAnimation* currentAnimation;
+        MeshAnimation* queuedAnimation;
+
+        bool isTransitioning = false;
     };
 }

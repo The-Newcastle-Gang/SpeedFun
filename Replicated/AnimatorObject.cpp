@@ -4,6 +4,8 @@
 namespace NCL {
     void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
         currentAnimation = newAnimation;
+        queuedAnimation = nullptr;
+        isTransitioning = false;
     }
 
     void AnimatorObject::UpdateAnimation(float dt) {

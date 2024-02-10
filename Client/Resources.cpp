@@ -33,3 +33,13 @@ MeshAnimation *Resources::GetAnimation(const std::string& name) {
 
     return animations[name].get();
 }
+
+MeshMaterial* Resources::GetMeshMaterial(const std::string& name) {
+    if (meshMaterials.find(name) == meshMaterials.end()) {
+        auto meshMaterial = std::unique_ptr<MeshMaterial>(new MeshMaterial(name));
+        meshMaterials.insert(std::make_pair(name, std::move(meshMaterial)));
+        return meshMaterials[name].get();
+    }
+
+    return meshMaterials[name].get();
+}

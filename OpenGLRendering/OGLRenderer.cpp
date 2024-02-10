@@ -54,6 +54,8 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 		TextureLoader::RegisterAPILoadFunction(OGLTexture::RGBATextureFromFilename);
 	}
 
+    boundMaterial = nullptr;// new MeshMaterial("Max/Rig_Maximilian.mat");
+
 
 	forceValidDebugState = false;
 }
