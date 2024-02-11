@@ -106,6 +106,8 @@ namespace NCL {
 
             GLuint uiVAO;
             GLuint uiVBO;
+
+            void InitUIQuad();
         };
     }
 }

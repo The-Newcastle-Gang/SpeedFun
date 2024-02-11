@@ -13,7 +13,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
-    delete networkThread;
 }
 
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
@@ -44,6 +43,7 @@ void GameplayState::CreateNetworkThread() {
 void GameplayState::OnExit() {
     world->ClearAndErase();
     renderer->Render();
+    delete networkThread;
 }
 
 void GameplayState::Update(float dt) {

@@ -78,26 +78,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     debugFont->fontShader = textShader;
 
     // move to own function.
-    glGenVertexArrays(1, &uiVAO);
-    glGenBuffers(1, &uiVBO);
-    glBindVertexArray(uiVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
-
-    float vertices[6][4] = {
-            { 0,  1,   0.0f, 0.0f },
-            { 0,  0,       0.0f, 1.0f },
-            { 1 , 0,       1.0f, 1.0f },
-
-            { 0, 1,   0.0f, 0.0f },
-            { 1, 0,       1.0f, 1.0f },
-            { 1, 1,   1.0f, 0.0f }
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    InitUIQuad();
 
 }
 
@@ -105,6 +86,29 @@ GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
     glDeleteFramebuffers(1, &shadowFBO);
     delete defaultShader;
+}
+
+void GameTechRenderer::InitUIQuad() {
+    glGenVertexArrays(1, &uiVAO);
+    glGenBuffers(1, &uiVBO);
+    glBindVertexArray(uiVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
+
+    float vertices[6][4] = {
+            { 0,  1,0.0f,0.0f },
+            { 0,  0,0.0f,1.0f },
+            { 1 , 0,1.0f,1.0f },
+
+            { 0, 1,0.0f,0.0f },
+            { 1, 0,1.0f,1.0f },
+            { 1, 1,1.0f,0.0f }
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void GameTechRenderer::LoadSkybox() {
@@ -181,10 +185,21 @@ void GameTechRenderer::RenderUI() {
 
         auto color = e.GetColor();
         auto colorAddress = color.array;
-        auto relPos = e.GetDimensions().GetRelativePosition();
-        auto absPos = e.GetDimensions().GetAbsolutePosition();
-        auto relSize = e.GetDimensions().GetRelativeSize();
-        auto absSize = e.GetDimensions().GetAbsoluteSize();
+        auto relPos = e.GetRelativePosition();
+        auto absPos = e.GetAbsolutePosition();
+        auto relSize = e.GetRelativeSize();
+        auto absSize = e.GetAbsoluteSize();
+
+        TextureBase* tex = e.GetTexture();
+        if (tex) {
+            auto glTex = (OGLTexture*)tex;
+            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 1);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, glTex->GetObjectID());
+            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "tex"), 0);
+        } else {
+            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 0);
+        }
 
         glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
         glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
