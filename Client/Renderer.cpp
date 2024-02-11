@@ -175,43 +175,48 @@ void GameTechRenderer::RenderFrame() {
 }
 
 void GameTechRenderer::RenderUI() {
+    auto& layers = canvas.GetActiveLayers();
+    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+        auto& elements = (*i)->GetElements();
+        for (auto& e : elements) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    auto elements = canvas.GetElements();
-    for (auto e : elements) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            BindShader(defaultUIShader);
 
-        BindShader(defaultUIShader);
+            auto color = e.GetColor();
+            auto colorAddress = color.array;
+            auto relPos = e.GetRelativePosition();
+            auto absPos = e.GetAbsolutePosition();
+            auto relSize = e.GetRelativeSize();
+            auto absSize = e.GetAbsoluteSize();
 
-        auto color = e.GetColor();
-        auto colorAddress = color.array;
-        auto relPos = e.GetRelativePosition();
-        auto absPos = e.GetAbsolutePosition();
-        auto relSize = e.GetRelativeSize();
-        auto absSize = e.GetAbsoluteSize();
+            TextureBase* tex = e.GetTexture();
+            if (tex) {
+                auto glTex = (OGLTexture*)tex;
+                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 1);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, glTex->GetObjectID());
+                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "tex"), 0);
+            } else {
+                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 0);
+            }
 
-        TextureBase* tex = e.GetTexture();
-        if (tex) {
-            auto glTex = (OGLTexture*)tex;
-            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 1);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, glTex->GetObjectID());
-            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "tex"), 0);
-        } else {
-            glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 0);
+            glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
+            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
+            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
+            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
+            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+
+
+            glBindVertexArray(uiVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
         }
-
-        glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
-        glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
-        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
-        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
-        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
-        glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
-
-
-        glBindVertexArray(uiVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        if ((*i)->CheckBlocking()) {
+            break;
+        }
     }
 }
 

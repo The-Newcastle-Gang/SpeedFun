@@ -38,8 +38,6 @@ using namespace CSC8503;
 class Client{
 public:
     Client();
-    void InitClient();
-    std::string GetAddress();
     void Update(float dt);
 
 private:
@@ -53,6 +51,8 @@ private:
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
     void InitStateManager();
+
+    void PauseScreen();
 };
 
 

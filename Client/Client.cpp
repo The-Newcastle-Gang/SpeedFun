@@ -19,11 +19,13 @@ Client::Client() {
     InitStateManager();
 }
 
+void Client::PauseScreen() {
+}
+
 void Client::InitStateManager() {
 
-    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
-    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get());
-
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get());
 
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
@@ -44,9 +46,9 @@ void Client::InitStateManager() {
 
 void Client::Update(float dt) {
 
-    //baseClient->UpdateClient();
-
     stateManager->Update(dt);
+
+    canvas->Update(dt);
 
     if (dt > 0.04) {
         std::cout << "Overly large dt" << std::endl;

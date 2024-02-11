@@ -7,13 +7,14 @@
 #include "GameClient.h"
 #include "Replicated.h"
 #include "PacketTypes.h"
+#include "Canvas.h"
 
 namespace NCL {
     namespace CSC8503 {
         class MenuState : public State, PacketReceiver
         {
         public:
-            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef);
+            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas);
             ~MenuState();
             void Update(float dt) override;
 
@@ -32,6 +33,7 @@ namespace NCL {
             PhysicsSystem* physics;
             GameWorld* world;
             GameClient* baseClient;
+            Canvas* canvas;
             std::string statusText;
 
             bool isGameStarted;
@@ -43,6 +45,16 @@ namespace NCL {
             void RegisterPackets();
             void ConnectedToServer();
             void StartGame();
+
+            void DogeEnter(Element &element);
+
+            void DogeExit(Element &element);
+
+            void DogeClick(Element &element);
+
+            void GreenBlobClick(Element &element);
+
+            void InitCanvas();
         };
     }
 }

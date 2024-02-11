@@ -2,21 +2,61 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State()
+MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas) : State()
 {
     renderer = pRenderer;
     world = pGameworld;
     // Please do not change this, has to be thread safe.
     baseClient = pClient;
+    canvas = pCanvas;
+}
+
+void MenuState::DogeEnter(Element& element) {
+    element.SetColor({1.0, 0.5, 0.2, 1.0});
+}
+
+void MenuState::DogeExit(Element& element) {
+    element.SetColor({1.0, 1.0, 1.0, 1.0});
+}
+
+void MenuState::DogeClick(Element& element) {
+    canvas->PushActiveLayer("pause");
+}
+
+void MenuState::GreenBlobClick(Element& element) {
+    canvas->PopActiveLayer();
+}
+
+void MenuState::InitCanvas() {
+    auto& element = canvas->AddImageElement("Default.png")
+            .SetAbsoluteSize({512, 512})
+            .AlignMiddle()
+            .AlignCenter();
+
+    element.OnMouseEnter.connect<&MenuState::DogeEnter>(this);
+    element.OnMouseExit.connect<&MenuState::DogeExit>(this);
+    element.OnMouseDown.connect<&MenuState::DogeClick>(this);
+
+    canvas->CreateNewLayer("pause");
+
+    auto& pauseElement = canvas->AddElement("pause")
+            .SetColor({0.5, 1.0, 0.2, 1.0})
+            .SetAbsoluteSize({100, 100})
+            .AlignTop(10)
+            .AlignRight(10);
+
+    pauseElement.OnMouseUp.connect<&MenuState::GreenBlobClick>(this);
 }
 
 void MenuState::OnEnter() {
     isGameStarted = false;
     statusText = "Press L to connect to localhost";
     connectState = 0;
+
+    InitCanvas();
+
     RegisterPackets();
 }
-
 
 void MenuState::RegisterPackets() {
     baseClient->RegisterPacketHandler(Function, this);
@@ -75,6 +115,7 @@ void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
 void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
     baseClient->ClearPacketHandlers();
+    canvas->Reset();
 }
 
 MenuState::~MenuState() {

@@ -15,6 +15,7 @@ add_executable(client
         CinematicCamera.cpp
         UI/Canvas.cpp
         UI/Element.cpp
+        UI/CanvasLayer.cpp
 )
 
 target_include_directories(client PUBLIC

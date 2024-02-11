@@ -24,7 +24,7 @@ namespace NCL {
         class GameplayState : public State
         {
         public:
-            GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources);
+            GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas);
             ~GameplayState();
             void Update(float dt) override;
 
@@ -51,6 +51,7 @@ namespace NCL {
             // DO NOT USE THIS POINTER or suffer a null pointer exception.
             GameClient* baseClient;
             Resources* resources;
+            Canvas* canvas;
             std::unique_ptr<Replicated> replicated;
             // This one is thread safe, add to the outgoing and fetch from incoming.
             std::unique_ptr<ClientNetworkData> networkData;
