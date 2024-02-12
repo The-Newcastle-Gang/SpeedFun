@@ -249,8 +249,6 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
-	//who cares?  i surely don't
-    //re: this unironically came to bite me back in my behind, funny.
 	if (contactVelocity.Length() < velocityThreshold) {
 		cRestitution = 0.0f;
 	}
