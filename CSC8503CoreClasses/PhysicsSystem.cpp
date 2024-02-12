@@ -242,12 +242,6 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Transform& transformB = b.GetTransform();
 
 	float cRestitution = physA->GetElasticity() + physB->GetElasticity() * 0.5;
-
-	//there is probably a better way of doing this
-	/*if (physA->isPlayerRet() || physB->isPlayerRet()) {
-		cRestitution = 0.0f;
-	}*/
-
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
 	if (totalMass == 0) {
@@ -268,11 +262,9 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
-	//who cares?  i surely don't
-    //re: this unironically came to bite me back in my behind, funny.
-//	if (contactVelocity.Length() < 8.0f) {
-//		cRestitution = 0.0f;
-//	}
+	if (contactVelocity.Length() < velocityThreshold) {
+		cRestitution = 0.0f;
+	}
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
@@ -283,6 +275,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	Vector3 fullImpulse = p.normal * j;
+
 
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
@@ -392,8 +385,6 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		if (object == nullptr) {                                //if it's not physical then we go to the next one
 			continue;
 		}
-		//if (object->GetType() == PhysObjType::Static || object->GetType() == PhysObjType::Sleeping) { continue; }
-
 
 		float inverseMass = object->GetInverseMass();       //getting inverse mass
 
@@ -402,11 +393,9 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		Vector3 accel = force * inverseMass;                     //f*m^-1
 
 		if (applyGravity && inverseMass > 0) {
-			//if ((*i)->GetGType() != GameObjType::AI) {
-				accel += gravity;
-			//}
-		}
+            accel += gravity;
 
+		}
 
 		linearVel += accel * dt;                                // v = a(t).dt
 		object->SetLinearVelocity(linearVel);

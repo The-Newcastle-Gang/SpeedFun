@@ -89,24 +89,25 @@ namespace NCL {
 				return physicsMaterial->e;
 			}
 
-            float GetLinearDampVertical() const {
-                return physicsMaterial->linearDampingVertical;
-            }
+      float GetLinearDampVertical() const {
+          return physicsMaterial->linearDampingVertical;
+      }
 
-            float GetLinearDampHorizontal() const {
-                return physicsMaterial->linearDampingHorizontal;
-            }
-            float GetAngularDamp() const {
-                return physicsMaterial->angularDamping;
-            }
-            PhysicsMaterial* GetPhysMat() {
-                return physicsMaterial;
-            }
-            void SetPhysMat(PhysicsMaterial* physMat) {
-                physicsMaterial = physMat;
-            }
+      float GetLinearDampHorizontal() const {
+          return physicsMaterial->linearDampingHorizontal;
+      }
+      float GetAngularDamp() const {
+          return physicsMaterial->angularDamping;
+      }
+      PhysicsMaterial* GetPhysMat() {
+          return physicsMaterial;
+      }
+      void SetPhysMat(PhysicsMaterial* physMat) {
+          physicsMaterial = physMat;
+      }
 
-            void SetForce(const Vector3 &forceSet);
+
+      void SetForce(const Vector3 &forceSet);
 
 
 		protected:
@@ -119,6 +120,7 @@ namespace NCL {
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
+            Vector3 accelerationAtUpdate;
 			
 			//angular stuff
 			Vector3 angularVelocity;

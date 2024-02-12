@@ -146,6 +146,8 @@ void TutorialGame::UpdateGame(float dt) {
 
 	renderer->Render();
 	Debug::UpdateRenderables(dt);
+
+    InputListener::InputUpdate();
 }
 
 void TutorialGame::LoadScripting() {
@@ -288,8 +290,8 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
-	BuildLevelFromJSON("level2");
-
+	BuildLevelFromJSON("sillylevel");
+    InitDefaultFloor();
 	world->StartWorld(); // must be done AFTER all objects are created
 }
 
@@ -446,12 +448,15 @@ GameObject* TutorialGame::AddBonusToWorld(const Vector3& position) {
 void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 {
 	levelReader = new LevelReader();
-    levelBuilder = new LevelBuilder();
 	if (!levelReader->HasReadLevel(levelName + ".json"))
 	{
 		std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
 		return;
 	}
+    auto plist = levelReader->GetPrimitiveList();
+    for(auto x: plist){
+        AddCubeToWorld(x->position, x->dimensions);
+    }
 
 	AddCubeToWorld(levelReader->GetStartPosition(), { 1, 1, 1 });
 	AddCubeToWorld(levelReader->GetEndPosition(), { 100, 1, 100 });
@@ -462,6 +467,7 @@ void NCL::CSC8503::TutorialGame::BuildLevelFromJSON(std::string levelName)
 	}
 
     levelBuilder->BuildLevel(world);
+
 }
 
 void TutorialGame::InitDefaultFloor() {

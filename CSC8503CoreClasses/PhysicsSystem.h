@@ -72,10 +72,14 @@ namespace NCL {
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
 			std::vector<CollisionDetection::CollisionInfo> broadphaseCollisionsVec;
-			bool useBroadPhase		= true;
-			int numCollisionFrames	= 5;
 
-            std::map<std::string, PhysicsMaterial*> physicsMaterials;
+			bool useBroadPhase		    = true;
+			int numCollisionFrames	    = 5;
+      float velocityThreshold    = 8.0f;
+
+
+      std::map<std::string, PhysicsMaterial*> physicsMaterials;
+
 		};
 	}
 }
