@@ -11,11 +11,11 @@ namespace NCL::CSC8503 {
 
 		TestComponent(GameObject* go) { gameObject = go; }
 		void Update(float dt)override {
-			std::cout << "UPDATE TEST" << "\n";
+
 		}
 
 		void Start()override {
-			std::cout << "START TEST" << "\n";
+
 		}
 
 		void PhysicsUpdate(float dt)override {

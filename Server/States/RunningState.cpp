@@ -112,10 +112,14 @@ void RunningState::CreatePlayers() {
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
-        player->GetPhysicsObject()->SetInverseMass(1.0f);
+        player->GetPhysicsObject()->SetInverseMass(10.0f);
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
-        //debug can be done in level manager
-        player->GetTransform().SetPosition(currentLevelStartPos);
+
+        //TODO: clean up
+        player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
+        auto component = new PlayerPhysComponent(player);
+        player->AddComponent(component);
+
         playerObjects[pair.first] = player;
     }
 }
@@ -126,8 +130,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
     player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 30);
     player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 30);
-
-
 
 }
 

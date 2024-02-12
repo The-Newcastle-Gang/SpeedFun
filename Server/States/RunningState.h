@@ -6,6 +6,8 @@
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
 
+#include "PlayerPhysComponent.h"
+
 #include <iostream>
 #include <thread>
 
