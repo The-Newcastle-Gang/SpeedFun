@@ -31,6 +31,7 @@ target_include_directories(client PUBLIC
         ./States
         ../enet/include
         ./UI
+        ../raudio/src
 )
 
 target_link_libraries(client PUBLIC
@@ -41,6 +42,8 @@ target_link_libraries(client PUBLIC
         freetype
         enet
         lua
+        enet
+        raudio
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
