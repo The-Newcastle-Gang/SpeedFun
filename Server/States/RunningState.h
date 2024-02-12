@@ -44,6 +44,8 @@ namespace NCL {
 
             std::unordered_map<int, PlayerInfo> playerInfo;
 
+            LevelReader* levelReader;
+
             float packetTimer;
             int sceneSnapshotId;
 
@@ -52,6 +54,7 @@ namespace NCL {
             std::unordered_map<int, GameObject*> playerObjects;
 
             void LoadLevel();
+            void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 
             void SendWorldToClient();
