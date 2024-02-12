@@ -74,7 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("Level1");
+    BuildLevel("debuglvl");
     CreatePlayers();
 }
 

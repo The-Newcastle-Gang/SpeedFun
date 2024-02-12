@@ -84,6 +84,7 @@ void GameplayState::ReadNetworkPackets() {
 }
 
 void GameplayState::SendInputData() {
+    InputListener::InputUpdate();
     InputPacket input;
 
     Camera* mainCamera = world->GetMainCamera();
@@ -155,7 +156,7 @@ void GameplayState::CreatePlayers() {
 void GameplayState::InitLevel(){
 
     auto lr= new LevelReader();
-    lr->HasReadLevel("finaltest.json");
+    lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();
