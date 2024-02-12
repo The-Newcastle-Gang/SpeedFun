@@ -119,6 +119,10 @@ void RunningState::CreatePlayers() {
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
-    player->GetTransform().SetPosition(player->GetTransform().GetPosition()
-                                       + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
+
+    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 30);
+    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 30);
+
+
+
 }
