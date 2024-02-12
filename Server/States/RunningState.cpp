@@ -74,6 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
+    BuildLevel("Level1");
     CreatePlayers();
 }
 
@@ -121,4 +122,21 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
     player->GetTransform().SetPosition(player->GetTransform().GetPosition()
                                        + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
+}
+
+void RunningState::BuildLevel(const std::string &levelName)
+{
+    std::cout << "Level: " << levelName << " being built\n";
+    levelReader = new LevelReader();
+    if (!levelReader->HasReadLevel(levelName + ".json"))
+    {
+        std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
+        return;
+    }
+    auto plist = levelReader->GetPrimitiveList();
+    for(auto x: plist){
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+    }
 }
