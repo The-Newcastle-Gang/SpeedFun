@@ -8,6 +8,7 @@
 #include "Replicated.h"
 #include "PacketTypes.h"
 #include "Canvas.h"
+#include "TweenManager.h"
 
 namespace NCL {
     namespace CSC8503 {
@@ -34,8 +35,10 @@ namespace NCL {
             GameWorld* world;
             GameClient* baseClient;
             Canvas* canvas;
+            std::unique_ptr<Font> menuFont;
             std::string statusText;
-            Element* hoverBox;
+            std::unique_ptr<TweenManager> tweenManager;
+            int hoverBox;
 
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.
@@ -46,14 +49,6 @@ namespace NCL {
             void RegisterPackets();
             void ConnectedToServer();
             void StartGame();
-
-            void DogeEnter(Element &element);
-
-            void DogeExit(Element &element);
-
-            void DogeClick(Element &element);
-
-            void GreenBlobClick(Element &element);
 
             void InitCanvas();
 

@@ -34,9 +34,9 @@ Element& Canvas::AddElement(const std::string& layerName) {
     if (!DoesLayerExist(layerName)) {
         std::cerr << "Layer doesn't exist!" << std::endl;
     }
-    layers[layerName].GetElements().emplace_back();
-    // Replace this with size for more permananet references?
-    return layers[layerName].GetElements().back();
+    auto index = layers[layerName].GetElements().size();
+    layers[layerName].GetElements().emplace_back(index);
+    return layers[layerName].GetElements()[index];
 }
 
 void Canvas::Reset(bool unloadTextures) {
@@ -69,6 +69,14 @@ void Canvas::Update(float dt) {
             break;
         }
     }
+}
+
+Element& Canvas::GetElementById(int index, const std::string& layerName) {
+    if (!DoesLayerExist(layerName)) {
+        std::cerr << "Layer doesn't exist!" << std::endl;
+    }
+
+    return layers[layerName].GetElements()[index];
 }
 
 void Canvas::PushActiveLayer(const std::string& layerName) {

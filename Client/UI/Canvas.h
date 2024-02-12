@@ -28,6 +28,9 @@ public:
     void CreateNewLayer(const std::string& name, bool isBlocking = true);
     void PushActiveLayer(const std::string &layerName);
     void PopActiveLayer();
+
+
+    Element& GetElementById(int index, const string &layerName = "main");
 private:
     std::unordered_map<std::string, CanvasLayer> layers;
     std::vector<CanvasLayer*> activeLayers;
@@ -36,8 +39,6 @@ private:
     std::unordered_map<std::string, TextureBase*> textures;
     void UnloadTextures();
     bool DoesLayerExist(const std::string &layer);
-
-
 
 };
 

@@ -19,6 +19,15 @@ struct TextData {
         fontSize = 0.5f;
     }
 
+    void SetFont(Font* f) {
+        font = f;
+    }
+
+    [[nodiscard]] Font* GetFont() const {
+        return font;
+    }
+
+    Font* font;
     Vector4 color;
     std::string text;
     float fontSize;

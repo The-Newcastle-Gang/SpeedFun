@@ -17,10 +17,10 @@ void Element::Update(float dt) {
     // Y Coordinates are flipped, just matrix things, can make this not the case if it's important.
     position.y = windowHeight - position.y;
 
-    float lowerBound = GetAbsolutePosition().y + GetRelativePosition().y * windowHeight;
-    float upperBound = lowerBound + (GetAbsoluteSize().y + GetRelativeSize().y * windowHeight);
-    float leftBound = GetAbsolutePosition().x + GetRelativePosition().x * windowWidth;
-    float rightBound = leftBound + (GetAbsoluteSize().x + GetRelativeSize().x * windowWidth);
+    float lowerBound = GetAbsolutePosition().y + GetRelativePosition().y * windowHeight - extendLowerY;
+    float upperBound = lowerBound + (GetAbsoluteSize().y + GetRelativeSize().y * windowHeight) + extendUpperY;
+    float leftBound = GetAbsolutePosition().x + GetRelativePosition().x * windowWidth - extendLowerX;
+    float rightBound = leftBound + (GetAbsoluteSize().x + GetRelativeSize().x * windowWidth) + extendUpperX;
 
     if (position.x > leftBound && position.x < rightBound && position.y < upperBound && position.y > lowerBound) {
         if (isClicked) {

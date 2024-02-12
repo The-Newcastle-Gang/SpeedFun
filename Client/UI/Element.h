@@ -17,13 +17,18 @@ using namespace NCL;
 
 class Element {
 public:
-    Element() : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update) {
+    Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         texture = nullptr;
         hoverTimer = 0;
         mouseDownTimer = 0;
         textData = nullptr;
+        index = ind;
+        extendUpperX = 0;
+        extendLowerX = 0;
+        extendLowerY = 0;
+        extendUpperY = 0;
     }
 
     ~Element() {
@@ -46,12 +51,17 @@ public:
         return dimensions.relativeSize;
     }
 
-    [[nodiscard]] Vector2Int GetAbsolutePosition() const {
+    // TODO: Fix this, should not be returning a reference, tween manager should accept pointer or function callback.
+    [[nodiscard]] Vector2Int& GetAbsolutePosition() {
         return dimensions.absolutePosition;
     }
 
     [[nodiscard]] Vector2 GetRelativePosition() const {
         return dimensions.relativePosition;
+    }
+
+    [[nodiscard]] int GetIndex() const {
+        return index;
     }
 
     Element& SetText(const TextData& data) {
@@ -93,6 +103,18 @@ public:
     Element& AlignLeft(int padding = 0) {
         dimensions.relativePosition.x = 0.0f;
         dimensions.absolutePosition.x = padding;
+        return *this;
+    }
+
+    Element& ExtendLowerBounds(int x, int y) {
+        extendLowerX = x;
+        extendLowerY = y;
+        return *this;
+    }
+
+    Element& ExtendUpperBounds(int x, int y) {
+        extendUpperX = x;
+        extendUpperY = y;
         return *this;
     }
 
@@ -151,6 +173,10 @@ private:
     Vector4 color;
     TextureBase* texture;
     ShaderBase* shader;
+    int extendLowerX;
+    int extendLowerY;
+    int extendUpperX;
+    int extendUpperY;
     entt::sigh<void(Element&, float)> mouseHover;
     entt::sigh<void(Element&)> mouseEnter;
     entt::sigh<void(Element&)> mouseExit;
@@ -161,6 +187,7 @@ private:
 
 
     int somethingElse = 0;
+    int index;
     float hoverTimer;
     float mouseDownTimer;
 

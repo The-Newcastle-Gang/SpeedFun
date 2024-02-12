@@ -12,7 +12,6 @@ Client::Client() {
     world = std::make_unique<GameWorld>();
     canvas = std::make_unique<Canvas>();
     renderer = std::make_unique<GameTechRenderer>(*world, *canvas);
-    networkData = std::make_unique<ClientNetworkData>();
     baseClient = std::make_unique<GameClient>();
     resources = std::make_unique<Resources>(renderer.get());
 

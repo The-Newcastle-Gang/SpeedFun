@@ -6,77 +6,93 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 {
     renderer = pRenderer;
     world = pGameworld;
-    // Please do not change this, has to be thread safe.
+    menuFont = renderer->LoadFont("IndigoRegular.otf");
     baseClient = pClient;
+    tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
 }
 
 void MenuState::OptionHover(Element& element) {
+
+    // Had to switch this to return a reference? Hope there's a better way, feels wrong.
     auto pos = element.GetAbsolutePosition().y;
-    hoverBox->SetAbsolutePosition({0, pos + 33});
-    hoverBox->AlignLeft(95);
-    std::cout << "Working?" << std::endl;
+    auto& boxElement = canvas->GetElementById(hoverBox);
+    tweenManager->CreateTween(
+            TweenManager::EaseOutElastic,
+            boxElement.GetAbsolutePosition().y,
+            pos - 33,
+            &boxElement.GetAbsolutePosition().y,
+            0.5f);
+    boxElement.AlignLeft(95);
+
 }
 
 void MenuState::InitCanvas() {
-
-    auto& menuBox = canvas->AddElement()
+    // This is killing me inside we need to load this in somehow.
+    canvas->AddElement()
             .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
             .SetRelativeSize({0.0f, 1.0f})
             .SetAbsoluteSize({415, 0})
             .AlignLeft(115);
 
-    auto& purpleBox = canvas->AddElement()
+    canvas->AddElement()
            .SetColor({150.0f/255.0f, 0.0f, 210.0f/255.0f, 1.0f})
            .SetAbsoluteSize({550, 220})
            .AlignTop()
            .AlignLeft(50);
 
-    auto& speedWord = canvas->AddImageElement("Menu/TitleSpeed.png")
+    canvas->AddImageElement("Menu/TitleSpeed.png")
             .SetAbsoluteSize({290, 97})
             .SetAbsolutePosition({280, 0})
             .AlignTop(25);
 
-    auto& funWord = canvas->AddImageElement("Menu/TitleFun.png")
+    canvas->AddImageElement("Menu/TitleFun.png")
             .SetAbsoluteSize({151, 77})
             .SetAbsolutePosition({407, 0})
             .AlignTop(122);
 
-    auto& dashes = canvas->AddImageElement("Menu/Dashes.png")
+    canvas->AddImageElement("Menu/Dashes.png")
             .SetAbsoluteSize({109, 70})
             .SetAbsolutePosition({285, 0})
             .AlignTop(128);
 
-    hoverBox = &canvas->AddElement()
+    hoverBox = canvas->AddElement()
             .SetAbsoluteSize({460, 115})
             .SetColor({160.0f/255.0f, 20.0f / 255.0f, 220.0f/255.0f, 1.0f})
             .AlignTop(247)
-            .AlignLeft(95);
+            .AlignLeft(95)
+            .GetIndex();
 
     auto& singleplayer = canvas->AddImageElement("Menu/Singleplayer.png")
             .SetAbsoluteSize({315, 54})
             .SetAbsolutePosition({160, 0})
             .AlignTop(280);
 
+    singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+
     auto& multiplayer = canvas->AddImageElement("Menu/Multiplayer.png")
             .SetAbsoluteSize({290, 54})
             .SetAbsolutePosition({160, 0})
-            .AlignTop(390);
+            .AlignTop(390)
+            .ExtendUpperBounds(20, 0);
+
+    multiplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 
     auto& exit = canvas->AddImageElement("Menu/Exit.png")
             .SetAbsoluteSize({97, 43})
             .SetAbsolutePosition({160, 0})
-            .AlignTop(610);
+            .AlignTop(610)
+            .ExtendUpperBounds(215, 0);
+
+    exit.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 
     auto& options = canvas->AddImageElement("Menu/Options.png")
             .SetAbsoluteSize({201, 55})
             .SetAbsolutePosition({160, 0})
-            .AlignTop(500);
+            .AlignTop(500)
+            .ExtendUpperBounds(115, 0);
 
-
-
-
-
+    options.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 }
 
 void MenuState::OnEnter() {
@@ -92,7 +108,6 @@ void MenuState::OnEnter() {
 void MenuState::RegisterPackets() {
     baseClient->RegisterPacketHandler(Function, this);
 }
-
 
 bool MenuState::CheckConnected() const {
     return isGameStarted;
@@ -117,6 +132,8 @@ void MenuState::StartGame() {
 void MenuState::Update(float dt) {
 
     baseClient->UpdateClient();
+
+    tweenManager->Update(dt);
 
     if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L) && connectState == 0) {
         ConnectToGame("127.0.0.1");

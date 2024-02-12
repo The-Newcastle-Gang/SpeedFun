@@ -16,6 +16,7 @@ add_executable(client
         UI/Canvas.cpp
         UI/Element.cpp
         UI/CanvasLayer.cpp
+        TweenManager.cpp
 )
 
 target_include_directories(client PUBLIC
