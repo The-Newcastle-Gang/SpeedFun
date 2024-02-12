@@ -40,7 +40,7 @@ bool GameServer::Initialise() {
     address.host = ENET_HOST_ANY;
     address.port = port;
 
-    netHandle = enet_host_create(&address, clientMax, 2, 0, 0);
+    netHandle = enet_host_create(&address, clientMax, Replicated::CHANNELCOUNT, 0, 0);
 
     if (!netHandle) {
         std::cout << __FUNCTION__ << " failed to create network handle!" << std::endl;
@@ -57,17 +57,46 @@ bool GameServer::SendGlobalPacket(int msgID) {
 }
 
 bool GameServer::SendGlobalPacket(GamePacket& packet) {
-    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), Replicated::BASICPACKETTYPE);
     enet_host_broadcast(netHandle, 0, dataPacket);
+    return true;
+}
+
+bool GameServer::SendGlobalImportantPacket(GamePacket &packet) {
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), ENET_PACKET_FLAG_RELIABLE);
+    enet_host_broadcast(netHandle, 0, dataPacket);
+    return true;
+}
+
+bool GameServer::UpdateDiagnostics(Diagnostics& d) {
+    d.gameTimer->Tick();
+    d.packetCount++;
+    auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
+    if (timeSinceLastPacket > d.maxPacketTime) {
+        d.maxPacketTime = timeSinceLastPacket;
+    }
+
+    if (timeSinceLastPacket > 0.1) {
+        std::cout << "Delay in packets sent" << std::endl;
+    }
+
     return true;
 }
 
 
 bool GameServer::SendPacket(GamePacket &packet, int peerId) {
-    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), 0);
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), Replicated::BASICPACKETTYPE);
+    enet_peer_send(idToPeer[peerId], 0, dataPacket);
+
+    return true;
+}
+
+bool GameServer::SendImportantPacket(GamePacket &packet, int peerId) {
+    ENetPacket* dataPacket = enet_packet_create(&packet, packet.GetTotalSize(), ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(idToPeer[peerId], 0, dataPacket);
     return true;
 }
+
 
 void GameServer::UpdateServer() {
     if (!netHandle) { return; }
@@ -117,5 +146,8 @@ PlayerInfo GameServer::GetPlayerByPeerId(int peerId) {
 std::unordered_map<int, PlayerInfo> &GameServer::GetPlayerInfo() {
     return players;
 }
+
+
+
 
 

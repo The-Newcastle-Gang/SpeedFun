@@ -1,6 +1,8 @@
 #pragma once
 #include <map>
 #include "entt.hpp"
+#include "enet.h"
+
 struct _ENetHost;
 struct _ENetPeer;
 struct _ENetEvent;
@@ -54,6 +56,10 @@ public:
 	void RegisterPacketHandler(int msgID, PacketReceiver* receiver) {
 		packetHandlers.insert(std::make_pair(msgID, receiver));
 	}
+
+    void ClearPacketHandlers() {
+        packetHandlers.clear();
+    }
 protected:
 	NetworkBase();
 	~NetworkBase();

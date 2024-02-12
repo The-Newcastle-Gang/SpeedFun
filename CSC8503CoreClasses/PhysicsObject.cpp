@@ -4,13 +4,11 @@
 using namespace NCL;
 using namespace CSC8503;
 
-PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume)	{
+PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume, PhysicsMaterial* physMat)	{
 	transform	= parentTransform;
 	volume		= parentVolume;
-
+    physicsMaterial = physMat;
 	inverseMass = 1.0f;
-	elasticity	= 0.8f;
-	friction	= 0.8f;
 }
 
 PhysicsObject::~PhysicsObject()	{
@@ -27,6 +25,10 @@ void PhysicsObject::ApplyLinearImpulse(const Vector3& force) {
 
 void PhysicsObject::AddForce(const Vector3& addedForce) {
 	force += addedForce;
+}
+
+void PhysicsObject::SetForce(const Vector3& forceSet) {
+    force = forceSet;
 }
 
 void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3& position) {
