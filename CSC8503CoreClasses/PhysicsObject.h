@@ -8,9 +8,28 @@ namespace NCL {
 	namespace CSC8503 {
 		class Transform;
 
+        struct PhysicsMaterial {
+            float e = 0.8f;
+            float linearDampingVertical = 0.995f;
+            float linearDampingHorizontal = 0.995f;
+            float angularDamping = 0.995f;
+            PhysicsMaterial() {
+		e = 0.8f
+                linearDampingVertical = 0.995f;
+                linearDampingHorizontal = 0.995f;
+                angularDamping = 0.995f;
+            }
+            PhysicsMaterial(float coeffOfRest, float linV, float linH, float ang) {
+		e = coeffOfRest;
+                linearDampingVertical = linV;
+                linearDampingHorizontal = linH;
+                angularDamping = ang;
+            }
+        };
+
 		class PhysicsObject	{
 		public:
-			PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume);
+			PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume, PhysicsMaterial* physMat);
 			~PhysicsObject();
 
 			Vector3 GetLinearVelocity() const {
@@ -67,18 +86,35 @@ namespace NCL {
 			}
 
 			float GetElasticity() const {
-				return elasticity;
+				return physicsMaterial->e;
 			}
 
+            float GetLinearDampVertical() const {
+                return physicsMaterial->linearDampingVertical;
+            }
+
+            float GetLinearDampHorizontal() const {
+                return physicsMaterial->linearDampingHorizontal;
+            }
+            float GetAngularDamp() const {
+                return physicsMaterial->angularDamping;
+            }
+            PhysicsMaterial* GetPhysMat() {
+                return physicsMaterial;
+            }
+            void SetPhysMat(PhysicsMaterial* physMat) {
+                physicsMaterial = physMat;
+            }
+
             void SetForce(const Vector3 &forceSet);
+
 
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
 
 			float inverseMass;
-			float elasticity;
-			float friction;
+            PhysicsMaterial* physicsMaterial;
 
 			//linear stuff
 			Vector3 linearVelocity;
