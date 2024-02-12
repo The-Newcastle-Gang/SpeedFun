@@ -128,8 +128,9 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
 
-    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 30);
-    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 30);
+    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
+    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
+
 
 }
 
