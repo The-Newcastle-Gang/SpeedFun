@@ -35,19 +35,19 @@ public:
 class LevelReader {
 public:
 
+    LevelReader();
+    ~LevelReader();
+
 	Vector3 GetStartPosition() { return startPosition; }
 	Vector3 GetEndPosition() { return endPosition; }
     std::vector<PrimitiveGameObject*> GetPrimitiveList(){ return primGOList; }
-
-
     std::vector<GroundCubePrimitive*> GetGroundCubes() { return groundCubes; }
-
-	bool ReadLevel(const std::string& source);
+    int GetLevelSize(){ return primGOList.size();}
+	bool HasReadLevel(const std::string& source);
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;
     std::vector<PrimitiveGameObject*> primGOList;
-
     std::vector<GroundCubePrimitive*> groundCubes;
 
 };

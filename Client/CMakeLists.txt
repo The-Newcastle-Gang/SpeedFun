@@ -12,7 +12,9 @@ add_executable(client
         States/GameplayState.cpp
         States/LoadingState.cpp
         States/MenuState.cpp
+        ClientThread.cpp
         Resources.cpp
+        ClientNetworkData.cpp
         Font.cpp
         DebugMode.cpp
         ${UI}
@@ -29,6 +31,7 @@ target_include_directories(client PUBLIC
         ./States
         ../enet/include
         ./UI
+        ../raudio/src
 )
 
 target_link_libraries(client PUBLIC
@@ -37,7 +40,10 @@ target_link_libraries(client PUBLIC
         OpenGLRendering
         replicated
         freetype
+        enet
         lua
+        enet
+        raudio
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE

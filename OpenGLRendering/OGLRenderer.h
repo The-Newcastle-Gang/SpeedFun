@@ -12,7 +12,7 @@ https://research.ncl.ac.uk/game/
 #include "Vector3.h"
 #include "Vector4.h"
 
-
+#define _WINSOCKAPI_
 #ifdef _WIN32
 #include "windows.h"
 #endif

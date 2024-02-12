@@ -1,5 +1,6 @@
 #include "NetworkObject.h"
 #include "enet.h"
+#include <chrono>
 using namespace NCL;
 using namespace CSC8503;
 
@@ -23,14 +24,10 @@ bool NetworkObject::ReadPacket(GamePacket& p) {
     return false;
 }
 
-bool NetworkObject::WritePacket(GamePacket** p, bool deltaFrame, int stateID) {
-	if (deltaFrame) {
-		if (!WriteDeltaPacket(p, stateID)) {
-			return WriteFullPacket(p);
-		}
-	}
-	return WriteFullPacket(p);
+bool NetworkObject::WritePacket(FullPacket& packet, bool deltaFrame, int stateID) {
+	return WriteFullPacket(packet);
 }
+
 //Client objects recieve these packets
 bool NetworkObject::ReadDeltaPacket(DeltaPacket &p) {
 	return true;
@@ -38,6 +35,7 @@ bool NetworkObject::ReadDeltaPacket(DeltaPacket &p) {
 
 bool NetworkObject::ReadFullPacket(FullPacket &p) {
     if (p.fullState.stateID < lastFullState.stateID) {
+        std::cout << "Packet recieved out of order." << std::endl;
         return false;
     }
 
@@ -53,13 +51,11 @@ bool NetworkObject::WriteDeltaPacket(GamePacket**p, int stateID) {
 	return true;
 }
 
-bool NetworkObject::WriteFullPacket(GamePacket**p) {
-    auto fp = new FullPacket();
-    fp->objectID = networkID;
-    fp->fullState.position = object.GetTransform().GetPosition();
-    fp->fullState.orientation = object.GetTransform().GetOrientation();
-    fp->fullState.stateID = lastFullState.stateID++;
-    *p = fp;
+bool NetworkObject::WriteFullPacket(FullPacket& packet) {
+    packet.objectID = networkID;
+    packet.fullState.position = object.GetTransform().GetPosition();
+    packet.fullState.orientation = object.GetTransform().GetOrientation();
+    packet.fullState.stateID = lastFullState.stateID++;
     return true;
 }
 

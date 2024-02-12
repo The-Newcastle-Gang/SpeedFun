@@ -84,11 +84,13 @@ void PhysicsSystem::Update(float dt) {
 
 	GameTimer t;
 	t.GetTimeDeltaSeconds();
-
+  
 	if (useBroadPhase) {
 		UpdateObjectAABBs();
 	}
+  
 	int iteratorCount = 0;
+
 	while(dTOffset > realDT) {
 		gameWorld.UpdateWorldPhysics(realDT);
 		IntegrateAccel(realDT); //Update accelerations from external forces
@@ -110,7 +112,7 @@ void PhysicsSystem::Update(float dt) {
 		IntegrateVelocity(realDT); //update positions from new velocity changes
 
 		dTOffset -= realDT;
-		iteratorCount++;
+    iteratorCount++;
 	}
 
 	ClearForces();	//Once we've finished with the forces, reset them to zero
@@ -430,6 +432,8 @@ the world, looking for collisions.
 */
 void PhysicsSystem::IntegrateVelocity(float dt) {
 
+    constexpr float SPEEDMAX = 10.0f;
+
 	std::vector<GameObject*>::const_iterator first;
 	std::vector<GameObject*>::const_iterator last;
 
@@ -446,6 +450,11 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 
 		Vector3 position = transform.GetPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
+
+        float strength = linearVel.Length();
+        if (strength > SPEEDMAX) {
+            object->SetLinearVelocity(linearVel.Normalised() * SPEEDMAX);
+        }
 
 		position += linearVel * dt;
 		transform.SetPosition(position);

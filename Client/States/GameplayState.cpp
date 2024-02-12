@@ -6,36 +6,81 @@ using namespace CSC8503;
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
     renderer = pRenderer;
     world = pGameworld;
+    // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
     resources = std::make_unique<Resources>(renderer);
+    replicated = std::make_unique<Replicated>();
 }
 
-GameplayState::~GameplayState() {}
+GameplayState::~GameplayState() {
+    delete networkThread;
+}
+
+void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
+
+    auto threadClient = ClientThread(client, networkData);
+
+    while (client) {
+        threadClient.Update();
+    }
+
+}
 
 void GameplayState::OnEnter() {
-
-    Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
-
     firstPersonPosition = nullptr;
+    CreateNetworkThread();
     InitialiseAssets();
 }
+
+void GameplayState::CreateNetworkThread() {
+    GameClient* client = baseClient;
+    baseClient = nullptr;
+    networkData = std::make_unique<ClientNetworkData>();
+    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
+    networkThread->detach();
+}
+
+
 void GameplayState::OnExit() {
     world->ClearAndErase();
     renderer->Render();
 }
 
 void GameplayState::Update(float dt) {
+    SendInputData();
+    ReadNetworkFunctions();
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
 
     world->GetMainCamera()->UpdateCamera(dt);
-    SendInputData();
     world->UpdateWorld(dt);
+
+    ReadNetworkPackets();
+
     renderer->Render();
     Debug::UpdateRenderables(dt);
+}
+
+void GameplayState::ReadNetworkFunctions() {
+    while (!networkData->incomingFunctions.IsEmpty()) {
+        FunctionPacket packet = networkData->incomingFunctions.Pop();
+        if (packet.functionId == Replicated::AssignPlayer) {
+            DataHandler handler(&packet.data);
+            auto networkId = handler.Unpack<int>();
+            AssignPlayer(networkId);
+        }
+    }
+}
+
+// Perhaps replace this with a data structure that won't overlap objects on the same packet.
+void GameplayState::ReadNetworkPackets() {
+    while (!networkData->incomingState.IsEmpty()) {
+        FullPacket packet = networkData->incomingState.Pop();
+        auto id = packet.objectID;
+        world->GetNetworkObject(id)->ReadPacket(packet);
+    }
 }
 
 void GameplayState::SendInputData() {
@@ -65,7 +110,7 @@ void GameplayState::SendInputData() {
     playerDirection.Normalise();
     input.playerDirection = playerDirection;
 
-    baseClient->SendPacket(input);
+    networkData->outgoingInput.Push(input);
 }
 
 
@@ -76,7 +121,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::FinishLoading() {
-    baseClient->RemoteFunction(Replicated::GameLoaded, nullptr);
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
 
 void GameplayState::InitCamera() {
@@ -89,6 +134,7 @@ void GameplayState::InitCamera() {
 
 void GameplayState::InitWorld() {
     CreatePlayers();
+    InitLevel();
 }
 
 void GameplayState::CreatePlayers() {
@@ -96,6 +142,18 @@ void GameplayState::CreatePlayers() {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
         player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+    }
+}
+
+void GameplayState::InitLevel(){
+
+    auto lr= new LevelReader();
+    lr->HasReadLevel("finaltest.json");
+    auto plist  = lr->GetPrimitiveList();
+    for(auto x : plist){
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 }
 
@@ -109,15 +167,6 @@ void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
     player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
-}
+    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
-void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
-    if (type == Function) {
-        auto functionPacket = reinterpret_cast<FunctionPacket*>(payload);
-        if (functionPacket->functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&functionPacket->data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
-        }
-    }
 }
