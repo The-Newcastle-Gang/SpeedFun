@@ -35,6 +35,7 @@ namespace NCL {
             GameClient* baseClient;
             Canvas* canvas;
             std::string statusText;
+            Element* hoverBox;
 
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.
@@ -55,6 +56,8 @@ namespace NCL {
             void GreenBlobClick(Element &element);
 
             void InitCanvas();
+
+            void OptionHover(Element &element);
         };
     }
 }

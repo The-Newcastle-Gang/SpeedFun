@@ -85,6 +85,11 @@ public:
         return *this;
     }
 
+    Element& SetShader(ShaderBase* s) {
+        shader = s;
+        return *this;
+    }
+
     Element& AlignLeft(int padding = 0) {
         dimensions.relativePosition.x = 0.0f;
         dimensions.absolutePosition.x = padding;
@@ -140,12 +145,12 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnMouseUp;
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHold;
 
-
     TextData* textData;
 private:
     UIDim dimensions;
     Vector4 color;
     TextureBase* texture;
+    ShaderBase* shader;
     entt::sigh<void(Element&, float)> mouseHover;
     entt::sigh<void(Element&)> mouseEnter;
     entt::sigh<void(Element&)> mouseExit;
@@ -158,6 +163,7 @@ private:
     int somethingElse = 0;
     float hoverTimer;
     float mouseDownTimer;
+
 };
 
 

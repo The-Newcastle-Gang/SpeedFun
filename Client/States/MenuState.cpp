@@ -11,44 +11,72 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     canvas = pCanvas;
 }
 
-void MenuState::DogeEnter(Element& element) {
-    element.SetColor({1.0, 0.5, 0.2, 1.0});
-}
-
-void MenuState::DogeExit(Element& element) {
-    element.SetColor({1.0, 1.0, 1.0, 1.0});
-}
-
-void MenuState::DogeClick(Element& element) {
-    canvas->PushActiveLayer("pause");
-}
-
-void MenuState::GreenBlobClick(Element& element) {
-    canvas->PopActiveLayer();
+void MenuState::OptionHover(Element& element) {
+    auto pos = element.GetAbsolutePosition().y;
+    hoverBox->SetAbsolutePosition({0, pos + 33});
+    hoverBox->AlignLeft(95);
+    std::cout << "Working?" << std::endl;
 }
 
 void MenuState::InitCanvas() {
-    auto& element = canvas->AddImageElement("Default.png")
-            .SetAbsoluteSize({512, 512})
-            .AlignMiddle()
-            .AlignCenter();
 
-    element.OnMouseEnter.connect<&MenuState::DogeEnter>(this);
-    element.OnMouseExit.connect<&MenuState::DogeExit>(this);
-    element.OnMouseDown.connect<&MenuState::DogeClick>(this);
+    auto& menuBox = canvas->AddElement()
+            .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
+            .SetRelativeSize({0.0f, 1.0f})
+            .SetAbsoluteSize({415, 0})
+            .AlignLeft(115);
 
-    canvas->CreateNewLayer("pause");
+    auto& purpleBox = canvas->AddElement()
+           .SetColor({150.0f/255.0f, 0.0f, 210.0f/255.0f, 1.0f})
+           .SetAbsoluteSize({550, 220})
+           .AlignTop()
+           .AlignLeft(50);
 
-    auto textData = TextData();
+    auto& speedWord = canvas->AddImageElement("Menu/TitleSpeed.png")
+            .SetAbsoluteSize({290, 97})
+            .SetAbsolutePosition({280, 0})
+            .AlignTop(25);
 
-    auto& pauseElement = canvas->AddElement("pause")
-            .SetColor({0.5, 1.0, 0.2, 1.0})
-            .SetAbsoluteSize({100, 100})
-            .AlignLeft(10)
-            .AlignMiddle()
-            .SetText(textData);
+    auto& funWord = canvas->AddImageElement("Menu/TitleFun.png")
+            .SetAbsoluteSize({151, 77})
+            .SetAbsolutePosition({407, 0})
+            .AlignTop(122);
 
-    pauseElement.OnMouseUp.connect<&MenuState::GreenBlobClick>(this);
+    auto& dashes = canvas->AddImageElement("Menu/Dashes.png")
+            .SetAbsoluteSize({109, 70})
+            .SetAbsolutePosition({285, 0})
+            .AlignTop(128);
+
+    hoverBox = &canvas->AddElement()
+            .SetAbsoluteSize({460, 115})
+            .SetColor({160.0f/255.0f, 20.0f / 255.0f, 220.0f/255.0f, 1.0f})
+            .AlignTop(247)
+            .AlignLeft(95);
+
+    auto& singleplayer = canvas->AddImageElement("Menu/Singleplayer.png")
+            .SetAbsoluteSize({315, 54})
+            .SetAbsolutePosition({160, 0})
+            .AlignTop(280);
+
+    auto& multiplayer = canvas->AddImageElement("Menu/Multiplayer.png")
+            .SetAbsoluteSize({290, 54})
+            .SetAbsolutePosition({160, 0})
+            .AlignTop(390);
+
+    auto& exit = canvas->AddImageElement("Menu/Exit.png")
+            .SetAbsoluteSize({97, 43})
+            .SetAbsolutePosition({160, 0})
+            .AlignTop(610);
+
+    auto& options = canvas->AddImageElement("Menu/Options.png")
+            .SetAbsoluteSize({201, 55})
+            .SetAbsolutePosition({160, 0})
+            .AlignTop(500);
+
+
+
+
+
 }
 
 void MenuState::OnEnter() {
@@ -98,7 +126,7 @@ void MenuState::Update(float dt) {
         StartGame();
     }
 
-    Debug::Print(statusText, Vector2(10, 20));
+    //Debug::Print(statusText, Vector2(10, 20));
     renderer->Render();
     Debug::UpdateRenderables(dt);
 }

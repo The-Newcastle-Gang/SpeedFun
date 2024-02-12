@@ -35,6 +35,7 @@ Element& Canvas::AddElement(const std::string& layerName) {
         std::cerr << "Layer doesn't exist!" << std::endl;
     }
     layers[layerName].GetElements().emplace_back();
+    // Replace this with size for more permananet references?
     return layers[layerName].GetElements().back();
 }
 
