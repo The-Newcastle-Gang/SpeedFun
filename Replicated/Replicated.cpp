@@ -20,7 +20,7 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new AABBVolume(currentPrimitive->colliderExtents);
     g->SetBoundingVolume((CollisionVolume*)volume);
-
+    
     g->GetTransform()
         .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position);

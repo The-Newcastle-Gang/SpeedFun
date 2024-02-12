@@ -45,6 +45,7 @@ namespace NCL {
             std::unordered_map<int, PlayerInfo> playerInfo;
 
             LevelReader* levelReader;
+            Vector3 currentLevelStartPos;
 
             float packetTimer;
             int sceneSnapshotId;

@@ -113,6 +113,8 @@ void RunningState::CreatePlayers() {
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetInverseMass(1.0f);
+        //debug can be done in level manager
+        player->GetTransform().SetPosition(currentLevelStartPos);
         playerObjects[pair.first] = player;
     }
 }
@@ -137,10 +139,13 @@ void RunningState::BuildLevel(const std::string &levelName)
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return;
     }
+    currentLevelStartPos = levelReader->GetStartPosition();
+
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
 }

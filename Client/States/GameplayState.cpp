@@ -98,25 +98,7 @@ void GameplayState::SendInputData() {
     input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
 
 
-
-    Vector2 playerDirection;
-
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-        playerDirection.y += 1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-        playerDirection.y += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-        playerDirection.x += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-        playerDirection.x += 1;
-    }
-
-    playerDirection.Normalise();
-    input.playerDirection = playerDirection;
-
+    input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
 }

@@ -17,9 +17,11 @@ public:
     ~InputListener();
 
     static void InputUpdate();
+    static Vector2 GetPlayerInput(){ return PlayerInput; }
 protected:
     static Vector2 HorizontalAxis;
     static Vector2 VerticalAxis;
+    static Vector2 PlayerInput;
 
 };
 
