@@ -11,9 +11,11 @@
 #include "PositionConstraint.h"
 #include "OrientationConstraint.h"
 #include "Resources.h"
-
+#include "ClientNetworkData.h"
+#include "ClientThread.h"
 #include "LevelBuilder.h"
 
+#include <thread>
 #include <iostream>
 
 namespace NCL {
@@ -30,15 +32,12 @@ namespace NCL {
 
             bool IsDisconnected();
 
-            void ReceivePacket(int type, GamePacket* payload, int source) override;
-
-
         protected:
-
             void InitialiseAssets();
             void InitCamera();
             void InitWorld();
             void AssignPlayer(int netObject);
+            void CreateNetworkThread();
             void InitLevel();
 
 
@@ -48,17 +47,29 @@ namespace NCL {
             GameTechRenderer* renderer;
 #endif
             GameWorld* world;
+            // DO NOT USE THIS POINTER or suffer a null pointer exception.
             GameClient* baseClient;
             std::unique_ptr<Resources> resources;
             std::unique_ptr<Replicated> replicated;
+            // This one is thread safe, add to the outgoing and fetch from incoming.
+            std::unique_ptr<ClientNetworkData> networkData;
+
+            std::thread* networkThread;
 
             Transform* firstPersonPosition;
 
+            Diagnostics packetsSent{};
 
             void SendInputData();
             void CreatePlayers();
 
             void FinishLoading();
+
+            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+
+            void ReadNetworkFunctions();
+
+            void ReadNetworkPackets();
         };
     }
 }

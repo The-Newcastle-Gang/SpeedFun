@@ -70,13 +70,9 @@ namespace NCL {
 				return elasticity;
 			}
 
-            Vector3 GetAccelerationAtUpdate(){
-                return accelerationAtUpdate;
-            }
 
-            void SetAccelerationAtUpdate(Vector3 accel){
-                accelerationAtUpdate = accel;
-            }
+            void SetForce(const Vector3 &forceSet);
+
 
 		protected:
 			const CollisionVolume* volume;
@@ -96,7 +92,7 @@ namespace NCL {
 			Vector3 torque;
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
-		};
+        };
 	}
 }
 

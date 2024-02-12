@@ -6,14 +6,19 @@ using namespace CSC8503;
 
 WaitingPlayers::WaitingPlayers(GameServer* pServerBase) : State() {
     serverBase = pServerBase;
+
 }
 
 WaitingPlayers::~WaitingPlayers() {
 
 }
 
-void WaitingPlayers::Update(float dt) {
+void WaitingPlayers::RegisterPackets() {
+    serverBase->RegisterPacketHandler(Function, this);
+}
 
+void WaitingPlayers::Update(float dt) {
+    serverBase->UpdateServer();
 }
 
 void WaitingPlayers::AddPlayer(int peerId) {
@@ -45,8 +50,10 @@ void WaitingPlayers::OnEnter() {
     std::cout << "Waiting for players" << std::endl;
     serverBase->OnPlayerJoined.connect<&WaitingPlayers::AddPlayer>(this);
     isReady = false;
+    RegisterPackets();
 }
 
 void WaitingPlayers::OnExit() {
     serverBase->OnPlayerJoined.disconnect(this);
+    serverBase->ClearPacketHandlers();
 }

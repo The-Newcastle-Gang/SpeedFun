@@ -31,8 +31,10 @@ namespace NCL {
 
             bool SendGlobalPacket(int msgID);
             bool SendGlobalPacket(GamePacket& packet);
+            bool SendGlobalImportantPacket(GamePacket& packet);
 
             bool SendPacket(GamePacket& packet, int peerId);
+            bool SendImportantPacket(GamePacket& packet, int peerId);
 
             void AddPlayerInfo(int peerId, PlayerInfo& info);
             std::unordered_map<int, PlayerInfo>& GetPlayerInfo();
@@ -66,7 +68,11 @@ namespace NCL {
             PlayerSignalH playerJoined;
             PlayerSignalH playerLeft;
 
+            Diagnostics packetsSent{};
+            Diagnostics packetsRecieved{};
+
             void RemovePlayerInfo(int peerId);
+            bool UpdateDiagnostics(Diagnostics &d);
         };
     }
 }

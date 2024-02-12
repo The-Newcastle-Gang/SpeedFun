@@ -2,7 +2,6 @@
 // Created by c3042750 on 30/01/2024.
 //
 #include <iostream>
-
 #include "Client.h"
 #include "Window.h"
 #include "TutorialGame.h"
@@ -19,7 +18,7 @@ int main() {
     if (!w->HasInitialised()) {
         return -1;
     }
-
+  
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
 
@@ -27,6 +26,7 @@ int main() {
     auto g = new TutorialGame();
   
     Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
   
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();

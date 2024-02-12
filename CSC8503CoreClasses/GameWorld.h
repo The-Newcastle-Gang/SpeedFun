@@ -66,6 +66,20 @@ namespace NCL {
                 return networkObjects[networkId]->GetParent();
             }
 
+            [[nodiscard]] NetworkObject* GetNetworkObject(int networkId) const {
+                return networkObjects[networkId];
+            }
+
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorStart() {
+                return networkObjects.begin();
+            }
+
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorEnd() {
+                return networkObjects.end();
+            }
+
+            vector<NetworkObject *> &GetNetworkObjects();
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;
@@ -80,6 +94,8 @@ namespace NCL {
             int		worldStateCounter;
 
             int networkIdCounter;
+
+
         };
     }
 }
