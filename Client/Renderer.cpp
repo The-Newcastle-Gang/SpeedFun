@@ -175,12 +175,12 @@ void GameTechRenderer::RenderFrame() {
 }
 
 void GameTechRenderer::RenderUI() {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     auto& layers = canvas.GetActiveLayers();
     for (auto i = layers.rbegin(); i != layers.rend(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             BindShader(defaultUIShader);
 
@@ -202,6 +202,9 @@ void GameTechRenderer::RenderUI() {
                 glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 0);
             }
 
+            auto textX = (relPos.x + (float)absPos.x / (float)windowWidth) * 100;
+            auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
+
             glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
             glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
             glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
@@ -213,6 +216,11 @@ void GameTechRenderer::RenderUI() {
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
+
+            if (e.textData) {
+                RenderText(e.textData->text, debugFont.get(), textX, textY, e.textData->fontSize, e.textData->color);
+            }
+
         }
         if ((*i)->CheckBlocking()) {
             break;
@@ -535,7 +543,6 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
 void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     BindShader(font->fontShader.get());
 
     glUniform3f(glGetUniformLocation(textShader->GetProgramID(), "textColor"), color.x, color.y, color.z);

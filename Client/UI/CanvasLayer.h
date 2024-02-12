@@ -19,7 +19,6 @@ public:
 private:
     bool isBlocking;
     std::vector<Element> elements;
-
 };
 
 

@@ -11,10 +11,9 @@
 #include "TextureBase.h"
 #include "entt.hpp"
 #include "Window.h"
+#include "TextData.h"
 
 using namespace NCL;
-using namespace Maths;
-using namespace Rendering;
 
 class Element {
 public:
@@ -24,6 +23,11 @@ public:
         texture = nullptr;
         hoverTimer = 0;
         mouseDownTimer = 0;
+        textData = nullptr;
+    }
+
+    ~Element() {
+        delete textData;
     }
 
     [[nodiscard]] UIDim GetDimensions() const {
@@ -48,6 +52,12 @@ public:
 
     [[nodiscard]] Vector2 GetRelativePosition() const {
         return dimensions.relativePosition;
+    }
+
+    Element& SetText(const TextData& data) {
+        delete textData;
+        textData = new TextData(data);
+        return *this;
     }
 
     Element& SetAbsolutePosition(Vector2Int v) {
@@ -130,6 +140,8 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnMouseUp;
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHold;
 
+
+    TextData* textData;
 private:
     UIDim dimensions;
     Vector4 color;
@@ -141,6 +153,7 @@ private:
     entt::sigh<void(Element&)> mouseUp;
     entt::sigh<void(Element&, float)> mouseHold;
     entt::sigh<void(Element&, float)> update;
+
 
     int somethingElse = 0;
     float hoverTimer;

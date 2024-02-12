@@ -39,11 +39,14 @@ void MenuState::InitCanvas() {
 
     canvas->CreateNewLayer("pause");
 
+    auto textData = TextData();
+
     auto& pauseElement = canvas->AddElement("pause")
             .SetColor({0.5, 1.0, 0.2, 1.0})
             .SetAbsoluteSize({100, 100})
-            .AlignTop(10)
-            .AlignRight(10);
+            .AlignLeft(10)
+            .AlignMiddle()
+            .SetText(textData);
 
     pauseElement.OnMouseUp.connect<&MenuState::GreenBlobClick>(this);
 }
