@@ -386,7 +386,7 @@ GameObject* TutorialGame::AddTriggerVolumeToWorld(const Vector3 &position, Vecto
             .SetPosition(position)
             .SetScale(dimensions * 2);
 // If you want to see the cube then set the rendering object. See commented out line below:
-//    cubeTrigger->SetRenderObject(new RenderObject(&cubeTrigger->GetTransform(), cubeMesh, triggerTex, basicShader));
+    cubeTrigger->SetRenderObject(new RenderObject(&cubeTrigger->GetTransform(), cubeMesh, triggerTex, basicShader));
     cubeTrigger->SetPhysicsObject(new PhysicsObject(&cubeTrigger->GetTransform(), cubeTrigger->GetBoundingVolume(), new PhysicsMaterial()));
 
     cubeTrigger->GetPhysicsObject()->SetInverseMass(inverseMass);
