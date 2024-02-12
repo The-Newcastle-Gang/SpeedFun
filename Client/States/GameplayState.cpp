@@ -92,6 +92,12 @@ void GameplayState::SendInputData() {
 
     input.playerRotation = Quaternion::EulerAnglesToQuaternion(cameraPitch, cameraYaw, 0);
 
+    Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
+    input.rightAxis = Vector3(camWorld.GetColumn(0));
+    input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
+
+
+
     Vector2 playerDirection;
 
     if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
@@ -109,6 +115,7 @@ void GameplayState::SendInputData() {
 
     playerDirection.Normalise();
     input.playerDirection = playerDirection;
+
 
     networkData->outgoingInput.Push(input);
 }
