@@ -89,6 +89,7 @@ namespace NCL {
 				return physicsMaterial->e;
 			}
 
+
             void SetIsTriggerVolume(bool b)
             {
                 isTrigger = b;
@@ -128,6 +129,7 @@ namespace NCL {
 			//linear stuff
 			Vector3 linearVelocity;
 			Vector3 force;
+            Vector3 accelerationAtUpdate;
 			
 			//angular stuff
 			Vector3 angularVelocity;

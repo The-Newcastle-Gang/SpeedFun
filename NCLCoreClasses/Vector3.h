@@ -172,5 +172,6 @@ namespace NCL::Maths {
 			o << "Vector3(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
 			return o;
 		}
+
 	};
 }
