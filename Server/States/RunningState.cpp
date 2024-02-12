@@ -137,6 +137,6 @@ void RunningState::BuildLevel(const std::string &levelName)
     for(auto x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
-        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume()));
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
     }
 }
