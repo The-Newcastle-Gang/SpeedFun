@@ -113,6 +113,7 @@ void RunningState::CreatePlayers() {
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetInverseMass(1.0f);
+        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
         //debug can be done in level manager
         player->GetTransform().SetPosition(currentLevelStartPos);
         playerObjects[pair.first] = player;
