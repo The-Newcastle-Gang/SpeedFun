@@ -23,7 +23,6 @@ void Client::InitStateManager() {
     auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
     auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get());
 
-
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
         return clientMenu->CheckConnected();
     });
