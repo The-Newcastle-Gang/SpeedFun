@@ -145,6 +145,9 @@ void GameplayState::InitLevel(){
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
+    auto temp = new GameObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(5,5,5) ,temp, *world);
+    replicated->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh, nullptr, nullptr));
 }
 
 

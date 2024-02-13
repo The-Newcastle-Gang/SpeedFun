@@ -76,6 +76,7 @@ void RunningState::Update(float dt) {
 void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
     CreatePlayers();
+    AddTriggerVolume();
 }
 
 void RunningState::Tick(float dt) {
@@ -124,6 +125,19 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::AddTriggerVolume(){
+    auto trigger = new GameObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(5,5,5), trigger, *world);
+    trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
+                                                trigger->GetBoundingVolume(),
+                                                physics->GetPhysMat("Default")));
+    trigger->GetPhysicsObject()->InitCubeInertia();
+    trigger->GetPhysicsObject()->SetInverseMass(0.0f);
+    trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
+    trigger->GetTransform().SetPosition(currentLevelStartPos);
+    trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+}
+
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
@@ -152,4 +166,5 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+    //add trigger vol
 }

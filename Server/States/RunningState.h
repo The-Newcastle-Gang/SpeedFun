@@ -59,6 +59,7 @@ namespace NCL {
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
+            void AddTriggerVolume();
 
             void SendWorldToClient();
 

@@ -39,6 +39,11 @@ void PhysicsSystem::SetupPhysicsMaterials() {
     auto* playerPhysMat = new PhysicsMaterial();
     playerPhysMat->e = 0.0f;
     physicsMaterials["Player"] = playerPhysMat;
+
+    PhysicsMaterial* triggerPhysMat = new PhysicsMaterial();
+    triggerPhysMat->e = 0.0f;
+    triggerPhysMat->linearDampingHorizontal = 0.5f;
+    physicsMaterials["Trigger"] = triggerPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -254,12 +259,10 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
     if(a.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        a.DrawCollision();
         return;
     }
     if(b.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        b.DrawCollision();
         return;
     }
 
