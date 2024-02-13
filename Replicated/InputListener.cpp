@@ -4,37 +4,41 @@
 
 #include "InputListener.h"
 
-Vector2 InputListener::HorizontalAxis;
-Vector2 InputListener::VerticalAxis;
+Vector2 InputListener::PlayerInput;
 
 using namespace NCL;
 
 void InputListener::InputUpdate() {
-    //ifdef windows
+    //if windows
 
     if(Window::GetKeyboard()->KeyDown(KeyboardKeys::W)){
-        VerticalAxis = {0,1};
+        PlayerInput.y = 1;
     }
     else if(Window::GetKeyboard()->KeyDown(KeyboardKeys::S)){
-        VerticalAxis = {0,-1};
+        PlayerInput.y = -1;
     } else{
-        VerticalAxis = {0,0};
+        PlayerInput.y = 0;
     }
 
     if(Window::GetKeyboard()->KeyDown(KeyboardKeys::A)){
-        HorizontalAxis = {1,0};
+        PlayerInput.x =-1;
     }
     else if(Window::GetKeyboard()->KeyDown(KeyboardKeys::D)){
-        HorizontalAxis = {-1,0};
+        PlayerInput.x = 1;
     } else{
-        HorizontalAxis = {0,0};
+        PlayerInput.x= 0;
     }
 
+    PlayerInput.Normalise();
 
 //DEBUG CODE
-    std::string tempv = "Vertical " + std::to_string((int)VerticalAxis.x) + " " +  std::to_string((int)VerticalAxis.y);
-    std::string temph = "Horizontal " + std::to_string((int)HorizontalAxis.x)+ " " +  std::to_string((int)HorizontalAxis.y);
+    std::string tempv = "PLayer " + std::to_string(PlayerInput.x) + " " +  std::to_string(PlayerInput.y);
     Debug::Print(tempv, {3, 70}, Debug::GREEN);
-    Debug::Print(temph, {3, 60}, Debug::RED);
+    Debug::Print(std::to_string(InputListener::hasPlayerPressed()), {3, 50}, Debug::GREEN);
 
+
+}
+
+bool InputListener::hasPlayerPressed() {
+    return PlayerInput.Length()> 0.5;
 }

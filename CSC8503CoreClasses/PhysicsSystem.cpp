@@ -13,7 +13,7 @@ using namespace NCL;
 using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
-	applyGravity	= false;
+	applyGravity	= true;
 	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
@@ -35,6 +35,10 @@ void PhysicsSystem::SetupPhysicsMaterials() {
     PhysicsMaterial* bouncyPhysMat = new PhysicsMaterial();
     bouncyPhysMat->e = 0.995f;
     physicsMaterials["Bouncy"] = bouncyPhysMat;
+
+    auto* playerPhysMat = new PhysicsMaterial();
+    playerPhysMat->e = 0.0f;
+    physicsMaterials["Player"] = playerPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -241,7 +245,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	Transform& transformA = a.GetTransform();
 	Transform& transformB = b.GetTransform();
 
-	float cRestitution = physA->GetElasticity() + physB->GetElasticity() * 0.5;
+	float cRestitution = physA->GetElasticity() * physB->GetElasticity();
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
 	if (totalMass == 0) {

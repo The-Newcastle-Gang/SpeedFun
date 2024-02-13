@@ -74,7 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("Level1");
+    BuildLevel("debuglvl");
     CreatePlayers();
 }
 
@@ -112,7 +112,14 @@ void RunningState::CreatePlayers() {
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
-        player->GetPhysicsObject()->SetInverseMass(1.0f);
+        player->GetPhysicsObject()->SetInverseMass(10.0f);
+        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+
+        //TODO: clean up
+        player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
+        auto component = new PlayerPhysComponent(player);
+        player->AddComponent(component);
+
         playerObjects[pair.first] = player;
     }
 }
@@ -121,9 +128,8 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
 
-    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 30);
-    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 30);
-
+    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
+    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
 
 
 }
@@ -137,10 +143,13 @@ void RunningState::BuildLevel(const std::string &levelName)
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return;
     }
+    currentLevelStartPos = levelReader->GetStartPosition();
+
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
 }

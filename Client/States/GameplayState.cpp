@@ -84,6 +84,7 @@ void GameplayState::ReadNetworkPackets() {
 }
 
 void GameplayState::SendInputData() {
+    InputListener::InputUpdate();
     InputPacket input;
 
     Camera* mainCamera = world->GetMainCamera();
@@ -97,25 +98,7 @@ void GameplayState::SendInputData() {
     input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
 
 
-
-    Vector2 playerDirection;
-
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-        playerDirection.y += 1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-        playerDirection.y += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-        playerDirection.x += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-        playerDirection.x += 1;
-    }
-
-    playerDirection.Normalise();
-    input.playerDirection = playerDirection;
-
+    input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
 }
@@ -148,14 +131,14 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
 void GameplayState::InitLevel(){
 
     auto lr= new LevelReader();
-    lr->HasReadLevel("finaltest.json");
+    lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();
