@@ -50,6 +50,7 @@ void TutorialGame::InitialiseAssets() {
 	capsuleMesh = renderer->LoadMesh("capsule.msh");
 
 	basicTex	= renderer->LoadTexture("checkerboard.png");
+	triggerTex	= renderer->LoadTexture("Solaire!.jpg");
 	basicShader = renderer->LoadShader("scene.vert", "scene.frag");
 
 	InitCamera();
@@ -65,6 +66,7 @@ TutorialGame::~TutorialGame()	{
 	delete bonusMesh;
 
 	delete basicTex;
+    delete triggerTex;
 	delete basicShader;
 
 	delete physics;
@@ -189,7 +191,6 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F10)) {
 		world->ShuffleConstraints(false);
 	}
-
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F7)) {
 		world->ShuffleObjects(true);
 	}
@@ -290,6 +291,8 @@ void TutorialGame::InitCamera() {
 void TutorialGame::InitWorld() {
 	world->ClearAndErase();
 	physics->Clear();
+
+    AddTriggerVolumeToWorld(Vector3(0,0,0), Vector3(2,2,2));
 	BuildLevelFromJSON("sillylevel");
     InitDefaultFloor();
 	world->StartWorld(); // must be done AFTER all objects are created
@@ -370,6 +373,28 @@ GameObject* TutorialGame::AddCubeToWorld(const Vector3& position, Vector3 dimens
 	world->AddGameObject(cube, false);
 
 	return cube;
+}
+
+GameObject* TutorialGame::AddTriggerVolumeToWorld(const Vector3 &position, Vector3 dimensions, float inverseMass)
+{
+    GameObject* cubeTrigger = new GameObject();
+    AABBVolume* volume = new AABBVolume(dimensions);
+    cubeTrigger->SetBoundingVolume((CollisionVolume*)volume);
+
+    cubeTrigger->GetTransform()
+            .SetPosition(position)
+            .SetScale(dimensions * 2);
+
+    cubeTrigger->SetRenderObject(new RenderObject(&cubeTrigger->GetTransform(), cubeMesh, triggerTex, basicShader));
+    cubeTrigger->SetPhysicsObject(new PhysicsObject(&cubeTrigger->GetTransform(), cubeTrigger->GetBoundingVolume(), new PhysicsMaterial()));
+
+    cubeTrigger->GetPhysicsObject()->SetInverseMass(inverseMass);
+    cubeTrigger->GetPhysicsObject()->InitCubeInertia();
+    cubeTrigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+
+    world->AddGameObject(cubeTrigger, false);
+
+    return cubeTrigger;
 }
 
 GameObject* TutorialGame::AddPlayerToWorld(const Vector3& position) {
@@ -601,5 +626,7 @@ void TutorialGame::MoveSelectedObject() {
 		}
 	}
 }
+
+
 
 

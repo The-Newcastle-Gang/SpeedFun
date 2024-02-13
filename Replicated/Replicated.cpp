@@ -37,5 +37,3 @@ void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
             .SetPosition(Vector3(0 + (g->GetWorldID()%2) * 10,0,10 * (g->GetWorldID()/2)));
 
 }
-
-

@@ -90,26 +90,35 @@ namespace NCL {
 				return physicsMaterial->e;
 			}
 
-      float GetLinearDampVertical() const {
-          return physicsMaterial->linearDampingVertical;
-      }
 
-      float GetLinearDampHorizontal() const {
-          return physicsMaterial->linearDampingHorizontal;
-      }
-      float GetAngularDamp() const {
-          return physicsMaterial->angularDamping;
-      }
-      PhysicsMaterial* GetPhysMat() {
-          return physicsMaterial;
-      }
-      void SetPhysMat(PhysicsMaterial* physMat) {
-          physicsMaterial = physMat;
-      }
+            void SetIsTriggerVolume(bool b)
+            {
+                isTrigger = b;
+            }
 
+            bool GetIsTriggerVolume() const
+            {
+                return isTrigger;
+            }
 
-      void SetForce(const Vector3 &forceSet);
+            float GetLinearDampVertical() const {
+                return physicsMaterial->linearDampingVertical;
+            }
 
+            float GetLinearDampHorizontal() const {
+                return physicsMaterial->linearDampingHorizontal;
+            }
+            float GetAngularDamp() const {
+                return physicsMaterial->angularDamping;
+            }
+            PhysicsMaterial* GetPhysMat() {
+                return physicsMaterial;
+            }
+            void SetPhysMat(PhysicsMaterial* physMat) {
+                physicsMaterial = physMat;
+            }
+
+            void SetForce(const Vector3 &forceSet);
 
 		protected:
 			const CollisionVolume* volume;
@@ -128,7 +137,9 @@ namespace NCL {
 			Vector3 torque;
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
-        };
+
+            bool isTrigger = false;
+		};
 	}
 }
 
