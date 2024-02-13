@@ -45,6 +45,10 @@ namespace NCL {
             // Bad way to manage it, but we leave it for now.
             int connectState;
 
+            static constexpr Vector4 inactiveMenuText = {0.2, 0.2, 0.2, 1.0};
+            static constexpr Vector4 activeMenuText = {1.0, 1.0, 1.0, 1.0};
+
+
 
             void ConnectToGame(const string &address);
             void RegisterPackets();

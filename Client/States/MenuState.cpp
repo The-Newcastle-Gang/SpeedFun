@@ -14,7 +14,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 
 void MenuState::OptionHover(Element& element) {
 
-    canvas->GetElementById(selected).GetTextData().color = {0.0, 0.0, 0.0, 1.0};
+    canvas->GetElementById(selected).GetTextData().color = inactiveMenuText;
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
@@ -28,7 +28,7 @@ void MenuState::OptionHover(Element& element) {
             0.5f);
 
     boxElement.AlignLeft(95);
-    element.GetTextData().color = {1.0, 1.0, 1.0, 1.0};
+    element.GetTextData().color = activeMenuText;
 }
 
 void MenuState::InitCanvas() {
@@ -78,7 +78,7 @@ void MenuState::InitCanvas() {
     // bad.
     TextData text;
     text.SetFont(menuFont.get());
-    text.color = Vector4(1.0, 1.0, 1.0, 1.0);
+    text.color = activeMenuText;
     text.text = "Singleplayer";
 
     auto& singleplayer = canvas->AddElement()
@@ -90,7 +90,7 @@ void MenuState::InitCanvas() {
 
     selected = singleplayer.GetIndex();
 
-    text.color = Vector4(0.0, 0.0, 0.0, 1.0);
+    text.color = inactiveMenuText;
     text.text = "Multiplayer";
 
     singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
