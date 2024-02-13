@@ -72,12 +72,21 @@ Vector2.__tostring = function(vec)
 end
 
 local COLORS = {
-    inactive = Vector4:newRGB(0.2, 0.2, 0.2, 1.0)
-    active = Vector4:new(1.0, 1.0, 1.0, 1.0)
+    inactive = Vector4:newRGB(0.2, 0.2, 0.2, 1.0),
+    active = Vector4:new(1.0, 1.0, 1.0, 1.0),
 }
 
 canvas = {
     {
-        color = Vector4:n()
+        color = COLORS.inactive,
+        aSize = Vector2:new(315, 54),
+        aPos = Vector2:new(160, 0),
+        text = {
+            
+        },
+        tags = {
+            "option"
+        },
+        id = "Singleplayer",
     }
 }
