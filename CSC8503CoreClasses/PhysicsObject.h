@@ -8,6 +8,7 @@ namespace NCL {
 	namespace CSC8503 {
 		class Transform;
 
+        //make sure 0.0f< e < 1.0f
         struct PhysicsMaterial {
             float e = 0.8f;
             float linearDampingVertical = 0.995f;

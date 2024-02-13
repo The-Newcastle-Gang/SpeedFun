@@ -6,6 +6,8 @@
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
 
+#include "PlayerPhysComponent.h"
+
 #include <iostream>
 #include <thread>
 
@@ -45,6 +47,7 @@ namespace NCL {
             std::unordered_map<int, PlayerInfo> playerInfo;
 
             LevelReader* levelReader;
+            Vector3 currentLevelStartPos;
 
             float packetTimer;
             int sceneSnapshotId;

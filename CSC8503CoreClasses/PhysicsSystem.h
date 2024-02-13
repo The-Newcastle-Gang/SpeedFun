@@ -78,7 +78,7 @@ namespace NCL {
       float velocityThreshold    = 8.0f;
 
 
-      std::map<std::string, PhysicsMaterial*> physicsMaterials;
+      std::unordered_map<std::string, PhysicsMaterial*> physicsMaterials;
 
 		};
 	}

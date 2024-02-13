@@ -14,6 +14,7 @@
 #include "ClientNetworkData.h"
 #include "ClientThread.h"
 #include "LevelBuilder.h"
+#include "InputListener.h"
 
 #include <thread>
 #include <iostream>
