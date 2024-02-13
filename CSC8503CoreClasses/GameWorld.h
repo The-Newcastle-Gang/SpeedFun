@@ -78,8 +78,6 @@ namespace NCL {
                 return networkObjects.end();
             }
 
-            std::vector<NetworkObject *> &GetNetworkObjects();
-
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;

@@ -106,7 +106,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    for (auto pair : playerInfo) {
+    for (auto& pair : playerInfo) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 

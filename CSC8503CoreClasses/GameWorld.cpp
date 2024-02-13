@@ -50,10 +50,6 @@ void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
     }
 }
 
-std::vector<NetworkObject*>& GameWorld::GetNetworkObjects() {
-    return networkObjects;
-}
-
 void GameWorld::RemoveGameObject(GameObject* o, bool andDelete) {
     gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), o), gameObjects.end());
     if (andDelete) {

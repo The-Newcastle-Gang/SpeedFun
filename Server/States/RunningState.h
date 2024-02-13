@@ -28,7 +28,7 @@ namespace NCL {
             }
 
             int GetIdFromPlayerObject(GameObject* obj) {
-                for (auto p : playerObjects) {
+                for (auto& p : playerObjects) {
                     if (p.second == obj) return p.first;
                 }
 
