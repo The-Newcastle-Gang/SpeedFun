@@ -50,8 +50,6 @@ private:
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
     void InitStateManager();
-
-    void PauseScreen();
 };
 
 

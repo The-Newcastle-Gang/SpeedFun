@@ -39,6 +39,7 @@ namespace NCL {
             std::string statusText;
             std::unique_ptr<TweenManager> tweenManager;
             int hoverBox;
+            int selected;
 
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.

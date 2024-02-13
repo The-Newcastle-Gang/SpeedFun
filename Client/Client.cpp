@@ -18,9 +18,6 @@ Client::Client() {
     InitStateManager();
 }
 
-void Client::PauseScreen() {
-}
-
 void Client::InitStateManager() {
 
     auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
@@ -34,6 +31,7 @@ void Client::InitStateManager() {
     auto gameplayToMenu = new StateTransition(clientGameplay, clientMenu, [=]()->bool {
         return clientGameplay->IsDisconnected();
     });
+
 
     stateManager->AddState(clientMenu);
     stateManager->AddState(clientGameplay);

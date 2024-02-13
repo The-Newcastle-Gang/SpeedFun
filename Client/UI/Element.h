@@ -23,16 +23,12 @@ public:
         texture = nullptr;
         hoverTimer = 0;
         mouseDownTimer = 0;
-        textData = nullptr;
+        textData = {};
         index = ind;
         extendUpperX = 0;
         extendLowerX = 0;
         extendLowerY = 0;
         extendUpperY = 0;
-    }
-
-    ~Element() {
-        delete textData;
     }
 
     [[nodiscard]] UIDim GetDimensions() const {
@@ -65,8 +61,7 @@ public:
     }
 
     Element& SetText(const TextData& data) {
-        delete textData;
-        textData = new TextData(data);
+        textData = data;
         return *this;
     }
 
@@ -153,6 +148,10 @@ public:
         return *this;
     }
 
+    TextData& GetTextData() {
+        return textData;
+    }
+
     TextureBase* GetTexture() {
         return texture;
     }
@@ -167,7 +166,7 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnMouseUp;
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHold;
 
-    TextData* textData;
+    TextData textData;
 private:
     UIDim dimensions;
     Vector4 color;

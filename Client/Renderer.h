@@ -29,7 +29,7 @@ namespace NCL {
             MeshGeometry*	LoadMesh(const string& name);
             TextureBase*	LoadTexture(const string& name);
             ShaderBase*		LoadShader(const string& vertex, const string& fragment);
-            std::unique_ptr<Font> LoadFont(const string& fontName);
+            std::unique_ptr<Font> LoadFont(const string& fontName, int size = 48);
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
             void RenderUI();

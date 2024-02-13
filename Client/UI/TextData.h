@@ -15,8 +15,8 @@ using namespace Maths;
 struct TextData {
     TextData() {
         color = Vector4(1.0, 1.0, 1.0, 1.0);
-        text = "No text entered!";
-        fontSize = 0.5f;
+        text = "";
+        fontSize = 1.0f;
     }
 
     void SetFont(Font* f) {

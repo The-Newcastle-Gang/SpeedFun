@@ -75,7 +75,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
-    debugFont->fontShader = textShader;
 
     // move to own function.
     InitUIQuad();
@@ -217,8 +216,10 @@ void GameTechRenderer::RenderUI() {
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
 
-            if (e.textData) {
-                RenderText(e.textData->text, debugFont.get(), textX, textY, e.textData->fontSize, e.textData->color);
+            if (!e.textData.text.empty()) {
+                auto fontToUse = e.textData.font;
+                if (!fontToUse) fontToUse = debugFont.get();
+                RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
             }
 
         }
@@ -586,7 +587,7 @@ void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
+std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, int size) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -602,7 +603,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
         return nullptr;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, size);
 
 
     if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
@@ -648,6 +649,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
                 (unsigned int) face->glyph->advance.x
         };
         font->characters.insert(std::pair<char, Font::Character>(c, character));
+        font->fontShader = textShader;
 
         glGenVertexArrays(1, &font->textVAO);
         glGenBuffers(1, &font->textVBO);

@@ -6,7 +6,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 {
     renderer = pRenderer;
     world = pGameworld;
-    menuFont = renderer->LoadFont("IndigoRegular.otf");
+    menuFont = renderer->LoadFont("IndigoRegular.otf", 55);
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
@@ -14,21 +14,25 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 
 void MenuState::OptionHover(Element& element) {
 
-    // Had to switch this to return a reference? Hope there's a better way, feels wrong.
+    canvas->GetElementById(selected).GetTextData().color = {0.0, 0.0, 0.0, 1.0};
+    selected = element.GetIndex();
+
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementById(hoverBox);
+
     tweenManager->CreateTween(
             TweenManager::EaseOutElastic,
             boxElement.GetAbsolutePosition().y,
             pos - 33,
             &boxElement.GetAbsolutePosition().y,
             0.5f);
-    boxElement.AlignLeft(95);
 
+    boxElement.AlignLeft(95);
+    element.GetTextData().color = {1.0, 1.0, 1.0, 1.0};
 }
 
 void MenuState::InitCanvas() {
-    // This is killing me inside we need to load this in somehow.
+    // This is killing me inside we need to load this in somehow. D A T A D R I V E N
     canvas->AddElement()
             .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
             .SetRelativeSize({0.0f, 1.0f})
@@ -63,34 +67,64 @@ void MenuState::InitCanvas() {
             .AlignLeft(95)
             .GetIndex();
 
-    auto& singleplayer = canvas->AddImageElement("Menu/Singleplayer.png")
+    // References are fun, change the order of the connections and it'll blow up.
+    // the extend upper bounds method below is a bit hacky, just lets the 'hitbox' of the text extend pass the image mesh.
+    // I don't even need this any more since I'm actually rendering text and can just make the absolute size bigger
+    // Owen I bet you're reviewing this don't delete my comments please.
+    // let my words ring throughout the future of github.
+    // let this be a reminder to all future generations
+    // kids
+    // don't drink and code.
+    // bad.
+    TextData text;
+    text.SetFont(menuFont.get());
+    text.color = Vector4(1.0, 1.0, 1.0, 1.0);
+    text.text = "Singleplayer";
+
+    auto& singleplayer = canvas->AddElement()
+            .SetColor({0.0, 0.0, 0.0, 0.0})
             .SetAbsoluteSize({315, 54})
             .SetAbsolutePosition({160, 0})
-            .AlignTop(280);
+            .AlignTop(280)
+            .SetText(text);
+
+    selected = singleplayer.GetIndex();
+
+    text.color = Vector4(0.0, 0.0, 0.0, 1.0);
+    text.text = "Multiplayer";
 
     singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 
-    auto& multiplayer = canvas->AddImageElement("Menu/Multiplayer.png")
+    auto& multiplayer = canvas->AddElement()
+            .SetColor({0.0, 0.0, 0.0, 0.0})
             .SetAbsoluteSize({290, 54})
             .SetAbsolutePosition({160, 0})
             .AlignTop(390)
-            .ExtendUpperBounds(20, 0);
+            .ExtendUpperBounds(20, 0)
+            .SetText(text);
+
+    text.text = "Exit";
 
     multiplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-
-    auto& exit = canvas->AddImageElement("Menu/Exit.png")
+    auto& exit = canvas->AddElement()
+            .SetColor({0.0, 0.0, 0.0, 0.0})
             .SetAbsoluteSize({97, 43})
             .SetAbsolutePosition({160, 0})
             .AlignTop(610)
-            .ExtendUpperBounds(215, 0);
+            .ExtendUpperBounds(215, 0)
+            .SetText(text);
 
     exit.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 
-    auto& options = canvas->AddImageElement("Menu/Options.png")
+    text.text = "Options";
+
+    auto& options = canvas->AddElement()
+            .SetColor({0.0, 0.0, 0.0, 0.0})
             .SetAbsoluteSize({201, 55})
             .SetAbsolutePosition({160, 0})
             .AlignTop(500)
-            .ExtendUpperBounds(115, 0);
+            .ExtendUpperBounds(115, 0)
+            .SetText(text);
 
     options.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 }
@@ -143,7 +177,6 @@ void MenuState::Update(float dt) {
         StartGame();
     }
 
-    //Debug::Print(statusText, Vector2(10, 20));
     renderer->Render();
     Debug::UpdateRenderables(dt);
 }
