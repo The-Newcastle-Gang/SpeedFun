@@ -29,6 +29,7 @@ target_include_directories(client PUBLIC
         ../enet/include
         ./UI
         ../raudio/src
+        ../NotLua
 )
 
 target_link_libraries(client PUBLIC

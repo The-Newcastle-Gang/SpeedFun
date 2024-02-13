@@ -10,6 +10,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
+
 }
 
 void MenuState::OptionHover(Element& element) {

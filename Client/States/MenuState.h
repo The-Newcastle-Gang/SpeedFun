@@ -9,6 +9,8 @@
 #include "PacketTypes.h"
 #include "Canvas.h"
 #include "TweenManager.h"
+#include "lua.hpp"
+#include "utils.h"
 
 namespace NCL {
     namespace CSC8503 {

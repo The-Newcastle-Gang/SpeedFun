@@ -30,6 +30,8 @@ void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -42,6 +44,8 @@ void GameplayState::CreateNetworkThread() {
 
 
 void GameplayState::OnExit() {
+    Window::GetWindow()->LockMouseToWindow(false);
+    Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
     delete networkThread;
