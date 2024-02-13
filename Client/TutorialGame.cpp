@@ -191,7 +191,6 @@ void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F10)) {
 		world->ShuffleConstraints(false);
 	}
-
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F7)) {
 		world->ShuffleObjects(true);
 	}
@@ -385,7 +384,7 @@ GameObject* TutorialGame::AddTriggerVolumeToWorld(const Vector3 &position, Vecto
     cubeTrigger->GetTransform()
             .SetPosition(position)
             .SetScale(dimensions * 2);
-// If you want to see the cube then set the rendering object. See commented out line below:
+
     cubeTrigger->SetRenderObject(new RenderObject(&cubeTrigger->GetTransform(), cubeMesh, triggerTex, basicShader));
     cubeTrigger->SetPhysicsObject(new PhysicsObject(&cubeTrigger->GetTransform(), cubeTrigger->GetBoundingVolume(), new PhysicsMaterial()));
 
