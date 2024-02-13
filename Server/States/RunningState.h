@@ -6,6 +6,8 @@
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
 
+#include "PlayerPhysComponent.h"
+
 #include <iostream>
 #include <thread>
 
@@ -26,7 +28,7 @@ namespace NCL {
             }
 
             int GetIdFromPlayerObject(GameObject* obj) {
-                for (auto p : playerObjects) {
+                for (auto& p : playerObjects) {
                     if (p.second == obj) return p.first;
                 }
 
@@ -44,6 +46,9 @@ namespace NCL {
 
             std::unordered_map<int, PlayerInfo> playerInfo;
 
+            LevelReader* levelReader;
+            Vector3 currentLevelStartPos;
+
             float packetTimer;
             int sceneSnapshotId;
 
@@ -52,6 +57,7 @@ namespace NCL {
             std::unordered_map<int, GameObject*> playerObjects;
 
             void LoadLevel();
+            void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 
             void SendWorldToClient();

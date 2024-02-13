@@ -26,6 +26,10 @@ void Debug::Print(const std::string& text, const Vector2& pos, const Vector4& co
 
 	stringEntries.emplace_back(newEntry);
 }
+void Debug::Print(const Vector3& source, const Vector2& pos, const Vector4& color){
+    std::string src = " " + std::to_string(source.x) + "," + std::to_string(source.y) +"," + std::to_string(source.z);
+    Debug::Print(src, pos, color);
+}
 
 void Debug::DrawLine(const Vector3& startpoint, const Vector3& endpoint, const Vector4& colour, float time) {
 	DebugLineEntry newEntry;

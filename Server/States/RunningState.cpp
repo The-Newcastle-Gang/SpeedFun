@@ -74,6 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
+    BuildLevel("debuglvl");
     CreatePlayers();
 }
 
@@ -105,13 +106,20 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    for (auto pair : playerInfo) {
+    for (auto& pair : playerInfo) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
-        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume()));
+        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
         player->GetPhysicsObject()->InitSphereInertia();
-        player->GetPhysicsObject()->SetInverseMass(1.0f);
+        player->GetPhysicsObject()->SetInverseMass(10.0f);
+        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+
+        //TODO: clean up
+        player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
+        auto component = new PlayerPhysComponent(player);
+        player->AddComponent(component);
+
         playerObjects[pair.first] = player;
     }
 }
@@ -119,6 +127,29 @@ void RunningState::CreatePlayers() {
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
-    player->GetTransform().SetPosition(player->GetTransform().GetPosition()
-                                       + Vector3(inputInfo.playerDirection.x, 0, inputInfo.playerDirection.y) * 2.0f);
+
+    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
+    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
+
+
+}
+
+void RunningState::BuildLevel(const std::string &levelName)
+{
+    std::cout << "Level: " << levelName << " being built\n";
+    levelReader = new LevelReader();
+    if (!levelReader->HasReadLevel(levelName + ".json"))
+    {
+        std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
+        return;
+    }
+    currentLevelStartPos = levelReader->GetStartPosition();
+
+    auto plist = levelReader->GetPrimitiveList();
+    for(auto x: plist){
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+    }
 }

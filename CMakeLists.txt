@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 
-project(CSC8503 CXX)
+project(SpeedFun CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(ASSET_ROOT "${CMAKE_SOURCE_DIR}/Assets/" CACHE STRING "" FORCE)
@@ -25,3 +25,15 @@ add_subdirectory(Replicated)
 add_subdirectory(Client)
 add_subdirectory(External)
 add_subdirectory(Server)
+
+add_executable(SpeedFun main.cpp)
+target_link_libraries(SpeedFun PUBLIC
+        NCLCoreClasses
+        CSC8503CoreClasses
+        OpenGLRendering
+        replicated
+        enet
+        client
+        server
+)
+

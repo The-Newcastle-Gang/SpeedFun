@@ -3,17 +3,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
     // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
-    resources = std::make_unique<Resources>(renderer);
+    resources = pResources;
     replicated = std::make_unique<Replicated>();
+    canvas = pCanvas;
 }
 
 GameplayState::~GameplayState() {
-    delete networkThread;
 }
 
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
@@ -44,6 +44,7 @@ void GameplayState::CreateNetworkThread() {
 void GameplayState::OnExit() {
     world->ClearAndErase();
     renderer->Render();
+    delete networkThread;
 }
 
 void GameplayState::Update(float dt) {
@@ -84,6 +85,7 @@ void GameplayState::ReadNetworkPackets() {
 }
 
 void GameplayState::SendInputData() {
+    InputListener::InputUpdate();
     InputPacket input;
 
     Camera* mainCamera = world->GetMainCamera();
@@ -92,23 +94,12 @@ void GameplayState::SendInputData() {
 
     input.playerRotation = Quaternion::EulerAnglesToQuaternion(cameraPitch, cameraYaw, 0);
 
-    Vector2 playerDirection;
+    Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
+    input.rightAxis = Vector3(camWorld.GetColumn(0));
+    input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
 
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-        playerDirection.y += 1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-        playerDirection.y += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-        playerDirection.x += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-        playerDirection.x += 1;
-    }
 
-    playerDirection.Normalise();
-    input.playerDirection = playerDirection;
+    input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
 }
@@ -141,14 +132,14 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Goat.msh"), nullptr, nullptr));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
 void GameplayState::InitLevel(){
 
     auto lr= new LevelReader();
-    lr->HasReadLevel("finaltest.json");
+    lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();

@@ -1,5 +1,4 @@
 #include "PhysicsSystem.h"
-#include "PhysicsObject.h"
 #include "GameObject.h"
 #include "CollisionDetection.h"
 #include "Quaternion.h"
@@ -14,14 +13,32 @@ using namespace NCL;
 using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
-	applyGravity	= false;
+	applyGravity	= true;
 	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
+    SetupPhysicsMaterials();
 }
 
+
 PhysicsSystem::~PhysicsSystem()	{
+    for (auto pair : physicsMaterials) {
+        delete pair.second;
+    }
+}
+
+void PhysicsSystem::SetupPhysicsMaterials() {
+    PhysicsMaterial* defaultPhysMat = new PhysicsMaterial();
+    physicsMaterials["Default"] = defaultPhysMat;
+
+    PhysicsMaterial* bouncyPhysMat = new PhysicsMaterial();
+    bouncyPhysMat->e = 0.995f;
+    physicsMaterials["Bouncy"] = bouncyPhysMat;
+
+    auto* playerPhysMat = new PhysicsMaterial();
+    playerPhysMat->e = 0.0f;
+    physicsMaterials["Player"] = playerPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -99,10 +116,10 @@ void PhysicsSystem::Update(float dt) {
 		IntegrateVelocity(realDT); //update positions from new velocity changes
 
 		dTOffset -= realDT;
-    iteratorCount++;
+        iteratorCount++;
 	}
 
-	ClearForces();	//Once we've finished with the forces, reset them to zero
+//	ClearForces();	//Once we've finished with the forces, reset them to zero
 
 	UpdateCollisionList(); //Remove any old collisions
 
@@ -142,13 +159,26 @@ OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a
 rocket launcher, gaining a point when the player hits the gold coin, and so on).
 */
 void PhysicsSystem::UpdateCollisionList() {
-	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); ) {
+	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); )
+    {
+        CollisionDetection::CollisionInfo& in = const_cast<CollisionDetection::CollisionInfo&>(*i);
+
 		if ((*i).framesLeft == numCollisionFrames) {
 			i->a->OnCollisionBegin(i->b);
 			i->b->OnCollisionBegin(i->a);
 		}
+        CollisionDetection::CollisionInfo blank;
+        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume())
+        {
+            in.framesLeft = 4;
 
-		CollisionDetection::CollisionInfo& in = const_cast<CollisionDetection::CollisionInfo&>(*i);
+            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank))
+            {
+                in.framesLeft = 0;
+            }
+        }
+
+
 		in.framesLeft--;
 
 		if ((*i).framesLeft < 0) {
@@ -222,19 +252,24 @@ so that objects separate back out.
 */
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
 
+    if(a.GetPhysicsObject()->GetIsTriggerVolume())
+    {
+        a.DrawCollision();
+        return;
+    }
+    if(b.GetPhysicsObject()->GetIsTriggerVolume())
+    {
+        b.DrawCollision();
+        return;
+    }
+
 	PhysicsObject* physA = a.GetPhysicsObject();
 	PhysicsObject* physB = b.GetPhysicsObject();
 
 	Transform& transformA = a.GetTransform();
 	Transform& transformB = b.GetTransform();
 
-	float cRestitution = physA->GetElasticity() + physB->GetElasticity() * 0.5;
-
-	//there is probably a better way of doing this
-	/*if (physA->isPlayerRet() || physB->isPlayerRet()) {
-		cRestitution = 0.0f;
-	}*/
-
+	float cRestitution = physA->GetElasticity() * physB->GetElasticity();
 	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
 	if (totalMass == 0) {
@@ -255,11 +290,9 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
-	//who cares?  i surely don't
-    //re: this unironically came to bite me back in my behind, funny.
-//	if (contactVelocity.Length() < 8.0f) {
-//		cRestitution = 0.0f;
-//	}
+	if (contactVelocity.Length() < velocityThreshold) {
+		cRestitution = 0.0f;
+	}
 
 	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
@@ -270,6 +303,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	Vector3 fullImpulse = p.normal * j;
+
 
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
@@ -379,21 +413,19 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		if (object == nullptr) {                                //if it's not physical then we go to the next one
 			continue;
 		}
-		//if (object->GetType() == PhysObjType::Static || object->GetType() == PhysObjType::Sleeping) { continue; }
-
 
 		float inverseMass = object->GetInverseMass();       //getting inverse mass
 
 		Vector3 linearVel = object->GetLinearVelocity();
 		Vector3 force = object->GetForce();
+
+        object->ClearForces();
 		Vector3 accel = force * inverseMass;                     //f*m^-1
 
 		if (applyGravity && inverseMass > 0) {
-			//if ((*i)->GetGType() != GameObjType::AI) {
-				accel += gravity;
-			//}
-		}
+            accel += gravity;
 
+		}
 
 		linearVel += accel * dt;                                // v = a(t).dt
 		object->SetLinearVelocity(linearVel);
@@ -425,7 +457,6 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 	std::vector<GameObject*>::const_iterator last;
 
 	gameWorld.GetObjectIterators(first, last);
-	float frameLinearDamping = 1.0f - (globalDamping * dt);                          //this is a drag that will be sent to set linear velocity so it can be damped
 
 	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
@@ -447,7 +478,11 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		position += linearVel * dt;
 		transform.SetPosition(position);
 
-		linearVel = linearVel * frameLinearDamping;
+        linearVel.x = linearVel.x * (1.0f - (object->GetLinearDampHorizontal() * dt));
+        linearVel.z = linearVel.z * (1.0f - (object->GetLinearDampHorizontal() * dt));
+
+        linearVel.y = linearVel.y * (1.0f - (object->GetLinearDampVertical() * dt));
+
 		object->SetLinearVelocity(linearVel);
 
 		Quaternion orientation = transform.GetOrientation();
@@ -459,7 +494,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 
 		transform.SetOrientation((orientation));
 
-		float frameAngDamp = 1.0f - (globalDamping * dt);
+		float frameAngDamp = 1.0f - (object->GetAngularDamp() * dt);
 		angVel = angVel * frameAngDamp;
 		object->SetAngularVelocity(angVel);
 	}
