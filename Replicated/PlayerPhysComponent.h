@@ -5,6 +5,7 @@
 #include "Debug.h"
 #include "InputListener.h"
 #include "GameWorld.h"
+#include "Window.h"
 
 
 namespace NCL::CSC8503 {
@@ -21,6 +22,8 @@ namespace NCL::CSC8503 {
         void FastFalling(PhysicsObject* physGameObj);
         void ClampPlayerVelocity(PhysicsObject* physGameObj);
         void MinimizeSlide(PhysicsObject* physGameObj);
+
+        void GroundCheck(PhysicsObject* physGameObj, Vector3 position);
 //        void 🦵💨❌();
 
 
@@ -30,7 +33,9 @@ namespace NCL::CSC8503 {
         float maxVelocity;
         float drag;
         float airDrag;
+        float groundOffset;
         float fastFallingMultiplier;
+        bool isGrounded;
 	};
 
 }

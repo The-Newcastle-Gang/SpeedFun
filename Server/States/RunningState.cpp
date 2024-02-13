@@ -131,6 +131,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
     player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
 
+    if(inputInfo.jumpInput == 1.0f){
+        player->GetPhysicsObject()->AddForce(Vector3{0,1,0} * 100);
+    } else{
+//        player->GetPhysicsObject()->ClearForces();
+    }
+
+    std::cout << "player forces:" << player->GetPhysicsObject()->GetForce() << std::endl;
 
 }
 
