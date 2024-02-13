@@ -40,7 +40,7 @@ void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
     if(physGameObj->GetLinearVelocity().y <1.0f){
         //multiply velocity instead of force since forces can be dangerous
         physGameObj->SetLinearVelocity(Vector3(physGameObj->GetLinearVelocity().x,
-                                               physGameObj->GetLinearVelocity().y * fastFallingMultiplier,
+                                               -abs(physGameObj->GetLinearVelocity().y) * fastFallingMultiplier,
                                                physGameObj->GetLinearVelocity().z));
     }
 }
