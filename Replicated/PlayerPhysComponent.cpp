@@ -4,8 +4,9 @@
 #include "PlayerPhysComponent.h"
 using namespace NCL::CSC8503;
 
-PlayerPhysComponent::PlayerPhysComponent(GameObject *go) {
+PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
+    world = pWorld;
     gameObject = go;
 //    runForce = 100.0f;
     maxVelocity = 10.0f;
@@ -22,19 +23,15 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
     //can use this to set the values of each of the variables but since players will rarely be tweaked im setting them manually right now
     auto physMat= physGameObj->GetPhysMat();
-    if(physGameObj->GetLinearVelocity().Length() > 10.0f){
 
-        auto curVel = physGameObj->GetLinearVelocity();
-        physGameObj->SetLinearVelocity(Vector3(curVel.Normalised()* 10.0f));
-    }
+    ClampPlayerVelocity(physGameObj);
+    FastFalling(physGameObj);
+    MinimizeSlide(physGameObj);
 
-    //Stop when not pressing button
-    if(!InputListener::hasPlayerPressed()){
-        //lerp this to 0
-        physGameObj->SetLinearVelocity(Vector3(0,physGameObj->GetLinearVelocity().y,0));
-    }
+}
 
-    //fast falling
+void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
+
     if(physGameObj->GetLinearVelocity().y <1.0f){
         //multiply velocity instead of force since forces can be dangerous
         physGameObj->SetLinearVelocity(Vector3(physGameObj->GetLinearVelocity().x,
@@ -42,3 +39,22 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
                                                physGameObj->GetLinearVelocity().z));
     }
 }
+
+void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
+
+    if(physGameObj->GetLinearVelocity().Length() > 10.0f){
+
+        auto curVel = physGameObj->GetLinearVelocity();
+        physGameObj->SetLinearVelocity(Vector3(curVel.Normalised()* maxVelocity));
+    }
+}
+
+void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
+    if(!InputListener::hasPlayerPressed()){
+        //lerp this to 0
+        physGameObj->SetLinearVelocity(Vector3(0,physGameObj->GetLinearVelocity().y,0));
+    }
+}
+
+
+

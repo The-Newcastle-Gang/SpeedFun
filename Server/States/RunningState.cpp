@@ -117,8 +117,8 @@ void RunningState::CreatePlayers() {
 
         //TODO: clean up
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
-        auto component = new PlayerPhysComponent(player);
-        player->AddComponent(component);
+        auto component = new PlayerPhysComponent(player, world.get());
+        player->AddComponent((Component*)component);
 
         playerObjects[pair.first] = player;
     }
