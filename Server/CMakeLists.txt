@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(server)
 
-add_executable(server
+add_library(server
         Server.cpp
-        main.cpp
         GameServer.cpp
         "States/RunningState.cpp"
         "States/WaitingState.cpp"

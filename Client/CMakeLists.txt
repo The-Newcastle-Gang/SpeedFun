@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(client)
 
-add_executable(client
-        main.cpp
+add_library(client
         Client.cpp
         GameClient.cpp
         Renderer.cpp
