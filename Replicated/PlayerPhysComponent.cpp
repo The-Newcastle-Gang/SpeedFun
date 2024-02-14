@@ -14,7 +14,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
     groundOffset = 0.1f;
     isGrounded = false;
-    jumpForce = 100.0f;
+    jumpForce = 0.9f;
     airMultiplier = 1.0f;
 
     fastFallingMultiplier = 1.1f;
@@ -58,7 +58,7 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 void PlayerPhysComponent::ProcessJumpInput(float jumpKeyPresed) {
 
     if(jumpKeyPresed && checkIsGrounded()){
-        gameObject->GetPhysicsObject()->AddForce(Vector3{0,1,0} * jumpForce);
+        gameObject->GetPhysicsObject()->ApplyLinearImpulse(Vector3{0,1,0} * jumpForce);
     }
 
 }
