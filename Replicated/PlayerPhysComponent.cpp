@@ -11,7 +11,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     maxVelocity = 10.0f;
     isGrounded = false;
     groundOffset = 0.9f;
-    fastFallingMultiplier = 1.4f;
+    fastFallingMultiplier = 1.1f;
 
 //    runForce = 100.0f;
     //drag =
@@ -26,12 +26,12 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 //    auto physMat= physGameObj->GetPhysMat();
 
     auto physGameObj = gameObject->GetPhysicsObject();
-    ClampPlayerVelocity(physGameObj);
-    FastFalling(physGameObj);
+//    ClampPlayerVelocity(physGameObj);
+//    FastFalling(physGameObj);
     MinimizeSlide(physGameObj);
 
     GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-
+    std::cout << isGrounded;
 
 }
 
@@ -63,14 +63,18 @@ void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
 }
 
 void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 position) {
+
+    auto collVol = (CapsuleVolume*)gameObject->GetBoundingVolume();
+    Vector3 offset =  position - Vector3(0, collVol->GetHalfHeight(),0);
+
     Ray ray = Ray(position, Vector3(0,-1,0));
     RayCollision closestCollision ;
 
     if(world->Raycast(ray, closestCollision, true, gameObject)){
         Vector3 disp = closestCollision.collidedAt - position;
-//        if(disp.Length() < 1.0f){
-//           std::cout << disp.Length();
-//        }
+        if(disp.Length() < 1.0f){
+           isGrounded = true;
+        }
     }
 
 }
