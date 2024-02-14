@@ -12,9 +12,9 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     maxVelocity = 10.0f;
     runForce = 100.0f;
 
+    groundOffset = 0.1f;
     isGrounded = false;
     jumpForce = 100.0f;
-    groundOffset = 0.1f;
     airMultiplier = 1.0f;
 
     fastFallingMultiplier = 1.1f;
@@ -37,7 +37,7 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
     if(!isGrounded){
-        airMultiplier = 0.4f;
+        airMultiplier = 0.6f;
     } else{
         airMultiplier = 1.0f;
     }
