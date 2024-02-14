@@ -10,7 +10,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     gameObject = go;
 
     maxVelocity = 10.0f;
-    runForce = 100.0f;
+    runForce = 50.0f;
 
     groundOffset = 0.1f;
     isGrounded = false;
@@ -19,10 +19,6 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
     fastFallingMultiplier = 1.1f;
 
-
-    //drag =
-    //airDrag =
-    //calc
 }
 
 void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput) {
@@ -37,7 +33,7 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
     if(!isGrounded){
-        airMultiplier = 0.6f;
+        airMultiplier = 0.3f;
     } else{
         airMultiplier = 1.0f;
     }
@@ -47,8 +43,10 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
     MinimizeSlide(physGameObj);
 
-//    ClampPlayerVelocity(physGameObj);
+    ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
+
+    std::cout << isGrounded;
 
 }
 
@@ -79,7 +77,8 @@ void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
     if(physGameObj->GetLinearVelocity().Length() > maxVelocity){
 
         auto curVel = physGameObj->GetLinearVelocity();
-        physGameObj->SetLinearVelocity(Vector3(curVel.Normalised()* maxVelocity));
+        curVel = curVel.Normalised();
+        physGameObj->SetLinearVelocity(Vector3(curVel.x* maxVelocity ,physGameObj->GetLinearVelocity().y, curVel.z* maxVelocity));
     }
 }
 
