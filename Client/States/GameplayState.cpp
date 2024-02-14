@@ -16,6 +16,29 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 GameplayState::~GameplayState() {
 }
 
+
+void GameplayState::InitCanvas(){
+
+    //this is clearly not the best way to do the crossheir but This will have to do for now
+    //since i wanna just use this as debug.
+    //I can bet money on the fact that this code is going to be at release
+    //if u see this owen dont kill this
+
+    auto crossHeirVert = canvas->AddElement()
+            .SetColor({0,0,0,0.7})
+            .SetRelativeSize({0.001f, 0.02f})
+            .SetAbsoluteSize({1,1})
+            .AlignCenter()
+            .AlignMiddle();
+
+    auto crossHeirHor = canvas->AddElement()
+            .SetColor({0,0,0,0.7})
+            .SetRelativeSize({0.015f, 0.001f})
+            .SetAbsoluteSize({1,1})
+            .AlignCenter()
+            .AlignMiddle();
+}
+
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -32,6 +55,7 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    InitCanvas();
 }
 
 void GameplayState::CreateNetworkThread() {

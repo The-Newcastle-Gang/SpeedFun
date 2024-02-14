@@ -119,6 +119,7 @@ void RunningState::CreatePlayers() {
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
         auto component = new PlayerPhysComponent(player, world.get());
         player->AddComponent((Component*)component);
+        player->AddComponent((Component*)new GrappleComponent(player, world.get()));
 
         playerObjects[pair.first] = player;
     }

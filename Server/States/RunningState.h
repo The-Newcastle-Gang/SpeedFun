@@ -7,6 +7,7 @@
 #include "ServerThread.h"
 
 #include "PlayerPhysComponent.h"
+#include "GrappleComponent.h"
 
 #include <iostream>
 #include <thread>

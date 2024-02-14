@@ -23,6 +23,7 @@ public:
 protected:
     static Vector2 PlayerInput;
     static float JumpInput;
+    static float GrappleInput;
 
 };
 
