@@ -76,7 +76,7 @@ void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
 
 void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
 
-    if(physGameObj->GetLinearVelocity().Length() > 10.0f){
+    if(physGameObj->GetLinearVelocity().Length() > maxVelocity){
 
         auto curVel = physGameObj->GetLinearVelocity();
         physGameObj->SetLinearVelocity(Vector3(curVel.Normalised()* maxVelocity));
