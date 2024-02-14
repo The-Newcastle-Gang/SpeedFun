@@ -14,7 +14,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
     groundOffset = 0.1f;
     isGrounded = false;
-    jumpForce = 0.9f;
+    jumpForce = 1.0f;
     airMultiplier = 1.0f;
 
     fastFallingMultiplier = 1.1f;
@@ -45,8 +45,6 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
     ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
-
-    std::cout << isGrounded;
 
 }
 

@@ -28,6 +28,8 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
 }
