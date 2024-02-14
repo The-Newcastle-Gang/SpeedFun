@@ -100,6 +100,7 @@ void GameplayState::SendInputData() {
 
 
     input.playerDirection = InputListener::GetPlayerInput();
+    input.jumpInput       = InputListener::GetJumpInput();
 
     networkData->outgoingInput.Push(input);
 }
