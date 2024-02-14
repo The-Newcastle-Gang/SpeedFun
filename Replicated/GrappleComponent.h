@@ -8,6 +8,7 @@
 #include "Component.h"
 #include "GameWorld.h"
 #include "PhysicsObject.h"
+#include "PlayerPhysComponent.h"
 
 namespace NCL::CSC8503{
     class GameObject;

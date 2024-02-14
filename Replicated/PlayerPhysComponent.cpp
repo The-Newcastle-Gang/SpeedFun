@@ -18,6 +18,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     airMultiplier = 1.0f;
 
     fastFallingMultiplier = 1.1f;
+    isGrappling = false;
 
 }
 
@@ -36,9 +37,8 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
-    GrappleComponent* gc;
-    gameObject->TryGetComponent(gc);
-    isGrappling = gc->isPlayerGrappling();
+    //DO IT THE OTHER WAY ROUND, GC SETS ISGRAPPLING HERE.
+    //EVERY PLAYER WILL HAVE A PLAYERPHYSCOMPONENT BUT NOT THE OTHERWAY RIOUND SMILE.
 
     if(isGrappling){
         return;

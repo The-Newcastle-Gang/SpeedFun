@@ -44,7 +44,10 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
 //s = ut+ 1/2 at2
 
 void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
-    isGrappling = true;
+
+    PlayerPhysComponent* p ;
+    gameObject->TryGetComponent(p);
+    p->setGrappling(true);
 
     float gravity = -9.8;
 
@@ -62,8 +65,17 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
     Vector3 velocityY =Vector3(0,1,0) *sqrt((-2 * gravity * height));
     Vector3 velocityXZ = displacementXZ / (sqrt(-2*height/gravity) + sqrt(2*(displacementY - height)/gravity));
 
-    gameObject->GetPhysicsObject()->ClearForces();
-    gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(velocityY + velocityXZ*4));
+
+    //TODO:: THROW THIS IN A VECTOR3 FUNCTION
+    if(velocityY.x != velocityY.x || velocityY.y != velocityY.y || velocityY.z != velocityY.z ||
+        velocityXZ.x !=velocityXZ.x ||velocityXZ.y !=velocityXZ.y ||velocityXZ.z !=velocityXZ.z)
+    {
+        return;
+    } else{
+
+        gameObject->GetPhysicsObject()->ClearForces();
+        gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(velocityY + velocityXZ*4));
+    }
 
 }
 

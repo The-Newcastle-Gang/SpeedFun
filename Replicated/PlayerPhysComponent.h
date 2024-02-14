@@ -26,6 +26,7 @@ namespace NCL::CSC8503 {
         float getRunVelocity()      { return runForce; }
         bool  checkIsGrounded()     { return isGrounded;}
         float getAirMultiplier()    { return airMultiplier;}
+        void setGrappling(bool x) {isGrappling = x;}
 
     protected:
         void FastFalling(PhysicsObject* physGameObj);
