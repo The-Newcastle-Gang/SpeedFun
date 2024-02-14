@@ -23,6 +23,10 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
 void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput) {
 
+    if(isGrappling){
+        return;
+    }
+
     auto pGO = gameObject->GetPhysicsObject();
 
     pGO->AddForce(fwdAxis  *playerInput.y * runForce * airMultiplier);
@@ -31,6 +35,15 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 }
 
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
+
+    GrappleComponent* gc;
+    gameObject->TryGetComponent(gc);
+    isGrappling = gc->isPlayerGrappling();
+
+    if(isGrappling){
+        return;
+    }
+
 
     if(!isGrounded){
         airMultiplier = 0.3f;
@@ -41,7 +54,7 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     auto physGameObj = gameObject->GetPhysicsObject();
 
     GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-    MinimizeSlide(physGameObj);
+//    MinimizeSlide(physGameObj);
 
     ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
@@ -52,6 +65,10 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
 
 void PlayerPhysComponent::ProcessJumpInput(float jumpKeyPresed) {
+
+    if(isGrappling){
+        return;
+    }
 
     if(jumpKeyPresed && checkIsGrounded()){
         gameObject->GetPhysicsObject()->ApplyLinearImpulse(Vector3{0,1,0} * jumpForce);

@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "GameWorld.h"
+#include "PhysicsObject.h"
 
 namespace NCL::CSC8503{
     class GameObject;
@@ -17,10 +18,14 @@ namespace NCL::CSC8503{
         GrappleComponent(GameObject* go, GameWorld* world);
         void PhysicsUpdate(float dt)override;
         void ProcessGrappleInput(float playerInput, Quaternion lookDir);
+        void ExecuteGrapple(Vector3 GrapplePoint);
+
+        bool isPlayerGrappling(){return isGrappling;}
 
     protected:
         GameWorld* world;
         float maxGrappleLen;
+        bool isGrappling = false;
 
     };
 }

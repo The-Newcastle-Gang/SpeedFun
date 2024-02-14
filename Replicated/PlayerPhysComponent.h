@@ -6,6 +6,7 @@
 #include "InputListener.h"
 #include "GameWorld.h"
 #include "Window.h"
+#include "GrappleComponent.h"
 
 
 namespace NCL::CSC8503 {
@@ -47,6 +48,7 @@ namespace NCL::CSC8503 {
         float airMultiplier;
         float fastFallingMultiplier;
         bool isGrounded;
+        bool isGrappling;
 	};
 
 }
