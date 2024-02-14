@@ -15,8 +15,16 @@ namespace NCL::CSC8503 {
 	public:
 
 		PlayerPhysComponent(GameObject* go, GameWorld* world);
-		void PhysicsUpdate(float dt)override;
-        float getRunVelocity(){ return runForce; }
+        void PhysicsUpdate(float dt)override;
+
+        void ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput);
+        void ProcessJumpInput(float jumpKeyPresed);
+
+
+
+        float getRunVelocity()      { return runForce; }
+        bool  checkIsGrounded()     { return isGrounded;}
+        float getAirMultiplier()    { return airMultiplier;}
 
     protected:
         void FastFalling(PhysicsObject* physGameObj);
@@ -24,6 +32,7 @@ namespace NCL::CSC8503 {
         void MinimizeSlide(PhysicsObject* physGameObj);
 
         void GroundCheck(PhysicsObject* physGameObj, Vector3 position);
+
 //        void 🦵💨❌();
 
 
@@ -34,6 +43,8 @@ namespace NCL::CSC8503 {
         float drag;
         float airDrag;
         float groundOffset;
+        float jumpForce;
+        float airMultiplier;
         float fastFallingMultiplier;
         bool isGrounded;
 	};
