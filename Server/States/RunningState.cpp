@@ -135,6 +135,10 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     playerPhysics->ProcessMovementInput(inputInfo.fwdAxis , inputInfo.rightAxis, inputInfo.playerDirection);
     playerPhysics->ProcessJumpInput(inputInfo.jumpInput);
 
+    GrappleComponent* playerGrapple;
+    player->TryGetComponent(playerGrapple);
+    playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);
+
 }
 
 void RunningState::BuildLevel(const std::string &levelName)

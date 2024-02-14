@@ -19,7 +19,7 @@ GameplayState::~GameplayState() {
 
 void GameplayState::InitCanvas(){
 
-    //this is clearly not the best way to do the crossheir but This will have to do for now
+    //this is clearly not the best way to do the cross-heir but This will have to do for now
     //since i wanna just use this as debug.
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
@@ -88,6 +88,7 @@ void GameplayState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+
 }
 
 void GameplayState::ReadNetworkFunctions() {
@@ -127,6 +128,7 @@ void GameplayState::SendInputData() {
 
     input.playerDirection = InputListener::GetPlayerInput();
     input.jumpInput       = InputListener::GetJumpInput();
+    input.grappleInput    = InputListener::GetGrappleInput();
 
     networkData->outgoingInput.Push(input);
 }

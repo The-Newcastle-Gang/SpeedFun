@@ -38,7 +38,7 @@ void InputListener::InputUpdate() {
     } else {
         JumpInput = 0.0f;
     }
-    
+
     if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)){
         GrappleInput = 1.0f;
     } else{

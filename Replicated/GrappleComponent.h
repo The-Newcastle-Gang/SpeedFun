@@ -16,11 +16,11 @@ namespace NCL::CSC8503{
 
         GrappleComponent(GameObject* go, GameWorld* world);
         void PhysicsUpdate(float dt)override;
-        void ProcessMovementInput(Vector3 position);
-        GameWorld* world;
+        void ProcessGrappleInput(float playerInput, Quaternion lookDir);
 
     protected:
-
+        GameWorld* world;
+        float maxGrappleLen;
 
     };
 }
