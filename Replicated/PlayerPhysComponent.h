@@ -38,6 +38,7 @@ namespace NCL::CSC8503 {
 
 
         GameWorld* world;
+        float gravity               = 0.0f;
         float runForce              = 0.0f;
         float maxVelocity           = 0.0f;
         float drag                  = 0.0f;

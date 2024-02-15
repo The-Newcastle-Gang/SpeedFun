@@ -6,19 +6,22 @@ using namespace NCL::CSC8503;
 
 PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
-    world = pWorld;
-    gameObject = go;
+    world                       = pWorld;
+    gameObject                  = go;
+    gravity                     = -9.8f;
 
-    maxVelocity = 10.0f;
-    runForce = 50.0f;
+    maxVelocity                 = 10.0f;
+    runForce                    = 50.0f;
+    groundOffset                = 0.1f;
+    jumpForce                   = 3.0f;
+    airMultiplier               = 1.0f;
+    fastFallingMultiplier       = 1.1f;
 
-    groundOffset = 0.1f;
-    isGrounded = false;
-    jumpForce = 1.0f;
-    airMultiplier = 1.0f;
-    fastFallingMultiplier = 1.1f;
-    isGrappling = false;
-    isDashing = false;
+    drag                        = 0.5f;
+
+    isGrounded                  = false;
+    isGrappling                 = false;
+    isDashing                   = false;
 
 }
 
@@ -34,8 +37,6 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 void PlayerPhysComponent::Update(float dt) {
     auto pGO = gameObject->GetPhysicsObject();
     GroundCheck(pGO, gameObject->GetTransform().GetPosition());
-
-
 }
 
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
@@ -51,13 +52,13 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
     auto physGameObj = gameObject->GetPhysicsObject();
     if(!isGrounded){
-        physGameObj->AddForce(Vector3(0,-9.8,0));
+        physGameObj->AddForce(Vector3(0,gravity * 0.5f,0));
     }
 
-
 //    GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-//    MinimizeSlide(physGameObj);
-//    ClampPlayerVelocity(physGameObj);
+
+    MinimizeSlide(physGameObj);
+    ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
 
 }
@@ -87,14 +88,14 @@ void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
 
 void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
 
-    if(isGrappling || isDashing){
-        return;
-    }
+    Vector3 currentVel = physGameObj->GetLinearVelocity();
+    Vector3 invVel = currentVel * -1;
+    invVel.y = 0;
+    Vector3 normalisedInvVel = invVel.Normalised();
 
-    if(!InputListener::hasPlayerPressed()){
-        physGameObj->SetLinearVelocity(Vector3(0,physGameObj->GetLinearVelocity().y,0));
+    if(isGrounded){
+        physGameObj->SetLinearVelocity(currentVel + normalisedInvVel * drag);
     }
-
 }
 
 void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 position) {
@@ -117,6 +118,9 @@ void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 positi
         else {
             isGrounded = false;
         }
+    }
+    else {
+        isGrounded = false;
     }
 }
 

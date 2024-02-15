@@ -28,13 +28,15 @@ namespace NCL::CSC8503{
         void ExecuteGrapple(Vector3 GrapplePoint);
 
         GameWorld* world;
-        float maxGrappleLen;
+        float maxGrappleLen = 0.0f;
         bool isGrappling = false;
         bool canGrapple;
         Vector3 GrapplePoint;
         float time;
         float grappleCooldown = 0.0f;
-
+    private:
+        float arcHeightOffset = 0.0f;
+        int XZVelModifier = 0;
     };
 }
 
