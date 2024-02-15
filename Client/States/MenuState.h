@@ -65,7 +65,9 @@ namespace NCL {
 
             void AddCanvasElement();
 
-            void AttachSignals(const std::vector<std::string>& tags, const string &id);
+            void AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const string &id);
+
+            void AlignCanvasElement(Element &element);
         };
     }
 }

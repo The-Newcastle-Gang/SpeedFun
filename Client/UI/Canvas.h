@@ -30,7 +30,7 @@ public:
     void PopActiveLayer();
 
 
-    Element& GetElementById(int index, const string &layerName = "main");
+    Element& GetElementByIndex(int index, const std::string &layerName = "main");
 private:
     std::unordered_map<std::string, CanvasLayer> layers;
     std::vector<CanvasLayer*> activeLayers;

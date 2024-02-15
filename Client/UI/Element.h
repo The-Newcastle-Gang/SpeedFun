@@ -156,14 +156,20 @@ public:
         return texture;
     }
 
-    Element& AddTags(const std::vector<std::string>& pTags) {
+    Element& AddTags(const std::unordered_set<std::string>& pTags) {
         for (auto& t: pTags) {
-            tags.push_back(t);
+            tags.insert(t);
         }
+        return *this;
     }
 
     Element& SetId(const std::string& pId) {
         id = pId;
+        return *this;
+    }
+
+    [[nodiscard]] std::string GetId() const {
+        return id;
     }
 
     void Update(float dt);
@@ -183,7 +189,7 @@ private:
     TextureBase* texture;
     ShaderBase* shader;
     std::string id;
-    std::vector<std::string> tags;
+    std::unordered_set<std::string> tags;
     int extendLowerX;
     int extendLowerY;
     int extendUpperX;

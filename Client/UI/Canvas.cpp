@@ -71,7 +71,7 @@ void Canvas::Update(float dt) {
     }
 }
 
-Element& Canvas::GetElementById(int index, const std::string& layerName) {
+Element& Canvas::GetElementByIndex(int index, const std::string& layerName) {
     if (!DoesLayerExist(layerName)) {
         std::cerr << "Layer doesn't exist!" << std::endl;
     }

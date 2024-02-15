@@ -72,38 +72,159 @@ Vector2.__tostring = function(vec)
 end
 
 local COLORS = {
-    inactive = Vector4:newRGB(0.2, 0.2, 0.2, 1.0),
+    translucent = Vector4:newRGB(255, 244, 255, 200);
+    inactive = Vector4:newRGB(40, 40, 40, 255),
     active = Vector4:new(1.0, 1.0, 1.0, 1.0),
-    transparent = Vector4:new(0.0, 0.0, 0.0, 0.0)
+    transparent = Vector4:new(0.0, 0.0, 0.0, 0.0),
+    main = Vector4:new(150, 0, 210, 255),
+    white = Vector4:new(1.0, 1.0, 1.0, 1.0)
 }
 
 local elementBase = {
-    color = Vector4:new(COLORS.transparent),
+    image = "",
+    color = COLORS.transparent,
     aSize = Vector2:new(0, 0),
     rSize = Vector2:new(0,0),
     aPos = Vector2:new(0,0),
     rPos = Vector2:new(0,0),
     align = {},
     tags = {},
+    text = {
+        text = "",
+        color = COLORS.transparent,
+        size = 1.0;
+    },
     id = ""
 }
 
+local alignBase = {
+    to = "middle",
+    padding = 0,
+}
+
+local function AlignTo(direction, padding)
+    local a = {}
+    a.to = direction
+    a.padding = padding
+    return a
+end
+
 canvas = {
     {
-        color = COLORS.transparent,
-        aSize = Vector2:new(315, 54),
+        color = COLORS.translucent,
+        rSize = Vector2:new(0, 1),
+        aSize = Vector2:new(415, 0),
+        align = {
+            AlignTo("left", 115)
+        },
+    },
+    {
+      color = COLORS.main,
+      aSize = Vector2:new(550, 220),
+      align = {
+          AlignTo("top", 0),
+          AlignTo("left", 50),
+      }
+    },
+    {
+      image = "Menu/TitleSpeed.png",
+      color = COLORS.white,
+      aSize = Vector2:new(290, 97),
+      aPos = Vector2:new(280, 0),
+      align = {
+          AlignTo("top", 25)
+      },
+    },
+    {
+      image = "Menu/TitleFun.png",
+      color = COLORS.white,
+      aSize = Vector2:new(151, 77),
+      aPos = Vector2:new(407, 0),
+      align = {
+          AlignTo("top", 128),
+      }
+    },
+    {
+      image = "Menu/Dashes.png",
+      color = COLORS.white,
+      aSize = Vector2:new(109, 70),
+      aPos = Vector2:new(285, 0),
+      align = {
+          AlignTo("top", 128)
+      }
+    },
+    {
+        color = COLORS.main,
+        aSize = Vector2:new(460, 115),
+        align = {
+            AlignTo("top", 247),
+            AlignTo("left", 95)
+        },
+        id = "HoverBox",
+    },
+    {
+        aSize = Vector2:new(315, 80),
         aPos = Vector2:new(160, 0),
         align = {
-            { to = "top",  padding = 0}
+            AlignTo("top", 250)
         },
         text = {
             text = "Singleplayer",
-            color = COLORS.inactive,
+            color = COLORS.active,
+            size = 1.0
         },
         tags = {
             "option"
         },
         id = "Singleplayer",
+    },
+    {
+        aSize = Vector2:new(315, 80),
+        aPos = Vector2:new(160, 0),
+        align = {
+            AlignTo("top", 360),
+        },
+        text = {
+            text = "Multiplayer",
+            color = COLORS.inactive,
+            size = 1.0,
+        },
+        tags = {
+            "option",
+        },
+        id = "Multiplayer",
+    },
+    {
+        aSize = Vector2:new(315, 80),
+        aPos = Vector2:new(160, 0),
+        align = {
+            AlignTo("top", 470),
+        },
+        text = {
+            text = "Options",
+            color = COLORS.inactive,
+            size = 1.0,
+        },
+        tags = {
+            "option",
+        },
+        id = "Options",
+    },
+    {
+        aSize = Vector2:new(315, 80),
+        aPos = Vector2:new(160, 0),
+        align = {
+            AlignTo("top", 580),
+        },
+        text = {
+            text = "Exit",
+            color = COLORS.inactive,
+            size = 1.0,
+        },
+        tags = {
+            "option",
+        },
+        id = "Exit",
     }
 }
 

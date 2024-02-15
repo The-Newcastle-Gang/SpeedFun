@@ -17,6 +17,7 @@ struct TextData {
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         text = "";
         fontSize = 1.0f;
+        font = nullptr;
     }
 
     void SetFont(Font* f) {

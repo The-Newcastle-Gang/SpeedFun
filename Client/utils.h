@@ -64,6 +64,11 @@ inline double getNumberField(lua_State* L, const char* key) {
     return result;
 }
 
+inline void getTableField(lua_State* L, const char* key) {
+    lua_pushstring(L, key);
+    lua_gettable(L, -2);
+}
+
 inline bool getBool(lua_State* L, const char* key) {
     lua_pushstring(L, key);
     lua_gettable(L, -2);

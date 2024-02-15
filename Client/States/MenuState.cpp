@@ -15,18 +15,18 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 
 void MenuState::OptionHover(Element& element) {
 
-    canvas->GetElementById(selected).GetTextData().color = inactiveMenuText;
+    canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
-    auto& boxElement = canvas->GetElementById(hoverBox);
+    auto& boxElement = canvas->GetElementByIndex(hoverBox);
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutElastic,
+            TweenManager::EaseOutSine,
             boxElement.GetAbsolutePosition().y,
             pos - 33,
             &boxElement.GetAbsolutePosition().y,
-            0.5f);
+            0.1f);
 
     boxElement.AlignLeft(95);
     element.GetTextData().color = activeMenuText;
@@ -45,24 +45,87 @@ void MenuState::InitLua() {
     }
 }
 
-void MenuState::AttachSignals(const std::vector<std::string>& tags, const std::string& id) {
+void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
+    if (tags.find("option") != tags.end()) {
+        element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    }
 
+    if (id == "Singleplayer") {
+        selected = element.GetIndex();
+    }
+
+    if (id == "HoverBox") {
+        hoverBox = element.GetIndex();
+    }
+}
+
+void MenuState::AlignCanvasElement(Element& element) {
+    getTableField(L, "align");
+    lua_pushnil(L);
+
+    while (lua_next(L, -2)) {
+        auto direction = getStringField(L, "to");
+        auto padding = getIntField(L, "padding");
+        if (!strcmp(direction, "top")) {
+            element.AlignTop(padding);
+        } else if (!strcmp(direction, "middle")) {
+            element.AlignMiddle();
+        } else if (!strcmp(direction, "bottom")) {
+            element.AlignBottom(padding);
+        } else if (!strcmp(direction, "left")) {
+            element.AlignLeft(padding);
+        } else if (!strcmp(direction, "center")) {
+            element.AlignCenter();
+        } else if (!strcmp(direction, "right")) {
+            element.AlignRight(padding);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1); // align
 }
 
 void MenuState::AddCanvasElement() {
-    auto& thisElement = canvas->AddElement()
-        .SetAbsoluteSize(getVec2Field(L, "aSize"))
+
+    std::string image = getStringField(L, "image");
+
+    auto& element = image.empty() ? canvas->AddElement() : canvas->AddImageElement(image);
+
+    element.SetAbsoluteSize(getVec2Field(L, "aSize"))
         .SetRelativeSize(getVec2Field(L, "rSize"))
         .SetAbsolutePosition(getVec2Field(L, "aPos"))
         .SetRelativePosition(getVec2Field(L, "rPos"))
         .SetColor(getVec4Field(L, "color"));
 
-    lua_gettable()
+    AlignCanvasElement(element);
+
+    TextData text;
+    getTableField(L, "text");
+
+    text.text = getStringField(L, "text");
+    text.color = getVec4Field(L, "color");
+    text.SetFont(menuFont.get());
+    text.fontSize = (float)getNumberField(L, "size");
+
+    element.SetText(text);
+    lua_pop(L, 1); // text
+
+    std::unordered_set<std::string> tags;
+    getTableField(L, "tags");
     lua_pushnil(L);
     while (lua_next(L, -2)) {
-
+        tags.insert(lua_tostring(L, -1));
         lua_pop(L, 1);
     }
+
+    lua_pop(L, 1); // tags
+
+    std::string id = getStringField(L, "id");
+
+    element.AddTags(tags);
+    element.SetId(id);
+
+    AttachSignals(element, tags, id);
 }
 
 void MenuState::InitCanvas() {
