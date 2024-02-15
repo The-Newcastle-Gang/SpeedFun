@@ -74,15 +74,31 @@ end
 local COLORS = {
     inactive = Vector4:newRGB(0.2, 0.2, 0.2, 1.0),
     active = Vector4:new(1.0, 1.0, 1.0, 1.0),
+    transparent = Vector4:new(0.0, 0.0, 0.0, 0.0)
+}
+
+local elementBase = {
+    color = Vector4:new(COLORS.transparent),
+    aSize = Vector2:new(0, 0),
+    rSize = Vector2:new(0,0),
+    aPos = Vector2:new(0,0),
+    rPos = Vector2:new(0,0),
+    align = {},
+    tags = {},
+    id = ""
 }
 
 canvas = {
     {
-        color = COLORS.inactive,
+        color = COLORS.transparent,
         aSize = Vector2:new(315, 54),
         aPos = Vector2:new(160, 0),
+        align = {
+            { to = "top",  padding = 0}
+        },
         text = {
-            
+            text = "Singleplayer",
+            color = COLORS.inactive,
         },
         tags = {
             "option"
@@ -90,3 +106,8 @@ canvas = {
         id = "Singleplayer",
     }
 }
+
+for _, v in pairs(canvas) do
+    v.__index = elementBase;
+    setmetatable(v, v)
+end

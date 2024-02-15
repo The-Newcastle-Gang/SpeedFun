@@ -50,7 +50,7 @@ namespace NCL {
             static constexpr Vector4 inactiveMenuText = {0.2, 0.2, 0.2, 1.0};
             static constexpr Vector4 activeMenuText = {1.0, 1.0, 1.0, 1.0};
 
-
+            lua_State* L;
 
             void ConnectToGame(const string &address);
             void RegisterPackets();
@@ -60,6 +60,12 @@ namespace NCL {
             void InitCanvas();
 
             void OptionHover(Element &element);
+
+            void InitLua();
+
+            void AddCanvasElement();
+
+            void AttachSignals(const std::vector<std::string>& tags, const string &id);
         };
     }
 }

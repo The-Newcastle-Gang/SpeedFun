@@ -156,6 +156,16 @@ public:
         return texture;
     }
 
+    Element& AddTags(const std::vector<std::string>& pTags) {
+        for (auto& t: pTags) {
+            tags.push_back(t);
+        }
+    }
+
+    Element& SetId(const std::string& pId) {
+        id = pId;
+    }
+
     void Update(float dt);
 
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHover;
@@ -172,6 +182,8 @@ private:
     Vector4 color;
     TextureBase* texture;
     ShaderBase* shader;
+    std::string id;
+    std::vector<std::string> tags;
     int extendLowerX;
     int extendLowerY;
     int extendUpperX;

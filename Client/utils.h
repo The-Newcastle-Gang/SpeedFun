@@ -13,6 +13,35 @@
 using namespace NCL;
 using namespace Maths;
 
+inline void stackDump (lua_State *L) {
+    int i;
+    int top = lua_gettop(L);
+    for (i = 1; i <= top; i++) {  /* repeat for each level */
+        int t = lua_type(L, i);
+        switch (t) {
+
+            case LUA_TSTRING:  /* strings */
+                printf("`%s'", lua_tostring(L, i));
+                break;
+
+            case LUA_TBOOLEAN:  /* booleans */
+                printf(lua_toboolean(L, i) ? "true" : "false");
+                break;
+
+            case LUA_TNUMBER:  /* numbers */
+                printf("%g", lua_tonumber(L, i));
+                break;
+
+            default:  /* other values */
+                printf("%s", lua_typename(L, t));
+                break;
+
+        }
+        printf("  ");  /* put a separator */
+    }
+    printf("\n");  /* end the listing */
+}
+
 inline int getIntField(lua_State* L, const char* key) {
     lua_pushstring(L, key);
     lua_gettable(L, -2);
@@ -55,6 +84,16 @@ inline const char* getStringField(lua_State* L, const char* key) {
     auto result = lua_tostring(L, -1);
     lua_pop(L, 1);
     return result;
+}
+
+inline Vector2 getVec2Field(lua_State* L, const char* key) {
+    Vector2 v;
+    lua_pushstring(L, key);
+    lua_gettable(L, -2);
+    v.x = (float)getNumberField(L, "x");
+    v.y = (float)getNumberField(L, "y");
+    lua_pop(L, 1);
+    return v;
 }
 
 inline Vector3 getVec3Field(lua_State* L, const char* key) {

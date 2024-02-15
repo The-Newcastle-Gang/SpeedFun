@@ -32,102 +32,142 @@ void MenuState::OptionHover(Element& element) {
     element.GetTextData().color = activeMenuText;
 }
 
+void MenuState::InitLua() {
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    //Register c functions here
+
+    auto status = luaL_dofile(L, (Assets::DATADIR + "MainMenu.lua").c_str());
+
+    if (status) {
+        std::cerr << "LUA CRIES OUT IN PAIN: " << lua_tostring(L, -1);
+    }
+}
+
+void MenuState::AttachSignals(const std::vector<std::string>& tags, const std::string& id) {
+
+}
+
+void MenuState::AddCanvasElement() {
+    auto& thisElement = canvas->AddElement()
+        .SetAbsoluteSize(getVec2Field(L, "aSize"))
+        .SetRelativeSize(getVec2Field(L, "rSize"))
+        .SetAbsolutePosition(getVec2Field(L, "aPos"))
+        .SetRelativePosition(getVec2Field(L, "rPos"))
+        .SetColor(getVec4Field(L, "color"));
+
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+
+        lua_pop(L, 1);
+    }
+}
+
 void MenuState::InitCanvas() {
-    // This is killing me inside we need to load this in somehow. D A T A D R I V E N
-    canvas->AddElement()
-            .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
-            .SetRelativeSize({0.0f, 1.0f})
-            .SetAbsoluteSize({415, 0})
-            .AlignLeft(115);
 
-    canvas->AddElement()
-           .SetColor({150.0f/255.0f, 0.0f, 210.0f/255.0f, 1.0f})
-           .SetAbsoluteSize({550, 220})
-           .AlignTop()
-           .AlignLeft(50);
+    InitLua();
 
-    canvas->AddImageElement("Menu/TitleSpeed.png")
-            .SetAbsoluteSize({290, 97})
-            .SetAbsolutePosition({280, 0})
-            .AlignTop(25);
-
-    canvas->AddImageElement("Menu/TitleFun.png")
-            .SetAbsoluteSize({151, 77})
-            .SetAbsolutePosition({407, 0})
-            .AlignTop(122);
-
-    canvas->AddImageElement("Menu/Dashes.png")
-            .SetAbsoluteSize({109, 70})
-            .SetAbsolutePosition({285, 0})
-            .AlignTop(128);
-
-    hoverBox = canvas->AddElement()
-            .SetAbsoluteSize({460, 115})
-            .SetColor({160.0f/255.0f, 20.0f / 255.0f, 220.0f/255.0f, 1.0f})
-            .AlignTop(247)
-            .AlignLeft(95)
-            .GetIndex();
-
-    // References are fun, change the order of the connections and it'll blow up.
-    // the extend upper bounds method below is a bit hacky, just lets the 'hitbox' of the text extend pass the image mesh.
-    // I don't even need this any more since I'm actually rendering text and can just make the absolute size bigger
-    // Owen I bet you're reviewing this don't delete my comments please.
-    // let my words ring throughout the future of github.
-    // let this be a reminder to all future generations
-    // kids
-    // don't drink and code.
-    // bad.
-    TextData text;
-    text.SetFont(menuFont.get());
-    text.color = activeMenuText;
-    text.text = "Singleplayer";
-
-    auto& singleplayer = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({315, 54})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(280)
-            .SetText(text);
-
-    selected = singleplayer.GetIndex();
-
-    text.color = inactiveMenuText;
-    text.text = "Multiplayer";
-
-    singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-
-    auto& multiplayer = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({290, 54})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(390)
-            .ExtendUpperBounds(20, 0)
-            .SetText(text);
-
-    text.text = "Exit";
-
-    multiplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-    auto& exit = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({97, 43})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(610)
-            .ExtendUpperBounds(215, 0)
-            .SetText(text);
-
-    exit.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-
-    text.text = "Options";
-
-    auto& options = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({201, 55})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(500)
-            .ExtendUpperBounds(115, 0)
-            .SetText(text);
-
-    options.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    lua_getglobal(L, "canvas");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        AddCanvasElement();
+        lua_pop(L, 1);
+    }
+//    canvas->AddElement()
+//            .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
+//            .SetRelativeSize({0.0f, 1.0f})
+//            .SetAbsoluteSize({415, 0})
+//            .AlignLeft(115);
+//
+//    canvas->AddElement()
+//           .SetColor({150.0f/255.0f, 0.0f, 210.0f/255.0f, 1.0f})
+//           .SetAbsoluteSize({550, 220})
+//           .AlignTop()
+//           .AlignLeft(50);
+//
+//    canvas->AddImageElement("Menu/TitleSpeed.png")
+//            .SetAbsoluteSize({290, 97})
+//            .SetAbsolutePosition({280, 0})
+//            .AlignTop(25);
+//
+//    canvas->AddImageElement("Menu/TitleFun.png")
+//            .SetAbsoluteSize({151, 77})
+//            .SetAbsolutePosition({407, 0})
+//            .AlignTop(122);
+//
+//    canvas->AddImageElement("Menu/Dashes.png")
+//            .SetAbsoluteSize({109, 70})
+//            .SetAbsolutePosition({285, 0})
+//            .AlignTop(128);
+//
+//    hoverBox = canvas->AddElement()
+//            .SetAbsoluteSize({460, 115})
+//            .SetColor({160.0f/255.0f, 20.0f / 255.0f, 220.0f/255.0f, 1.0f})
+//            .AlignTop(247)
+//            .AlignLeft(95)
+//            .GetIndex();
+//
+//    // References are fun, change the order of the connections and it'll blow up.
+//    // the extend upper bounds method below is a bit hacky, just lets the 'hitbox' of the text extend pass the image mesh.
+//    // I don't even need this any more since I'm actually rendering text and can just make the absolute size bigger
+//    // Owen I bet you're reviewing this don't delete my comments please.
+//    // let my words ring throughout the future of github.
+//    // let this be a reminder to all future generations
+//    // kids
+//    // don't drink and code.
+//    // bad.
+//    TextData text;
+//    text.SetFont(menuFont.get());
+//    text.color = activeMenuText;
+//    text.text = "Singleplayer";
+//
+//    auto& singleplayer = canvas->AddElement()
+//            .SetColor({0.0, 0.0, 0.0, 0.0})
+//            .SetAbsoluteSize({315, 54})
+//            .SetAbsolutePosition({160, 0})
+//            .AlignTop(280)
+//            .SetText(text);
+//
+//    selected = singleplayer.GetIndex();
+//
+//    text.color = inactiveMenuText;
+//    text.text = "Multiplayer";
+//
+//    singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+//
+//    auto& multiplayer = canvas->AddElement()
+//            .SetColor({0.0, 0.0, 0.0, 0.0})
+//            .SetAbsoluteSize({290, 54})
+//            .SetAbsolutePosition({160, 0})
+//            .AlignTop(390)
+//            .ExtendUpperBounds(20, 0)
+//            .SetText(text);
+//
+//    text.text = "Exit";
+//
+//    multiplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+//    auto& exit = canvas->AddElement()
+//            .SetColor({0.0, 0.0, 0.0, 0.0})
+//            .SetAbsoluteSize({97, 43})
+//            .SetAbsolutePosition({160, 0})
+//            .AlignTop(610)
+//            .ExtendUpperBounds(215, 0)
+//            .SetText(text);
+//
+//    exit.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+//
+//    text.text = "Options";
+//
+//    auto& options = canvas->AddElement()
+//            .SetColor({0.0, 0.0, 0.0, 0.0})
+//            .SetAbsoluteSize({201, 55})
+//            .SetAbsolutePosition({160, 0})
+//            .AlignTop(500)
+//            .ExtendUpperBounds(115, 0)
+//            .SetText(text);
+//
+//    options.OnMouseEnter.connect<&MenuState::OptionHover>(this);
 }
 
 void MenuState::OnEnter() {
@@ -198,6 +238,7 @@ void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
     baseClient->ClearPacketHandlers();
     canvas->Reset();
+    lua_close(L);
 }
 
 MenuState::~MenuState() {
