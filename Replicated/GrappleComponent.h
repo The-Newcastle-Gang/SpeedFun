@@ -18,6 +18,7 @@ namespace NCL::CSC8503{
 
         GrappleComponent(GameObject* go, GameWorld* world);
         void PhysicsUpdate(float dt)override;
+        void Update(float dt) override;
         void ProcessGrappleInput(float playerInput, Quaternion lookDir);
 
 
@@ -32,6 +33,7 @@ namespace NCL::CSC8503{
         bool canGrapple;
         Vector3 GrapplePoint;
         float time;
+        float grappleCooldown = 0.0f;
 
     };
 }

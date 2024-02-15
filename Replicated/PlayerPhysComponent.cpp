@@ -46,7 +46,7 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
         return;
     }
 
-    if(isGrounded){ isGrappling = false;}
+    //if(isGrounded){ isGrappling = false;}
 
     if(!isGrounded){
         airMultiplier = 0.3f;
@@ -57,8 +57,9 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     auto physGameObj = gameObject->GetPhysicsObject();
 
     GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-//    MinimizeSlide(physGameObj);
-
+/*
+    MinimizeSlide(physGameObj);
+    */
     ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
 
@@ -69,7 +70,7 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
 void PlayerPhysComponent::ProcessJumpInput(float jumpKeyPresed) {
 
-    if(isGrappling){
+    if(isGrappling || isDashing){
         return;
     }
 
@@ -105,7 +106,7 @@ void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
 
 void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
 
-    if(isGrappling){
+    if(isGrappling || isDashing){
         return;
     }
 

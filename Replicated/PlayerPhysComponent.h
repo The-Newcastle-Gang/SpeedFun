@@ -21,10 +21,12 @@ namespace NCL::CSC8503 {
         void ProcessJumpInput(float jumpKeyPresed);
 
 
-        float getRunVelocity()      { return runForce; }
-        bool  checkIsGrounded()     { return isGrounded;}
-        float getAirMultiplier()    { return airMultiplier;}
-        void setGrappling(bool x) {isGrappling = x;}
+        float getRunVelocity()   const  { return runForce; }
+        bool  checkIsGrounded()  const  { return isGrounded;}
+        float getAirMultiplier() const  { return airMultiplier;}
+        void setGrappling(bool x)       { isGrappling = x; }
+
+        void SetIsDashing(bool b) {isDashing = b;}
 
     protected:
         void FastFalling(PhysicsObject* physGameObj);
@@ -32,9 +34,6 @@ namespace NCL::CSC8503 {
         void MinimizeSlide(PhysicsObject* physGameObj);
 
         void GroundCheck(PhysicsObject* physGameObj, Vector3 position);
-
-//        void 🦵💨❌();
-
 
 
         GameWorld* world;

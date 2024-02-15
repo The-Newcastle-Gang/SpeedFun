@@ -15,18 +15,21 @@ namespace NCL::CSC8503 {
     public:
         DashComponent(GameObject* go);
         void PhysicsUpdate(float dt) override;
+        void Update(float dt) override;
         void ProcessDashInput(bool dashButton, Quaternion rotation);
 
     protected:
 
         void ExecuteDash(Vector3 LookDirection);
 
-        float dashStrength;
-        float dashCooldown;
-        int maxDashes;
-        int currentDashAmt;
+        float dashStrength = 0.0f;
+        float dashCooldown = 0.0f;
+        float dashRecharge = 0.0f;
+        int maxDashes = 0.0f;
+        int currentDashAmt = 0.0f;
         bool canDash;
         bool isDashing;
+        float time = 0.0f;
 
     };
 }

@@ -12,12 +12,22 @@ GrappleComponent::GrappleComponent(GameObject* go, GameWorld* pWorld) : world(pW
     maxGrappleLen = 10.0f;
     time = 0.0f;
     canGrapple = true;
+    grappleCooldown = 3.0f;
 
 }
 
 void GrappleComponent::PhysicsUpdate(float dt) {
-    
 
+
+}
+
+void GrappleComponent::Update(float dt) {
+    time += dt;
+    if (time > grappleCooldown && !canGrapple){
+        canGrapple = true;
+        time = 0.0f;
+        std::cout << "Grapple ready\n";
+    }
 }
 
 void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotation) {
@@ -46,7 +56,9 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
 
 void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
 
-    PlayerPhysComponent* p ;
+    if(!canGrapple) { return; }
+
+    PlayerPhysComponent* p;
     gameObject->TryGetComponent(p);
     p->setGrappling(true);
     canGrapple = false;
@@ -66,7 +78,7 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
     float airTime =  (sqrt(-2*height/gravity) + sqrt(2*(displacementY - height)/gravity));
     time = airTime;
 
-    Vector3 velocityY =Vector3(0,1,0) *sqrt((-2 * gravity * height));
+    Vector3 velocityY = Vector3(0,1,0) *sqrt((-2 * gravity * height));
     Vector3 velocityXZ = displacementXZ / airTime;
 
 

@@ -119,7 +119,7 @@ void RunningState::CreatePlayers() {
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
         auto component = new PlayerPhysComponent(player, world.get());
         player->AddComponent((Component*)component);
-        player->AddComponent((Component*)new GrappleComponent(player, world.get()));
+       // player->AddComponent((Component*)new GrappleComponent(player, world.get()));
         player->AddComponent((Component*)new DashComponent(player));
 
 
@@ -137,9 +137,9 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     playerPhysics->ProcessMovementInput(inputInfo.fwdAxis , inputInfo.rightAxis, inputInfo.playerDirection);
     playerPhysics->ProcessJumpInput(inputInfo.jumpInput);
 
-    GrappleComponent* playerGrapple;
+    /*GrappleComponent* playerGrapple;
     player->TryGetComponent(playerGrapple);
-    playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);
+    playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);*/
 
     DashComponent* playerDash;
     player->TryGetComponent(playerDash);
