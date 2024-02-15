@@ -57,6 +57,7 @@ void MenuState::AddCanvasElement() {
         .SetRelativePosition(getVec2Field(L, "rPos"))
         .SetColor(getVec4Field(L, "color"));
 
+    lua_gettable()
     lua_pushnil(L);
     while (lua_next(L, -2)) {
 
