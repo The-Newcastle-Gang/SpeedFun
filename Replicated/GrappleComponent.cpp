@@ -10,10 +10,14 @@ GrappleComponent::GrappleComponent(GameObject* go, GameWorld* pWorld) : world(pW
     world = pWorld;
     gameObject = go;
     maxGrappleLen = 10.0f;
+    time = 0.0f;
+    canGrapple = true;
 
 }
 
 void GrappleComponent::PhysicsUpdate(float dt) {
+    
+
 }
 
 void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotation) {
@@ -32,6 +36,7 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
     closestColl.rayDistance =  maxGrappleLen;
 
     if(world->Raycast(ray, closestColl, true, gameObject)){
+        GrapplePoint = closestColl.collidedAt;
         ExecuteGrapple(closestColl.collidedAt);
     }
 
@@ -44,6 +49,7 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
     PlayerPhysComponent* p ;
     gameObject->TryGetComponent(p);
     p->setGrappling(true);
+    canGrapple = false;
 
     float gravity = -9.8;
 
@@ -57,9 +63,11 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
 
     Vector3 displacementXZ = Vector3(GrapplePoint.x - posCache.x, 0, GrapplePoint.z - posCache.z);
 
+    float airTime =  (sqrt(-2*height/gravity) + sqrt(2*(displacementY - height)/gravity));
+    time = airTime;
 
     Vector3 velocityY =Vector3(0,1,0) *sqrt((-2 * gravity * height));
-    Vector3 velocityXZ = displacementXZ / (sqrt(-2*height/gravity) + sqrt(2*(displacementY - height)/gravity));
+    Vector3 velocityXZ = displacementXZ / airTime;
 
 
     //TODO:: THROW THIS IN A VECTOR3 FUNCTION

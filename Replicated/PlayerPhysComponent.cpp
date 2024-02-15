@@ -41,10 +41,12 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     //DO IT THE OTHER WAY ROUND, GC SETS ISGRAPPLING HERE.
     //EVERY PLAYER WILL HAVE A PLAYERPHYSCOMPONENT BUT NOT THE OTHERWAY RIOUND SMILE.
 
+
     if(isGrappling){
         return;
     }
 
+    if(isGrounded){ isGrappling = false;}
 
     if(!isGrounded){
         airMultiplier = 0.3f;
@@ -89,7 +91,7 @@ void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
 }
 
 void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
-    if(isGrappling || isDashing){
+    if(isGrappling){
         return;
     }
 
@@ -102,6 +104,10 @@ void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
 }
 
 void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
+
+    if(isGrappling){
+        return;
+    }
 
     if(!InputListener::hasPlayerPressed()){
         physGameObj->SetLinearVelocity(Vector3(0,physGameObj->GetLinearVelocity().y,0));

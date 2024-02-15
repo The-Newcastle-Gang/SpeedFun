@@ -29,6 +29,9 @@ namespace NCL::CSC8503{
         GameWorld* world;
         float maxGrappleLen;
         bool isGrappling = false;
+        bool canGrapple;
+        Vector3 GrapplePoint;
+        float time;
 
     };
 }
