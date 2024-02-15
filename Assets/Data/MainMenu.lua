@@ -110,125 +110,129 @@ local function AlignTo(direction, padding)
 end
 
 canvas = {
-    {
-        color = COLORS.translucent,
-        rSize = Vector2:new(0, 1),
-        aSize = Vector2:new(415, 0),
-        align = {
-            AlignTo("left", 115)
+    main = {
+        {
+            color = COLORS.translucent,
+            rSize = Vector2:new(0, 1),
+            aSize = Vector2:new(415, 0),
+            align = {
+                AlignTo("left", 115)
+            },
         },
-    },
-    {
-      color = COLORS.main,
-      aSize = Vector2:new(550, 220),
-      align = {
-          AlignTo("top", 0),
-          AlignTo("left", 50),
-      }
-    },
-    {
-      image = "Menu/TitleSpeed.png",
-      color = COLORS.white,
-      aSize = Vector2:new(290, 97),
-      aPos = Vector2:new(280, 0),
-      align = {
-          AlignTo("top", 25)
-      },
-    },
-    {
-      image = "Menu/TitleFun.png",
-      color = COLORS.white,
-      aSize = Vector2:new(151, 77),
-      aPos = Vector2:new(407, 0),
-      align = {
-          AlignTo("top", 128),
-      }
-    },
-    {
-      image = "Menu/Dashes.png",
-      color = COLORS.white,
-      aSize = Vector2:new(109, 70),
-      aPos = Vector2:new(285, 0),
-      align = {
-          AlignTo("top", 128)
-      }
-    },
-    {
-        color = COLORS.main,
-        aSize = Vector2:new(460, 115),
-        align = {
-            AlignTo("top", 247),
-            AlignTo("left", 95)
+        {
+            color = COLORS.main,
+            aSize = Vector2:new(550, 220),
+            align = {
+                AlignTo("top", 0),
+                AlignTo("left", 50),
+            }
         },
-        id = "HoverBox",
-    },
-    {
-        aSize = Vector2:new(315, 80),
-        aPos = Vector2:new(160, 0),
-        align = {
-            AlignTo("top", 250)
+        {
+            image = "Menu/TitleSpeed.png",
+            color = COLORS.white,
+            aSize = Vector2:new(290, 97),
+            aPos = Vector2:new(280, 0),
+            align = {
+                AlignTo("top", 25)
+            },
         },
-        text = {
-            text = "Singleplayer",
-            color = COLORS.active,
-            size = 1.0
+        {
+            image = "Menu/TitleFun.png",
+            color = COLORS.white,
+            aSize = Vector2:new(151, 77),
+            aPos = Vector2:new(407, 0),
+            align = {
+                AlignTo("top", 128),
+            }
         },
-        tags = {
-            "option"
+        {
+            image = "Menu/Dashes.png",
+            color = COLORS.white,
+            aSize = Vector2:new(109, 70),
+            aPos = Vector2:new(285, 0),
+            align = {
+                AlignTo("top", 128)
+            }
         },
-        id = "Singleplayer",
-    },
-    {
-        aSize = Vector2:new(315, 80),
-        aPos = Vector2:new(160, 0),
-        align = {
-            AlignTo("top", 360),
+        {
+            color = COLORS.main,
+            aSize = Vector2:new(460, 115),
+            align = {
+                AlignTo("top", 247),
+                AlignTo("left", 95)
+            },
+            id = "HoverBox",
         },
-        text = {
-            text = "Multiplayer",
-            color = COLORS.inactive,
-            size = 1.0,
+        {
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160, 0),
+            align = {
+                AlignTo("top", 250)
+            },
+            text = {
+                text = "Singleplayer",
+                color = COLORS.active,
+                size = 1.0
+            },
+            tags = {
+                "option"
+            },
+            id = "Singleplayer",
         },
-        tags = {
-            "option",
+        {
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160, 0),
+            align = {
+                AlignTo("top", 360),
+            },
+            text = {
+                text = "Multiplayer",
+                color = COLORS.inactive,
+                size = 1.0,
+            },
+            tags = {
+                "option",
+            },
+            id = "Multiplayer",
         },
-        id = "Multiplayer",
-    },
-    {
-        aSize = Vector2:new(315, 80),
-        aPos = Vector2:new(160, 0),
-        align = {
-            AlignTo("top", 470),
+        {
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160, 0),
+            align = {
+                AlignTo("top", 470),
+            },
+            text = {
+                text = "Options",
+                color = COLORS.inactive,
+                size = 1.0,
+            },
+            tags = {
+                "option",
+            },
+            id = "Options",
         },
-        text = {
-            text = "Options",
-            color = COLORS.inactive,
-            size = 1.0,
-        },
-        tags = {
-            "option",
-        },
-        id = "Options",
-    },
-    {
-        aSize = Vector2:new(315, 80),
-        aPos = Vector2:new(160, 0),
-        align = {
-            AlignTo("top", 580),
-        },
-        text = {
-            text = "Exit",
-            color = COLORS.inactive,
-            size = 1.0,
-        },
-        tags = {
-            "option",
-        },
-        id = "Exit",
+        {
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160, 0),
+            align = {
+                AlignTo("top", 580),
+            },
+            text = {
+                text = "Exit",
+                color = COLORS.inactive,
+                size = 1.0,
+            },
+            tags = {
+                "option",
+            },
+            id = "Exit",
+        }
     }
 }
 
 for _, v in pairs(canvas) do
-    v.__index = elementBase;
-    setmetatable(v, v)
+    for _, nv in pairs(v) do
+        nv.__index = elementBase;
+        setmetatable(nv, nv)
+    end
 end

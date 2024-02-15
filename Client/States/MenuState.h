@@ -11,6 +11,7 @@
 #include "TweenManager.h"
 #include "lua.hpp"
 #include "utils.h"
+#include "raudio.h"
 
 namespace NCL {
     namespace CSC8503 {
@@ -63,11 +64,13 @@ namespace NCL {
 
             void InitLua();
 
-            void AddCanvasElement();
-
             void AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const string &id);
 
             void AlignCanvasElement(Element &element);
+
+            void BeginSingleplayer(Element &_);
+
+            void AddCanvasElement(const string &layerName);
         };
     }
 }
