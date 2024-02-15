@@ -120,6 +120,8 @@ void RunningState::CreatePlayers() {
         auto component = new PlayerPhysComponent(player, world.get());
         player->AddComponent((Component*)component);
         player->AddComponent((Component*)new GrappleComponent(player, world.get()));
+        player->AddComponent((Component*)new DashComponent(player));
+
 
         playerObjects[pair.first] = player;
     }
@@ -138,6 +140,10 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     GrappleComponent* playerGrapple;
     player->TryGetComponent(playerGrapple);
     playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);
+
+    DashComponent* playerDash;
+    player->TryGetComponent(playerDash);
+    playerDash->ProcessDashInput(inputInfo.dashInput, inputInfo.playerRotation);
 
 }
 

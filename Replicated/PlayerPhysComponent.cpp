@@ -19,6 +19,7 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
     fastFallingMultiplier = 1.1f;
     isGrappling = false;
+    isDashing = false;
 
 }
 
@@ -88,6 +89,9 @@ void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
 }
 
 void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
+    if(isGrappling || isDashing){
+        return;
+    }
 
     if(physGameObj->GetLinearVelocity().Length() > maxVelocity){
 

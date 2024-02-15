@@ -59,6 +59,7 @@ struct InputPacket : public GamePacket {
     Vector3 rightAxis;
     float jumpInput;
     float grappleInput;
+    bool dashInput;
     // Put any more necessary client inputs here
 
     InputPacket() {

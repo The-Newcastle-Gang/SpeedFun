@@ -8,6 +8,7 @@
 
 #include "PlayerPhysComponent.h"
 #include "GrappleComponent.h"
+#include "DashComponent.h"
 
 #include <iostream>
 #include <thread>

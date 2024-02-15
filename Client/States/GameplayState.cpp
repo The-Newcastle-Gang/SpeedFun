@@ -129,6 +129,7 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
     input.jumpInput       = InputListener::GetJumpInput();
     input.grappleInput    = InputListener::GetGrappleInput();
+    input.dashInput       = InputListener::GetDashInput();
 
     networkData->outgoingInput.Push(input);
 }

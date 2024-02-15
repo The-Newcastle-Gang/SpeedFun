@@ -5,7 +5,6 @@
 #include "Debug.h"
 #include "InputListener.h"
 #include "GameWorld.h"
-#include "Window.h"
 #include "GrappleComponent.h"
 
 
@@ -20,7 +19,6 @@ namespace NCL::CSC8503 {
 
         void ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput);
         void ProcessJumpInput(float jumpKeyPresed);
-
 
 
         float getRunVelocity()      { return runForce; }
@@ -50,6 +48,7 @@ namespace NCL::CSC8503 {
         float fastFallingMultiplier;
         bool isGrounded;
         bool isGrappling;
+        bool isDashing;
 	};
 
 }

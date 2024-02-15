@@ -22,7 +22,8 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
         return;
     }
     //holy fucking shit openGL dude why are you z -1 im gonna krill you
-    //my god
+    //my god (this furthered like all of my calculations for a good 45minutes)
+    //im not kidding I redid my math only to realize that the fwd vector for opengl is z= -1
 
     Vector3 lookDirection = rotation * Vector3(0,0,-1);
 
@@ -31,12 +32,7 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
     closestColl.rayDistance =  maxGrappleLen;
 
     if(world->Raycast(ray, closestColl, true, gameObject)){
-        auto test  = (GameObject*)closestColl.node;
         ExecuteGrapple(closestColl.collidedAt);
-
-        //execute grapple after a delay maybe?
-//        ExecuteGrapple(test->GetTransform().GetPosition());
-
     }
 
 }
