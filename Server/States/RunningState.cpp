@@ -48,6 +48,12 @@ void RunningState::ReadNetworkFunctions() {
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
         }
+        else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerPhysComponent* playerPhysics;
+            player->TryGetComponent(playerPhysics);
+            playerPhysics->Jump();
+        }
     }
 }
 
@@ -119,9 +125,8 @@ void RunningState::CreatePlayers() {
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
         auto component = new PlayerPhysComponent(player, world.get());
         player->AddComponent((Component*)component);
-       // player->AddComponent((Component*)new GrappleComponent(player, world.get()));
+        player->AddComponent((Component*)new GrappleComponent(player, world.get()));
         player->AddComponent((Component*)new DashComponent(player));
-
 
         playerObjects[pair.first] = player;
     }
@@ -135,15 +140,14 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     player->TryGetComponent(playerPhysics);
 
     playerPhysics->ProcessMovementInput(inputInfo.fwdAxis , inputInfo.rightAxis, inputInfo.playerDirection);
-    playerPhysics->ProcessJumpInput(inputInfo.jumpInput);
 
-    /*GrappleComponent* playerGrapple;
+    GrappleComponent* playerGrapple;
     player->TryGetComponent(playerGrapple);
-    playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);*/
+    playerGrapple->ProcessGrappleInput(inputInfo.grappleInput, inputInfo.playerRotation);
 
-    DashComponent* playerDash;
+/*    DashComponent* playerDash;
     player->TryGetComponent(playerDash);
-    playerDash->ProcessDashInput(inputInfo.dashInput, inputInfo.playerRotation);
+    playerDash->ProcessDashInput(inputInfo.dashInput, inputInfo.playerRotation);*/
 
 }
 

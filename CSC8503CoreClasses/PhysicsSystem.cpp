@@ -422,10 +422,10 @@ void PhysicsSystem::IntegrateAccel(float dt) {
         object->ClearForces();
 		Vector3 accel = force * inverseMass;                     //f*m^-1
 
-		if (applyGravity && inverseMass > 0) {
-            accel += gravity;
-
-		}
+//		if (applyGravity && inverseMass > 0 && !ifplayer) {
+//            accel += gravity;
+//
+//		}
 
 		linearVel += accel * dt;                                // v = a(t).dt
 		object->SetLinearVelocity(linearVel);

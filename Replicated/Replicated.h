@@ -31,6 +31,7 @@ public:
     enum RemoteServerCalls {
         StartGame,
         GameLoaded,
+        PlayerJump,
     };
 
     Replicated();

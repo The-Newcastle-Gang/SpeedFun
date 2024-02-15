@@ -115,6 +115,10 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
+        networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
+    }
+
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
     float cameraYaw = mainCamera->GetYaw();

@@ -16,7 +16,6 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     isGrounded = false;
     jumpForce = 1.0f;
     airMultiplier = 1.0f;
-
     fastFallingMultiplier = 1.1f;
     isGrappling = false;
     isDashing = false;
@@ -25,14 +24,17 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
 
 void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput) {
 
-    if(isGrappling){
-        return;
-    }
-
     auto pGO = gameObject->GetPhysicsObject();
 
     pGO->AddForce(fwdAxis  *playerInput.y * runForce * airMultiplier);
     pGO->AddForce(rightAxis *playerInput.x * runForce * airMultiplier);
+
+}
+
+void PlayerPhysComponent::Update(float dt) {
+    auto pGO = gameObject->GetPhysicsObject();
+    GroundCheck(pGO, gameObject->GetTransform().GetPosition());
+
 
 }
 
@@ -41,13 +43,6 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     //DO IT THE OTHER WAY ROUND, GC SETS ISGRAPPLING HERE.
     //EVERY PLAYER WILL HAVE A PLAYERPHYSCOMPONENT BUT NOT THE OTHERWAY RIOUND SMILE.
 
-
-    if(isGrappling){
-        return;
-    }
-
-    //if(isGrounded){ isGrappling = false;}
-
     if(!isGrounded){
         airMultiplier = 0.3f;
     } else{
@@ -55,31 +50,17 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
     }
 
     auto physGameObj = gameObject->GetPhysicsObject();
+    if(!isGrounded){
+        physGameObj->AddForce(Vector3(0,-9.8,0));
+    }
 
-    GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-/*
-    MinimizeSlide(physGameObj);
-    */
-    ClampPlayerVelocity(physGameObj);
+
+//    GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
+//    MinimizeSlide(physGameObj);
+//    ClampPlayerVelocity(physGameObj);
 //    FastFalling(physGameObj);
 
 }
-
-
-
-
-void PlayerPhysComponent::ProcessJumpInput(float jumpKeyPresed) {
-
-    if(isGrappling || isDashing){
-        return;
-    }
-
-    if(jumpKeyPresed && checkIsGrounded()){
-        gameObject->GetPhysicsObject()->ApplyLinearImpulse(Vector3{0,1,0} * jumpForce);
-    }
-
-}
-
 
 //multiply velocity instead of force since forces can be dangerous
 void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
@@ -125,7 +106,6 @@ void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 positi
     Ray ray = Ray(capBottom, Vector3(0,-1,0));
     RayCollision closestCollision ;
 
-
     float groundEpsilon = 0.01;
 
     if(world->Raycast(ray, closestCollision, true, gameObject)){
@@ -138,6 +118,12 @@ void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 positi
             isGrounded = false;
         }
     }
+}
 
+void PlayerPhysComponent::Jump() {
+    if(isGrounded)
+    {
+        gameObject->GetPhysicsObject()->ApplyLinearImpulse(Vector3{0,1,0} * jumpForce);
+    }
 }
 

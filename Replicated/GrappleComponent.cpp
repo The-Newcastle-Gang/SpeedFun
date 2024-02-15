@@ -49,7 +49,6 @@ void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotatio
         GrapplePoint = closestColl.collidedAt;
         ExecuteGrapple(closestColl.collidedAt);
     }
-
 }
 
 //s = ut+ 1/2 at2
@@ -60,7 +59,7 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
 
     PlayerPhysComponent* p;
     gameObject->TryGetComponent(p);
-    p->setGrappling(true);
+    p->SetGrappling(true);
     canGrapple = false;
 
     float gravity = -9.8;
