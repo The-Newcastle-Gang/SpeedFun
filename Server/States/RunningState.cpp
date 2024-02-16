@@ -153,6 +153,9 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
 void RunningState::BuildLevel(const std::string &levelName)
 {
+    auto levelManager = new LevelManager();
+    std::cout << "Level Manger: " << levelManager->GetCurrentLevel() << std::endl;
+
     std::cout << "Level: " << levelName << " being built\n";
     levelReader = new LevelReader();
     if (!levelReader->HasReadLevel(levelName + ".json"))
