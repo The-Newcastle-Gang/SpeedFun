@@ -37,6 +37,7 @@ MeshAnimation *Resources::GetAnimation(const std::string& name) {
 MeshMaterial* Resources::GetMeshMaterial(const std::string& name) {
     if (meshMaterials.find(name) == meshMaterials.end()) {
         auto meshMaterial = std::unique_ptr<MeshMaterial>(new MeshMaterial(name));
+        meshMaterial->LoadTextures();
         meshMaterials.insert(std::make_pair(name, std::move(meshMaterial)));
         return meshMaterials[name].get();
     }

@@ -3,6 +3,7 @@
 #include "ShaderBase.h"
 #include "MeshAnimation.h"
 #include "MeshGeometry.h"
+#include "MeshMaterial.h"
 #include "AnimatorObject.h"
 
 namespace NCL {
@@ -35,6 +36,14 @@ namespace NCL {
 				return transform;
 			}
 
+            void SetMeshMaterial(MeshMaterial* m) {
+                meshMaterial = m;
+            }
+
+            MeshMaterial* GetMeshMaterial() const {
+                return meshMaterial;
+            }
+
 			ShaderBase*		GetShader() const {
 				return shader;
 			}
@@ -57,6 +66,7 @@ namespace NCL {
 
 		protected:
 			MeshGeometry*	mesh;
+            MeshMaterial* meshMaterial;
 			TextureBase*	texture;
 			ShaderBase*		shader;
 			Transform*		transform;

@@ -80,6 +80,7 @@ namespace NCL {
 			void BindTextureToShader(const TextureBase*t, const std::string& uniform, int texUnit) const;
 			void BindMesh(MeshGeometry*m);
 			void BindAnimation(AnimatorObject*a);
+            void BindMeshMaterial(MeshMaterial* m);
 			void DrawBoundMesh(int subLayer = 0, int numInstances = 1);
             void DrawBoundAnimation(int layerCount);
 #ifdef _WIN32
@@ -108,7 +109,7 @@ namespace NCL {
 			OGLMesh*	boundMesh;
 			OGLShader*	boundShader;
             AnimatorObject* boundAnimation;
-            MeshMaterial* boundMaterial;
+            MeshMaterial* boundMeshMaterial;
 
 			//OGLShader*  debugShader;		
 			//std::vector<DebugString>	debugStrings;

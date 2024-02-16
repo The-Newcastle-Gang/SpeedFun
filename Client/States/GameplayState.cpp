@@ -92,7 +92,7 @@ void GameplayState::InitWorld() {
 }
 
 void GameplayState::CreatePlayers() {
-    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "scene.frag");
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
@@ -107,6 +107,7 @@ void GameplayState::CreatePlayers() {
         newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
     }
 }
 

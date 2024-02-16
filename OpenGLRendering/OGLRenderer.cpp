@@ -46,6 +46,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	boundMesh	= nullptr;
 	boundShader = nullptr;
     boundAnimation = nullptr;
+    boundMeshMaterial = nullptr;//new MeshMaterial("Rig_Maximilian.mat");
 
 	windowWidth	= (int)w.GetScreenSize().x;
 	windowHeight	= (int)w.GetScreenSize().y;
@@ -53,10 +54,6 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	if (initState) {
 		TextureLoader::RegisterAPILoadFunction(OGLTexture::RGBATextureFromFilename);
 	}
-
-    boundMaterial = nullptr;// new MeshMaterial("Max/Rig_Maximilian.mat");
-
-
 	forceValidDebugState = false;
 }
 
@@ -127,6 +124,10 @@ void OGLRenderer::BindAnimation(AnimatorObject* a) {
     boundAnimation = a;
 }
 
+void OGLRenderer::BindMeshMaterial(MeshMaterial* m) {
+    boundMeshMaterial = m;
+}
+
 void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 	if (!boundMesh) {
 		std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
@@ -164,7 +165,6 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		case GeometryPrimitive::TriangleStrip:	mode = GL_TRIANGLE_STRIP;	break;
 		case GeometryPrimitive::Patches:		mode = GL_PATCHES;			break;
 	}
-
 	if (boundMesh->GetIndexCount() > 0) {
 		glDrawElements(mode, count, GL_UNSIGNED_INT, (const GLvoid*)(offset * sizeof(unsigned int)));
 	}
@@ -208,6 +208,10 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
         glUniformMatrix4fv(jointLoc, frameMatrices.size(), false, (float*)frameMatrices.data());
         glUniformMatrix4fv(nextJointLoc, nextFrameMatrices.size(), false, (float*)nextFrameMatrices.data());
         glUniform1f(frameLerpLoc, framePercentage);
+
+        OGLTexture* layerTex = (OGLTexture*)boundMeshMaterial->GetMaterialForLayer(l)->GetEntry("Diffuse");
+        
+        BindTextureToShader(layerTex, "mainTex", layerTex->GetObjectID());
 
         DrawBoundMesh(l);
     }

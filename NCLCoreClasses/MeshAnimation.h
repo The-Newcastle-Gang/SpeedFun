@@ -24,7 +24,7 @@ namespace NCL {
         MeshAnimationInfo() {
             frameTimer = 0;
             currentFrame = 0;
-            animationSpeed = 1.0f;
+            animationSpeed = 0.1f;
             framePercent = 0.0f;
         }
 
