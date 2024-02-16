@@ -6,6 +6,11 @@
 #include "InputListener.h"
 #include "GameWorld.h"
 #include "GrappleComponent.h"
+#include "StateMachine.h"
+#include "StateTransition.h"
+#include "../Server/PlayerStates/GroundedState.h"
+#include "../Server/PlayerStates/JumpingState.h"
+#include "../Server/PlayerStates/GrapplingState.h"
 
 
 namespace NCL::CSC8503 {
@@ -30,18 +35,16 @@ namespace NCL::CSC8503 {
 
         void Jump();
 
+        void InitStateMachine();
+
     protected:
         void FastFalling(PhysicsObject* physGameObj);
-        void ClampPlayerVelocity(PhysicsObject* physGameObj);
-        void MinimizeSlide(PhysicsObject* physGameObj);
         void GroundCheck(PhysicsObject* physGameObj, Vector3 position);
 
 
         GameWorld* world;
         float gravity               = 0.0f;
         float runForce              = 0.0f;
-        float maxVelocity           = 0.0f;
-        float drag                  = 0.0f;
         float airDrag               = 0.0f;
         float groundOffset          = 0.0f;
         float jumpForce             = 0.0f;
@@ -50,6 +53,10 @@ namespace NCL::CSC8503 {
         bool isGrounded             = false;
         bool isGrappling            = false;
         bool isDashing              = false;
+
+
+        std::unique_ptr<StateMachine> stateManager;
+
 	};
 
 }

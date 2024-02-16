@@ -10,18 +10,58 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     gameObject                  = go;
     gravity                     = -9.8f;
 
-    maxVelocity                 = 10.0f;
+
     runForce                    = 50.0f;
     groundOffset                = 0.1f;
     jumpForce                   = 3.0f;
     airMultiplier               = 1.0f;
-    fastFallingMultiplier       = 1.1f;
 
-    drag                        = 0.5f;
 
     isGrounded                  = false;
     isGrappling                 = false;
     isDashing                   = false;
+
+    stateManager = std::make_unique<StateMachine>();
+    InitStateMachine();
+}
+
+void PlayerPhysComponent::InitStateMachine() {
+    auto playerPhysObj = gameObject->GetPhysicsObject();
+    auto grounded = new GroundedState(playerPhysObj);
+    auto jumping = new JumpingState(playerPhysObj);
+    auto grappling = new GrapplingState(playerPhysObj);
+
+    stateManager->AddState(grounded);
+    stateManager->AddState(jumping);
+    stateManager->AddState(grappling);
+
+
+    //TODO:: REPLACE ALL THE IS GRAPPLING WITH HAS GRAPPLE FINISHED SOMEHOW
+
+    stateManager->AddTransition(new StateTransition(grounded, jumping, [=, this]()-> bool{
+        return !isGrounded;
+    }));
+
+    stateManager->AddTransition(new StateTransition(grounded, grappling, [=, this]()-> bool{
+        return isGrappling && isGrounded;
+    }));
+
+    stateManager->AddTransition(new StateTransition(jumping, grounded, [=, this]()->bool{
+        return isGrounded;
+    }));
+
+    stateManager->AddTransition(new StateTransition(jumping, grappling, [=, this]()->bool{
+        return isGrappling;
+    }));
+
+    stateManager->AddTransition(new StateTransition(grappling, grounded, [=, this]()-> bool{
+        return !isGrappling;
+    }));
+
+//    stateManager->AddTransition(new StateTransition(grappling, jumping, [=, this]()-> bool{
+//        //?
+//    }));
+
 
 }
 
@@ -35,16 +75,15 @@ void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxi
 }
 
 void PlayerPhysComponent::Update(float dt) {
+
+
     auto pGO = gameObject->GetPhysicsObject();
     GroundCheck(pGO, gameObject->GetTransform().GetPosition());
 }
 
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
-    //DO IT THE OTHER WAY ROUND, GC SETS ISGRAPPLING HERE.
-    //EVERY PLAYER WILL HAVE A PLAYERPHYSCOMPONENT BUT NOT THE OTHERWAY RIOUND SMILE.
-
-    if(!isGrounded){
+        if(!isGrounded){
         airMultiplier = 0.3f;
     } else{
         airMultiplier = 1.0f;
@@ -55,48 +94,15 @@ void PlayerPhysComponent::PhysicsUpdate(float dt) {
         physGameObj->AddForce(Vector3(0,gravity * 0.5f,0));
     }
 
-//    GroundCheck(physGameObj, gameObject->GetTransform().GetPosition());
-
-    MinimizeSlide(physGameObj);
-    ClampPlayerVelocity(physGameObj);
-//    FastFalling(physGameObj);
-
+    stateManager->Update(dt);
 }
 
 //multiply velocity instead of force since forces can be dangerous
 void PlayerPhysComponent::FastFalling(PhysicsObject* physGameObj) {
 
-    if(physGameObj->GetLinearVelocity().y <1.0f){
-        physGameObj->SetLinearVelocity(Vector3(physGameObj->GetLinearVelocity().x,
-                                               -abs(physGameObj->GetLinearVelocity().y) * fastFallingMultiplier,
-                                               physGameObj->GetLinearVelocity().z));
-    }
+
 }
 
-void PlayerPhysComponent::ClampPlayerVelocity(PhysicsObject* physGameObj) {
-    if(isGrappling){
-        return;
-    }
-
-    if(physGameObj->GetLinearVelocity().Length() > maxVelocity){
-
-        auto curVel = physGameObj->GetLinearVelocity();
-        curVel = curVel.Normalised();
-        physGameObj->SetLinearVelocity(Vector3(curVel.x* maxVelocity ,physGameObj->GetLinearVelocity().y, curVel.z* maxVelocity));
-    }
-}
-
-void PlayerPhysComponent::MinimizeSlide(PhysicsObject *physGameObj) {
-
-    Vector3 currentVel = physGameObj->GetLinearVelocity();
-    Vector3 invVel = currentVel * -1;
-    invVel.y = 0;
-    Vector3 normalisedInvVel = invVel.Normalised();
-
-    if(isGrounded){
-        physGameObj->SetLinearVelocity(currentVel + normalisedInvVel * drag);
-    }
-}
 
 void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 position) {
 

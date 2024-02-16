@@ -7,6 +7,9 @@ add_library(server
         "States/RunningState.cpp"
         "States/WaitingState.cpp"
         ServerThread.cpp
+        "PlayerStates/GroundedState.cpp"
+        "PlayerStates/JumpingState.cpp"
+        "PlayerStates/GrapplingState.cpp"
 )
 
 target_include_directories(server PUBLIC
