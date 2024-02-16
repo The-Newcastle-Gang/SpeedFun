@@ -1,20 +1,22 @@
 #ifndef GITIGNORE_LEVELMANGER_H
 #define GITIGNORE_LEVELMANGER_H
 
-using namespace std;
+#include <string>
+#include <vector>
+#include <iostream>
 
 class LevelManager {
 public:
     LevelManager();
     ~LevelManager();
 
-    string GetCurrentLevel() { return levelList[currentLevelIndex];}
-    void GoToLevelNumber(int level);
-    void GoToNextLevel();
+    static std::string GetCurrentLevel() { return levelList[currentLevelIndex];}
+    static void GoToLevelNumber(int level);
+    static void GoToNextLevel();
 
 private:
-    vector<string> levelList;
-    int currentLevelIndex = 0;
+    static std::vector<std::string> levelList;
+    static int currentLevelIndex;
 
 
 };

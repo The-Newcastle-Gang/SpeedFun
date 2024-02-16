@@ -4,17 +4,14 @@
 
 #include "LevelManager.h"
 
-LevelManager::LevelManager() {
-    levelList = { "debuglvl",
+int LevelManager::currentLevelIndex = 0;
+std::vector<std::string> LevelManager::levelList = { "debuglvl",
                   "finaltest",
                   "level1",
                   "level2",
                   "level3",
                   "sillylevel" };
 
-    // Level zero is debug, set this to 1 at the start of the game.
-    currentLevelIndex = 0;
-}
 
 void LevelManager::GoToNextLevel() {
     if(currentLevelIndex < levelList.size() - 1){
