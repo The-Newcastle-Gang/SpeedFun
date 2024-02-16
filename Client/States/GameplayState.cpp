@@ -140,8 +140,7 @@ void GameplayState::CreatePlayers() {
     }
 }
 
-void GameplayState::InitLevel(){
-
+void GameplayState::InitLevel() {
     auto lr= new LevelReader();
     lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();

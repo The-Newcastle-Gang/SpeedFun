@@ -22,13 +22,12 @@ void MenuState::OptionHover(Element& element) {
     auto& boxElement = canvas->GetElementByIndex(hoverBox);
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutSine,
+            TweenManager::EaseOutElastic,
             boxElement.GetAbsolutePosition().y,
             pos - 33,
             &boxElement.GetAbsolutePosition().y,
-            0.1f);
+            0.4f);
 
-    boxElement.AlignLeft(95);
     element.GetTextData().color = activeMenuText;
 }
 
@@ -52,11 +51,14 @@ void MenuState::BeginSingleplayer(Element& _) {
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
     if (tags.find("option") != tags.end()) {
         element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+
     }
 
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
+        canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
+        canvas->GetElementByIndex(hoverBox).AlignLeft(95);
     }
 
     if (id == "HoverBox") {
@@ -101,7 +103,8 @@ void MenuState::AddCanvasElement(const std::string& layerName) {
         .SetRelativeSize(getVec2Field(L, "rSize"))
         .SetAbsolutePosition(getVec2Field(L, "aPos"))
         .SetRelativePosition(getVec2Field(L, "rPos"))
-        .SetColor(getVec4Field(L, "color"));
+        .SetColor(getVec4Field(L, "color"))
+        .SetZIndex(getIntField(L, "zIndex"));
 
     AlignCanvasElement(element);
 

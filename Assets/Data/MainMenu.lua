@@ -94,8 +94,13 @@ local elementBase = {
         color = COLORS.transparent,
         size = 1.0;
     },
-    id = ""
+    id = "",
+    zIndex = 0
 }
+
+function elementBase:MakeList(previous, padding)
+    self.aPos = Vector2:new(self.aPos.x, previous.aPos.y + previous.aSize.y + padding)
+end
 
 local alignBase = {
     to = "middle",
@@ -121,10 +126,11 @@ canvas = {
         },
         {
             color = COLORS.main,
-            aSize = Vector2:new(550, 220),
+            aSize = Vector2:new(0, 150),
+            rSize = Vector2:new(1.0, 0.0),
             align = {
                 AlignTo("top", 0),
-                AlignTo("left", 50),
+                AlignTo("left", 0),
             }
         },
         {
@@ -133,7 +139,8 @@ canvas = {
             aSize = Vector2:new(290, 97),
             aPos = Vector2:new(280, 0),
             align = {
-                AlignTo("top", 25)
+                AlignTo("top", 35),
+                AlignTo("right", 181)
             },
         },
         {
@@ -142,7 +149,8 @@ canvas = {
             aSize = Vector2:new(151, 77),
             aPos = Vector2:new(407, 0),
             align = {
-                AlignTo("top", 128),
+                AlignTo("top", 35),
+                AlignTo("right", 20)
             }
         },
         {
@@ -151,14 +159,15 @@ canvas = {
             aSize = Vector2:new(109, 70),
             aPos = Vector2:new(285, 0),
             align = {
-                AlignTo("top", 128)
+                AlignTo("top", 45),
+                AlignTo("right", 181 + 290 + 10)
             }
         },
         {
             color = COLORS.main,
             aSize = Vector2:new(460, 115),
             align = {
-                AlignTo("top", 247),
+                AlignTo("top", 180 + 33 - 40),
                 AlignTo("left", 95)
             },
             id = "HoverBox",
@@ -167,7 +176,7 @@ canvas = {
             aSize = Vector2:new(315, 80),
             aPos = Vector2:new(160, 0),
             align = {
-                AlignTo("top", 250)
+                AlignTo("top", 180)
             },
             text = {
                 text = "Singleplayer",
@@ -183,7 +192,7 @@ canvas = {
             aSize = Vector2:new(315, 80),
             aPos = Vector2:new(160, 0),
             align = {
-                AlignTo("top", 360),
+                AlignTo("top", 290),
             },
             text = {
                 text = "Multiplayer",
@@ -199,7 +208,7 @@ canvas = {
             aSize = Vector2:new(315, 80),
             aPos = Vector2:new(160, 0),
             align = {
-                AlignTo("top", 470),
+                AlignTo("top", 400),
             },
             text = {
                 text = "Options",
@@ -215,7 +224,7 @@ canvas = {
             aSize = Vector2:new(315, 80),
             aPos = Vector2:new(160, 0),
             align = {
-                AlignTo("top", 580),
+                AlignTo("top", 510),
             },
             text = {
                 text = "Exit",
@@ -227,6 +236,9 @@ canvas = {
             },
             id = "Exit",
         }
+    },
+    multiplayer = {
+
     }
 }
 

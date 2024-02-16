@@ -172,6 +172,15 @@ public:
         return id;
     }
 
+    Element& SetZIndex(int z) {
+        zIndex = z;
+        return *this;
+    }
+
+    [[nodiscard]] int GetZIndex() const{
+        return zIndex;
+    }
+
     void Update(float dt);
 
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHover;
@@ -201,6 +210,7 @@ private:
     entt::sigh<void(Element&)> mouseUp;
     entt::sigh<void(Element&, float)> mouseHold;
     entt::sigh<void(Element&, float)> update;
+    int zIndex;
 
 
     int somethingElse = 0;
