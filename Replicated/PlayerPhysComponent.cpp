@@ -55,7 +55,7 @@ void PlayerPhysComponent::InitStateMachine() {
     }));
 
     stateManager->AddTransition(new StateTransition(grappling, grounded, [=, this]()-> bool{
-        return !isGrappling;
+        return grappling->HasGrappleCompleted();
     }));
 
 //    stateManager->AddTransition(new StateTransition(grappling, jumping, [=, this]()-> bool{
@@ -83,7 +83,7 @@ void PlayerPhysComponent::Update(float dt) {
 
 void PlayerPhysComponent::PhysicsUpdate(float dt) {
 
-        if(!isGrounded){
+    if(!isGrounded){
         airMultiplier = 0.3f;
     } else{
         airMultiplier = 1.0f;

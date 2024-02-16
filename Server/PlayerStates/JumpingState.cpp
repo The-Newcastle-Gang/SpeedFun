@@ -19,7 +19,8 @@ void JumpingState::OnEnter() {
 
 void JumpingState::Update(float dt) {
 //    std::cout << "Update air";
-    FastFalling(playerPhysObj);
+//    FastFalling(playerPhysObj);
+
 }
 
 void JumpingState::FastFalling (PhysicsObject* physObj) {

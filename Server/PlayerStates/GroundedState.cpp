@@ -22,7 +22,7 @@ void GroundedState::OnEnter() {
 void GroundedState::Update(float dt) {
 
     MinimizePlayerSlide(playerPhysObj);
-    ClampPlayerVelocity(playerPhysObj);
+//    ClampPlayerVelocity(playerPhysObj);
 
 }
 

@@ -16,9 +16,12 @@ namespace NCL{
         public:
             GrapplingState(PhysicsObject* physObj);
             void Update(float dt) override;
-        protected:
+            void OnEnter() override;
             bool HasGrappleCompleted();
+        protected:
 
+            bool isGrappling;
+            float time = 0.0f;
         };
     }
 }
