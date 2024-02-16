@@ -238,6 +238,40 @@ canvas = {
         }
     },
     multiplayer = {
+        {
+            color = COLORS.translucent,
+            rSize = Vector2:new(0, 1),
+            aSize = Vector2:new(415, 0),
+            align = {
+                AlignTo("left", 115 + 415)
+            },
+        },
+        {
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160 + 415, 0),
+            align = {
+                AlignTo("top", 180)
+            },
+            text = {
+                text = "Join Game",
+                color = COLORS.active,
+                size = 1.0
+            },
+            tags = {
+                "mOption"
+            },
+            id = "JoinGame",
+        },
+        {
+            color = COLORS.main,
+            aSize = Vector2:new(460, 115),
+            align = {
+                AlignTo("top", 180 + 33 - 40),
+                AlignTo("left", 95 + 415)
+            },
+            id = "mHoverBox",
+        },
+
 
     }
 }

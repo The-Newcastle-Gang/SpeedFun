@@ -31,6 +31,10 @@ void MenuState::OptionHover(Element& element) {
     element.GetTextData().color = activeMenuText;
 }
 
+void MenuState::MultiplayerOptionHover(Element& element) {
+
+}
+
 void MenuState::InitLua() {
     L = luaL_newstate();
     luaL_openlibs(L);
@@ -48,10 +52,13 @@ void MenuState::BeginSingleplayer(Element& _) {
     ConnectToGame("127.0.0.1");
 }
 
+void MenuState::ShowMultiplayerOptions(Element& _) {
+    canvas->PushActiveLayer("multiplayer");
+}
+
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
     if (tags.find("option") != tags.end()) {
         element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-
     }
 
     if (id == "Singleplayer") {
@@ -59,9 +66,9 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
         canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
         canvas->GetElementByIndex(hoverBox).AlignLeft(95);
-    }
-
-    if (id == "HoverBox") {
+    } else if (id == "Multiplayer") {
+        element.OnMouseUp.connect<&MenuState::ShowMultiplayerOptions>(this);
+    } else if (id == "HoverBox") {
         hoverBox = element.GetIndex();
     }
 }
@@ -93,6 +100,10 @@ void MenuState::AlignCanvasElement(Element& element) {
 }
 
 void MenuState::AddCanvasElement(const std::string& layerName) {
+
+    if (layerName != "main") {
+        canvas->CreateNewLayer(layerName, false);
+    }
 
     std::string image = getStringField(L, "image");
 

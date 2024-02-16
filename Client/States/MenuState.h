@@ -42,6 +42,7 @@ namespace NCL {
             std::string statusText;
             std::unique_ptr<TweenManager> tweenManager;
             int hoverBox;
+            int mHoverBox;
             int selected;
 
             bool isGameStarted;
@@ -71,6 +72,8 @@ namespace NCL {
             void BeginSingleplayer(Element &_);
 
             void AddCanvasElement(const string &layerName);
+
+            void ShowMultiplayerOptions(Element &_);
         };
     }
 }
