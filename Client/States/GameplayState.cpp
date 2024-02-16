@@ -25,16 +25,14 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0,0,0,0.7})
-            .SetRelativeSize({0.001f, 0.02f})
-            .SetAbsoluteSize({1,1})
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
-    auto crossHeirHor = canvas->AddElement()
-            .SetColor({0,0,0,0.7})
-            .SetRelativeSize({0.015f, 0.001f})
-            .SetAbsoluteSize({1,1})
+    auto crossHeirHoriz = canvas->AddElement()
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
 }
