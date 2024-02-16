@@ -165,14 +165,27 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		case GeometryPrimitive::Patches:		mode = GL_PATCHES;			break;
 	}
 
-    if (boundAnimation) {
-        const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
-        const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
-        const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
-        const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
-        const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
-        SubMeshPoses pose;
-        boundMesh->GetBindPoseState(subLayer,pose);
+	if (boundMesh->GetIndexCount() > 0) {
+		glDrawElements(mode, count, GL_UNSIGNED_INT, (const GLvoid*)(offset * sizeof(unsigned int)));
+	}
+	else {
+		glDrawArrays(mode, 0, count);
+	}
+    
+}
+
+void OGLRenderer::DrawBoundAnimation(int layerCount)
+{
+    const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
+    const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
+    const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
+    const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
+    const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
+    SubMeshPoses pose;
+
+    for (int l = 0; l < layerCount; l++) {
+
+        boundMesh->GetBindPoseState(l, pose);
 
         int jointLoc = glGetUniformLocation(boundShader->programID, "joints");
         int nextJointLoc = glGetUniformLocation(boundShader->programID, "nextJoints");
@@ -196,16 +209,11 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
         glUniformMatrix4fv(nextJointLoc, nextFrameMatrices.size(), false, (float*)nextFrameMatrices.data());
         glUniform1f(frameLerpLoc, framePercentage);
 
+        DrawBoundMesh(l);
     }
-
-	if (boundMesh->GetIndexCount() > 0) {
-		glDrawElements(mode, count, GL_UNSIGNED_INT, (const GLvoid*)(offset * sizeof(unsigned int)));
-	}
-	else {
-		glDrawArrays(mode, 0, count);
-	}
-    
 }
+
+
 
 void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& uniform, int texUnit) const{
 	GLint texID = 0;

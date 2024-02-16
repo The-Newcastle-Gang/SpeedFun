@@ -81,6 +81,7 @@ namespace NCL {
 			void BindMesh(MeshGeometry*m);
 			void BindAnimation(AnimatorObject*a);
 			void DrawBoundMesh(int subLayer = 0, int numInstances = 1);
+            void DrawBoundAnimation(int layerCount);
 #ifdef _WIN32
 			void InitWithWin32(Window& w);
 			void DestroyWithWin32();

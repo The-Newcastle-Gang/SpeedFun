@@ -308,16 +308,18 @@ void GameTechRenderer::RenderCamera() {
 
         BindMesh((*i).GetMesh());
 
+        int layerCount = (*i).GetMesh()->GetSubMeshCount();
+
         if (i->GetAnimatorObject()) {
             BindAnimation(i->GetAnimatorObject());
+            DrawBoundAnimation(layerCount);
+            BindAnimation(nullptr);
+            return;
         }
 
-
-        int layerCount = (*i).GetMesh()->GetSubMeshCount();
         for (int i = 0; i < layerCount; ++i) {
             DrawBoundMesh(i);
         }
-        BindAnimation(nullptr);
     }
 }
 
