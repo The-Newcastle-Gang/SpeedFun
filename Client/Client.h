@@ -16,7 +16,6 @@
 #include "StateMachine.h"
 #include "State.h"
 #include "GameplayState.h"
-#include "LoadingState.h"
 #include "MenuState.h"
 #include "raudio.h"
 #include "SafeQueue.h"
@@ -24,6 +23,8 @@
 #include "NetworkObject.h"
 #include "enet.h"
 #include "ClientNetworkData.h"
+#include "Canvas.h"
+#include "Resources.h"
 
 #include <iostream>
 #include <memory>
@@ -37,8 +38,6 @@ using namespace CSC8503;
 class Client{
 public:
     Client();
-    void InitClient();
-    std::string GetAddress();
     void Update(float dt);
 
 private:
@@ -47,8 +46,9 @@ private:
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
-    std::unique_ptr<ClientNetworkData> networkData;
     std::unique_ptr<GameClient> baseClient;
+    std::unique_ptr<Canvas> canvas;
+    std::unique_ptr<Resources> resources;
     void InitStateManager();
 };
 

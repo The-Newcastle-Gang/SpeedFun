@@ -5,6 +5,7 @@
 #include "InputListener.h"
 
 Vector2 InputListener::PlayerInput;
+float InputListener::JumpInput;
 
 using namespace NCL;
 
@@ -29,13 +30,19 @@ void InputListener::InputUpdate() {
         PlayerInput.x= 0;
     }
 
+    if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
+        JumpInput = 1.0f;
+    } else {
+        JumpInput = 0.0f;
+    }
+
     PlayerInput.Normalise();
 
 //DEBUG CODE
     std::string tempv = "PLayer " + std::to_string(PlayerInput.x) + " " +  std::to_string(PlayerInput.y);
     Debug::Print(tempv, {3, 70}, Debug::GREEN);
     Debug::Print(std::to_string(InputListener::hasPlayerPressed()), {3, 50}, Debug::GREEN);
-
+    Debug::Print("Jumped" + std::to_string(JumpInput), {3,40}, Debug::BLACK);
 
 }
 

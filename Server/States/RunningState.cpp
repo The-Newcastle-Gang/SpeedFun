@@ -107,7 +107,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    for (auto pair : playerInfo) {
+    for (auto& pair : playerInfo) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
 
@@ -118,8 +118,8 @@ void RunningState::CreatePlayers() {
 
         //TODO: clean up
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
-        auto component = new PlayerPhysComponent(player);
-        player->AddComponent(component);
+        auto component = new PlayerPhysComponent(player, world.get());
+        player->AddComponent((Component*)component);
 
         playerObjects[pair.first] = player;
     }
@@ -141,10 +141,11 @@ void RunningState::AddTriggerVolume(){
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
+    PlayerPhysComponent* playerPhysics;
+    player->TryGetComponent(playerPhysics);
 
-    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
-    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
-
+    playerPhysics->ProcessMovementInput(inputInfo.fwdAxis , inputInfo.rightAxis, inputInfo.playerDirection);
+    playerPhysics->ProcessJumpInput(inputInfo.jumpInput);
 
 }
 

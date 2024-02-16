@@ -10,19 +10,18 @@ Client::Client() {
 
     stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
-    renderer = std::make_unique<GameTechRenderer>(*world);
-    networkData = std::make_unique<ClientNetworkData>();
+    canvas = std::make_unique<Canvas>();
+    renderer = std::make_unique<GameTechRenderer>(*world, *canvas);
     baseClient = std::make_unique<GameClient>();
+    resources = std::make_unique<Resources>(renderer.get());
 
     InitStateManager();
 }
 
 void Client::InitStateManager() {
 
-    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
-    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
-
-
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get());
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
         return clientMenu->CheckConnected();
@@ -31,6 +30,7 @@ void Client::InitStateManager() {
     auto gameplayToMenu = new StateTransition(clientGameplay, clientMenu, [=]()->bool {
         return clientGameplay->IsDisconnected();
     });
+
 
     stateManager->AddState(clientMenu);
     stateManager->AddState(clientGameplay);
@@ -42,9 +42,9 @@ void Client::InitStateManager() {
 
 void Client::Update(float dt) {
 
-    //baseClient->UpdateClient();
-
     stateManager->Update(dt);
+
+    canvas->Update(dt);
 
     if (dt > 0.04) {
         std::cout << "Overly large dt" << std::endl;

@@ -18,9 +18,11 @@ public:
 
     static void InputUpdate();
     static Vector2 GetPlayerInput(){ return PlayerInput; }
+    static float GetJumpInput(){return JumpInput;}
     static bool    hasPlayerPressed();
 protected:
     static Vector2 PlayerInput;
+    static float JumpInput;
 
 };
 
