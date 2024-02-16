@@ -34,6 +34,7 @@ namespace NCL::CSC8503{
         Vector3 GrapplePoint;
         float time;
         float grappleCooldown = 0.0f;
+        float airTime;
     private:
         float arcHeightOffset = 0.0f;
         int XZVelModifier = 0;

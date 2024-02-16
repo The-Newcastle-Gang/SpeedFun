@@ -15,6 +15,7 @@ GrappleComponent::GrappleComponent(GameObject* go, GameWorld* pWorld) : world(pW
     grappleCooldown = 3.0f;
     arcHeightOffset = 10.0f;
     XZVelModifier = 7;
+    airTime = 0;
 
 }
 
@@ -24,12 +25,25 @@ void GrappleComponent::PhysicsUpdate(float dt) {
 }
 
 void GrappleComponent::Update(float dt) {
-    time += dt;
-    if (time > grappleCooldown && !canGrapple){
-        canGrapple = true;
-        time = 0.0f;
-        std::cout << "Grapple ready\n";
+//    time += dt;
+//    std::cout << time <<std::endl;
+//    if (time > grappleCooldown && !canGrapple){
+//        canGrapple = true;
+//        time = 0.0f;
+//    }
+
+//this is a static value since our gravity stuff is kinda crappy so yeah.
+    if(isGrappling){
+        time +=dt;
+        if(time> 0.3f){
+            isGrappling = false;
+            PlayerPhysComponent* p;
+            gameObject->TryGetComponent(p);
+            p->SetGrappling(false);
+        }
     }
+
+
 }
 
 void GrappleComponent::ProcessGrappleInput(float playerInput, Quaternion rotation) {
@@ -70,7 +84,8 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
     PlayerPhysComponent* p;
     gameObject->TryGetComponent(p);
     p->SetGrappling(true);
-    canGrapple = false;
+//    canGrapple = false;
+    isGrappling = true;
 
     float gravity = -9.8 * 2;
 
@@ -84,11 +99,11 @@ void GrappleComponent::ExecuteGrapple(Vector3 GrapplePoint) {
 
     Vector3 displacementXZ = Vector3(GrapplePoint.x - posCache.x, 0, GrapplePoint.z - posCache.z);
 
-    float airTime =  (sqrt(-2 * height/gravity) + sqrt(2 * (displacementY - height)/gravity));
-    time = airTime;
+    float inAirTime =  (sqrt(-2 * height/gravity) + sqrt(2 * (displacementY - height)/gravity));
 
     Vector3 velocityY = Vector3(0,1,0) * sqrt((-2 * gravity * height));
-    Vector3 velocityXZ = displacementXZ / airTime;
+    Vector3 velocityXZ = displacementXZ / inAirTime;
+
 
     //TODO:: THROW THIS IN A VECTOR3 FUNCTION
     if(velocityY.x != velocityY.x || velocityY.y != velocityY.y || velocityY.z != velocityY.z ||
