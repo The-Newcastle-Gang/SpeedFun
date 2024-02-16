@@ -5,6 +5,7 @@
 #include "PhysicsObject.h"
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
+#include "TriggerVolumeObject.h"
 
 #include "PlayerPhysComponent.h"
 

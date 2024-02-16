@@ -122,6 +122,9 @@ namespace NCL::CSC8503 {
 
         void DrawCollision();
 
+        [[nodiscard]] bool GetIsPlayerBool() const { return isPlayer; }
+        void SetIsPlayerBool(bool b) { isPlayer = b;  }
+
     protected:
 
         CollisionVolume*	boundingVolume;
@@ -130,6 +133,7 @@ namespace NCL::CSC8503 {
         NetworkObject*		networkObject;
 
         bool		isActive;
+        bool        isPlayer;
         int			worldID;
         std::string	name;
 

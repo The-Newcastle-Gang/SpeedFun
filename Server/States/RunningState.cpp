@@ -115,6 +115,7 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetInverseMass(10.0f);
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+        player->SetIsPlayerBool(true);
 
         //TODO: clean up
         player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
@@ -126,8 +127,8 @@ void RunningState::CreatePlayers() {
 }
 
 void RunningState::AddTriggerVolume(){
-    auto trigger = new GameObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(5,5,5), trigger, *world);
+    auto trigger = new TriggerVolumeObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
     trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
                                                 trigger->GetBoundingVolume(),
                                                 physics->GetPhysMat("Default")));
