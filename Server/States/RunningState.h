@@ -49,6 +49,7 @@ namespace NCL {
 
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
+            Vector3 currentLevelEndPos;
 
             float packetTimer;
             int sceneSnapshotId;
@@ -61,6 +62,7 @@ namespace NCL {
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
             void AddTriggerVolume();
+            void AddTriggerVolumeEND();
 
             void SendWorldToClient();
 

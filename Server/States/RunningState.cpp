@@ -77,6 +77,7 @@ void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
     CreatePlayers();
     AddTriggerVolume();
+    AddTriggerVolumeEND();
 }
 
 void RunningState::Tick(float dt) {
@@ -139,6 +140,19 @@ void RunningState::AddTriggerVolume(){
     trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
 }
 
+void RunningState::AddTriggerVolumeEND(){
+    auto triggerEND = new TriggerVolumeObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), triggerEND, *world);
+    triggerEND->SetPhysicsObject(new PhysicsObject(&triggerEND->GetTransform(),
+                                                   triggerEND->GetBoundingVolume(),
+                                                physics->GetPhysMat("Default")));
+    triggerEND->GetPhysicsObject()->InitCubeInertia();
+    triggerEND->GetPhysicsObject()->SetInverseMass(0.0f);
+    triggerEND->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
+    triggerEND->GetTransform().SetPosition({0,0,-20});
+    triggerEND->GetPhysicsObject()->SetIsTriggerVolume(true);
+}
+
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
@@ -160,6 +174,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         return;
     }
     currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){

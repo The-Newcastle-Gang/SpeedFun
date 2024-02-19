@@ -40,7 +40,7 @@ void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
 
 void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world){
     constexpr float meshSize = 1.0f;
-    world.AddGameObject(g, true);
+    world.AddGameObject(g, false);
     auto volume = new AABBVolume(dimensions * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
     g->GetTransform()
