@@ -47,7 +47,7 @@ namespace NCL {
 
             std::unordered_map<int, PlayerInfo> playerInfo;
 
-            std::unordered_map<int, Vector3> triggers;
+            std::vector<Vector3> triggersVector;
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;

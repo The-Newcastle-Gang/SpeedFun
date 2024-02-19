@@ -76,7 +76,6 @@ void RunningState::Update(float dt) {
 void RunningState::LoadLevel() {
     BuildLevel("Owen's_Magnum_Opus");
     CreatePlayers();
-    AddStartAndEndTriggers();
 }
 
 void RunningState::Tick(float dt) {
@@ -127,7 +126,7 @@ void RunningState::CreatePlayers() {
 }
 
 void RunningState::AddStartAndEndTriggers(){
-    for (auto itr = triggers.begin(); itr != triggers.end(); itr++){
+    for (auto triggerVec : triggersVector){
         auto trigger = new TriggerVolumeObject();
         replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
         trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
@@ -136,7 +135,7 @@ void RunningState::AddStartAndEndTriggers(){
         trigger->GetPhysicsObject()->InitCubeInertia();
         trigger->GetPhysicsObject()->SetInverseMass(0.0f);
         trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
-        trigger->GetTransform().SetPosition(itr->second);
+        trigger->GetTransform().SetPosition(triggerVec);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
     }
 }
@@ -163,7 +162,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
     currentLevelStartPos = levelReader->GetStartPosition();
     currentLevelEndPos = levelReader->GetEndPosition();
-    triggers = { {0, currentLevelStartPos}, {1, currentLevelEndPos} };
+    triggersVector = {currentLevelStartPos, currentLevelEndPos};
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
@@ -172,5 +171,5 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
-    //add trigger vol
+    AddStartAndEndTriggers();
 }
