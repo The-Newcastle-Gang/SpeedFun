@@ -76,8 +76,7 @@ void RunningState::Update(float dt) {
 void RunningState::LoadLevel() {
     BuildLevel("Owen's_Magnus");
     CreatePlayers();
-    AddTriggerVolume();
-    AddTriggerVolumeEND();
+    AddStartAndEndTriggers();
 }
 
 void RunningState::Tick(float dt) {
@@ -127,30 +126,26 @@ void RunningState::CreatePlayers() {
     }
 }
 
-void RunningState::AddTriggerVolume(){
-    auto trigger = new TriggerVolumeObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
-    trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
-                                                trigger->GetBoundingVolume(),
-                                                physics->GetPhysMat("Default")));
-    trigger->GetPhysicsObject()->InitCubeInertia();
-    trigger->GetPhysicsObject()->SetInverseMass(0.0f);
-    trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
-    trigger->GetTransform().SetPosition(currentLevelStartPos);
-    trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
-}
+void RunningState::AddStartAndEndTriggers(){
+    std::unordered_map<int, Vector3> triggers = {
+            {0, currentLevelStartPos},
+            {1, currentLevelEndPos}
+    };
 
-void RunningState::AddTriggerVolumeEND(){
-    auto triggerEND = new TriggerVolumeObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), triggerEND, *world);
-    triggerEND->SetPhysicsObject(new PhysicsObject(&triggerEND->GetTransform(),
-                                                   triggerEND->GetBoundingVolume(),
-                                                physics->GetPhysMat("Default")));
-    triggerEND->GetPhysicsObject()->InitCubeInertia();
-    triggerEND->GetPhysicsObject()->SetInverseMass(0.0f);
-    triggerEND->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
-    triggerEND->GetTransform().SetPosition({0,0,-20});
-    triggerEND->GetPhysicsObject()->SetIsTriggerVolume(true);
+    for (auto itr = triggers.begin(); itr != triggers.end(); itr++){
+        std::cout << "Iteration: " << itr->first << " & " << itr->second << std::endl;
+
+        auto trigger = new TriggerVolumeObject();
+        replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
+        trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
+                                                    trigger->GetBoundingVolume(),
+                                                    physics->GetPhysMat("Default")));
+        trigger->GetPhysicsObject()->InitCubeInertia();
+        trigger->GetPhysicsObject()->SetInverseMass(0.0f);
+        trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
+        trigger->GetTransform().SetPosition(itr->second);
+        trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+    }
 }
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {

@@ -61,6 +61,7 @@ namespace NCL {
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
+            void AddStartAndEndTriggers();
             void AddTriggerVolume();
             void AddTriggerVolumeEND();
 
