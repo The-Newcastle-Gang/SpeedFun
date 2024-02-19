@@ -74,7 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("debuglvl");
+    BuildLevel("Owen's_Magnus");
     CreatePlayers();
     AddTriggerVolume();
     AddTriggerVolumeEND();
