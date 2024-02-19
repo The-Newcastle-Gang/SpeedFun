@@ -47,6 +47,7 @@ namespace NCL {
 
             std::unordered_map<int, PlayerInfo> playerInfo;
 
+            std::unordered_map<int, Vector3> triggers;
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;
@@ -61,9 +62,6 @@ namespace NCL {
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
-            void AddStartAndEndTriggers();
-            void AddTriggerVolume();
-            void AddTriggerVolumeEND();
 
             void SendWorldToClient();
 
@@ -71,6 +69,7 @@ namespace NCL {
 
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
+            void AddStartAndEndTriggers();
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
             static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);

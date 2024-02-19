@@ -74,7 +74,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("Owen's_Magnus");
+    BuildLevel("Owen's_Magnum_Opus");
     CreatePlayers();
     AddStartAndEndTriggers();
 }
@@ -127,14 +127,7 @@ void RunningState::CreatePlayers() {
 }
 
 void RunningState::AddStartAndEndTriggers(){
-    std::unordered_map<int, Vector3> triggers = {
-            {0, currentLevelStartPos},
-            {1, currentLevelEndPos}
-    };
-
     for (auto itr = triggers.begin(); itr != triggers.end(); itr++){
-        std::cout << "Iteration: " << itr->first << " & " << itr->second << std::endl;
-
         auto trigger = new TriggerVolumeObject();
         replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
         trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
@@ -170,6 +163,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
     currentLevelStartPos = levelReader->GetStartPosition();
     currentLevelEndPos = levelReader->GetEndPosition();
+    triggers = { {0, currentLevelStartPos}, {1, currentLevelEndPos} };
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
