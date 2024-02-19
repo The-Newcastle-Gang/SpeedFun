@@ -10,7 +10,12 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
+    curvyShader = renderer->LoadShader("defaultUI.vert", "curvyUi.frag");
 
+}
+
+MenuState::~MenuState() {
+    delete curvyShader;
 }
 
 void MenuState::OptionHover(Element& element) {
@@ -32,7 +37,20 @@ void MenuState::OptionHover(Element& element) {
 }
 
 void MenuState::MultiplayerOptionHover(Element& element) {
+    canvas->GetElementByIndex(mSelected, "multiplayer").GetTextData().color = inactiveMenuText;
+    mSelected = element.GetIndex();
 
+    auto pos = element.GetAbsolutePosition().y;
+    auto& boxElement = canvas->GetElementByIndex(mHoverBox, "multiplayer");
+
+    tweenManager->CreateTween(
+            TweenManager::EaseOutElastic,
+            boxElement.GetAbsolutePosition().y,
+            pos - 33,
+            &boxElement.GetAbsolutePosition().y,
+            0.4f);
+
+    element.GetTextData().color = activeMenuText;
 }
 
 void MenuState::InitLua() {
@@ -56,20 +74,32 @@ void MenuState::ShowMultiplayerOptions(Element& _) {
     canvas->PushActiveLayer("multiplayer");
 }
 
+void MenuState::JoinGame(Element& _) {
+    canvas->PushActiveLayer("joinGame");
+}
+
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
     if (tags.find("option") != tags.end()) {
         element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    } if (tags.find("mOption") != tags.end()) {
+        element.OnMouseEnter.connect<&MenuState::MultiplayerOptionHover>(this);
     }
-
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
         canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
-        canvas->GetElementByIndex(hoverBox).AlignLeft(95);
+        canvas->GetElementByIndex(hoverBox).AlignLeft(115);
     } else if (id == "Multiplayer") {
         element.OnMouseUp.connect<&MenuState::ShowMultiplayerOptions>(this);
     } else if (id == "HoverBox") {
         hoverBox = element.GetIndex();
+    } else if (id == "mHoverBox") {
+        mHoverBox = element.GetIndex();
+    } else if (id == "JoinGame") {
+        mSelected = element.GetIndex();
+        element.OnMouseUp.connect<&MenuState::JoinGame>(this);
+    } else if (id == "PlayerName") {
+        element.SetShader(curvyShader);
     }
 }
 
@@ -83,13 +113,13 @@ void MenuState::AlignCanvasElement(Element& element) {
         if (!strcmp(direction, "top")) {
             element.AlignTop(padding);
         } else if (!strcmp(direction, "middle")) {
-            element.AlignMiddle();
+            element.AlignMiddle(padding);
         } else if (!strcmp(direction, "bottom")) {
             element.AlignBottom(padding);
         } else if (!strcmp(direction, "left")) {
             element.AlignLeft(padding);
         } else if (!strcmp(direction, "center")) {
-            element.AlignCenter();
+            element.AlignCenter(padding);
         } else if (!strcmp(direction, "right")) {
             element.AlignRight(padding);
         }
@@ -99,10 +129,10 @@ void MenuState::AlignCanvasElement(Element& element) {
     lua_pop(L, 1); // align
 }
 
-void MenuState::AddCanvasElement(const std::string& layerName) {
+void MenuState::AddCanvasElement(const std::string& layerName, bool blocking) {
 
-    if (layerName != "main") {
-        canvas->CreateNewLayer(layerName, false);
+    if (layerName != "main" && !canvas->DoesLayerExist(layerName)) {
+        canvas->CreateNewLayer(layerName, blocking);
     }
 
     std::string image = getStringField(L, "image");
@@ -158,6 +188,18 @@ void MenuState::InitCanvas() {
         lua_pushnil(L);
         while(lua_next(L, -2)) {
             AddCanvasElement(layerName);
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_getglobal(L, "blockingCanvas");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        auto layerName = lua_tostring(L, -2);
+        lua_pushnil(L);
+        while (lua_next(L, -2)) {
+            AddCanvasElement(layerName, true);
             lua_pop(L, 1);
         }
         lua_pop(L, 1);
@@ -220,8 +262,4 @@ void MenuState::OnExit() {
     baseClient->ClearPacketHandlers();
     canvas->Reset();
     lua_close(L);
-}
-
-MenuState::~MenuState() {
-
 }

@@ -165,10 +165,10 @@ canvas = {
         },
         {
             color = COLORS.main,
-            aSize = Vector2:new(460, 115),
+            aSize = Vector2:new(415, 115),
             align = {
                 AlignTo("top", 180 + 33 - 40),
-                AlignTo("left", 95)
+                AlignTo("left", 115)
             },
             id = "HoverBox",
         },
@@ -247,6 +247,15 @@ canvas = {
             },
         },
         {
+            color = COLORS.main,
+            aSize = Vector2:new(460, 115),
+            align = {
+                AlignTo("top", 180 + 33 - 40),
+                AlignTo("left", 95 + 415)
+            },
+            id = "mHoverBox",
+        },
+        {
             aSize = Vector2:new(315, 80),
             aPos = Vector2:new(160 + 415, 0),
             align = {
@@ -263,20 +272,81 @@ canvas = {
             id = "JoinGame",
         },
         {
-            color = COLORS.main,
-            aSize = Vector2:new(460, 115),
+            aSize = Vector2:new(315, 80),
+            aPos = Vector2:new(160 + 415, 0),
             align = {
-                AlignTo("top", 180 + 33 - 40),
-                AlignTo("left", 95 + 415)
+                AlignTo("top", 290)
             },
-            id = "mHoverBox",
+            text = {
+                text = "Create Game",
+                color = COLORS.inactive,
+                size = 1.0
+            },
+            tags = {
+                "mOption"
+            },
+            id = "CreateGame",
         },
+    }
+}
 
+blockingCanvas = {
+    joinGame = {
+        {
+            aSize = Vector2:new(350, 325),
+            color = Vector4:newRGB(236, 236, 236, 255),
+            align = {
+                AlignTo("middle", 0), AlignTo("center", 0)
+            }
 
+        },
+        {
+            text = {
+                text = "Join Game",
+                color = COLORS.inactive,
+                size = 0.56,
+            },
+            align = {
+                AlignTo("middle", 100), AlignTo("center", -80)
+            }
+        },
+        {
+            aSize = Vector2:new(250, 70),
+            color = COLORS.main,
+            align = {
+                AlignTo("middle", -100), AlignTo("center", 0)
+            },
+        },
+        {
+            
+            text = {
+                text = "Connect",
+                color = COLORS.white,
+                size = 0.56,
+            },
+            align = {
+                AlignTo("middle", -110), AlignTo("center", -60)
+            }
+        },
+        {
+            aSize = Vector2:new(255, 45),
+            color = COLORS.white,
+            align = {
+                AlignTo("middle", 60), AlignTo("center", 0)
+            },
+            id = "PlayerName"
+        }
     }
 }
 
 for _, v in pairs(canvas) do
+    for _, nv in pairs(v) do
+        nv.__index = elementBase;
+        setmetatable(nv, nv)
+    end
+end
+
+for _, v in pairs(blockingCanvas) do
     for _, nv in pairs(v) do
         nv.__index = elementBase;
         setmetatable(nv, nv)

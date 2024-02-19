@@ -21,6 +21,7 @@ public:
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         texture = nullptr;
+        shader = nullptr;
         hoverTimer = 0;
         mouseDownTimer = 0;
         textData = {};
@@ -113,9 +114,9 @@ public:
         return *this;
     }
 
-    Element& AlignCenter() {
+    Element& AlignCenter(int padding = 0) {
         dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
-        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2;
+        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2 + padding;
         return *this;
     }
 
@@ -125,9 +126,9 @@ public:
         return *this;
     }
 
-    Element& AlignMiddle() {
+    Element& AlignMiddle(int padding = 0) {
         dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
-        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2;
+        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2 + padding;
         return *this;
     }
 
@@ -154,6 +155,10 @@ public:
 
     TextureBase* GetTexture() {
         return texture;
+    }
+
+    ShaderBase* GetShader() {
+        return shader;
     }
 
     Element& AddTags(const std::unordered_set<std::string>& pTags) {

@@ -41,9 +41,11 @@ namespace NCL {
             std::unique_ptr<Font> menuFont;
             std::string statusText;
             std::unique_ptr<TweenManager> tweenManager;
+            ShaderBase* curvyShader;
             int hoverBox;
             int mHoverBox;
             int selected;
+            int mSelected;
 
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.
@@ -71,9 +73,13 @@ namespace NCL {
 
             void BeginSingleplayer(Element &_);
 
-            void AddCanvasElement(const string &layerName);
+            void AddCanvasElement(const string &layerName, bool blocking = false);
 
             void ShowMultiplayerOptions(Element &_);
+
+            void MultiplayerOptionHover(Element &element);
+
+            void JoinGame(Element &_);
         };
     }
 }

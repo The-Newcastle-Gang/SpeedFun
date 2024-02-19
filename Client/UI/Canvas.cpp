@@ -63,12 +63,7 @@ Element& Canvas::AddImageElement(const std::string &name, const std::string& lay
 
 void Canvas::Update(float dt) {
     auto aLayers = GetActiveLayers();
-    for (auto i = aLayers.rbegin(); i != aLayers.rend(); ++i) {
-        (*i)->Update(dt);
-        if ((*i)->CheckBlocking()) {
-            break;
-        }
-    }
+    aLayers.back()->Update(dt);
 }
 
 Element& Canvas::GetElementByIndex(int index, const std::string& layerName) {
