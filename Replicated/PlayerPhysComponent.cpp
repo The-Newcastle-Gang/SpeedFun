@@ -113,6 +113,5 @@ void PlayerPhysComponent::GroundCheck(PhysicsObject *physGameObj, Vector3 positi
             isGrounded = false;
         }
     }
-
 }
 

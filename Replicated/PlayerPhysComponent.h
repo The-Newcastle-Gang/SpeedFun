@@ -33,10 +33,6 @@ namespace NCL::CSC8503 {
 
         void GroundCheck(PhysicsObject* physGameObj, Vector3 position);
 
-//        void 🦵💨❌();
-
-
-
         GameWorld* world;
         float runForce;
         float maxVelocity;
