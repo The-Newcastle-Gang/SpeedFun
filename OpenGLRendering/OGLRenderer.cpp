@@ -46,7 +46,7 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	boundMesh	= nullptr;
 	boundShader = nullptr;
     boundAnimation = nullptr;
-    boundMeshMaterial = nullptr;//new MeshMaterial("Rig_Maximilian.mat");
+    boundMeshMaterial = nullptr;
 
 	windowWidth	= (int)w.GetScreenSize().x;
 	windowHeight	= (int)w.GetScreenSize().y;
