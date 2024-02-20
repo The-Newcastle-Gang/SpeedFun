@@ -54,11 +54,12 @@ void RunningState::ReadNetworkFunctions() {
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Jump();
             }
-
-
-//            PlayerPhysComponent* playerPhysics;
-//            player->TryGetComponent(playerPhysics);
-//            playerPhysics->Jump();
+        } else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->Grapple();
+            }
         }
     }
 }
@@ -130,11 +131,6 @@ void RunningState::CreatePlayers() {
         player->GetTransform().SetPosition(Vector3(0,0,0));
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
-//        auto component = new PlayerPhysComponent(player, world.get());
-//        player->AddComponent((Component*)component);
-//        player->AddComponent((Component*)new GrappleComponent(player, world.get()));
-//        player->AddComponent((Component*)new DashComponent(player));
-
         playerObjects[pair.first] = player;
     }
 }
@@ -147,7 +143,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
     PlayerMovement* playerMovement;
     if (player->TryGetComponent(playerMovement)) {
-        playerMovement->UpdateInputs(rightAxis, inputInfo.playerDirection);
+        playerMovement->UpdateInputs(rightAxis, inputInfo.playerDirection, inputInfo.playerRotation);
     } else {
         std::cerr << "Where tf player movement" << std::endl;
     }

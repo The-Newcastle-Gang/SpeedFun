@@ -4,8 +4,8 @@ project(server)
 add_library(server
         Server.cpp
         GameServer.cpp
-        "States/RunningState.cpp"
-        "States/WaitingState.cpp"
+        States/RunningState.cpp
+        States/WaitingState.cpp
         ServerThread.cpp
         Components/PlayerMovement.cpp
 

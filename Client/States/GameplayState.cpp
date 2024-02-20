@@ -113,8 +113,12 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
-    if(Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
+    }
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
     Camera* mainCamera = world->GetMainCamera();
