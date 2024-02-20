@@ -51,6 +51,9 @@ void GameplayState::Update(float dt) {
     SendInputData();
     ReadNetworkFunctions();
 
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
+
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }

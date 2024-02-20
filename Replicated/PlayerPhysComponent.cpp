@@ -18,11 +18,6 @@ PlayerPhysComponent::PlayerPhysComponent(GameObject *go, GameWorld* pWorld) {
     airMultiplier = 1.0f;
 
     fastFallingMultiplier = 1.1f;
-
-
-    //drag =
-    //airDrag =
-    //calc
 }
 
 void PlayerPhysComponent::ProcessMovementInput(Vector3 fwdAxis, Vector3 rightAxis, Vector2 playerInput) {

@@ -50,9 +50,6 @@ void Client::Update(float dt) {
     if (dt > 0.04) {
         std::cout << "Overly large dt" << std::endl;
     }
-
-    Debug::DrawLine({0,0,0}, {0,10,0});
-    Debug::DrawLine({0,0,-20}, {0,50,0}, Debug::MAGENTA);
 }
 
 
