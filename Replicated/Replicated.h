@@ -32,6 +32,7 @@ public:
         StartGame,
         GameLoaded,
         PlayerJump,
+        PlayerGrapple,
     };
 
     Replicated();

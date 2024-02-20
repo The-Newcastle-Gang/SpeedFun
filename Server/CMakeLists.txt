@@ -7,9 +7,8 @@ add_library(server
         "States/RunningState.cpp"
         "States/WaitingState.cpp"
         ServerThread.cpp
-        "PlayerStates/GroundedState.cpp"
-        "PlayerStates/JumpingState.cpp"
-        "PlayerStates/GrapplingState.cpp"
+        Components/PlayerMovement.cpp
+
 )
 
 target_include_directories(server PUBLIC
@@ -20,6 +19,7 @@ target_include_directories(server PUBLIC
         ./
         ./States
         ../enet/include
+        ./Components
 )
 
 target_link_libraries(server PUBLIC

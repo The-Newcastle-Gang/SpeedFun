@@ -6,10 +6,6 @@ add_library(replicated STATIC Replicated.cpp
         "LevelReader.cpp"
         "LevelBuilder.cpp"
         "Component.h"
-        "TestComponent.h"
-        "PlayerPhysComponent.cpp"
-        "DashComponent.cpp"
-        "GrappleComponent.cpp"
         "InputListener.cpp"
         "SafeQueue.cpp")
 

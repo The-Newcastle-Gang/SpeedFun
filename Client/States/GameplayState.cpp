@@ -125,13 +125,9 @@ void GameplayState::SendInputData() {
 
     Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
     input.rightAxis = Vector3(camWorld.GetColumn(0));
-    input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
 
 
     input.playerDirection = InputListener::GetPlayerInput();
-    input.jumpInput       = InputListener::GetJumpInput();
-    input.grappleInput    = InputListener::GetGrappleInput();
-    input.dashInput       = InputListener::GetDashInput();
 
     networkData->outgoingInput.Push(input);
 }
