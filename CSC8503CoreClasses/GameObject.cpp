@@ -22,6 +22,7 @@ GameObject::~GameObject()	{
     delete boundingVolume;
     delete physicsObject;
     delete renderObject;
+    delete animatorObject;
     delete networkObject;
 }
 
