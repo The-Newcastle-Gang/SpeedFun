@@ -191,10 +191,9 @@ void PlayerMovement::FireGrapple(Vector3 grapplePoint) {
 
     Vector3 velocityXZ = displaceXZ / inAirTime;
     if(displaceY < 0){
-        velocityY *= -1 * 0.2f;
+        velocityY *= -1 * 0.3f;
     }
     Vector3 totalVel = velocityY  + velocityXZ;
-    std::cout << totalVel << "\n";
     gameObject->GetPhysicsObject()->ClearForces();
     gameObject->GetPhysicsObject()->SetLinearVelocity(totalVel * 2.0f);
 }
