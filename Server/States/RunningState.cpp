@@ -128,7 +128,8 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetInverseMass(2.0f);
 
         //TODO: clean up
-        player->GetTransform().SetPosition(Vector3(0,0,0));
+//        player->GetTransform().SetPosition(Vector3(0,0,0));
+        player->GetTransform().SetPosition(currentLevelStartPos);
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
         playerObjects[pair.first] = player;

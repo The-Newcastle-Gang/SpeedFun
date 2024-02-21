@@ -24,8 +24,8 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
 
 	json jData = json::parse(jFileStream);
 
-	startPosition = Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"]);
-	endPosition = Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"] * -1);
+	startPosition = Vector3(jData["StartPoint"]["x"], jData["StartPoint"]["y"], jData["StartPoint"]["z"]*-1);
+	endPosition = Vector3(jData["EndPoint"]["x"], jData["EndPoint"]["y"], jData["EndPoint"]["z"]*-1);
 
 
 	for (auto& item : jData["primitiveGameObject"].items()) {
