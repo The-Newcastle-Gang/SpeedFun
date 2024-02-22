@@ -8,7 +8,7 @@ add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}")
 
 if(MSVC)
     add_compile_definitions("NOMINMAX")
-    add_compile_options(/wd4293 /wd4018 /wd4244 /wd4312)
+    add_compile_options(/wd4293 /wd4018 /wd4244 /wd4312 /wd4267 /wd4005)
 endif()
 
 include_directories(enet)

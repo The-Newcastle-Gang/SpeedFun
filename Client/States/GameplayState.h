@@ -40,6 +40,7 @@ namespace NCL {
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
             void InitLevel();
+            void InitCanvas();
 
 
 #ifdef USEVULKAN
@@ -72,6 +73,7 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
+
         };
     }
 }

@@ -55,9 +55,7 @@ private:
 struct InputPacket : public GamePacket {
     Quaternion playerRotation;
     Vector2 playerDirection;
-    Vector3 fwdAxis;
     Vector3 rightAxis;
-    // Put any more necessary client inputs here
 
     InputPacket() {
         type = Received_State;
