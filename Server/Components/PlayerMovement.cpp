@@ -11,7 +11,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     world = w;
     gameObject = g;
 
-    runSpeed = 4000.0f;
+    runSpeed = 5000.0f;
     jumpForce = 500.0f;
     dragFactor = 10.0f;
 
@@ -191,10 +191,9 @@ void PlayerMovement::FireGrapple(Vector3 grapplePoint) {
 
     Vector3 velocityXZ = displaceXZ / inAirTime;
     if(displaceY < 0){
-        velocityY *= -1;
+        velocityY *= -1 * 0.3f;
     }
     Vector3 totalVel = velocityY  + velocityXZ;
-
     gameObject->GetPhysicsObject()->ClearForces();
     gameObject->GetPhysicsObject()->SetLinearVelocity(totalVel * 2.0f);
 }
