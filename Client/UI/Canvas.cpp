@@ -74,6 +74,14 @@ Element& Canvas::GetElementByIndex(int index, const std::string& layerName) {
     return layers[layerName].GetElements()[index];
 }
 
+Element& Canvas::GetElementById(const std::string& id, const std::string& layerName) {
+    for (auto& e : layers[layerName].GetElements()) {
+        if (e.GetId() == id) {
+            return e;
+        }
+    }
+}
+
 void Canvas::PushActiveLayer(const std::string& layerName) {
     if (!DoesLayerExist(layerName)) {
         std::cerr << "Layer doesn't exist!" << std::endl;

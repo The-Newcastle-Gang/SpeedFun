@@ -35,6 +35,8 @@ public:
 
     bool DoesLayerExist(const std::string &layer);
 
+    Element &GetElementById(const string &id, const string &layerName = "main");
+
 private:
     std::unordered_map<std::string, CanvasLayer> layers;
     std::vector<CanvasLayer*> activeLayers;

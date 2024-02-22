@@ -47,6 +47,9 @@ namespace NCL {
             int selected;
             int mSelected;
 
+            int activeText;
+            int textLimit;
+
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.
             int connectState;
@@ -60,26 +63,20 @@ namespace NCL {
             void RegisterPackets();
             void ConnectedToServer();
             void StartGame();
-
             void InitCanvas();
-
             void OptionHover(Element &element);
-
             void InitLua();
-
             void AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const string &id);
-
             void AlignCanvasElement(Element &element);
-
             void BeginSingleplayer(Element &_);
-
             void AddCanvasElement(const string &layerName, bool blocking = false);
-
             void ShowMultiplayerOptions(Element &_);
-
             void MultiplayerOptionHover(Element &element);
-
             void JoinGame(Element &_);
+            void SetActiveTextEntry(Element& element);
+            void UnsetActiveTextEntry(Element& element);
+            void TextEntry();
+            void ConnectWithIp(Element& element);
         };
     }
 }

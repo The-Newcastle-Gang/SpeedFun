@@ -11,6 +11,8 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
     curvyShader = renderer->LoadShader("defaultUI.vert", "curvyUi.frag");
+    activeText = -1;
+    textLimit = 15;
 
 }
 
@@ -20,35 +22,44 @@ MenuState::~MenuState() {
 
 void MenuState::OptionHover(Element& element) {
 
+    if (selected == element.GetIndex()) return;
+
     canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
+
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(hoverBox);
+    boxElement.GetAbsolutePosition().y = pos - 33;
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutElastic,
-            boxElement.GetAbsolutePosition().y,
-            pos - 33,
-            &boxElement.GetAbsolutePosition().y,
-            0.4f);
+            TweenManager::EaseOutSine,
+            0,
+            415,
+            &boxElement.GetAbsoluteSize().x,
+            0.2f);
 
     element.GetTextData().color = activeMenuText;
 }
 
 void MenuState::MultiplayerOptionHover(Element& element) {
+
+    if (selected == element.GetIndex()) return;
+
+    
     canvas->GetElementByIndex(mSelected, "multiplayer").GetTextData().color = inactiveMenuText;
     mSelected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(mHoverBox, "multiplayer");
+    boxElement.GetAbsolutePosition().y = pos - 33;
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutElastic,
-            boxElement.GetAbsolutePosition().y,
-            pos - 33,
-            &boxElement.GetAbsolutePosition().y,
-            0.4f);
+            TweenManager::EaseOutSine,
+            0,
+            415,
+            &boxElement.GetAbsoluteSize().x,
+            0.2f);
 
     element.GetTextData().color = activeMenuText;
 }
@@ -56,8 +67,6 @@ void MenuState::MultiplayerOptionHover(Element& element) {
 void MenuState::InitLua() {
     L = luaL_newstate();
     luaL_openlibs(L);
-
-    //Register c functions here
 
     auto status = luaL_dofile(L, (Assets::DATADIR + "MainMenu.lua").c_str());
 
@@ -78,12 +87,49 @@ void MenuState::JoinGame(Element& _) {
     canvas->PushActiveLayer("joinGame");
 }
 
+void MenuState::UnsetActiveTextEntry(Element& element) {
+    if (element.GetIndex() == activeText) {
+        activeText = -1;
+    }
+
+    std::string textId = element.GetId() + "Text";
+    auto& textElement = canvas->GetElementById(textId, "joinGame");
+
+    if (textElement.GetTextData().text.empty()) {
+        textElement.GetTextData().text = textElement.GetTextData().defaultText;
+    }
+}
+
+void MenuState::SetActiveTextEntry(Element& element) {
+
+    std::string textId = element.GetId() + "Text";
+    auto& textElement = canvas->GetElementById(textId, "joinGame");
+    activeText = textElement.GetIndex();
+    auto& textElementData = textElement.GetTextData();
+
+    if (textElementData.text == textElementData.defaultText) {
+        textElementData.text = "";
+    }
+}
+
+void MenuState::ConnectWithIp(Element& element) {
+    auto& textElement = canvas->GetElementById("IpAddressText", "joinGame");
+    ConnectToGame(textElement.GetTextData().text);
+}
+
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
+
+
     if (tags.find("option") != tags.end()) {
         element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
     } if (tags.find("mOption") != tags.end()) {
         element.OnMouseEnter.connect<&MenuState::MultiplayerOptionHover>(this);
+    } if (tags.find("textEntry") != tags.end()) {
+        element.OnFocusExit.connect<&MenuState::UnsetActiveTextEntry>(this);
+        element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
     }
+
+
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
@@ -100,6 +146,8 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.OnMouseUp.connect<&MenuState::JoinGame>(this);
     } else if (id == "PlayerName") {
         element.SetShader(curvyShader);
+    } else if (id == "Connect") {
+        element.OnMouseUp.connect<&MenuState::ConnectWithIp>(this);
     }
 }
 
@@ -153,6 +201,7 @@ void MenuState::AddCanvasElement(const std::string& layerName, bool blocking) {
     getTableField(L, "text");
 
     text.text = getStringField(L, "text");
+    text.defaultText = text.text;
     text.color = getVec4Field(L, "color");
     text.SetFont(menuFont.get());
     text.fontSize = (float)getNumberField(L, "size");
@@ -235,10 +284,42 @@ void MenuState::StartGame() {
     baseClient->RemoteFunction(Replicated::StartGame, nullptr);
 }
 
+void MenuState::TextEntry() {
+    if (activeText == -1) return;
+
+
+    auto w = Window::GetKeyboard();
+    auto& textElement = canvas->GetElementByIndex(activeText, "joinGame");
+
+
+    if (w->KeyPressed(KeyboardKeys::BACK)) {
+        if (!textElement.GetTextData().text.empty()) {
+            textElement.GetTextData().text.pop_back();
+        }
+    }
+
+    if (textElement.GetTextData().text.size() >= textLimit) return;
+
+    for (auto keyValue = (int)KeyboardKeys::A; keyValue <= (int)KeyboardKeys::Z; keyValue++) {
+        if (w->KeyPressed((KeyboardKeys)keyValue)) {
+            textElement.GetTextData().text += w->KeyDown(KeyboardKeys::SHIFT) ? (char)keyValue : (char)(keyValue + 32);
+        }
+    }
+
+    for (auto keyValue = (int)KeyboardKeys::NUM0; keyValue <= (int)KeyboardKeys::NUM9; keyValue++) {
+        if (!w->KeyPressed((KeyboardKeys)keyValue)) continue;
+        textElement.GetTextData().text += (char)keyValue;
+    }
+
+    if (w->KeyPressed(KeyboardKeys::PERIOD)) {
+        textElement.GetTextData().text += ".";
+    }
+}
+
 void MenuState::Update(float dt) {
 
     baseClient->UpdateClient();
-
+    TextEntry();
     tweenManager->Update(dt);
 
     renderer->Render();

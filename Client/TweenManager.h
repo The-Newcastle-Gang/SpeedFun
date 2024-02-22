@@ -87,12 +87,12 @@ private:
             if (elapsed >= duration) {
                 // Just putting this in case there are floating point shenanigans
                 // that lead to imprecise endings.
-                origin = end;
                 shouldDie = true;
             }
         }
 
         void Finish() override {
+            *valueToChange = end;
             callback();
         }
     };

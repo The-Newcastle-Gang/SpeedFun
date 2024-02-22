@@ -77,7 +77,8 @@ local COLORS = {
     active = Vector4:new(1.0, 1.0, 1.0, 1.0),
     transparent = Vector4:new(0.0, 0.0, 0.0, 0.0),
     main = Vector4:new(150, 0, 210, 255),
-    white = Vector4:new(1.0, 1.0, 1.0, 1.0)
+    white = Vector4:new(1.0, 1.0, 1.0, 1.0),
+    lightgray = Vector4:newRGB(200, 200, 200, 255),
 }
 
 local elementBase = {
@@ -248,10 +249,10 @@ canvas = {
         },
         {
             color = COLORS.main,
-            aSize = Vector2:new(460, 115),
+            aSize = Vector2:new(415, 115),
             align = {
                 AlignTo("top", 180 + 33 - 40),
-                AlignTo("left", 95 + 415)
+                AlignTo("left", 115 + 415)
             },
             id = "mHoverBox",
         },
@@ -316,9 +317,9 @@ blockingCanvas = {
             align = {
                 AlignTo("middle", -100), AlignTo("center", 0)
             },
+            id = "Connect",
         },
         {
-            
             text = {
                 text = "Connect",
                 color = COLORS.white,
@@ -326,7 +327,7 @@ blockingCanvas = {
             },
             align = {
                 AlignTo("middle", -110), AlignTo("center", -60)
-            }
+            },
         },
         {
             aSize = Vector2:new(255, 45),
@@ -334,8 +335,41 @@ blockingCanvas = {
             align = {
                 AlignTo("middle", 60), AlignTo("center", 0)
             },
-            id = "PlayerName"
-        }
+            id = "PlayerName",
+            tags = { "textEntry" }
+        },
+        {
+            aSize = Vector2:new(255, 45),
+            color = COLORS.white,
+            align = {
+                AlignTo("middle", 0), AlignTo("center", 0)
+            },
+            id = "IpAddress",
+            tags = { "textEntry" }
+        },
+        {
+            text = {
+                text = "Player Name",
+                color = COLORS.lightgray,
+                size = 0.45,
+            },
+            align = {
+                AlignTo("middle", 50), AlignTo("center", -110)
+            },
+            id = "PlayerNameText"
+        },
+        {
+            text = {
+                text = "IP Address",
+                color = COLORS.lightgray,
+                size = 0.45,
+            },
+            align = {
+                AlignTo("middle", -10), AlignTo("center", -110)
+            },
+            id = "IpAddressText",
+        },
+        
     }
 }
 

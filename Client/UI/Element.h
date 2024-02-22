@@ -17,7 +17,7 @@ using namespace NCL;
 
 class Element {
 public:
-    Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update) {
+    Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         texture = nullptr;
@@ -30,6 +30,7 @@ public:
         extendLowerX = 0;
         extendLowerY = 0;
         extendUpperY = 0;
+        isFocused = false;
     }
 
     [[nodiscard]] UIDim GetDimensions() const {
@@ -40,7 +41,7 @@ public:
         return color;
     }
 
-    [[nodiscard]] Vector2Int GetAbsoluteSize() const {
+    [[nodiscard]] Vector2Int& GetAbsoluteSize() {
         return dimensions.absoluteSize;
     }
 
@@ -195,6 +196,8 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnMouseDown;
     entt::sink<entt::sigh<void(Element&)>> OnMouseUp;
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHold;
+    entt::sink<entt::sigh<void(Element&)>> OnFocus;
+    entt::sink<entt::sigh<void(Element&)>> OnFocusExit;
 
     TextData textData;
 private:
@@ -215,7 +218,10 @@ private:
     entt::sigh<void(Element&)> mouseUp;
     entt::sigh<void(Element&, float)> mouseHold;
     entt::sigh<void(Element&, float)> update;
+    entt::sigh<void(Element&)> focus;
+    entt::sigh<void(Element&)> focusExit;
     int zIndex;
+    bool isFocused;
 
 
     int somethingElse = 0;
