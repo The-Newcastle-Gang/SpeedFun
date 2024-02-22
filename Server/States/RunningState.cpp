@@ -135,7 +135,6 @@ void RunningState::AddTriggersToLevel(){
                                                     physics->GetPhysMat("Default")));
         trigger->GetPhysicsObject()->InitCubeInertia();
         trigger->GetPhysicsObject()->SetInverseMass(0.0f);
-        trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
     }
