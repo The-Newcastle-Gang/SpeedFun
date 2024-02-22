@@ -23,6 +23,7 @@ namespace NCL {
 
 		class Ray {
 		public:
+            Ray() = default;
 			Ray(Vector3 position, Vector3 direction) {
 				this->position  = position;
 				this->direction = direction;

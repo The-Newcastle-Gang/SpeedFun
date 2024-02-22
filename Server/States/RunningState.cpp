@@ -48,6 +48,19 @@ void RunningState::ReadNetworkFunctions() {
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
         }
+        else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->Jump();
+            }
+        } else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->Grapple();
+            }
+        }
     }
 }
 
@@ -107,30 +120,38 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
     for (auto& pair : playerInfo) {
-        auto player = new GameObject();
+        auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
 
-        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), physics->GetPhysMat("Default")));
+        player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
         player->GetPhysicsObject()->InitSphereInertia();
-        player->GetPhysicsObject()->SetInverseMass(10.0f);
-        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+        player->GetPhysicsObject()->SetInverseMass(2.0f);
 
         //TODO: clean up
-        player->GetTransform().SetPosition(currentLevelStartPos + Vector3(0,10,0));
-        auto component = new PlayerPhysComponent(player);
-        player->AddComponent(component);
+//        player->GetTransform().SetPosition(Vector3(0,0,0));
+        player->GetTransform().SetPosition(currentLevelStartPos);
+        player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
         playerObjects[pair.first] = player;
     }
 }
 
+
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
+    auto rightAxis = inputInfo.rightAxis;
 
-    player->GetPhysicsObject()->AddForce(inputInfo.fwdAxis  *inputInfo.playerDirection.y * 100);
-    player->GetPhysicsObject()->AddForce(inputInfo.rightAxis *inputInfo.playerDirection.x * 100);
+    PlayerMovement* playerMovement;
+    if (player->TryGetComponent(playerMovement)) {
+        playerMovement->UpdateInputs(rightAxis, inputInfo.playerDirection, inputInfo.playerRotation);
+    } else {
+        std::cerr << "Where tf player movement" << std::endl;
+    }
 
+}
+
+void RunningState::ApplyPlayerMovement() {
 
 }
 

@@ -18,9 +18,15 @@ public:
 
     static void InputUpdate();
     static Vector2 GetPlayerInput(){ return PlayerInput; }
+    static float GetJumpInput(){return JumpInput;}
+    static float GetGrappleInput(){return GrappleInput;}
     static bool    hasPlayerPressed();
+    static bool    GetDashInput(){ return DashInput; }
 protected:
     static Vector2 PlayerInput;
+    static float JumpInput;
+    static float GrappleInput;
+    static bool DashInput;
 
 };
 

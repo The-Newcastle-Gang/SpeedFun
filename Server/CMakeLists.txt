@@ -4,9 +4,11 @@ project(server)
 add_library(server
         Server.cpp
         GameServer.cpp
-        "States/RunningState.cpp"
-        "States/WaitingState.cpp"
+        States/RunningState.cpp
+        States/WaitingState.cpp
         ServerThread.cpp
+        Components/PlayerMovement.cpp
+
 )
 
 target_include_directories(server PUBLIC
@@ -17,6 +19,7 @@ target_include_directories(server PUBLIC
         ./
         ./States
         ../enet/include
+        ./Components
 )
 
 target_link_libraries(server PUBLIC
