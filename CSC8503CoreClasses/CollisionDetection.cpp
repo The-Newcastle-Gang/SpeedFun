@@ -187,7 +187,8 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 
 	//Two AABBs
 	if (pairType == VolumeType::AABB) {
-		return AABBIntersection((AABBVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
+        auto result = AABBIntersection((AABBVolume&)*volA, transformA, (AABBVolume&)*volB, transformB, collisionInfo);
+		return result;
 	}
 	//Two Spheres
 	if (pairType == VolumeType::Sphere) {

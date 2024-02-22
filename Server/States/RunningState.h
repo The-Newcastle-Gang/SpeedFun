@@ -5,8 +5,7 @@
 #include "PhysicsObject.h"
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
-
-#include "PlayerPhysComponent.h"
+#include "PlayerMovement.h"
 
 #include <iostream>
 #include <thread>
@@ -75,6 +74,8 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
+
+            void ApplyPlayerMovement();
         };
     }
 }
