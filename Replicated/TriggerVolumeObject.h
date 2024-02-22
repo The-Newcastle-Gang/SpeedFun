@@ -13,11 +13,19 @@ using namespace CSC8503;
 
 class TriggerVolumeObject : public GameObject {
 public:
+    enum class TriggerType {
+        Start = 1,
+        End = 2,
+        Death = 4,
+    };
+
+    TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
 
     virtual void OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
 private:
+    TriggerType triggerType;
 
 };
 

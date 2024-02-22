@@ -9,6 +9,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
 
+    currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
@@ -125,9 +126,9 @@ void RunningState::CreatePlayers() {
     }
 }
 
-void RunningState::AddStartAndEndTriggers(){
-    for (auto triggerVec : triggersVector){
-        auto trigger = new TriggerVolumeObject();
+void RunningState::AddTriggersToLevel(){
+    for (auto& triggerVec : triggersVector){
+        auto trigger = new TriggerVolumeObject(triggerVec.first);
         replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
         trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
                                                     trigger->GetBoundingVolume(),
@@ -135,7 +136,7 @@ void RunningState::AddStartAndEndTriggers(){
         trigger->GetPhysicsObject()->InitCubeInertia();
         trigger->GetPhysicsObject()->SetInverseMass(0.0f);
         trigger->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Trigger"));
-        trigger->GetTransform().SetPosition(triggerVec);
+        trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
     }
 }
@@ -162,7 +163,12 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
     currentLevelStartPos = levelReader->GetStartPosition();
     currentLevelEndPos = levelReader->GetEndPosition();
-    triggersVector = {currentLevelStartPos, currentLevelEndPos};
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition();
+    triggersVector = {
+            std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
+    };
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
@@ -171,5 +177,5 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
-    AddStartAndEndTriggers();
+    AddTriggersToLevel();
 }

@@ -7,6 +7,20 @@
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
     if(otherObject->GetIsPlayerBool()){
+        switch (triggerType) {
+            case TriggerType::Start: // Start volume
+                std::cout << "Start volume\n";
+                break;
+            case TriggerType::End: // End Volume
+                std::cout << "End volume\n";
+                break;
+            case TriggerType::Death: // Death Volume
+                std::cout << "Death volume\n";
+                break;
+
+            default:
+                    break;
+        }
         std::cout << "Player has collided\n";
     }
 }
