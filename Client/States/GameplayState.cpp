@@ -174,7 +174,7 @@ void GameplayState::CreatePlayers() {
 void GameplayState::InitLevel(){
 
     auto lr= new LevelReader();
-    lr->HasReadLevel("Owen's_Magnum_Opus.json");
+    lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();

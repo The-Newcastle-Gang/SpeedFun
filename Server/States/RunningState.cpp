@@ -88,7 +88,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("Owen's_Magnum_Opus");
+    BuildLevel("debuglvl");
     CreatePlayers();
 }
 
