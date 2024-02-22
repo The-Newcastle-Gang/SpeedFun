@@ -150,6 +150,8 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetInverseMass(0.0f);
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+
+        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5), Debug::MAGENTA, 1000.0f);
     }
 }
 

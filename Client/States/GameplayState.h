@@ -15,6 +15,7 @@
 #include "ClientThread.h"
 #include "LevelBuilder.h"
 #include "InputListener.h"
+#include "TriggerVolumeObject.h"
 
 #include <thread>
 #include <iostream>
@@ -73,7 +74,6 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
-
         };
     }
 }
