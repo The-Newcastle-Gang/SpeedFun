@@ -16,6 +16,27 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 GameplayState::~GameplayState() {
 }
 
+
+void GameplayState::InitCanvas(){
+
+    //this is clearly not the best way to do the cross-heir but This will have to do for now
+    //since i wanna just use this as debug.
+    //I can bet money on the fact that this code is going to be at release
+    //if u see this owen dont kill this
+
+    auto crossHeirVert = canvas->AddElement()
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({15,3})
+            .AlignCenter()
+            .AlignMiddle();
+
+    auto crossHeirHoriz = canvas->AddElement()
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({3,15})
+            .AlignCenter()
+            .AlignMiddle();
+}
+
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -28,8 +49,11 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    InitCanvas();
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -65,6 +89,7 @@ void GameplayState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+
 }
 
 void GameplayState::ReadNetworkFunctions() {
@@ -91,6 +116,14 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
+        networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
+    }
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
+    }
+
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
     float cameraYaw = mainCamera->GetYaw();
@@ -99,11 +132,9 @@ void GameplayState::SendInputData() {
 
     Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
     input.rightAxis = Vector3(camWorld.GetColumn(0));
-    input.fwdAxis = Vector3::Cross(Vector3(0,1,0), input.rightAxis);
 
 
     input.playerDirection = InputListener::GetPlayerInput();
-    input.jumpInput       = InputListener::GetJumpInput();
 
     networkData->outgoingInput.Push(input);
 }

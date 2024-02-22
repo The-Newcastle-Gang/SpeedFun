@@ -8,3 +8,4 @@
 /build
 /.idea
 /cmake-build-debug-visual-studio
+/release

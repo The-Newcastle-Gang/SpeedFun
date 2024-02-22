@@ -11,11 +11,11 @@ namespace NCL {
         //make sure 0.0f< e < 1.0f
         struct PhysicsMaterial {
             float e = 0.8f;
-            float linearDampingVertical = 0.995f;
-            float linearDampingHorizontal = 0.995f;
-            float angularDamping = 0.995f;
+            float linearDampingVertical = 1.0f;
+            float linearDampingHorizontal = 1.0f;
+            float angularDamping = 1.0f;
             PhysicsMaterial() {
-		        e = 0.8f;
+		        e = 0.0f;
                 linearDampingVertical = 0.995f;
                 linearDampingHorizontal = 0.995f;
                 angularDamping = 0.995f;

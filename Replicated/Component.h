@@ -7,7 +7,7 @@ namespace NCL::CSC8503 {
 	{
 	public:
 		Component() { };
-		~Component() {};
+		virtual ~Component() {};
 		Component(GameObject*  gameObject) { this->gameObject = gameObject;}
 
 		//all virtual, not the best approach but works

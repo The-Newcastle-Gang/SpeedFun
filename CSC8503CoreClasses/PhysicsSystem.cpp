@@ -101,8 +101,7 @@ void PhysicsSystem::Update(float dt) {
 	int iteratorCount = 0;
 
 	while(dTOffset > realDT) {
-		gameWorld.UpdateWorldPhysics(realDT);
-		IntegrateAccel(realDT); //Update accelerations from external forces
+        //Update accelerations from external forces
 		if (useBroadPhase) {
 			BroadPhase();
 			NarrowPhase();
@@ -110,6 +109,7 @@ void PhysicsSystem::Update(float dt) {
 		else {
 			BasicCollisionDetection();
 		}
+        IntegrateAccel(realDT);
 		if(isDebugDrawingCollision) DrawAllObjectCollision();
 		//This is our simple iterative solver - 
 		//we just run things multiple times, slowly moving things forward
@@ -119,6 +119,7 @@ void PhysicsSystem::Update(float dt) {
 			UpdateConstraints(constraintDt);	
 		}
 		IntegrateVelocity(realDT); //update positions from new velocity changes
+        gameWorld.UpdateWorldPhysics(realDT);
 
 		dTOffset -= realDT;
         iteratorCount++;
@@ -234,6 +235,7 @@ void PhysicsSystem::BasicCollisionDetection() {
             if((* j)->GetPhysicsObject() == nullptr){
                 continue;
             }
+
             CollisionDetection::CollisionInfo info;
 
             if(CollisionDetection::ObjectIntersection(*i,*j,info)){
@@ -305,6 +307,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
 	Vector3 fullImpulse = p.normal * j;
+
 
 
 	physA->ApplyLinearImpulse(-fullImpulse);
@@ -424,12 +427,11 @@ void PhysicsSystem::IntegrateAccel(float dt) {
         object->ClearForces();
 		Vector3 accel = force * inverseMass;                     //f*m^-1
 
-		if (applyGravity && inverseMass > 0) {
+        if (applyGravity && inverseMass > 0) {
             accel += gravity;
+        }
 
-		}
-
-		linearVel += accel * dt;                                // v = a(t).dt
+        linearVel += accel * dt;                                // v = a(t).dt
 		object->SetLinearVelocity(linearVel);
 
 		Vector3 torque = object->GetTorque();
@@ -453,10 +455,9 @@ the world, looking for collisions.
 */
 void PhysicsSystem::IntegrateVelocity(float dt) {
 
-    constexpr float SPEEDMAX = 10.0f;
-
 	std::vector<GameObject*>::const_iterator first;
 	std::vector<GameObject*>::const_iterator last;
+    float frameLinearDamping = 1.0f - (0.1f * dt);
 
 	gameWorld.GetObjectIterators(first, last);
 
@@ -472,19 +473,10 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		Vector3 position = transform.GetPosition();
 		Vector3 linearVel = object->GetLinearVelocity();
 
-        float strength = linearVel.Length();
-        if (strength > SPEEDMAX) {
-            object->SetLinearVelocity(linearVel.Normalised() * SPEEDMAX);
-        }
-
 		position += linearVel * dt;
 		transform.SetPosition(position);
 
-        linearVel.x = linearVel.x * (1.0f - (object->GetLinearDampHorizontal() * dt));
-        linearVel.z = linearVel.z * (1.0f - (object->GetLinearDampHorizontal() * dt));
-
-        linearVel.y = linearVel.y * (1.0f - (object->GetLinearDampVertical() * dt));
-
+        linearVel = linearVel * frameLinearDamping;
 		object->SetLinearVelocity(linearVel);
 
 		Quaternion orientation = transform.GetOrientation();
