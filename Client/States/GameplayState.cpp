@@ -75,6 +75,9 @@ void GameplayState::Update(float dt) {
     SendInputData();
     ReadNetworkFunctions();
 
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
+
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
@@ -179,6 +182,7 @@ void GameplayState::InitLevel(){
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 }
+
 
 
 bool GameplayState::IsDisconnected() {

@@ -39,6 +39,11 @@ void PhysicsSystem::SetupPhysicsMaterials() {
     auto* playerPhysMat = new PhysicsMaterial();
     playerPhysMat->e = 0.0f;
     physicsMaterials["Player"] = playerPhysMat;
+
+    PhysicsMaterial* triggerPhysMat = new PhysicsMaterial();
+    triggerPhysMat->e = 0.0f;
+    triggerPhysMat->linearDampingHorizontal = 0.5f;
+    physicsMaterials["Trigger"] = triggerPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -169,16 +174,13 @@ void PhysicsSystem::UpdateCollisionList() {
 			i->b->OnCollisionBegin(i->a);
 		}
         CollisionDetection::CollisionInfo blank;
-        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume())
-        {
+        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume()){
             in.framesLeft = 4;
 
-            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank))
-            {
+            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank)){
                 in.framesLeft = 0;
             }
         }
-
 
 		in.framesLeft--;
 

@@ -3,6 +3,7 @@
 //
 
 #include "Client.h"
+#include "../CSC8503CoreClasses/Debug.h"
 
 
 Client::Client() {

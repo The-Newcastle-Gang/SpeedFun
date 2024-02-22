@@ -9,6 +9,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
 
+    currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
@@ -124,8 +125,10 @@ void RunningState::CreatePlayers() {
         replicated->CreatePlayer(player, *world);
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
-        player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetInverseMass(2.0f);
+        player->GetPhysicsObject()->InitSphereInertia();
+        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+        player->SetIsPlayerBool(true);
 
         //TODO: clean up
 //        player->GetTransform().SetPosition(Vector3(0,0,0));
@@ -136,6 +139,21 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::AddTriggersToLevel(){
+    for (auto& triggerVec : triggersVector){
+        auto trigger = new TriggerVolumeObject(triggerVec.first);
+        replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
+        trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
+                                                    trigger->GetBoundingVolume(),
+                                                    physics->GetPhysMat("Default")));
+        trigger->GetPhysicsObject()->InitCubeInertia();
+        trigger->GetPhysicsObject()->SetInverseMass(0.0f);
+        trigger->GetTransform().SetPosition(triggerVec.second);
+        trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+
+        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5), Debug::MAGENTA, 1000.0f);
+    }
+}
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
@@ -165,6 +183,13 @@ void RunningState::BuildLevel(const std::string &levelName)
         return;
     }
     currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition();
+    triggersVector = {
+            std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
+    };
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
@@ -173,4 +198,5 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+    AddTriggersToLevel();
 }
