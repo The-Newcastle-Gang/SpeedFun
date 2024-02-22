@@ -53,6 +53,8 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
 }
 
@@ -66,6 +68,8 @@ void GameplayState::CreateNetworkThread() {
 
 
 void GameplayState::OnExit() {
+    Window::GetWindow()->LockMouseToWindow(false);
+    Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
     delete networkThread;
@@ -171,8 +175,7 @@ void GameplayState::CreatePlayers() {
     }
 }
 
-void GameplayState::InitLevel(){
-
+void GameplayState::InitLevel() {
     auto lr= new LevelReader();
     lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();

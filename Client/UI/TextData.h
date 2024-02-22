@@ -16,7 +16,9 @@ struct TextData {
     TextData() {
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         text = "";
+        defaultText = "";
         fontSize = 1.0f;
+        font = nullptr;
     }
 
     void SetFont(Font* f) {
@@ -30,6 +32,7 @@ struct TextData {
     Font* font;
     Vector4 color;
     std::string text;
+    std::string defaultText;
     float fontSize;
 };
 
