@@ -42,6 +42,11 @@ namespace NCL {
             void InitLevel();
             void InitCanvas();
 
+            GameObject* AddRaycastEnemy(const Vector3& position);
+            void RaycastEnemy(float dt, Transform* playerPos);
+            double warnningTime;
+            GameObject* raycastEnemy = new GameObject();
+
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
