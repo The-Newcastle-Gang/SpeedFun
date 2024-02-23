@@ -28,4 +28,4 @@ private:
 };
 
 
-#endif //SPEEDFUN_PLAYERMOVEMENT_H
+#endif //SPEEDFUN_SPRING_H

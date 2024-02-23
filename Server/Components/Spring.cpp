@@ -8,7 +8,6 @@ Spring::Spring(GameObject* g, Vector3 bI) {
 void Spring::Update(float dt) {
 
 	cooldown -= dt;
-
 }
 
 void Spring::OnCollisionEnter(const GameObject* otherObject) {
