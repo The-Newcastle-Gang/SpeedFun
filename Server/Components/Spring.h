@@ -23,9 +23,6 @@ public:
 
 private:
     Vector3 bounceForce;
-    float cooldown;
-    float cooldownLimit = 1.0f;
-
     bool continuous = false;
     std::map<const GameObject*, float> pushableObject;
     Vector3 continuousForce;

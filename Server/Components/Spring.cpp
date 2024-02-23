@@ -17,7 +17,7 @@ void Spring::Update(float dt) {
 			obj.first->GetPhysicsObject()->AddForce(continuousForce);
 		}
 		pushableObject[obj.first] -= dt;
-		std::cout << pushableObject[obj.first] << "\n";
+		//std::cout << pushableObject[obj.first] << "\n";
 		if (pushableObject[obj.first] <= 0.0f) tempList.push_back(obj.first);
 	}
 
@@ -25,13 +25,11 @@ void Spring::Update(float dt) {
 		auto it = pushableObject.find(obj);
 		pushableObject.erase(it);
 	}
-	
-	cooldown -= dt;
 }
 
 void Spring::OnCollisionEnter(const GameObject* otherObject) {
 	if (otherObject->GetIsPlayerBool() && pushableObject.find(otherObject) == pushableObject.end()) {
-		pushableObject.emplace(otherObject, cooldownLimit);
+		pushableObject.emplace(otherObject, continuousForceTimerLimit);
 		otherObject->GetPhysicsObject()->AddForce(bounceForce);
 	}
 
