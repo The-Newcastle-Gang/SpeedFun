@@ -15,6 +15,7 @@ GameObject::GameObject(string objectName)	{
     physicsObject	= nullptr; // Server
     renderObject	= nullptr; // Client
     animatorObject = nullptr;
+    isPlayer        = false;
 
 }
 
@@ -24,6 +25,11 @@ GameObject::~GameObject()	{
     delete renderObject;
     delete animatorObject;
     delete networkObject;
+
+	for (Component* c : components) {
+		delete c;
+	}
+
 }
 
 bool GameObject::GetBroadphaseAABB(Vector3&outSize) const {

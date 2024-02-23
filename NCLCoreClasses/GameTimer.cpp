@@ -16,7 +16,7 @@ GameTimer::GameTimer(void) {
 	Tick();
 }
 
-double	GameTimer::GetTotalTimeSeconds()	const {
+double GameTimer::GetTotalTimeSeconds()	const {
 	Timepoint time = std::chrono::high_resolution_clock::now();
 
 	std::chrono::duration<double> diff = time - firstPoint;
@@ -24,7 +24,7 @@ double	GameTimer::GetTotalTimeSeconds()	const {
 	return diff.count();
 };
 
-double	GameTimer::GetTotalTimeMSec()		const {
+double GameTimer::GetTotalTimeMSec() const {
 	Timepoint time = std::chrono::high_resolution_clock::now();
 
 	std::chrono::duration<double, std::milli> diff = time - firstPoint;
@@ -32,7 +32,7 @@ double	GameTimer::GetTotalTimeMSec()		const {
 	return diff.count();
 }
 
-void	GameTimer::Tick() {
+void GameTimer::Tick() {
 	Timepoint latestTime = std::chrono::high_resolution_clock::now();
 
 	std::chrono::duration<float> diff = latestTime - nowPoint;

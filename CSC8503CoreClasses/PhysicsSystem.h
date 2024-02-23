@@ -1,5 +1,6 @@
 #pragma once
 #include "GameWorld.h"
+#include "PhysicsObject.h"
 
 
 namespace NCL {
@@ -30,6 +31,14 @@ namespace NCL {
 			bool GetDebugDrawingCollision() {
 				return isDebugDrawingCollision;
 			}
+
+            PhysicsMaterial* GetPhysMat(std::string materialName) {
+                if (physicsMaterials.find(materialName) != physicsMaterials.end()) {
+                    return physicsMaterials[materialName];
+                }
+                return nullptr;
+            }
+
 		protected:
 			void BasicCollisionDetection();
 			void BroadPhase();
@@ -45,8 +54,11 @@ namespace NCL {
 			void UpdateCollisionList();
 			void UpdateObjectAABBs();
 
+            void SetupPhysicsMaterials();
+
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
 			void DrawAllObjectCollision();
+
 
 			bool isDebugDrawingCollision = false;
 
@@ -60,8 +72,14 @@ namespace NCL {
 			std::set<CollisionDetection::CollisionInfo> allCollisions;
 			std::set<CollisionDetection::CollisionInfo> broadphaseCollisions;
 			std::vector<CollisionDetection::CollisionInfo> broadphaseCollisionsVec;
-			bool useBroadPhase		= true;
-			int numCollisionFrames	= 5;
+
+			bool useBroadPhase		    = true;
+			int numCollisionFrames	    = 5;
+      float velocityThreshold    = 8.0f;
+
+
+      std::unordered_map<std::string, PhysicsMaterial*> physicsMaterials;
+
 		};
 	}
 }

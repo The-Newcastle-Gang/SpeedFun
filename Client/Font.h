@@ -14,6 +14,7 @@ using namespace Rendering;
 
 class Font {
 public:
+
     struct Vector2i {
         int x;
         int y;

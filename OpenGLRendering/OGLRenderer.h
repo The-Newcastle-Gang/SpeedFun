@@ -13,7 +13,7 @@ https://research.ncl.ac.uk/game/
 #include "AnimatorObject.h"
 #include "MeshMaterial.h"
 
-
+#define _WINSOCKAPI_
 #ifdef _WIN32
 #include "windows.h"
 #endif

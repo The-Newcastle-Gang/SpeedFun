@@ -11,6 +11,19 @@
 using namespace NCL;
 using namespace CSC8503;
 
+struct PrimitiveGameObject {
+public:
+    std::string     meshName;
+    Vector3         dimensions;
+    Quaternion      rotation;
+    Vector3         position;
+    float           inverseMass;
+    std::string     physicsType;
+    Vector3         colliderExtents;
+    float           colliderRadius;
+    bool            shouldNetwork;
+
+};
 
 struct GroundCubePrimitive {
 public:
@@ -21,14 +34,22 @@ public:
 class LevelReader {
 public:
 
-	Vector3 GetStartPosition() { return startPosition; }
-	Vector3 GetEndPosition() { return endPosition; }
-	std::vector<GroundCubePrimitive*> GetGroundCubes() { return groundCubes; }
+    LevelReader();
+    ~LevelReader();
 
-	bool ReadLevel(const std::string& source);
+	Vector3 GetStartPosition() const { return startPosition; }
+	Vector3 GetEndPosition() const { return endPosition; }
+    Vector3 GetDeathBoxPosition() const { return deathBoxPosition; }
+    std::vector<PrimitiveGameObject*> GetPrimitiveList() const { return primGOList; }
+    std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
+    int GetLevelSize() const { return primGOList.size();}
+	bool HasReadLevel(const std::string& source);
+
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;
-	std::vector<GroundCubePrimitive*> groundCubes;
+    Vector3 deathBoxPosition;
+    std::vector<PrimitiveGameObject*> primGOList;
+    std::vector<GroundCubePrimitive*> groundCubes;
 
 };

@@ -8,12 +8,12 @@
 
 namespace NCL {
     namespace CSC8503 {
-        class WaitingPlayers : public State
+        class WaitingPlayers : public State, PacketReceiver
         {
         public:
             WaitingPlayers(GameServer* pServerBase);
             ~WaitingPlayers();
-            void Update(float dt);
+            void Update(float dt) override;
 
             void OnEnter() override;
             void OnExit() override;
@@ -25,6 +25,8 @@ namespace NCL {
             bool isReady;
             void StartGame();
             void AddPlayer(int peerId);
+
+            void RegisterPackets();
         };
     }
 }

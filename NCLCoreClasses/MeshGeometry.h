@@ -231,7 +231,6 @@ namespace NCL {
 
 		std::vector<int>			bindPoseIndices; //New!
 		std::vector<SubMeshPoses>	bindPoseStates;  //New!
-
-        std::map<std::string, MeshAnimation*> animations;
+    std::map<std::string, MeshAnimation*> animations;
 	};
 }

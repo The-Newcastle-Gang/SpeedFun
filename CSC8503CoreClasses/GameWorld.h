@@ -45,7 +45,9 @@ namespace NCL {
 
             bool Raycast(Ray& r, RayCollision& closestCollision, bool closestObject = false, GameObject* ignore = nullptr) const;
 
-            virtual void UpdateWorld(float dt);
+			virtual void UpdateWorld(float dt);
+			virtual void StartWorld();
+			virtual void UpdateWorldPhysics(float dt);
 
             void OperateOnContents(GameObjectFunc f);
 
@@ -65,6 +67,18 @@ namespace NCL {
                 return networkObjects[networkId]->GetParent();
             }
 
+            [[nodiscard]] NetworkObject* GetNetworkObject(int networkId) const {
+                return networkObjects[networkId];
+            }
+
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorStart() {
+                return networkObjects.begin();
+            }
+
+            std::vector<NetworkObject*>::const_iterator GetNetworkIteratorEnd() {
+                return networkObjects.end();
+            }
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;
@@ -79,6 +93,8 @@ namespace NCL {
             int		worldStateCounter;
 
             int networkIdCounter;
+
+
         };
     }
 }

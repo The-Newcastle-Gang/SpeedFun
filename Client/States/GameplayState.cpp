@@ -3,43 +3,130 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient) : State() {
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
+    // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
-    resources = std::make_unique<Resources>(renderer);
+    resources = pResources;
+    replicated = std::make_unique<Replicated>();
+    canvas = pCanvas;
 }
 
-GameplayState::~GameplayState() {}
+GameplayState::~GameplayState() {
+}
+
+
+void GameplayState::InitCanvas(){
+
+    //this is clearly not the best way to do the cross-heir but This will have to do for now
+    //since i wanna just use this as debug.
+    //I can bet money on the fact that this code is going to be at release
+    //if u see this owen dont kill this
+
+    auto crossHeirVert = canvas->AddElement()
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({15,3})
+            .AlignCenter()
+            .AlignMiddle();
+
+    auto crossHeirHoriz = canvas->AddElement()
+            .SetColor({0.2,0.2,0.2,1.0})
+            .SetAbsoluteSize({3,15})
+            .AlignCenter()
+            .AlignMiddle();
+}
+
+void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
+
+    auto threadClient = ClientThread(client, networkData);
+
+    while (client) {
+        threadClient.Update();
+    }
+
+}
 
 void GameplayState::OnEnter() {
-
+    firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
-
-    firstPersonPosition = nullptr;
+    CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
+    InitCanvas();
 }
+
+void GameplayState::CreateNetworkThread() {
+    GameClient* client = baseClient;
+    baseClient = nullptr;
+    networkData = std::make_unique<ClientNetworkData>();
+    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
+    networkThread->detach();
+}
+
+
 void GameplayState::OnExit() {
+    Window::GetWindow()->LockMouseToWindow(false);
+    Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
+    delete networkThread;
 }
 
 void GameplayState::Update(float dt) {
+    SendInputData();
+    ReadNetworkFunctions();
+
+    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
 
     world->GetMainCamera()->UpdateCamera(dt);
-    SendInputData();
     world->UpdateWorld(dt);
+
+    ReadNetworkPackets();
+
     renderer->Render();
     Debug::UpdateRenderables(dt);
+
+}
+
+void GameplayState::ReadNetworkFunctions() {
+    while (!networkData->incomingFunctions.IsEmpty()) {
+        FunctionPacket packet = networkData->incomingFunctions.Pop();
+        if (packet.functionId == Replicated::AssignPlayer) {
+            DataHandler handler(&packet.data);
+            auto networkId = handler.Unpack<int>();
+            AssignPlayer(networkId);
+        }
+    }
+}
+
+// Perhaps replace this with a data structure that won't overlap objects on the same packet.
+void GameplayState::ReadNetworkPackets() {
+    while (!networkData->incomingState.IsEmpty()) {
+        FullPacket packet = networkData->incomingState.Pop();
+        auto id = packet.objectID;
+        world->GetNetworkObject(id)->ReadPacket(packet);
+    }
 }
 
 void GameplayState::SendInputData() {
+    InputListener::InputUpdate();
     InputPacket input;
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
+        networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
+    }
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
+    }
 
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
@@ -47,25 +134,13 @@ void GameplayState::SendInputData() {
 
     input.playerRotation = Quaternion::EulerAnglesToQuaternion(cameraPitch, cameraYaw, 0);
 
-    Vector2 playerDirection;
+    Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
+    input.rightAxis = Vector3(camWorld.GetColumn(0));
 
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-        playerDirection.y += 1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-        playerDirection.y += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-        playerDirection.x += -1;
-    }
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-        playerDirection.x += 1;
-    }
 
-    playerDirection.Normalise();
-    input.playerDirection = playerDirection;
+    input.playerDirection = InputListener::GetPlayerInput();
 
-    baseClient->SendPacket(input);
+    networkData->outgoingInput.Push(input);
 }
 
 
@@ -76,7 +151,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::FinishLoading() {
-    baseClient->RemoteFunction(Replicated::GameLoaded, nullptr);
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
 
 void GameplayState::InitCamera() {
@@ -89,18 +164,18 @@ void GameplayState::InitCamera() {
 
 void GameplayState::InitWorld() {
     CreatePlayers();
+    InitLevel();
 }
 
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
+    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-
-        MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
-        MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
+      
         playerMesh->AddAnimationToMesh("Run", testAnimation);
-
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
         AnimatorObject* newAnimator = new AnimatorObject();
@@ -108,8 +183,23 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+
+        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
+
+void GameplayState::InitLevel() {
+    auto lr= new LevelReader();
+    lr->HasReadLevel("debuglvl.json");
+    auto plist  = lr->GetPrimitiveList();
+    for(auto x : plist){
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+
+    }
+}
+
 
 
 bool GameplayState::IsDisconnected() {
@@ -121,15 +211,6 @@ void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
     player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
-}
+    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
-void GameplayState::ReceivePacket(int type, GamePacket *payload, int source) {
-    if (type == Function) {
-        auto functionPacket = reinterpret_cast<FunctionPacket*>(payload);
-        if (functionPacket->functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&functionPacket->data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
-        }
-    }
 }

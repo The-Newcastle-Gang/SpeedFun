@@ -2,24 +2,27 @@
 // Created by c3042750 on 30/01/2024.
 //
 
-#include <NetworkObject.h>
 #include "Client.h"
+#include "../CSC8503CoreClasses/Debug.h"
+
 
 Client::Client() {
     NetworkBase::Initialise();
 
-    baseClient = std::make_unique<GameClient>();
     stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
-    renderer = std::make_unique<GameTechRenderer>(*world);
+    canvas = std::make_unique<Canvas>();
+    renderer = std::make_unique<GameTechRenderer>(*world, *canvas);
+    baseClient = std::make_unique<GameClient>();
+    resources = std::make_unique<Resources>(renderer.get());
 
     InitStateManager();
-    RegisterPackets();
 }
 
 void Client::InitStateManager() {
-    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get());
-    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get());
+
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get());
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
         return clientMenu->CheckConnected();
@@ -29,6 +32,7 @@ void Client::InitStateManager() {
         return clientGameplay->IsDisconnected();
     });
 
+
     stateManager->AddState(clientMenu);
     stateManager->AddState(clientGameplay);
 
@@ -37,21 +41,15 @@ void Client::InitStateManager() {
 
 }
 
-void Client::RegisterPackets() {
-    baseClient->RegisterPacketHandler(Full_State, this);
-    baseClient->RegisterPacketHandler(Function, this);
-}
-
 void Client::Update(float dt) {
 
     stateManager->Update(dt);
-    baseClient->UpdateClient();
-}
 
+    canvas->Update(dt);
 
-void Client::ReceivePacket(int type, GamePacket *payload, int source) {
-
-    stateManager->ReceivePacket(type, payload, source);
+    if (dt > 0.04) {
+        std::cout << "Overly large dt" << std::endl;
+    }
 }
 
 

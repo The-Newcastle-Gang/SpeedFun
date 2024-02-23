@@ -10,68 +10,74 @@ using namespace CSC8503;
 
 Matrix4 biasMatrix = Matrix4::Translation(Vector3(0.5f, 0.5f, 0.5f)) * Matrix4::Scale(Vector3(0.5f, 0.5f, 0.5f));
 
-GameTechRenderer::GameTechRenderer(GameWorld& world) : OGLRenderer(*Window::GetWindow()), gameWorld(world)	{
+GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRenderer(*Window::GetWindow()), gameWorld(world), canvas(canvas)	{
     glEnable(GL_DEPTH_TEST);
 
     debugShader  = new OGLShader("debug.vert", "debug.frag");
     shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
+    defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
 
-    glGenTextures(1, &shadowTex);
-    glBindTexture(GL_TEXTURE_2D, shadowTex);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	lineCount = 0;
+	textCount = 0;
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                 SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glGenTextures(1, &shadowTex);
+	glBindTexture(GL_TEXTURE_2D, shadowTex);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+			     SHADOWSIZE, SHADOWSIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	glGenFramebuffers(1, &shadowFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
+	glDrawBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glGenFramebuffers(1, &shadowFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
-    glDrawBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(1, 1, 1, 1);
 
-    glClearColor(1, 1, 1, 1);
+	textCount = 0;
+	lineCount = 0;
 
-    textCount = 0;
-    lineCount = 0;
+	//Set up the light properties
+	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+	lightRadius = 1000.0f;
+	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
-    //Set up the light properties
-    lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-    lightRadius = 1000.0f;
-    lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
+	//Skybox!
+	skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
+	skyboxMesh = new OGLMesh();
+	skyboxMesh->SetVertexPositions({Vector3(-1, 1,-1), Vector3(-1,-1,-1) , Vector3(1,-1,-1) , Vector3(1,1,-1) });
+	skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
+	skyboxMesh->UploadToGPU();
 
-    //Skybox!
-    skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
-    skyboxMesh = new OGLMesh();
-    skyboxMesh->SetVertexPositions({Vector3(-1, 1,-1), Vector3(-1,-1,-1) , Vector3(1,-1,-1) , Vector3(1,1,-1) });
-    skyboxMesh->SetVertexIndices({ 0,1,2,2,3,0 });
-    skyboxMesh->UploadToGPU();
+	textCount = 0;
+	lineCount = 0;
 
-    textCount = 0;
-    lineCount = 0;
+	LoadSkybox();
 
-    LoadSkybox();
+	glGenVertexArrays(1, &lineVAO);
+	glGenVertexArrays(1, &textVAO);
 
-    glGenVertexArrays(1, &lineVAO);
-    glGenVertexArrays(1, &textVAO);
+	glGenBuffers(1, &lineVertVBO);
+	glGenBuffers(1, &textVertVBO);
+	glGenBuffers(1, &textColourVBO);
+	glGenBuffers(1, &textTexVBO);
 
-    glGenBuffers(1, &lineVertVBO);
-    glGenBuffers(1, &textVertVBO);
-    glGenBuffers(1, &textColourVBO);
-    glGenBuffers(1, &textTexVBO);
-
-    SetDebugStringBufferSizes(10000);
-    SetDebugLineBufferSizes(1000);
+	SetDebugStringBufferSizes(10000);
+	SetDebugLineBufferSizes(1000);
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
-    debugFont->fontShader = textShader;
+
+    // move to own function.
+    InitUIQuad();
 
 }
 
@@ -79,6 +85,29 @@ GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
     glDeleteFramebuffers(1, &shadowFBO);
     delete defaultShader;
+}
+
+void GameTechRenderer::InitUIQuad() {
+    glGenVertexArrays(1, &uiVAO);
+    glGenBuffers(1, &uiVBO);
+    glBindVertexArray(uiVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
+
+    float vertices[6][4] = {
+            { 0,  1,0.0f,0.0f },
+            { 0,  0,0.0f,1.0f },
+            { 1 , 0,1.0f,1.0f },
+
+            { 0, 1,0.0f,0.0f },
+            { 1, 0,1.0f,1.0f },
+            { 1, 1,1.0f,0.0f }
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void GameTechRenderer::LoadSkybox() {
@@ -125,22 +154,85 @@ void GameTechRenderer::RenderFrame() {
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
 
-    glEnable(GL_CULL_FACE);
-    glClearColor(1, 1, 1, 1);
-    BuildObjectList();
-    SortObjectList();
-    RenderShadowMap();
-    RenderSkybox();
-    RenderCamera();
-    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glClearColor(1, 1, 1, 1);
+	BuildObjectList();
+	SortObjectList();
+	RenderShadowMap();
+	RenderSkybox();
+	RenderCamera();
+	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	NewRenderLines();
+	NewRenderText();
+    RenderUI();
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void GameTechRenderer::RenderUI() {
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    NewRenderLines();
-    NewRenderText();
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    auto& layers = canvas.GetActiveLayers();
+    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+        auto& elements = (*i)->GetElements();
+        for (auto& e : elements) {
+            auto activeShader = defaultUIShader;
+            if (!e.GetShader()) {
+                BindShader(defaultUIShader);
+            }
+            else {
+                BindShader(e.GetShader());
+                activeShader = (OGLShader*)(e.GetShader());
+            }
+
+            auto color = e.GetColor();
+            auto colorAddress = color.array;
+            auto relPos = e.GetRelativePosition();
+            auto absPos = e.GetAbsolutePosition();
+            auto relSize = e.GetRelativeSize();
+            auto absSize = e.GetAbsoluteSize();
+
+            TextureBase* tex = e.GetTexture();
+            if (tex) {
+                auto glTex = (OGLTexture*)tex;
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "hasTexture"), 1);
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, glTex->GetObjectID());
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tex"), 0);
+            } else {
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "hasTexture"), 0);
+            }
+
+            auto textX = (relPos.x + (float)absPos.x / (float)windowWidth) * 100;
+            auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
+
+            glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniform4fv(glGetUniformLocation(activeShader->GetProgramID(), "uiColor"), 1, colorAddress);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+
+
+            glBindVertexArray(uiVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+
+            if (!e.textData.text.empty()) {
+                auto fontToUse = e.textData.font;
+                if (!fontToUse) fontToUse = debugFont.get();
+                RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
+            }
+
+        }
+        if ((*i)->CheckBlocking()) {
+            break;
+        }
+    }
 }
 
 void GameTechRenderer::BuildObjectList() {
@@ -256,6 +348,7 @@ void GameTechRenderer::RenderCamera() {
             shader = defaultShader;
         }
 
+
         BindShader(shader);
 
         if (i->GetDefaultTexture()) {
@@ -350,19 +443,17 @@ void GameTechRenderer::NewRenderLines() {
 
     glUniformMatrix4fv(matSlot, 1, false, (float*)viewProj.array);
 
+	  size_t frameLineCount = lines.size() * 2;
     debugLineData.clear();
-
-    int frameLineCount = lines.size() * 2;
-
+  
     SetDebugLineBufferSizes(frameLineCount);
 
-    glBindBuffer(GL_ARRAY_BUFFER, lineVertVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, frameLineCount * sizeof(Debug::DebugLineEntry), lines.data());
-
-
-    glBindVertexArray(lineVAO);
-    glDrawArrays(GL_LINES, 0, frameLineCount);
-    glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, lineVertVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, lines.size() * sizeof(Debug::DebugLineEntry), lines.data());
+	
+	glBindVertexArray(lineVAO);
+	glDrawArrays(GL_LINES, 0, (GLsizei)frameLineCount);
+	glBindVertexArray(0);
 }
 
 void GameTechRenderer::NewRenderText() {
@@ -470,7 +561,6 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
 void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     BindShader(font->fontShader.get());
 
     glUniform3f(glGetUniformLocation(textShader->GetProgramID(), "textColor"), color.x, color.y, color.z);
@@ -514,10 +604,9 @@ void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
+std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, int size) {
     FT_Library ft;
-    if (FT_Init_FreeType(&ft))
-    {
+    if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
         return nullptr;
     }
@@ -525,18 +614,16 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
     std::string filePath = std::string(Assets::FONTSSDIR) + fontName;
 
     FT_Face face;
-    if (FT_New_Face(ft, filePath.c_str(), 0, &face))
-    {
+    if (FT_New_Face(ft, filePath.c_str(), 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
         std::cout << filePath.c_str() << std::endl;
         return nullptr;
     }
 
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, size);
 
 
-    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-    {
+    if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
         std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
         return nullptr;
     }
@@ -545,11 +632,9 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
 
     auto font = std::make_unique<Font>();
 
-    for (unsigned char c = 0; c < 128; c++)
-    {
+    for (unsigned char c = 0; c < 128; c++) {
 
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-        {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
             continue;
         }
@@ -578,9 +663,10 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName) {
                 texture,
                 Font::Vector2i(face->glyph->bitmap.width, face->glyph->bitmap.rows),
                 Font::Vector2i(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                (unsigned int)face->glyph->advance.x
+                (unsigned int) face->glyph->advance.x
         };
         font->characters.insert(std::pair<char, Font::Character>(c, character));
+        font->fontShader = textShader;
 
         glGenVertexArrays(1, &font->textVAO);
         glGenBuffers(1, &font->textVBO);

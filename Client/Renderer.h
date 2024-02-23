@@ -11,6 +11,8 @@
 #include "Font.h"
 
 #include "Assets.h"
+#include "Element.h"
+#include "Canvas.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,15 +23,18 @@ namespace NCL {
 
         class GameTechRenderer : public OGLRenderer	{
         public:
-            GameTechRenderer(GameWorld& world);
+            GameTechRenderer(GameWorld& world, Canvas& canvas);
             ~GameTechRenderer();
 
             MeshGeometry*	LoadMesh(const string& name);
             TextureBase*	LoadTexture(const string& name);
             ShaderBase*		LoadShader(const string& vertex, const string& fragment);
-            std::unique_ptr<Font> LoadFont(const string& fontName);
+            std::unique_ptr<Font> LoadFont(const string& fontName, int size = 48);
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+            void RenderUI();
+
+            OGLMesh* GetUIMesh() {return UIMesh;}
 
         protected:
             void NewRenderLines();
@@ -38,8 +43,10 @@ namespace NCL {
             void RenderFrame()	override;
 
             OGLShader*	defaultShader;
+            OGLShader* defaultUIShader;
 
             GameWorld&	gameWorld;
+            Canvas& canvas;
 
             void BuildObjectList();
             void SortObjectList();
@@ -82,6 +89,11 @@ namespace NCL {
             vector<Vector4> debugTextColours;
             vector<Vector2> debugTextUVs;
 
+            //debug
+            std::vector<OGLMesh*> UIQuads;
+            OGLMesh* UIMesh;
+            OGLShader* uiShader;
+
             GLuint lineVAO;
             GLuint lineVertVBO;
             size_t lineCount = 0;
@@ -91,6 +103,11 @@ namespace NCL {
             GLuint textColourVBO;
             GLuint textTexVBO;
             size_t textCount = 0;
+
+            GLuint uiVAO;
+            GLuint uiVBO;
+
+            void InitUIQuad();
         };
     }
 }

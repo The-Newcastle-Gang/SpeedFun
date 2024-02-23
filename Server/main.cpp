@@ -4,9 +4,6 @@
 
 #pragma comment(lib, "winmm.lib")
 
-#define ENET_IMPLEMENTATION
-#include <enet.h>
-
 #include "GameTimer.h"
 #include "Server.h"
 
@@ -17,7 +14,6 @@
 int main() {
     auto timer = GameTimer();
     auto server = std::make_unique<Server>();
-//    server->ServerInit();
     timer.Tick();
 
     while (true) {

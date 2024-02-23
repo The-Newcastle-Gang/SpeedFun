@@ -10,6 +10,9 @@
 #include "MeshMaterial.h"
 #include "Renderer.h"
 
+using namespace NCL;
+using namespace CSC8503;
+
 class Resources {
 public:
     Resources(GameTechRenderer* pRenderer) : renderer(pRenderer) {}

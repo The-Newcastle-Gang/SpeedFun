@@ -1,17 +1,21 @@
 cmake_minimum_required(VERSION 3.16.0 FATAL_ERROR)
 project(client)
 
-add_executable(client
-        main.cpp
+add_library(client
         Client.cpp
         GameClient.cpp
         Renderer.cpp
-        #TutorialGame.cpp
-        States/InactiveState.cpp
         States/GameplayState.cpp
-        States/LoadingState.cpp
         States/MenuState.cpp
+        ClientThread.cpp
         Resources.cpp
+        ClientNetworkData.cpp
+        Font.cpp
+        CinematicCamera.cpp
+        UI/Canvas.cpp
+        UI/Element.cpp
+        UI/CanvasLayer.cpp
+        TweenManager.cpp
 )
 
 target_include_directories(client PUBLIC
@@ -23,6 +27,9 @@ target_include_directories(client PUBLIC
         ../FreetypeRenderer/Include
         ./States
         ../enet/include
+        ./UI
+        ../raudio/src
+        ../NotLua
 )
 
 target_link_libraries(client PUBLIC
@@ -31,6 +38,10 @@ target_link_libraries(client PUBLIC
         OpenGLRendering
         replicated
         freetype
+        enet
+        lua
+        enet
+        raudio
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
