@@ -163,8 +163,8 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    CreatePlayers();
     InitLevel();
+    CreatePlayers();
 }
 
 void GameplayState::CreatePlayers() {
@@ -184,6 +184,13 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
+
+    // TEST SWINGING OBJECT ON THE CLIENT
+    auto swingingTemp = new GameObject();
+    replicated->AddSwingingBlock(swingingTemp, *world);
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+
+
 }
 
 

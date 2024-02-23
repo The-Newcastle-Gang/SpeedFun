@@ -29,12 +29,12 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
 void Replicated::AddSwingingBlock(GameObject* g, GameWorld& world) {
 
     world.AddGameObject(g, true);
-    auto volume = new AABBVolume(Vector3(1, 1, 1) * 0.5f);
+    auto volume = new AABBVolume(Vector3(10, 10, 10) * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-        .SetScale({1, 1, 1})
-        .SetPosition({1, 1, 1});
+        .SetScale({10, 10, 10})
+        .SetPosition({1, 20, 1});
 }
 
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {

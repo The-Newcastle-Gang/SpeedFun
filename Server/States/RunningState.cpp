@@ -89,6 +89,7 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
+    AddTriggersToLevel();
     CreatePlayers();
 }
 
@@ -120,6 +121,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
+    std::cout << "HELLO GAMERS" << std::endl;
     for (auto& pair : playerInfo) {
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
@@ -200,9 +202,11 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
 
     // TEST SWINGING OBJECT ON THE SERVER
-    auto swingingObject = new GameObject("SwingingObject");
+    auto swingingObject = new GameObject("YEEEEHAWWWWW");
     replicated->AddSwingingBlock(swingingObject, *world);
-    swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
+    swingingObject->SetPhysicsObject(new PhysicsObject(&swingingObject->GetTransform(), swingingObject->GetBoundingVolume(), new PhysicsMaterial()));
+    swingingObject->GetPhysicsObject()->SetInverseMass(0.0f);
 
-    AddTriggersToLevel();
+
+    swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
 }

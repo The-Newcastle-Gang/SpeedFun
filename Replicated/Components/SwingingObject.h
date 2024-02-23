@@ -11,7 +11,9 @@ namespace NCL::CSC8503 {
 
 		SwingingObject(GameObject* go) { gameObject = go; }
 		void Update(float dt)override {
-			std::cout << "UPDATE ON THE COMPONENT!!!!!";
+
+			std::cout << "in the component!!!!!" << gameObject->GetName() << std::endl;
+			gameObject->GetTransform().SetPosition({ 1, (float)(rand() % 6), 1 });
 		}
 
 		void Start()override {
@@ -19,7 +21,7 @@ namespace NCL::CSC8503 {
 		}
 
 		void PhysicsUpdate(float dt)override {
-			std::cout << "PHYS UPDATE TEST" << "\n";
+
 		}
 	};
 }
