@@ -1,10 +1,10 @@
 #include "Spring.h"
 
-Spring::Spring(GameObject* g, Vector3 bI, bool c, float ctfl, Vector3 cf) {
+Spring::Spring(GameObject* g, Vector3 bI,  float aT, bool c, Vector3 cf) {
 	gameObject = g;
 	bounceForce = bI;
+	springActiveTime = aT;
 	continuous = c;
-	continuousForceTimerLimit = ctfl;
 	continuousForce = cf;
 	
 }
@@ -29,8 +29,7 @@ void Spring::Update(float dt) {
 
 void Spring::OnCollisionEnter(const GameObject* otherObject) {
 	if (otherObject->GetIsPlayerBool() && pushableObject.find(otherObject) == pushableObject.end()) {
-		pushableObject.emplace(otherObject, continuousForceTimerLimit);
+		pushableObject.emplace(otherObject, springActiveTime);
 		otherObject->GetPhysicsObject()->AddForce(bounceForce);
 	}
-
 }

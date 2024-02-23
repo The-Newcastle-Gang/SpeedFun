@@ -14,10 +14,13 @@
 using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
-
+/*
+* NOTE: If you're applying a big force to an object that touches a spring, use a continuous force spring so it doesn't
+*       look like said object is teleporting. Physics sucks.
+*/
 class Spring : public Component {
 public:
-    Spring(GameObject* g, Vector3 bI = Vector3(0, 5, 0), bool c = false, float cftl = 1.0f, Vector3 cf = Vector3(0,0,0));
+    Spring(GameObject* g, Vector3 bI = Vector3(0, 5, 0), float aT = 1.0f, bool c = false, Vector3 cf = Vector3(0,0,0));
     void OnCollisionEnter(const GameObject* otherObject) override;
     void Update(float dt) override;
 
@@ -25,8 +28,8 @@ private:
     Vector3 bounceForce;
     bool continuous = false;
     std::map<const GameObject*, float> pushableObject;
-    Vector3 continuousForce;
-    float continuousForceTimerLimit;
+    Vector3 continuousForce; 
+    float springActiveTime;
 };
 
 
