@@ -198,5 +198,11 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+
+    // TEST SWINGING OBJECT ON THE SERVER
+    auto swingingObject = new GameObject("SwingingObject");
+    replicated->AddSwingingBlock(swingingObject, *world);
+    swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
+
     AddTriggersToLevel();
 }
