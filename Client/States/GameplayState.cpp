@@ -84,6 +84,7 @@ void GameplayState::Update(float dt) {
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        RaycastEnemy(dt, firstPersonPosition);
     }
 
     world->GetMainCamera()->UpdateCamera(dt);
@@ -165,6 +166,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     CreatePlayers();
     InitLevel();
+    AddRaycastEnemy(Vector3(-80, 6, -7));
 }
 
 void GameplayState::CreatePlayers() {
@@ -200,3 +202,43 @@ void GameplayState::AssignPlayer(int netObject) {
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
 }
+
+void GameplayState::RaycastEnemy(float dt, Transform* playerPos) {
+    Vector3 rayPos;
+    Vector3 rayDir;
+    Vector3 player1Pos;
+    Vector3 enemyPos;
+    Vector3 enemyDir;
+    Quaternion enemyOrientation;
+
+    player1Pos = playerPos->GetPosition();
+    enemyPos = raycastEnemy->GetTransform().GetPosition();
+
+    if (player1Pos.x >= enemyPos.x - 10 && player1Pos.x <= enemyPos.x + 10
+        && player1Pos.z >= enemyPos.z - 10 && player1Pos.z <= enemyPos.z + 10) {
+         warnningTime += dt;
+         if (warnningTime >= 5) {
+             std::cout << "You are shooted by the enemy" << std::endl;
+             warnningTime = 0.0;
+         }    // didn't cout the word
+         //rayDir = (player1Pos - enemyPos).Normalised();
+         //rayPos = raycastEnemy->GetTransform().GetPosition();
+         //Debug::DrawLine(rayPos, player1Pos, Vector4(1, 0, 0, 1));//someting problem on it   wrong phenomenon
+
+         enemyDir = (enemyPos - player1Pos).Normalised();
+         float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / 3.14159265358979323846f;
+         enemyOrientation = Quaternion::EulerAnglesToQuaternion(0.0f, transDegree, 0.0f);
+         raycastEnemy->GetTransform().SetOrientation(enemyOrientation);
+     }
+ }
+
+ GameObject* GameplayState::AddRaycastEnemy(const Vector3& position) {
+     float meshSize = 0.5f;
+     raycastEnemy->GetTransform()
+         .SetScale(Vector3(meshSize, meshSize, meshSize))
+         .SetPosition(position);
+     raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
+     world->AddGameObject(raycastEnemy, true);
+
+     return raycastEnemy;
+ }
