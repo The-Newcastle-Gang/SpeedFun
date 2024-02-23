@@ -87,14 +87,7 @@ namespace NCL::CSC8503 {
         void SetWorldID(int newID) {
             worldID = newID;
         }
-    
-        virtual void OnCollisionBegin(GameObject* otherObject) {
-            //std::cout << "OnCollisionBegin event occured!\n";
-        }
 
-        virtual void OnCollisionEnd(GameObject* otherObject) {
-            //std::cout << "OnCollisionEnd event occured!\n";
-        }
 
 		template <typename T>
 		bool TryGetComponent(T*& returnPointer) {

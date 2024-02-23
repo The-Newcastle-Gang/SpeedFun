@@ -39,6 +39,9 @@ public:
     void InitLevel();
     int GetCurrentLevelLen();
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
+    void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
+
+
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
   

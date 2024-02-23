@@ -9,7 +9,7 @@ add_library(server
         ServerThread.cpp
         Components/PlayerMovement.cpp
 
-)
+ "Components/Spring.h" "Components/Spring.cpp")
 
 target_include_directories(server PUBLIC
         ../NCLCoreClasses
