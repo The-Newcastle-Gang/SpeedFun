@@ -25,11 +25,12 @@ public:
     void Update(float dt) override;
 
 private:
-    Vector3 bounceForce;
-    bool continuous = false;
-    std::map<const GameObject*, float> pushableObject;
-    Vector3 continuousForce; 
+    Vector3 bounceForce; 
     float springActiveTime;
+    std::map<const GameObject*, float> pushableObject;
+    bool continuous = false;
+    Vector3 continuousForce; 
+    
 };
 
 
