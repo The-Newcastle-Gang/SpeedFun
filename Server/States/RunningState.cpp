@@ -198,6 +198,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+
+    //* =================SPRING STUFF=================
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject("Spring");
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
@@ -212,8 +214,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->AddComponent((Component*)(new Spring(g, Vector3(0.0f, 1000.0f, 0), true, 1.0f, Vector3(0.5f * pow(i, 4),0,0))));
     }
-
-
+    //*/
 
     auto g2 = new GameObject();
     auto x = new PrimitiveGameObject();
