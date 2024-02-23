@@ -11,7 +11,7 @@
 
 class ServerThread : PacketReceiver {
 public:
-    ServerThread(GameServer* server, ServerNetworkData* data);
+    ServerThread(GameServer* server, ServerNetworkData* data, std::atomic<int>* playerCount);
     ~ServerThread();
 
     void ReadPacketsToSend();
@@ -20,6 +20,7 @@ public:
 private:
     GameServer* baseServer;
     ServerNetworkData* networkData;
+    std::atomic<int>* playerCount;
 
 };
 

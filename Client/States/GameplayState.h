@@ -32,6 +32,8 @@ namespace NCL {
             void OnEnter() override;
             void OnExit() override;
 
+            std::atomic<bool> shouldClose;
+
             bool IsDisconnected();
 
         protected:
@@ -69,7 +71,7 @@ namespace NCL {
 
             void FinishLoading();
 
-            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData, std::atomic<bool>& shouldClose);
 
             void ReadNetworkFunctions();
 

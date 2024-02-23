@@ -14,6 +14,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    OnExit();
 }
 
 
@@ -37,11 +38,11 @@ void GameplayState::InitCanvas(){
             .AlignMiddle();
 }
 
-void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
+void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData, std::atomic<bool>& shouldClose) {
 
     auto threadClient = ClientThread(client, networkData);
 
-    while (client) {
+    while (!shouldClose) {
         threadClient.Update();
     }
 
@@ -49,8 +50,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
-    Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    shouldClose = false;
     CreateNetworkThread();
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
@@ -62,12 +62,13 @@ void GameplayState::CreateNetworkThread() {
     GameClient* client = baseClient;
     baseClient = nullptr;
     networkData = std::make_unique<ClientNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(ThreadUpdate, client, networkData.get(), std::ref(shouldClose));
 }
 
 
 void GameplayState::OnExit() {
+    shouldClose = true;
+    networkThread->join();
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();

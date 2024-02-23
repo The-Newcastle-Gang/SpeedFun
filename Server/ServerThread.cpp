@@ -4,11 +4,13 @@
 
 #include "ServerThread.h"
 
-ServerThread::ServerThread(GameServer *server, ServerNetworkData *data) {
+ServerThread::ServerThread(GameServer *server, ServerNetworkData *data, std::atomic<int>* playCount) {
     baseServer = server;
     networkData = data;
     baseServer->RegisterPacketHandler(Function, this);
     baseServer->RegisterPacketHandler(Received_State, this);
+    playerCount = playCount;
+    *playerCount = (int)baseServer->GetPlayerInfo().size();
 }
 
 ServerThread::~ServerThread() {
@@ -45,5 +47,6 @@ void ServerThread::ReceivePacket(int type, GamePacket *payload, int source) {
 void ServerThread::Update() {
     ReadPacketsToSend();
     baseServer->UpdateServer();
+    *playerCount =  (int)baseServer->GetPlayerInfo().size();
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 }

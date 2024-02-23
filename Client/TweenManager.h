@@ -92,7 +92,6 @@ private:
         }
 
         void Finish() override {
-            *valueToChange = end;
             callback();
         }
     };

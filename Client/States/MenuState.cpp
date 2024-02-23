@@ -30,14 +30,22 @@ void MenuState::OptionHover(Element& element) {
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(hoverBox);
-    boxElement.GetAbsolutePosition().y = pos - 33;
+//    boxElement.GetAbsolutePosition().y = pos - 33;
+
+//    tweenManager->CreateTween(
+//            TweenManager::EaseOutSine,
+//            0,
+//            415,
+//            &boxElement.GetAbsoluteSize().x,
+//            0.2f);
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutSine,
-            0,
-            415,
-            &boxElement.GetAbsoluteSize().x,
-            0.2f);
+            TweenManager::EaseOutElastic,
+            boxElement.GetAbsolutePosition().y,
+            pos - 33,
+            &boxElement.GetAbsolutePosition().y,
+            0.6f);
+
 
     element.GetTextData().color = activeMenuText;
 }

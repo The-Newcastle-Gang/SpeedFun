@@ -10,12 +10,15 @@ using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
 
+
+std::atomic<int> G_Should_Close = -1;
+
 void ServerThreadFunction() {
     auto server = new Server();
     auto timer = GameTimer();
     timer.Tick();
 
-    while (true) {
+    while (G_Should_Close != 0) {
         std::this_thread::yield();
         timer.Tick();
         float dt = timer.GetTimeDeltaSeconds();
@@ -24,10 +27,10 @@ void ServerThreadFunction() {
             std::cout << "Skipping large time delta" << std::endl;
             continue;
         }
-
         server->UpdateServer(dt);
     }
     delete server;
+    G_Should_Close = 1;
 }
 
 int main() {
@@ -76,6 +79,13 @@ int main() {
         }
 
     }
+
+    G_Should_Close = 0;
+
+    while (G_Should_Close == 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     delete client;
     Window::DestroyGameWindow();
 }

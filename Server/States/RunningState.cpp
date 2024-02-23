@@ -8,12 +8,13 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     replicated = std::make_unique<Replicated>();
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
+    networkThread = nullptr;
 
     currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
-
+    delete networkThread;
 }
 
 void RunningState::OnEnter() {
@@ -21,15 +22,18 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+
+    shouldThreadClose = false;
+
     CreateNetworkThread();
     LoadLevel();
 
 }
 
-void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
-    auto threadServer = ServerThread(server, networkData);
+void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData, std::atomic<bool>& shouldThreadClose, std::atomic<int>* playerCount) {
+    auto threadServer = ServerThread(server, networkData, playerCount);
 
-    while (server) {
+    while (!shouldThreadClose) {
         threadServer.Update();
     }
 }
@@ -37,10 +41,9 @@ void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkDa
 void RunningState::CreateNetworkThread() {
     GameServer* server = serverBase;
     // Again, make sure serverBase isn't used without confirmation.
-    serverBase = nullptr;
     networkData = std::make_unique<ServerNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, server, networkData.get());
-    networkThread->detach();
+    delete networkThread;
+    networkThread = new std::thread(ThreadUpdate, server, networkData.get(), std::ref(shouldThreadClose), &playerCount);
 }
 
 void RunningState::ReadNetworkFunctions() {
@@ -73,6 +76,9 @@ void RunningState::ReadNetworkPackets() {
 }
 
 void RunningState::OnExit() {
+    shouldThreadClose = true;
+    networkThread->join();
+
     world->ClearAndErase();
     physics->Clear();
     playerObjects.clear();
@@ -84,6 +90,7 @@ void RunningState::Update(float dt) {
     ReadNetworkPackets();
     world->UpdateWorld(dt);
     physics->Update(dt);
+    std::cout << playerCount << std::endl;
     Tick(dt);
 }
 

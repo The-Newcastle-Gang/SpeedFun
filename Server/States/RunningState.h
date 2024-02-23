@@ -42,6 +42,9 @@ namespace NCL {
             std::unique_ptr<GameWorld> world;
             std::unique_ptr<ServerNetworkData> networkData;
 
+            std::atomic<bool> shouldThreadClose;
+            std::atomic<int> playerCount;
+
             std::thread* networkThread;
 
             std::unordered_map<int, PlayerInfo> playerInfo;
@@ -72,7 +75,7 @@ namespace NCL {
             void AddTriggersToLevel();
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
-            static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
+            static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData, std::atomic<bool>& shouldThreadClose, std::atomic<int>* playerCount);
 
             void CreateNetworkThread();
 
