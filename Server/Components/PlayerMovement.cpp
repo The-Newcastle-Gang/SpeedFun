@@ -11,7 +11,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     world = w;
     gameObject = g;
 
-    runSpeed = 5000.0f;
+    runSpeed = 7500.0f;
     jumpForce = 500.0f;
     dragFactor = 10.0f;
 

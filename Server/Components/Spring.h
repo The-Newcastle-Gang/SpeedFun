@@ -17,14 +17,19 @@ using namespace Maths;
 
 class Spring : public Component {
 public:
-    Spring(GameObject* g, Vector3 bI = Vector3(0, 5, 0));
+    Spring(GameObject* g, Vector3 bI = Vector3(0, 5, 0), bool c = false, float cftl = 1.0f, Vector3 cf = Vector3(0,0,0));
     void OnCollisionEnter(const GameObject* otherObject) override;
     void Update(float dt) override;
 
 private:
     Vector3 bounceForce;
     float cooldown;
-    const float cooldownLimit = 1.0f;
+    float cooldownLimit = 1.0f;
+
+    bool continuous = false;
+    std::map<const GameObject*, float> pushableObject;
+    Vector3 continuousForce;
+    float continuousForceTimerLimit;
 };
 
 

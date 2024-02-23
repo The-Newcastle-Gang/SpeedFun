@@ -184,9 +184,16 @@ void GameplayState::InitLevel(){
 
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject();
-        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -39.0f));
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-        g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f/4.0f*i, 0.0f, 1.0f));
+        g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f));
+    }
+
+    for (int i = 0; i < 4; i++) {
+        auto g = new GameObject();
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
+        g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+        g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
     }
 
 
@@ -200,6 +207,7 @@ void GameplayState::InitLevel(){
     g2->SetRenderObject(new RenderObject(&g2->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 
 }
+
 
 
 
