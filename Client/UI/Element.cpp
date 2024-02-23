@@ -24,6 +24,12 @@ void Element::Update(float dt) {
 
     if (position.x > leftBound && position.x < rightBound && position.y < upperBound && position.y > lowerBound) {
         if (isClicked) {
+
+            if (!isFocused) {
+                focus.publish(*this);
+                isFocused = true;
+            }
+
             if (mouseDownTimer > 0) {
                 mouseHold.publish(*this, mouseDownTimer);
                 mouseDownTimer += dt;
@@ -47,6 +53,13 @@ void Element::Update(float dt) {
             hoverTimer += dt;
         }
         return;
+    } else {
+        if (isClicked) {
+            if (isFocused) {
+                focusExit.publish(*this);
+                isFocused = false;
+            }
+        }
     }
 
     if (hoverTimer > 0) {

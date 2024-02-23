@@ -63,20 +63,23 @@ Element& Canvas::AddImageElement(const std::string &name, const std::string& lay
 
 void Canvas::Update(float dt) {
     auto aLayers = GetActiveLayers();
-    for (auto i = aLayers.rbegin(); i != aLayers.rend(); ++i) {
-        (*i)->Update(dt);
-        if ((*i)->CheckBlocking()) {
-            break;
-        }
-    }
+    aLayers.back()->Update(dt);
 }
 
-Element& Canvas::GetElementById(int index, const std::string& layerName) {
+Element& Canvas::GetElementByIndex(int index, const std::string& layerName) {
     if (!DoesLayerExist(layerName)) {
         std::cerr << "Layer doesn't exist!" << std::endl;
     }
 
     return layers[layerName].GetElements()[index];
+}
+
+Element& Canvas::GetElementById(const std::string& id, const std::string& layerName) {
+    for (auto& e : layers[layerName].GetElements()) {
+        if (e.GetId() == id) {
+            return e;
+        }
+    }
 }
 
 void Canvas::PushActiveLayer(const std::string& layerName) {

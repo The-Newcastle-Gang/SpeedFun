@@ -180,8 +180,14 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.rbegin(); i != layers.rend(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
-
-            BindShader(defaultUIShader);
+            auto activeShader = defaultUIShader;
+            if (!e.GetShader()) {
+                BindShader(defaultUIShader);
+            }
+            else {
+                BindShader(e.GetShader());
+                activeShader = (OGLShader*)(e.GetShader());
+            }
 
             auto color = e.GetColor();
             auto colorAddress = color.array;
@@ -193,23 +199,23 @@ void GameTechRenderer::RenderUI() {
             TextureBase* tex = e.GetTexture();
             if (tex) {
                 auto glTex = (OGLTexture*)tex;
-                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 1);
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "hasTexture"), 1);
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, glTex->GetObjectID());
-                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "tex"), 0);
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "tex"), 0);
             } else {
-                glUniform1i(glGetUniformLocation(defaultUIShader->GetProgramID(), "hasTexture"), 0);
+                glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "hasTexture"), 0);
             }
 
             auto textX = (relPos.x + (float)absPos.x / (float)windowWidth) * 100;
             auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
 
-            glUniformMatrix4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
-            glUniform4fv(glGetUniformLocation(defaultUIShader->GetProgramID(), "uiColor"), 1, colorAddress);
-            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
-            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
-            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
-            glUniform2f(glGetUniformLocation(defaultUIShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+            glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniform4fv(glGetUniformLocation(activeShader->GetProgramID(), "uiColor"), 1, colorAddress);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
+            glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
 
 
             glBindVertexArray(uiVAO);
