@@ -28,9 +28,11 @@ namespace NCL::CSC8503 {
 
 		void CheckTimerState();
 
+		void SetRadius(float r) { radius = r; }
+
 
 	protected:
-		float const radius = 10;
+		float radius = 10;
 
 		Vector3 startingPos;
 
