@@ -90,6 +90,7 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
+    AddTriggersToLevel();
     CreatePlayers();
 }
 
@@ -200,5 +201,11 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
-    AddTriggersToLevel();
+
+    // TEST SWINGING OBJECT ON THE SERVER
+    auto swingingObject = new GameObject("Swinging_Object");
+    replicated->AddSwingingBlock(swingingObject, *world);
+    swingingObject->SetPhysicsObject(new PhysicsObject(&swingingObject->GetTransform(), swingingObject->GetBoundingVolume(), new PhysicsMaterial()));
+    swingingObject->GetPhysicsObject()->SetInverseMass(0.0f);
+    swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
 }

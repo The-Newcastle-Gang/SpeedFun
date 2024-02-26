@@ -26,6 +26,17 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
         .SetPosition(currentPrimitive->position);
 }
 
+void Replicated::AddSwingingBlock(GameObject* g, GameWorld& world) {
+
+    world.AddGameObject(g, true);
+    auto volume = new AABBVolume(Vector3(10, 10, 10) * 0.5f);
+    g->SetBoundingVolume((CollisionVolume*)volume);
+
+    g->GetTransform()
+        .SetScale({10, 10, 10})
+        .SetPosition({1, 20, 1});
+}
+
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
@@ -46,7 +57,3 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
     g->GetTransform()
         .SetScale(Vector3(meshSize, meshSize, meshSize));
 }
-
-
-
-
