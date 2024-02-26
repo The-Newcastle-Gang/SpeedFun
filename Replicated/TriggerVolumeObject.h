@@ -6,7 +6,6 @@
 #define GITIGNORE_TRIGGERVOLUMEOBJECT_H
 
 #include "GameObject.h"
-#include <iostream>
 
 using namespace NCL;
 using namespace CSC8503;
@@ -27,7 +26,6 @@ public:
 
 private:
     TriggerType triggerType;
-
 };
 
 

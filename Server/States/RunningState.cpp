@@ -154,7 +154,25 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
 
-        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5), Debug::MAGENTA, 1000.0f);
+        Vector4 colour = Vector4();
+        switch (triggerVec.first){
+            case TriggerVolumeObject::TriggerType::Start:
+                colour = {1,1,1,1};
+                break;
+            case TriggerVolumeObject::TriggerType::End:
+                colour = {0,1,0,1};
+                break;
+            case TriggerVolumeObject::TriggerType::Death:
+                colour = {1,0,0,1};
+                break;
+            case TriggerVolumeObject::TriggerType::CheckPoint:
+                colour = {1,0.4f,1,1};
+                break;
+            default:
+                break;
+        }
+        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5),
+                             colour, 1000.0f);
     }
 }
 
