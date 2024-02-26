@@ -48,10 +48,10 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::StartInAir() {
-    static float airRunSpeed = 300.0f;
+    static float airRunSpeed = 600.0f;
     static float airJumpForce = 0.0f;
     static float airDragFactor = 0.5f;
-    static float airMaxHorizontalVelocity = 15.0f;
+    static float airMaxHorizontalVelocity = 20.0f;
 
     runSpeed = airRunSpeed;
     jumpForce = airJumpForce;
@@ -66,10 +66,10 @@ void PlayerMovement::UpdateInAir(float dt) {
 void PlayerMovement::LeaveInAir() {}
 
 void PlayerMovement::StartGround() {
-    static float groundRunSpeed = 5000.0f;
+    static float groundRunSpeed = 7000.0f;
     static float groundJumpForce = 500.f;
-    static float groundDragFactor = 9.0f;
-    static float groundMaxHorizontalVelocity = 7.0f;
+    static float groundDragFactor = 8.5f;
+    static float groundMaxHorizontalVelocity = 20.0f;
 
     runSpeed = groundRunSpeed;
     jumpForce = groundJumpForce;
