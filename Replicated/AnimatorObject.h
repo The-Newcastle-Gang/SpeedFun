@@ -1,34 +1,34 @@
 #pragma once
 #include "MeshAnimation.h"
 
-namespace NCL {
-    class AnimatorObject {
-    public:
-        AnimatorObject() { currentAnimation = nullptr; };
-        ~AnimatorObject() {};
-        void SetAnimation(MeshAnimation* newAnimation);
-        void UpdateAnimation(float dt);
+using namespace NCL;
 
-        MeshAnimation* GetAnimation() {
-            return currentAnimation;
-        }
+class AnimatorObject {
+public:
+    AnimatorObject() { currentAnimation = nullptr; };
+    ~AnimatorObject() {};
+    void SetAnimation(MeshAnimation* newAnimation);
+    void UpdateAnimation(float dt);
 
-        int GetCurrentFrame() {
-            return animationInfo.currentFrame;
-        }
+    MeshAnimation* GetAnimation() {
+        return currentAnimation;
+    }
 
-        int GetNextFrame() {
-            return (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
-        }
+    int GetCurrentFrame() {
+        return animationInfo.currentFrame;
+    }
 
-        float GetFramePercent() {
-            return animationInfo.framePercent;
-        }
-    private:
-        MeshAnimationInfo animationInfo;
-        MeshAnimation* currentAnimation;
-        MeshAnimation* queuedAnimation;
+    int GetNextFrame() {
+        return (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
+    }
 
-        bool isTransitioning = false;
-    };
-}
+    float GetFramePercent() {
+        return animationInfo.framePercent;
+    }
+private:
+    MeshAnimationInfo animationInfo;
+    MeshAnimation* currentAnimation;
+    MeshAnimation* queuedAnimation;
+
+    bool isTransitioning = false;
+};

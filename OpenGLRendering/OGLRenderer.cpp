@@ -211,7 +211,7 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
 
         OGLTexture* layerTex = (OGLTexture*)boundMeshMaterial->GetMaterialForLayer(l)->GetEntry("Diffuse");
         
-        BindTextureToShader(layerTex, "mainTex", layerTex->GetObjectID());
+        BindTextureToShader(layerTex, "mainTex", 0);
 
         DrawBoundMesh(l);
     }

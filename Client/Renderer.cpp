@@ -342,7 +342,7 @@ void GameTechRenderer::RenderCamera() {
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-    for (const auto&i : activeObjects) {
+    for (const RenderObject* i : activeObjects) {
         OGLShader* shader = (OGLShader*)(*i).GetShader();
         if (!shader) {
             shader = defaultShader;
@@ -403,13 +403,14 @@ void GameTechRenderer::RenderCamera() {
 
         int layerCount = (*i).GetMesh()->GetSubMeshCount();
 
-        if( MeshMaterial* m = (*i).GetMeshMaterial())BindMeshMaterial(m);
+        if (MeshMaterial* m = (*i).GetMeshMaterial())BindMeshMaterial(m);
+        else(BindMeshMaterial(nullptr));
 
-        if (i->GetAnimatorObject()) {
+        if ((*i).GetAnimatorObject()) {
             BindAnimation(i->GetAnimatorObject());
             DrawBoundAnimation(layerCount);
             BindAnimation(nullptr);
-            return;
+            continue;
         }
 
         for (int i = 0; i < layerCount; ++i) {
