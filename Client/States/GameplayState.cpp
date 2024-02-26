@@ -152,6 +152,7 @@ void GameplayState::InitialiseAssets() {
 
 void GameplayState::FinishLoading() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    world->StartWorld();
 }
 
 void GameplayState::InitCamera() {

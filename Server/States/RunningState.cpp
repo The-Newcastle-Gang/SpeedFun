@@ -23,6 +23,7 @@ void RunningState::OnEnter() {
     sceneSnapshotId = 0;
     CreateNetworkThread();
     LoadLevel();
+    world->StartWorld();
 
 }
 
