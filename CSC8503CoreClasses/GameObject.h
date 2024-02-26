@@ -8,37 +8,41 @@ namespace NCL::CSC8503 {
     class RenderObject;
     class PhysicsObject;
 
-	class GameObject{
-	public:
-		GameObject(std::string name = "");
-		~GameObject();
+    enum Tag {
+        PLAYER
+    };
 
-		virtual void Update(float dt) { UpdateAllComponents(dt);}
-		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
-		virtual void Start() { StartAllComponents(); }
+    class GameObject {
+    public:
+        GameObject(std::string name = "");
+        ~GameObject();
 
-		virtual void OnCollisionBegin(const GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionEnter(otherObject);
-		}
+        virtual void Update(float dt) { UpdateAllComponents(dt); }
+        virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
+        virtual void Start() { StartAllComponents(); }
 
-		virtual void OnCollisionEnd(const GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionEnd(otherObject);
-		}
+        virtual void OnCollisionBegin(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionEnter(otherObject);
+        }
 
-		virtual void OnCollisionStay(const GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionStay(otherObject);
-		}
+        virtual void OnCollisionEnd(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionEnd(otherObject);
+        }
 
-		void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
+        virtual void OnCollisionStay(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionStay(otherObject);
+        }
 
-		void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
+        void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
 
-		void StartAllComponents() { for (Component* component : components)component->Start(); }
+        void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
+
+        void StartAllComponents() { for (Component* component : components)component->Start(); }
 
 
-		void SetBoundingVolume(CollisionVolume* vol) {
-			boundingVolume = vol;
-		}
+        void SetBoundingVolume(CollisionVolume* vol) {
+            boundingVolume = vol;
+        }
 
         const CollisionVolume* GetBoundingVolume() const {
             return boundingVolume;
@@ -80,45 +84,40 @@ namespace NCL::CSC8503 {
             return name;
         }
 
-        bool GetBroadphaseAABB(Vector3&outsize) const;
+        bool GetBroadphaseAABB(Vector3& outsize) const;
 
         void UpdateBroadphaseAABB();
 
         void SetWorldID(int newID) {
             worldID = newID;
         }
-    
-        virtual void OnCollisionBegin(GameObject* otherObject) {
-            //std::cout << "OnCollisionBegin event occured!\n";
+
+        template <typename T>
+        bool TryGetComponent(T*& returnPointer) {
+            for (Component* component : components) {
+                T* typeCast = dynamic_cast<T*>(component);
+                if (typeCast) {
+                    returnPointer = typeCast;
+                    return true;
+                }
+            }
+            return false;
         }
 
-        virtual void OnCollisionEnd(GameObject* otherObject) {
-            //std::cout << "OnCollisionEnd event occured!\n";
+        void AddComponent(Component* component) {
+            components.push_back(component);
         }
 
-		template <typename T>
-		bool TryGetComponent(T*& returnPointer) {
-			for (Component* component : components) {
-				T* typeCast = dynamic_cast<T*>(component);
-				if (typeCast) {
-					returnPointer = typeCast;
-					return true;
-				}
-			}
-			return false;
-		}
+        std::vector<Component*> components;
 
-		void AddComponent(Component* component) {
-			components.push_back(component);
-		}
+        Transform transform;
 
-		std::vector<Component*> components;
-
-		Transform transform;
-        
         int GetWorldID() const {
-          return worldID;
+            return worldID;
         }
+
+        const Tag GetTag() { return tag; }
+        void SetTag(Tag t) { tag = t; }
 
         void DrawCollision();
 
@@ -136,6 +135,8 @@ namespace NCL::CSC8503 {
         bool        isPlayer;
         int			worldID;
         std::string	name;
+
+        Tag tag;
 
         Vector3 broadphaseAABB;
     };

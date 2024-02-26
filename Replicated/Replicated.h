@@ -39,6 +39,7 @@ public:
     void InitLevel();
     int GetCurrentLevelLen();
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
+    void AddTestObstacleToLevel(GameObject *g, GameWorld& world);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
     void AddSwingingBlock(GameObject* g, GameWorld& world);
