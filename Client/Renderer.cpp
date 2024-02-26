@@ -18,6 +18,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    postProcessBase = new OGLShader("post.vert", "post.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -40,7 +41,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	glDrawBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glClearColor(1, 1, 1, 1);
+	glClearColor(1, 1, 1, 0);
 
 	textCount = 0;
 	lineCount = 0;
@@ -60,6 +61,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	textCount = 0;
 	lineCount = 0;
 
+    CreatePostProcessQuad();
+
 	LoadSkybox();
 
 	glGenVertexArrays(1, &lineVAO);
@@ -76,8 +79,14 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
 
+    sceneColorTexture = CreateHDRTexture();
+    sceneDepthTexture = CreateDepthTexture();
+
+    hdrFramebuffer = CreateHDRFramebuffer(sceneColorTexture, sceneDepthTexture);
+
     // move to own function.
     InitUIQuad();
+    //InitRayMarching();
 
 }
 
@@ -85,6 +94,73 @@ GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
     glDeleteFramebuffers(1, &shadowFBO);
     delete defaultShader;
+}
+
+GLuint GameTechRenderer::CreateHDRTexture() {
+    GLuint t;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    return t;
+}
+
+GLuint GameTechRenderer::CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTexture) {
+    GLuint f;
+    glGenFramebuffers(1, &f);
+    glBindFramebuffer(GL_FRAMEBUFFER, f);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+
+    if (depthTexture != 0) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
+    }
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Framebuffer is jover" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return f;
+}
+
+GLuint GameTechRenderer::CreateDepthTexture() {
+    GLuint t;
+    glGenTextures(1, &t);
+    glBindTexture(GL_TEXTURE_2D, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    return t;
+}
+
+
+void GameTechRenderer::CreatePostProcessQuad() {
+
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+
+    float vertices[] = {
+            1.0f,  1.0f, 0.0f, 1.0, 1.0,
+            1.0f, -1.0f, 0.0f, 1.0, 0.0,
+            -1.0f,  1.0f, 0.0f, 0.0, 1.0,
+
+            1.0f, -1.0f, 0.0f, 1.0, 0.0,
+            -1.0f, -1.0f, 0.0f, 0.0, 0.0,
+            -1.0f,  1.0f, 0.0f, 0.0, 1.0
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void GameTechRenderer::InitUIQuad() {
@@ -155,7 +231,7 @@ void GameTechRenderer::RenderFrame() {
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
 
 	glEnable(GL_CULL_FACE);
-	glClearColor(1, 1, 1, 1);
+	glClearColor(1, 1, 1, 0);
 	BuildObjectList();
 	SortObjectList();
 	RenderShadowMap();
@@ -165,12 +241,37 @@ void GameTechRenderer::RenderFrame() {
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //RenderRayMap();
 	NewRenderLines();
 	NewRenderText();
     RenderUI();
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+void GameTechRenderer::InitRayMarching() {
+
+    glGenTextures(1, &rayMarchTexture);
+    glBindTexture(GL_TEXTURE_2D, rayMarchTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+    glGenFramebuffers(1, &rayMarchFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, rayMarchFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rayMarchTexture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Framebuffer is jover" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GameTechRenderer::RenderRayMap() {
+
 }
 
 void GameTechRenderer::RenderUI() {
@@ -332,6 +433,10 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
     //TODO - PUT IN FUNCTION
     glActiveTexture(GL_TEXTURE0 + 1);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
@@ -399,6 +504,35 @@ void GameTechRenderer::RenderCamera() {
             DrawBoundMesh(i);
         }
     }
+
+    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    BindShader(postProcessBase);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sceneColorTexture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, sceneDepthTexture);
+    glBindVertexArray(quadVAO);
+
+    auto& camera = *gameWorld.GetMainCamera();
+
+    Matrix4 invVP = CollisionDetection::GenerateInverseView(camera) * CollisionDetection::GenerateInverseProjection(screenAspect, camera.GetFieldOfVision(), camera.GetNearPlane(), camera.GetFarPlane());
+    int invLocation = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
+    int lightLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
+    int depthLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
+    glUniform3fv(lightLoc, 1, (float*)&lightPosition);
+    glUniform1i(depthLoc, 1);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {

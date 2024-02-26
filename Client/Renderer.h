@@ -13,6 +13,7 @@
 #include "Assets.h"
 #include "Element.h"
 #include "Canvas.h"
+#include "CollisionDetection.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -63,6 +64,7 @@ namespace NCL {
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
+            OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
 
@@ -107,7 +109,30 @@ namespace NCL {
             GLuint uiVAO;
             GLuint uiVBO;
 
+            GLuint quadVAO;
+            GLuint quadVBO;
+            GLuint rayMarchFBO;
+            GLuint rayMarchTexture;
+
+
+            GLuint sceneColorTexture;
+            GLuint sceneDepthTexture;
+
+            GLuint hdrFramebuffer;
+
             void InitUIQuad();
+
+            void RenderRayMap();
+
+            void InitRayMarching();
+
+            void CreatePostProcessQuad();
+
+            GLuint CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTexture);
+
+            GLuint CreateDepthTexture();
+
+            GLuint CreateHDRTexture();
         };
     }
 }
