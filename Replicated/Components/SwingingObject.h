@@ -10,12 +10,10 @@ namespace NCL::CSC8503 {
 	public:
 
 		SwingingObject(GameObject* go) { gameObject = go; }
-		void Update(float dt)override {
-			timer += dt;
-			gameObject->GetTransform().SetPosition({ 1, sin(timer) * movementModifier, cos(timer) * movementModifier });
-		}
+		void Update(float dt)override;
 
 		void Start()override {
+			startingPos = gameObject->GetTransform().GetPosition();
 		}
 
 		void PhysicsUpdate(float dt)override {
@@ -24,7 +22,9 @@ namespace NCL::CSC8503 {
 
 	protected:
 		float timer = 0;
-		float const movementModifier = 5;
+		float const radius = 10;
+
+		Vector3 startingPos;
 	};
 }
 
