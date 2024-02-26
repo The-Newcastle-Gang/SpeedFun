@@ -3,19 +3,24 @@
 //
 
 #include "TriggerVolumeObject.h"
+#include "PhysicsObject.h"
 
+using namespace NCL::CSC8503;
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
     if(otherObject->GetIsPlayerBool()){
         switch (triggerType) {
-            case TriggerType::Start: // Start volume
+            case TriggerType::Start:
                 std::cout << "Start volume\n";
                 break;
-            case TriggerType::End: // End Volume
+            case TriggerType::End:
                 std::cout << "End volume\n";
                 break;
-            case TriggerType::Death: // Death Volume
-                std::cout << "Death volume\n";
+            case TriggerType::Death:
+                otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
+                break;
+            case TriggerType::CheckPoint:
+                otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;
 
             default:

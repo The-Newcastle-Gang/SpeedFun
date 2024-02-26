@@ -258,12 +258,10 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
     if(a.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        a.DrawCollision();
         return;
     }
     if(b.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        b.DrawCollision();
         return;
     }
 

@@ -17,6 +17,7 @@ public:
         Start = 1,
         End = 2,
         Death = 4,
+        CheckPoint = 8,
     };
 
     TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }

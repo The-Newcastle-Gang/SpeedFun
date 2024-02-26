@@ -189,9 +189,12 @@ void RunningState::BuildLevel(const std::string &levelName)
     currentLevelEndPos = levelReader->GetEndPosition();
     currentLevelDeathPos = levelReader->GetDeathBoxPosition();
     triggersVector = {
-            std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
-            std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
-            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
+            std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
     };
 
     auto plist = levelReader->GetPrimitiveList();

@@ -124,12 +124,17 @@ namespace NCL::CSC8503 {
         [[nodiscard]] bool GetIsPlayerBool() const { return isPlayer; }
         void SetIsPlayerBool(bool b) { isPlayer = b;  }
 
+        [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
+        void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
+
     protected:
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;
         RenderObject*		renderObject;
         NetworkObject*		networkObject;
+
+        Vector3 checkPointPos;
 
         bool		isActive;
         bool        isPlayer;
