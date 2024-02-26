@@ -17,6 +17,7 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 std::cout << "End volume\n";
                 break;
             case TriggerType::Death:
+                otherObject->GetPhysicsObject()->ClearForces();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
                 break;
             case TriggerType::CheckPoint:

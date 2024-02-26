@@ -45,6 +45,7 @@ void PhysicsObject::AddTorque(const Vector3& addedTorque) {
 void PhysicsObject::ClearForces() {
 	force				= Vector3();
 	torque				= Vector3();
+    linearVelocity      = Vector3();
 }
 
 void PhysicsObject::InitCubeInertia() {
