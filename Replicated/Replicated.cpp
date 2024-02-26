@@ -47,6 +47,16 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
         .SetScale(Vector3(meshSize, meshSize, meshSize));
 }
 
+void Replicated::AddTrapBlockToLevel(GameObject* g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
 
+    world.AddGameObject(g, currentPrimitive->shouldNetwork);
+    auto volume = new AABBVolume(currentPrimitive->colliderExtents * 0.5f);
+    g->SetBoundingVolume((CollisionVolume*)volume);
+
+    g->GetTransform()
+        .SetScale(currentPrimitive->dimensions)
+        .SetPosition(currentPrimitive->position);
+    g->SetIsTrap(true);
+}
 
 
