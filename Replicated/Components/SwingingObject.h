@@ -5,6 +5,10 @@
 namespace NCL::CSC8503 {
 	class GameObject;
 	class GameWorld;
+
+	const float MAX_TIMER = 6.5f;
+	const float MIN_TIMER = 3.0f;
+
 	class SwingingObject : public Component
 	{
 	public:
@@ -14,17 +18,24 @@ namespace NCL::CSC8503 {
 
 		void Start()override {
 			startingPos = gameObject->GetTransform().GetPosition();
+			timer = MAX_TIMER;
+			CheckTimerState();
 		}
 
 		void PhysicsUpdate(float dt)override {
 
 		}
 
+		void CheckTimerState();
+
+
 	protected:
-		float timer = 0;
 		float const radius = 10;
 
 		Vector3 startingPos;
+
+		float timer;
+		float ascending;
 	};
 }
 
