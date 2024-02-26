@@ -18,7 +18,7 @@ private:
     void UpdateOscillation();
     Vector3 initPosition;
 
-    Vector3 direction; //should be normalised!
+    Vector3 normalisedDirection; //should be normalised!
     float distance = 1.0f;
 
     float waitDelay = 0.0f;
@@ -29,7 +29,7 @@ private:
 
     float timer = 0.0f;
 
-    float oneOverPeriod = 1.0f;
+    float frequency = 1.0f;
 
     State state = RUNNING;
 

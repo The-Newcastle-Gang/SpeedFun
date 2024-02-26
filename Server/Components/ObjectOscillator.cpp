@@ -4,9 +4,9 @@
 ObjectOscillator::ObjectOscillator(GameObject * go, float period, float distance, Vector3 direction, float cooldown, float waitDelay) {
     gameObject = go;
     initPosition = go->GetTransform().GetPosition();
-    this->oneOverPeriod = 1.0f/period;
+    this->frequency = 1.0f/period;
     this->distance = distance;
-    this->direction = direction;
+    this->normalisedDirection = direction;
     this->cooldown = cooldown;
     this->waitDelay = waitDelay;
 }
@@ -19,7 +19,7 @@ void ObjectOscillator::Update(float dt) {
         if (timer >= waitDelay) {
             float leftover = timer - waitDelay;
             state = RUNNING;
-            timer = 0.5f * 1/oneOverPeriod + leftover;
+            timer = 0.5f * 1/frequency + leftover;
             isReturning = true;
             UpdateOscillation();
         }
@@ -47,20 +47,20 @@ void ObjectOscillator::Update(float dt) {
 }
 
 void ObjectOscillator::UpdateOscillation() {
-    if (timer * oneOverPeriod >= 0.5f && !isReturning) {
-        float leftover = timer - 0.5f * 1.0f/oneOverPeriod;
+    if (timer * frequency >= 0.5f && !isReturning) {
+        float leftover = timer - 0.5f * 1.0f/frequency;
         timer = leftover;
         state = WAITING;
         return;
     }
-    if (timer * oneOverPeriod >= 1.0f && isReturning) {
-        float leftover = timer - 1/oneOverPeriod;
+    if (timer * frequency >= 1.0f && isReturning) {
+        float leftover = timer - 1/frequency;
         isReturning = false;
         timer = 0.0f + leftover;
         state = COOLDOWN;
         return;
     }
 
-    float cosTimer = (-1.0f * cos((timer * oneOverPeriod * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value 
-    gameObject->GetTransform().SetPosition(initPosition + direction * cosTimer * distance);
+    float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value 
+    gameObject->GetTransform().SetPosition(initPosition + normalisedDirection * cosTimer * distance);
 }
