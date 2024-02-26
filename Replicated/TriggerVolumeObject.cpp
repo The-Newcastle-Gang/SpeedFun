@@ -19,6 +19,7 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 break;
             case TriggerType::Death:
                 otherObject->GetPhysicsObject()->ClearForces();
+                otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
                 break;
             case TriggerType::CheckPoint:
