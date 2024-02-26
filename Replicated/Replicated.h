@@ -42,6 +42,7 @@ public:
     void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
+    void AddSwingingBlock(GameObject* g, GameWorld& world);
   
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;

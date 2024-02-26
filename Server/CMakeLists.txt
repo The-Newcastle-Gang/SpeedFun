@@ -9,7 +9,7 @@ add_library(server
         ServerThread.cpp
         Components/PlayerMovement.cpp
         Components/ObjectOscillator.cpp
-
+        Components/DamagingObstacle.cpp
 )
 
 target_include_directories(server PUBLIC
