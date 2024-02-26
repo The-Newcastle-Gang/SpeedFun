@@ -8,6 +8,7 @@ add_library(server
         States/WaitingState.cpp
         ServerThread.cpp
         Components/PlayerMovement.cpp
+        Components/DamagingObstacle.cpp
 
 )
 

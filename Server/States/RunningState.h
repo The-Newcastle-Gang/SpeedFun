@@ -7,6 +7,7 @@
 #include "ServerThread.h"
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
+#include "DamagingObstacle.h"
 
 #include <iostream>
 #include <thread>
