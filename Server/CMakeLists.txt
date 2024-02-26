@@ -8,8 +8,8 @@ add_library(server
         States/WaitingState.cpp
         ServerThread.cpp
         Components/PlayerMovement.cpp
+        Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
-
 )
 
 target_include_directories(server PUBLIC
