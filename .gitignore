@@ -9,3 +9,4 @@
 /.idea
 /cmake-build-debug-visual-studio
 /release
+/cmake-build-debug/
