@@ -22,6 +22,10 @@ namespace NCL::CSC8503 {
 			CheckTimerState();
 		}
 
+        void OnCollisionEnter(GameObject* otherObject) override;
+        void OnCollisionStay(GameObject* otherObject) override;
+        void OnCollisionEnd(GameObject* otherObject) override;
+
 		void PhysicsUpdate(float dt)override {}
 
 		void CheckTimerState();
