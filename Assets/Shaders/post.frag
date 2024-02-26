@@ -26,9 +26,8 @@ float smoothMin(float a, float b, float k) {
 float map_the_world(in vec3 p)
 {
     float sphere_0 = distance_from_sphere(p, vec3(0.0, 0.0, 3.0), 1.0);
-    float sphere_1 = distance_from_sphere(p, vec3(0.0, 0.0, 6.0), 1.5);
 
-    return min(sphere_0, sphere_1);
+    return sphere_0;
 }
 
 float linearDepth(float depth) {
@@ -40,7 +39,7 @@ float linearDepth(float depth) {
 
 vec3 calculate_normal(in vec3 p)
 {
-    const vec3 small_step = vec3(0.0001, 0.0, 0.0);
+    const vec3 small_step = vec3(0.001, 0.0, 0.0);
 
     float gradient_x = map_the_world(p + small_step.xyy) - map_the_world(p - small_step.xyy);
     float gradient_y = map_the_world(p + small_step.yxy) - map_the_world(p - small_step.yxy);
