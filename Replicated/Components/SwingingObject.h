@@ -22,20 +22,15 @@ namespace NCL::CSC8503 {
 			CheckTimerState();
 		}
 
-		void PhysicsUpdate(float dt)override {
-
-		}
+		void PhysicsUpdate(float dt)override {}
 
 		void CheckTimerState();
 
 		void SetRadius(float r) { radius = r; }
 
-
 	protected:
-		float radius = 10;
-
 		Vector3 startingPos;
-
+		float radius = 10;
 		float timer;
 		float ascending;
 	};

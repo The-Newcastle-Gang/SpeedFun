@@ -13,11 +13,7 @@ void SwingingObject::Update(float dt)
     tempPos.z = startingPos.y + cos(timer) * radius;
     gameObject->GetTransform().SetPosition(tempPos);
 
-
-    std::cout << tempPos.y << std::endl;
-
     CheckTimerState();
-
 }
 
 void SwingingObject::CheckTimerState()

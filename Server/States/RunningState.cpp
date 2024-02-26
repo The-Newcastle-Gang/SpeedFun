@@ -121,7 +121,6 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
 
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    std::cout << "HELLO GAMERS" << std::endl;
     for (auto& pair : playerInfo) {
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
@@ -202,11 +201,9 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
 
     // TEST SWINGING OBJECT ON THE SERVER
-    auto swingingObject = new GameObject("YEEEEHAWWWWW");
+    auto swingingObject = new GameObject("Swinging_Object");
     replicated->AddSwingingBlock(swingingObject, *world);
     swingingObject->SetPhysicsObject(new PhysicsObject(&swingingObject->GetTransform(), swingingObject->GetBoundingVolume(), new PhysicsMaterial()));
     swingingObject->GetPhysicsObject()->SetInverseMass(0.0f);
-
-
     swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
 }
