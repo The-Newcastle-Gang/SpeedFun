@@ -9,6 +9,7 @@ using namespace NCL::CSC8503;
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
     if(otherObject->GetIsPlayerBool()){
+        //std::cout << "Player has collided\n";
         switch (triggerType) {
             case TriggerType::Start:
                 std::cout << "Start volume\n";
@@ -27,12 +28,23 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
             default:
                     break;
         }
-        std::cout << "Player has collided\n";
     }
 }
 
 void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
-    if(otherObject->GetIsPlayerBool()){
+    if(otherObject->GetIsPlayerBool()) {
         std::cout << "Collision with player has ended\n";
+        switch (triggerType) {
+            case TriggerType::Start:
+                break;
+            case TriggerType::End:
+                break;
+            case TriggerType::Death:
+                break;
+            case TriggerType::CheckPoint:
+                break;
+            default:
+                break;
+        }
     }
 }
