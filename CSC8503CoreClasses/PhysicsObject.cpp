@@ -9,6 +9,7 @@ PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* 
 	volume		= parentVolume;
     physicsMaterial = physMat;
 	inverseMass = 1.0f;
+    isTrigger = false;
 }
 
 PhysicsObject::~PhysicsObject()	{

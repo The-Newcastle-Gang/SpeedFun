@@ -139,7 +139,7 @@ namespace NCL {
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
 
-            bool isTrigger = false;
+            bool isTrigger;
 		};
 	}
 }

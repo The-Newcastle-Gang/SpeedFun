@@ -106,23 +106,22 @@ namespace NCL::CSC8503 {
 
         void AddComponent(Component* component) {
             components.push_back(component);
+            SetHasComponent(true);
         }
 
         std::vector<Component*> components;
 
         Transform transform;
 
-        int GetWorldID() const {
-            return worldID;
-        }
+        int GetWorldID() const { return worldID; }
 
         const Tag GetTag() { return tag; }
         void SetTag(Tag t) { tag = t; }
 
-        void DrawCollision();
+        const bool GetHasComponent() { return hasComponent; }
+        void SetHasComponent(bool b) { hasComponent = b; }
 
-        [[nodiscard]] bool GetIsPlayerBool() const { return isPlayer; }
-        void SetIsPlayerBool(bool b) { isPlayer = b;  }
+        void DrawCollision();
 
         [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
         void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
@@ -137,7 +136,7 @@ namespace NCL::CSC8503 {
         Vector3 checkPointPos;
 
         bool		isActive;
-        bool        isPlayer;
+        bool        hasComponent;
         int			worldID;
         std::string	name;
 

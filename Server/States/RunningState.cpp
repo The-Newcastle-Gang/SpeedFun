@@ -130,7 +130,6 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetInverseMass(2.0f);
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
-        player->SetIsPlayerBool(true);
         player->SetTag(Tag::PLAYER);
 
         //TODO: clean up

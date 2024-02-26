@@ -174,7 +174,11 @@ void PhysicsSystem::UpdateCollisionList() {
 			i->b->OnCollisionBegin(i->a);
 		}
         CollisionDetection::CollisionInfo blank;
-        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume()){
+        if(i->a->GetPhysicsObject()->GetIsTriggerVolume()   ||
+           i->b->GetPhysicsObject()->GetIsTriggerVolume()   ||
+           i->a->GetHasComponent() ||
+           i->b->GetHasComponent() )
+        {
             in.framesLeft = 4;
 
             if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank)){
