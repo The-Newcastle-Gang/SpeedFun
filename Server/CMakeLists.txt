@@ -10,6 +10,7 @@ add_library(server
         Components/PlayerMovement.cpp
         Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
+        Scoring/StageTimer.cpp
 )
 
 target_include_directories(server PUBLIC
@@ -19,6 +20,7 @@ target_include_directories(server PUBLIC
         ../Replicated
         ./
         ./States
+        ./Scoring
         ../enet/include
         ./Components
 )
