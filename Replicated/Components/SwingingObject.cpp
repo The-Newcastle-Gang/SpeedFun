@@ -34,5 +34,5 @@ void SwingingObject::OnCollisionStay(NCL::CSC8503::GameObject *otherObject) {
 
 void SwingingObject::OnCollisionEnd(GameObject *otherObject) {
     Component::OnCollisionEnter(otherObject);
-    std::cout << "player has collided with swinging object\n";
+    std::cout << "player has STOPPED colliding with swinging object\n";
 }
