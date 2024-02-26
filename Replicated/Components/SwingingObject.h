@@ -11,18 +11,20 @@ namespace NCL::CSC8503 {
 
 		SwingingObject(GameObject* go) { gameObject = go; }
 		void Update(float dt)override {
-
-			std::cout << "in the component!!!!!" << gameObject->GetName() << std::endl;
-			gameObject->GetTransform().SetPosition({ 1, (float)(rand() % 6), 1 });
+			timer += dt;
+			gameObject->GetTransform().SetPosition({ 1, sin(timer) * movementModifier, cos(timer) * movementModifier });
 		}
 
 		void Start()override {
-
 		}
 
 		void PhysicsUpdate(float dt)override {
 
 		}
+
+	protected:
+		float timer = 0;
+		float const movementModifier = 5;
 	};
 }
 
