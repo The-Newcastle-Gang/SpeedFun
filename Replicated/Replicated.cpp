@@ -56,7 +56,4 @@ void Replicated::AddTrapBlockToLevel(GameObject* g, GameWorld& world, PrimitiveG
     g->GetTransform()
         .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position);
-    g->SetIsTrap(true);
 }
-
-

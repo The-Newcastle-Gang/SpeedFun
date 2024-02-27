@@ -10,6 +10,8 @@ add_library(replicated STATIC Replicated.cpp
 "SafeQueue.cpp"
 "TriggerVolumeObject.cpp"
 "TriggerVolumeObject.h"
+"Components/TrapObject.cpp"
+"Components/TrapObject.h"
 )
 
 

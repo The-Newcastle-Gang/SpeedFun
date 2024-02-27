@@ -8,7 +8,6 @@ add_library(server
         States/WaitingState.cpp
         ServerThread.cpp
         Components/PlayerMovement.cpp
-
 )
 
 target_include_directories(server PUBLIC
