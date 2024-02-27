@@ -222,11 +222,36 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+    SetTestSprings();
+    SetTestFloor();
+}
 
-    // TEST SWINGING OBJECT ON THE SERVER
-    auto swingingObject = new GameObject("Swinging_Object");
-    replicated->AddSwingingBlock(swingingObject, *world);
-    swingingObject->SetPhysicsObject(new PhysicsObject(&swingingObject->GetTransform(), swingingObject->GetBoundingVolume(), new PhysicsMaterial()));
-    swingingObject->GetPhysicsObject()->SetInverseMass(0.0f);
-    swingingObject->AddComponent((Component*)(new SwingingObject(swingingObject)));
+void RunningState::SetTestSprings() {
+    for (int i = 0; i < 4; i++) {
+        auto g = new GameObject("Spring");
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->AddComponent((Component*)(new Spring(g, Vector3(500.0f * pow(i, 5), 1000, 0), false)));
+    }
+    for (int i = 0; i < 4; i++) {
+        auto g = new GameObject("Spring");
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->AddComponent((Component*)(new Spring(g, Vector3(0.0f, 1000.0f, 0), true, 1.0f, Vector3(0.5f * pow(i, 4), 0, 0))));
+    }
+}
+
+void RunningState::SetTestFloor() {
+    auto g2 = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(0, -5, 0);
+    x->colliderExtents = Vector3(200, 2, 200);
+    x->dimensions = Vector3(200, 2, 200);
+
+    replicated->AddBlockToLevel(g2, *world, x);
+    g2->SetPhysicsObject(new PhysicsObject(&g2->GetTransform(), g2->GetBoundingVolume(), new PhysicsMaterial()));
+    g2->GetPhysicsObject()->SetInverseMass(0.0f);
+    AddTriggersToLevel();
 }

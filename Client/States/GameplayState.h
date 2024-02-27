@@ -43,6 +43,8 @@ namespace NCL {
             void InitLevel();
             void InitCanvas();
             void ResetCameraToForwards();
+            void SetTestSprings();
+            void SetTestFloor();
 
 
 #ifdef USEVULKAN
