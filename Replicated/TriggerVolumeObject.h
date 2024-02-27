@@ -6,6 +6,7 @@
 #define GITIGNORE_TRIGGERVOLUMEOBJECT_H
 
 #include "GameObject.h"
+#include "PhysicsObject.h"
 
 using namespace NCL;
 using namespace CSC8503;

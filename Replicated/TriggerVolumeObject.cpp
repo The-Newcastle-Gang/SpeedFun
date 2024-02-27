@@ -1,9 +1,4 @@
-//
-// Created by c3064585 on 16/02/2024.
-//
-
 #include "TriggerVolumeObject.h"
-#include "PhysicsObject.h"
 
 using namespace NCL::CSC8503;
 
@@ -20,6 +15,7 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 otherObject->GetPhysicsObject()->ClearForces();
                 otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
+                //revert camera, function in gameplay state
                 break;
             case TriggerType::CheckPoint:
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
