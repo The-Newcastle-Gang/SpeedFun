@@ -5,6 +5,8 @@
 #include "StageTimer.h"
 
 StageTimer::StageTimer() {
+    std::cout << "Timer initialized" << std::endl;
+    currentState = StageTimer::Running;
     elapsedTime = 0.0f;
 }
 
@@ -18,11 +20,9 @@ void StageTimer::Update(float dt) {
             break;
         }
     }
+    std::cout << elapsedTime << "\n";
 }
 
-void StageTimer::PauseTimer() {
-    currentState = StageTimer::Paused;
-}
 
 void StageTimer::EndTimer() {
     CalculateMedal();

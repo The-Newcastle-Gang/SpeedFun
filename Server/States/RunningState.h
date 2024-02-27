@@ -9,6 +9,7 @@
 #include "PlayerMovement.h"
 #include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
+#include "LevelManager.h"
 
 #include <iostream>
 #include <thread>
@@ -43,6 +44,7 @@ namespace NCL {
             std::unique_ptr<PhysicsSystem> physics;
             std::unique_ptr<GameWorld> world;
             std::unique_ptr<ServerNetworkData> networkData;
+            std::unique_ptr<LevelManager> levelManager;
 
             std::thread* networkThread;
 

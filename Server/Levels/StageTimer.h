@@ -22,25 +22,27 @@ class StageTimer {
 
 public:
     StageTimer();
-    static void Update(float dt);
-    static void PauseTimer();
-    static void EndTimer();
-    static void ResetTimer();
+    void Update(float dt);
+    void EndTimer();
+    void ResetTimer();
 
-    static float GetFinalTime()          { return finalTime; }
-    static Medal GetCurrentMedal()       { return currentMedal; }
+    float GetFinalTime()          { return finalTime; }
+    Medal GetCurrentMedal()       { return currentMedal; }
+
+    void ResumeTimer(){ currentState = StageTimer::Running; }
+    void PauseTimer() { currentState = StageTimer::Paused;  }
 
 protected:
 
-    static void CalculateMedal();
-    static void CalculateScore();
+    void CalculateMedal();
+    void CalculateScore();
 
 
-    static Medal       currentMedal;
-    static TimerState  currentState;
+    Medal       currentMedal;
+    TimerState  currentState;
 
-    static float finalTime;
-    static float elapsedTime;
+    float finalTime;
+    float elapsedTime;
 
 };
 

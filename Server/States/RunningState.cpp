@@ -8,6 +8,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     replicated = std::make_unique<Replicated>();
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
+    levelManager = std::make_unique<LevelManager>();
 
     currentLevelDeathPos = {0,0,0};
 }
@@ -86,6 +87,8 @@ void RunningState::Update(float dt) {
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
+
+    levelManager->UpdateTimer(dt);
 }
 
 void RunningState::LoadLevel() {
@@ -178,7 +181,9 @@ void RunningState::ApplyPlayerMovement() {
 
 void RunningState::BuildLevel(const std::string &levelName)
 {
+    //TODO: REDO THIS FUNCTION WITH LEVELMANAGER
     std::cout << "Level: " << levelName << " being built\n";
+    levelManager->TryReadLevel(levelName);
     levelReader = new LevelReader();
     if (!levelReader->HasReadLevel(levelName + ".json"))
     {
@@ -194,7 +199,7 @@ void RunningState::BuildLevel(const std::string &levelName)
             std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
     };
 
-    auto plist = levelReader->GetPrimitiveList();
+    auto plist = levelManager->GetCurrentPrimitiveList();
     for(auto x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);

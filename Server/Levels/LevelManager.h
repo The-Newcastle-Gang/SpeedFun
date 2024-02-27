@@ -12,9 +12,30 @@
 class LevelManager {
 public:
     LevelManager();
-protected:
-    std::unique_ptr
+    void UpdateTimer(float dt);
+    bool TryReadLevel(std::string levelSource);
 
+    void StartStageTimer();
+    void EndStageTimer();
+
+
+    std::vector<PrimitiveGameObject*> GetCurrentPrimitiveList() const ;
+
+protected:
+
+    std::unique_ptr<LevelReader> levelReader;
+    std::unique_ptr<StageTimer> stageTimer;
+    int currentTimer;
+
+    struct {
+
+        Vector3 currentStartPos;
+        Vector3 currentEndPos;
+        Vector3 currentDeathPos;
+
+    } currentLevelDetails;
+
+    std::vector<PrimitiveGameObject*> pList;
 };
 
 
