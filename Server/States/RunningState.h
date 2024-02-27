@@ -10,6 +10,9 @@
 #include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
 
+#include "Spring.h"
+
+
 #include <iostream>
 #include <thread>
 
@@ -83,6 +86,9 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void SetTestSprings();
+            void SetTestFloor();
         };
     }
 }

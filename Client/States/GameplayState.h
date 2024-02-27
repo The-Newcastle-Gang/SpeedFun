@@ -42,7 +42,8 @@ namespace NCL {
             void CreateNetworkThread();
             void InitLevel();
             void InitCanvas();
-
+            void SetTestSprings();
+            void SetTestFloor();
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
