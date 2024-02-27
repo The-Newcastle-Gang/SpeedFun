@@ -27,6 +27,7 @@ namespace NCL {
 
 			pitch		= 0.0f;
 			yaw			= 0.0f;
+			roll		= 0.0f;
 
 			fov			= 45.0f;
 			nearPlane	= 1.0f;
@@ -39,6 +40,7 @@ namespace NCL {
 			this->pitch		= pitch;
 			this->yaw		= yaw;
 			this->position	= position;
+			this->roll = 0.0f;
 
 			this->fov		= 45.0f;
 			this->nearPlane = 1.0f;
@@ -94,7 +96,12 @@ namespace NCL {
 		//Sets pitch, in degrees
 		Camera& SetPitch(float p) { pitch = p; return *this; }
 
-		static Camera BuildPerspectiveCamera(const Vector3& pos, float pitch, float yaw, float fov, float near, float far);
+		//Gets roll, in degrees
+		float	GetRoll() const { return roll; }
+		//Sets roll, in degrees
+		Camera& SetRoll(float p) { roll = p; return *this; }
+
+		static Camera BuildPerspectiveCamera(const Vector3& pos, float pitch, float yaw, float roll, float fov, float near, float far);
 		static Camera BuildOrthoCamera(const Vector3& pos, float pitch, float yaw, float left, float right, float top, float bottom, float near, float far);
 	protected:
 		CameraType camType;
@@ -109,6 +116,9 @@ namespace NCL {
 		float	fov;
 		float	yaw;
 		float	pitch;
+		float	roll;
 		Vector3 position;
+
+		Vector3 offset = Vector3(0,0,0);
 	};
 }

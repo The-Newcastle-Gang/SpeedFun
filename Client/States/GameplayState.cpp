@@ -186,9 +186,9 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 
-    SetTestSprings();
+    //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
 }
 
