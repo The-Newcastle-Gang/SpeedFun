@@ -7,6 +7,8 @@
 #include "ServerThread.h"
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
+#include "Components/SwingingObject.h"
+#include "DamagingObstacle.h"
 
 #include "Spring.h"
 

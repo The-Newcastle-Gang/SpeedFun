@@ -53,6 +53,8 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
 }
 
@@ -66,6 +68,8 @@ void GameplayState::CreateNetworkThread() {
 
 
 void GameplayState::OnExit() {
+    Window::GetWindow()->LockMouseToWindow(false);
+    Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
     delete networkThread;
@@ -148,6 +152,7 @@ void GameplayState::InitialiseAssets() {
 
 void GameplayState::FinishLoading() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    world->StartWorld();
 }
 
 void GameplayState::InitCamera() {
@@ -159,8 +164,8 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    CreatePlayers();
     InitLevel();
+    CreatePlayers();
 }
 
 void GameplayState::CreatePlayers() {
@@ -171,8 +176,7 @@ void GameplayState::CreatePlayers() {
     }
 }
 
-void GameplayState::InitLevel(){
-
+void GameplayState::InitLevel() {
     auto lr= new LevelReader();
     lr->HasReadLevel("debuglvl.json");
     auto plist  = lr->GetPrimitiveList();

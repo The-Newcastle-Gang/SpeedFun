@@ -10,7 +10,8 @@ add_library(replicated STATIC Replicated.cpp
 "SafeQueue.cpp"
 "TriggerVolumeObject.cpp"
 "TriggerVolumeObject.h"
-)
+"Components/SwingingObject.h"
+"Components/SwingingObject.cpp")
 
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ../CSC8503CoreClasses ../OpenGLRendering ./)

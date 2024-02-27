@@ -54,7 +54,7 @@ public:
 
     static float EaseOutElastic(float t) {
         float c4 = (2.0f * PI_VALUE) / 3.0f;
-        return t == 0 ? 0 : t == 1 ? 1 : powf(2, -10 * t) * sinf((t * 10.0f - 0.75f) * c4) + 1;
+        return t == 0 ? 0 : t == 1 ? 1 : powf(2, -10 * t) * sinf((t * 7.0f - 0.75f) * c4) + 1;
     }
 
 private:
@@ -87,12 +87,12 @@ private:
             if (elapsed >= duration) {
                 // Just putting this in case there are floating point shenanigans
                 // that lead to imprecise endings.
-                origin = end;
                 shouldDie = true;
             }
         }
 
         void Finish() override {
+            *valueToChange = end;
             callback();
         }
     };

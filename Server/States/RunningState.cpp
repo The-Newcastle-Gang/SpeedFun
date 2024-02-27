@@ -23,6 +23,7 @@ void RunningState::OnEnter() {
     sceneSnapshotId = 0;
     CreateNetworkThread();
     LoadLevel();
+    world->StartWorld();
 
 }
 
@@ -89,6 +90,7 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
+    AddTriggersToLevel();
     CreatePlayers();
 }
 
@@ -128,7 +130,7 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetInverseMass(2.0f);
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
-        player->SetIsPlayerBool(true);
+        player->SetTag(Tag::PLAYER);
 
         //TODO: clean up
 //        player->GetTransform().SetPosition(Vector3(0,0,0));
