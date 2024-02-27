@@ -17,6 +17,8 @@ using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
 
+
+
 class PlayerMovement : public Component {
 public:
     PlayerMovement(GameObject* g, GameWorld* w);
@@ -26,6 +28,14 @@ public:
 
     void Jump();
     void Grapple();
+
+    struct CameraAnimationCalls {
+        bool land = false;
+        float tilt = 0.0f;
+        float shakeIntensity = 0.0f;
+    };
+
+    CameraAnimationCalls cameraAnimationCalls;
 
 private:
     GameWorld* world;

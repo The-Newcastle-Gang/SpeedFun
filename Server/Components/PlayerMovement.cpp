@@ -222,7 +222,10 @@ void PlayerMovement::Jump() {
 
     Vector3 currentVelocity = physOb->GetLinearVelocity();
     gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
-    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocity);
+    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } * jumpVelocity);
+    cameraAnimationCalls.shakeIntensity = (activeState == &ground ? 3.0f : 0.0f);
     SwitchToState(&air);
+    
+    
 }
 

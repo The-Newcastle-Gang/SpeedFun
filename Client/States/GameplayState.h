@@ -75,6 +75,8 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
+
+
         };
     }
 }

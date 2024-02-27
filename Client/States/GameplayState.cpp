@@ -99,11 +99,17 @@ void GameplayState::Update(float dt) {
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
+
         if (packet.functionId == Replicated::AssignPlayer) {
             DataHandler handler(&packet.data);
             auto networkId = handler.Unpack<int>();
             AssignPlayer(networkId);
+        } else if (packet.functionId == Replicated::CameraAnimations) {
+            DataHandler handler(&packet.data);
+            auto intesnity = handler.Unpack<float>();
+            std::cout << intesnity << "\n";
         }
+
     }
 }
 

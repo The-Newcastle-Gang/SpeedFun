@@ -168,7 +168,14 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     } else {
         std::cerr << "Where tf player movement" << std::endl;
     }
-
+    if (playerMovement->cameraAnimationCalls.shakeIntensity > 0.0f) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.shakeIntensity);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::CameraAnimations, &data)));
+        playerMovement->cameraAnimationCalls.shakeIntensity = 0.0f;
+    }
 }
 
 void RunningState::ApplyPlayerMovement() {
