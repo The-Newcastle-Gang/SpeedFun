@@ -87,6 +87,8 @@ void GameplayState::Update(float dt) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
     WalkCamera(dt);
+    if(jumpTimer > 0) JumpCamera(dt);
+
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
 
@@ -112,10 +114,10 @@ void GameplayState::ReadNetworkFunctions() {
             //std::cout << intesnity << "\n";
             playerMovement = intesnity;
         }
-        else if (packet.functionId == Replicated::Camera_IsGrounded) {
+        else if (packet.functionId == Replicated::Camera_Jump) {
             DataHandler handler(&packet.data);
             auto grounded = handler.Unpack<bool>();
-            
+            jumpTimer = 3.14f;
         }
 
 
@@ -127,6 +129,11 @@ void GameplayState::ResetCameraAnimation() {
 void GameplayState::WalkCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(-0.015f + 0.1f*sin(walkTimer)) * (playerMovement/15.0f), 0));
     walkTimer += dt * playerMovement * 0.75f;
+}
+
+void GameplayState::JumpCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.55f * sin(3.14f - jumpTimer) , 0));
+    jumpTimer = std::clamp(jumpTimer - dt * 18.0f, 0.0f, 3.14f);
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.

@@ -31,6 +31,7 @@ public:
 
     struct CameraAnimationCalls {
         bool jump = false;
+        bool isGrounded = false;
         bool land = false;
         float groundMovement = 0.0f;
         float tilt = 0.0f;

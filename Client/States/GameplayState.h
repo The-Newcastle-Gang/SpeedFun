@@ -82,6 +82,8 @@ namespace NCL {
             void WalkCamera(float dt);
             float walkTimer = 0.0f;
 
+            bool isGrounded = false;
+
             void JumpCamera(float dt);
             float jumpTimer = 0.0f;
         };

@@ -61,7 +61,7 @@ void PlayerMovement::StartInAir() {
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
     maxHorizontalVelocity = airMaxHorizontalVelocity;
-    cameraAnimationCalls.jump = true;
+    cameraAnimationCalls.isGrounded = false;
 }
 
 void PlayerMovement::UpdateInAir(float dt) {
@@ -72,6 +72,7 @@ void PlayerMovement::UpdateInAir(float dt) {
 
 void PlayerMovement::LeaveInAir() {
     cameraAnimationCalls.land = true;
+    cameraAnimationCalls.isGrounded = true;
 }
 
 void PlayerMovement::StartGround() {
@@ -230,6 +231,7 @@ void PlayerMovement::Jump() {
     Vector3 currentVelocity = physOb->GetLinearVelocity();
     gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
     physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } * jumpVelocity);
+    if(activeState!=&air) cameraAnimationCalls.jump = true;
     SwitchToState(&air);
     
     

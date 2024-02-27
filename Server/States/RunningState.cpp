@@ -181,8 +181,8 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(false);
-        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_IsGrounded, &data)));
+        handler.Pack(true);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Jump, &data)));
         playerMovement->cameraAnimationCalls.jump = false;
     }
     if (playerMovement->cameraAnimationCalls.land) {
@@ -190,7 +190,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         FunctionData data;
         DataHandler handler(&data);
         handler.Pack(true);
-        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_IsGrounded, &data)));
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Land, &data)));
         playerMovement->cameraAnimationCalls.land = false;
     }
 }

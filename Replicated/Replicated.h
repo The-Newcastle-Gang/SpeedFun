@@ -26,7 +26,8 @@ public:
         AssignPlayer,
         LoadGame,
         Camera_GroundedMove,
-        Camera_IsGrounded,
+        Camera_Jump,
+        Camera_Land,
         Camera_Tilt
     };
 
