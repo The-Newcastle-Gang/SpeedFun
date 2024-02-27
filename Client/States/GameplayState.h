@@ -40,8 +40,12 @@ namespace NCL {
             void InitWorld();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
+
             void InitLevel();
             void InitCanvas();
+            void InitCrossHeir();
+            void InitTimerBar();
+            void InitLevelMap();
 
 
 #ifdef USEVULKAN
@@ -74,6 +78,14 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
+
+            float levelLen;
+            Vector3 startPos;
+            float CalculateCompletion(Vector3 cp);
+            Element* timeBar;
+            int PlayerBlip;
+
+            void UpdatePlayerBlip(Element &element, float dt);
         };
     }
 }
