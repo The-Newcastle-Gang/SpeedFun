@@ -30,7 +30,9 @@ public:
     void Grapple();
 
     struct CameraAnimationCalls {
+        bool jump = false;
         bool land = false;
+        float groundMovement = 0.0f;
         float tilt = 0.0f;
         float shakeIntensity = 0.0f;
     };

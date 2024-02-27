@@ -84,7 +84,12 @@ namespace NCL {
 		//Gets position in world space
 		Vector3 GetPosition() const { return position; }
 		//Sets position in world space
-		Camera&	SetPosition(const Vector3& val) { position = val;  return *this; }
+		Camera& SetPosition(const Vector3& val) { position = val;  return *this; }
+
+
+		Vector3 GetOffsetPosition() const { return offset; }
+		
+		Camera& SetOffsetPosition(const Vector3& val) { offset = val;  return *this; }
 
 		//Gets yaw, in degrees
 		float	GetYaw()   const { return yaw; }

@@ -65,6 +65,8 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
+            float playerMovement = 0.0f;
+
             void SendInputData();
             void CreatePlayers();
 
@@ -76,7 +78,12 @@ namespace NCL {
 
             void ReadNetworkPackets();
 
+            void ResetCameraAnimation();
+            void WalkCamera(float dt);
+            float walkTimer = 0.0f;
 
+            void JumpCamera(float dt);
+            float jumpTimer = 0.0f;
         };
     }
 }

@@ -168,13 +168,30 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     } else {
         std::cerr << "Where tf player movement" << std::endl;
     }
-    if (playerMovement->cameraAnimationCalls.shakeIntensity > 0.0f) {
+    if (playerMovement->cameraAnimationCalls.groundMovement != 0.0f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(playerMovement->cameraAnimationCalls.shakeIntensity);
-        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::CameraAnimations, &data)));
-        playerMovement->cameraAnimationCalls.shakeIntensity = 0.0f;
+        handler.Pack(playerMovement->cameraAnimationCalls.groundMovement);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_GroundedMove, &data)));
+        playerMovement->cameraAnimationCalls.groundMovement = 0.0f;
+    }
+
+    if (playerMovement->cameraAnimationCalls.jump) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(false);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_IsGrounded, &data)));
+        playerMovement->cameraAnimationCalls.jump = false;
+    }
+    if (playerMovement->cameraAnimationCalls.land) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(true);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_IsGrounded, &data)));
+        playerMovement->cameraAnimationCalls.land = false;
     }
 }
 
@@ -208,7 +225,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
     //SetTestSprings();
-    //SetTestFloor();
+    SetTestFloor();
 }
 
 void RunningState::SetTestSprings() {

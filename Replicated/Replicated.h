@@ -25,7 +25,9 @@ public:
     enum RemoteClientCalls {
         AssignPlayer,
         LoadGame,
-        CameraAnimations
+        Camera_GroundedMove,
+        Camera_IsGrounded,
+        Camera_Tilt
     };
 
     // In the situation where the server is the remote (Client to server)

@@ -61,13 +61,18 @@ void PlayerMovement::StartInAir() {
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
     maxHorizontalVelocity = airMaxHorizontalVelocity;
+    cameraAnimationCalls.jump = true;
 }
 
 void PlayerMovement::UpdateInAir(float dt) {
-    if (GroundCheck()) return SwitchToState(&ground);
+    if (GroundCheck()) {
+        return SwitchToState(&ground);
+    }
 }
 
-void PlayerMovement::LeaveInAir() {}
+void PlayerMovement::LeaveInAir() {
+    cameraAnimationCalls.land = true;
+}
 
 void PlayerMovement::StartGround() {
     static float groundRunSpeed = 7000.0f;
@@ -81,6 +86,7 @@ void PlayerMovement::StartGround() {
     maxHorizontalVelocity = groundMaxHorizontalVelocity;
 
     hasCoyoteExpired = false;
+    
 }
 
 void PlayerMovement::UpdateOnGround(float dt) {
@@ -159,7 +165,8 @@ void PlayerMovement::Update(float dt) {
     auto fwdAxis = Vector3::Cross(Vector3(0,1,0), rightAxis);
     gameObject->GetPhysicsObject()->AddForce(fwdAxis * inputDirection.y * runSpeed * dt);
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
-
+    cameraAnimationCalls.groundMovement = (gameObject->GetPhysicsObject()->GetLinearVelocity() * Vector3 (1,0,1)).Length();
+    if (cameraAnimationCalls.groundMovement < 0.05f || activeState == &air) cameraAnimationCalls.groundMovement = 0.0f;
 }
 
 void PlayerMovement::Grapple() {
@@ -223,7 +230,6 @@ void PlayerMovement::Jump() {
     Vector3 currentVelocity = physOb->GetLinearVelocity();
     gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
     physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } * jumpVelocity);
-    cameraAnimationCalls.shakeIntensity = (activeState == &ground ? 3.0f : 0.0f);
     SwitchToState(&air);
     
     
