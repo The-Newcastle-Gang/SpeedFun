@@ -40,9 +40,17 @@ namespace NCL {
             void InitWorld();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
+
             void InitLevel();
             void InitCanvas();
+
             void ResetCameraToForwards();
+
+            void InitCrossHeir();
+            void InitTimerBar();
+            void InitLevelMap();
+
+
             void SetTestSprings();
             void SetTestFloor();
 
@@ -77,6 +85,14 @@ namespace NCL {
             void ReadNetworkFunctions();
 
             void ReadNetworkPackets();
+
+            float levelLen;
+            Vector3 startPos;
+            float CalculateCompletion(Vector3 cp);
+            Element* timeBar;
+            int PlayerBlip;
+
+            void UpdatePlayerBlip(Element &element, float dt);
         };
     }
 }

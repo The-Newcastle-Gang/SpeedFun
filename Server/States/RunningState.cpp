@@ -222,8 +222,6 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
-    SetTestSprings();
-    SetTestFloor();
 }
 
 void RunningState::SetTestSprings() {
