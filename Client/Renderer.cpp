@@ -46,9 +46,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	lineCount = 0;
 
 	//Set up the light properties
-	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	lightRadius = 1000.0f;
-	lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
+    sunlight.lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+    sunlight.lightRadius = 1000.0f;
+    sunlight.lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
 	//Skybox!
 	skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
@@ -173,6 +173,10 @@ void GameTechRenderer::RenderFrame() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+void GameTechRenderer::FillBuffers() {
+
+}
+
 void GameTechRenderer::RenderUI() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -263,7 +267,7 @@ void GameTechRenderer::RenderShadowMap() {
     BindShader(shadowShader);
     int mvpLocation = glGetUniformLocation(shadowShader->GetProgramID(), "mvpMatrix");
 
-    Matrix4 shadowViewMatrix = Matrix4::BuildViewMatrix(lightPosition, Vector3(0, 0, 0), Vector3(0,1,0));
+    Matrix4 shadowViewMatrix = Matrix4::BuildViewMatrix(sunlight.lightPosition, Vector3(0, 0, 0), Vector3(0,1,0));
     Matrix4 shadowProjMatrix = Matrix4::Perspective(100.0f, 500.0f, 1, 45.0f);
 
     Matrix4 mvMatrix = shadowProjMatrix * shadowViewMatrix;
@@ -376,9 +380,9 @@ void GameTechRenderer::RenderCamera() {
             glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
             glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-            glUniform3fv(lightPosLocation	, 1, (float*)&lightPosition);
-            glUniform4fv(lightColourLocation, 1, (float*)&lightColour);
-            glUniform1f(lightRadiusLocation , lightRadius);
+            glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
+            glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
+            glUniform1f(lightRadiusLocation , sunlight.lightRadius);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);

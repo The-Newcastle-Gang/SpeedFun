@@ -21,6 +21,12 @@ namespace NCL {
     namespace CSC8503 {
         class RenderObject;
 
+        struct PointLightInfo {
+            Vector4		lightColour;
+            float		lightRadius;
+            Vector3		lightPosition;
+        };
+
         class GameTechRenderer : public OGLRenderer	{
         public:
             GameTechRenderer(GameWorld& world, Canvas& canvas);
@@ -53,6 +59,7 @@ namespace NCL {
             void RenderShadowMap();
             void RenderCamera();
             void RenderSkybox();
+            void FillBuffers();
 
             void LoadSkybox();
 
@@ -78,9 +85,9 @@ namespace NCL {
             // Ortho for UI
             Matrix4 uiOrthoView;
 
-            Vector4		lightColour;
-            float		lightRadius;
-            Vector3		lightPosition;
+
+            PointLightInfo sunlight;
+            std::vector<PointLightInfo> pointLights;
 
             //Debug data storage things
             vector<Vector3> debugLineData;
