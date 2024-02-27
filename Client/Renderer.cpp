@@ -18,9 +18,19 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    combineShader = new OGLShader("defaultUi.vert", "CombineFrag.frag");
+    pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
+
+    PointLightInfo testLight;
+    testLight.lightPosition = {5,5,5};
+    testLight.lightColour = {1,1,1,1};
+    testLight.lightRadius = 20.0f;
+    pointLights.push_back(testLight);
 
 	lineCount = 0;
 	textCount = 0;
+
+    GLenum buffers[2] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1};
 
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
@@ -34,11 +44,32 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+
+    GenerateScreenTexture(bufferColourTex, false);
+    GenerateScreenTexture(bufferNormalTex, false);
+    GenerateScreenTexture(lightDiffuseTex, false);
+    GenerateScreenTexture(lightSpecularTex, false);
+    GenerateScreenTexture(bufferDepthTex, true);
+
 	glGenFramebuffers(1, &shadowFBO);
+    glGenFramebuffers(1, &lightFBO);
+    glGenFramebuffers(1, &bufferFBO);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
 	glDrawBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bufferNormalTex, 0);
+    glDrawBuffers(2, buffers);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightDiffuseTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, lightSpecularTex, 0);
+    glDrawBuffers(2, buffers);
+
 
 	glClearColor(1, 1, 1, 1);
 
@@ -79,12 +110,16 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     // move to own function.
     InitUIQuad();
 
+    CreatePostProcessQuad();
+
+
 }
 
 GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
     glDeleteFramebuffers(1, &shadowFBO);
     delete defaultShader;
+    delete combineShader;
 }
 
 void GameTechRenderer::InitUIQuad() {
@@ -184,12 +219,15 @@ void GameTechRenderer::RenderFrame() {
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
 
 	glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
 	glClearColor(1, 1, 1, 1);
 	BuildObjectList();
 	SortObjectList();
 	RenderShadowMap();
-	RenderSkybox();
-	RenderCamera();
+    FillDiffuseBuffer();
+    RenderDeferredLighting();
+    CombineBuffers();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
@@ -202,8 +240,93 @@ void GameTechRenderer::RenderFrame() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void GameTechRenderer::FillBuffers() {
+void GameTechRenderer::FillDiffuseBuffer() {
+    glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+    RenderCamera();
+    RenderSkybox();
+}
 
+void GameTechRenderer::RenderDeferredLighting() {
+    float screenAspect = (float)windowWidth / (float)windowHeight;
+    Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+    Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+    BindShader(pointLightShader);
+    GLuint shaderProg = pointLightShader->GetProgramID();
+
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glCullFace(GL_FRONT);
+    glDepthFunc(GL_ALWAYS);
+    glDepthMask(GL_FALSE);
+
+    glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+
+    glUniform1i(glGetUniformLocation(shaderProg, "normTex"), 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+
+    float* camPos = (float*)&gameWorld.GetMainCamera()->GetPosition().array[0];
+
+    glUniform3fv(glGetUniformLocation(shaderProg, "cameraPos"), 1, camPos); //fix this? cant & the Vec3 cos its temporary
+    glUniform2f(glGetUniformLocation(shaderProg, "pixelSize"), 1.0f / windowWidth, 1.0f / windowHeight);
+
+    Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "inverseProjView"), 1, false, (float*)invViewProj.array);
+
+    for (int i = 0; i < pointLights.size(); i++) {
+        PointLightInfo& l = pointLights[i];
+        glUniform3fv(glGetUniformLocation(shaderProg, "lightPos"), 1, (float*)&l.lightPosition);
+        glUniform4fv(glGetUniformLocation(shaderProg, "lightColour"), 1, (float*)&l.lightColour);
+        glUniform1f(glGetUniformLocation(shaderProg, "lightRadius"), l.lightRadius);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+    }
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LEQUAL);
+
+    glDepthMask(GL_TRUE);
+    glClearColor(0.2f, 0.2f, 0.2f, 1);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GameTechRenderer::CombineBuffers() {
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    BindShader(combineShader);
+    Matrix4 modelTemp;
+    Matrix4 viewTemp;
+    Matrix4 projTemp;
+    modelTemp.ToIdentity();
+    viewTemp.ToIdentity();
+    projTemp.ToIdentity();
+
+    glDepthMask(false);
+    GLuint shaderID = combineShader->GetProgramID();
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseTex"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseNorm"), 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseLight"), 2);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, lightDiffuseTex);
+
+    glUniform1i(glGetUniformLocation(shaderID, "specularLight"), 3);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
+
+    glBindBuffer(GL_ARRAY_BUFFER,quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP,0, 6);
+    glDepthMask(true);
 }
 
 void GameTechRenderer::RenderUI() {
@@ -282,7 +405,6 @@ void GameTechRenderer::BuildObjectList() {
 }
 
 void GameTechRenderer::SortObjectList() {
-
 }
 
 void GameTechRenderer::RenderShadowMap() {
@@ -503,6 +625,20 @@ void GameTechRenderer::NewRenderText() {
 //	glBindVertexArray(0);
 }
 
+void GameTechRenderer::GenerateScreenTexture(GLuint& into, bool depth) {
+    glGenTextures(1, &into);
+    glBindTexture(GL_TEXTURE_2D, into);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    GLuint format = depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8;
+    GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, windowWidth, windowHeight, 0, type, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 
 TextureBase* GameTechRenderer::LoadTexture(const string& name) {

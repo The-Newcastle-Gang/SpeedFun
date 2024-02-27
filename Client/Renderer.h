@@ -60,7 +60,10 @@ namespace NCL {
             void RenderShadowMap();
             void RenderCamera();
             void RenderSkybox();
-            void FillBuffers();
+            void FillDiffuseBuffer();
+            void RenderDeferredLighting();
+            void CombineBuffers();
+            void GenerateScreenTexture(GLuint& into, bool depth);
 
             void LoadSkybox();
 
@@ -68,6 +71,19 @@ namespace NCL {
             void SetDebugLineBufferSizes(size_t newVertCount);
 
             vector<const RenderObject*> activeObjects;
+
+
+            GLuint bufferColourTex;
+            GLuint bufferNormalTex;
+            GLuint bufferDepthTex;
+            GLuint lightDiffuseTex;
+            GLuint lightSpecularTex;
+
+            GLuint bufferFBO;
+            GLuint lightFBO;
+
+            OGLShader* combineShader;
+            OGLShader* pointLightShader;
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
