@@ -47,6 +47,9 @@ namespace NCL {
             void InitTimerBar();
             void InitLevelMap();
 
+            void SetTestSprings();
+            void SetTestFloor();
+
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
