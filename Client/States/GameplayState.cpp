@@ -88,6 +88,7 @@ void GameplayState::Update(float dt) {
     }
     WalkCamera(dt);
     if(jumpTimer > 0) JumpCamera(dt);
+    if (landTimer > 0) LandCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
@@ -122,7 +123,7 @@ void GameplayState::ReadNetworkFunctions() {
         else if (packet.functionId == Replicated::Camera_Land) {
             DataHandler handler(&packet.data);
             auto grounded = handler.Unpack<bool>();
-            //jumpTimer = 3.14f;
+            landTimer = 3.14f;
         }
 
 
@@ -138,8 +139,13 @@ void GameplayState::WalkCamera(float dt) {
 }
 
 void GameplayState::JumpCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.55f * sin(3.14f - jumpTimer) , 0));
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.55f * sin(3.14f - jumpTimer), 0));
     jumpTimer = std::clamp(jumpTimer - dt * 18.0f, 0.0f, 3.14f);
+}
+
+void GameplayState::LandCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.2f * sin(3.14f - 3.14f * sin(3.14f/2 - landTimer/2)), 0));
+    landTimer = std::clamp(landTimer - dt * 15.0f, 0.0f, 3.14f);
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.

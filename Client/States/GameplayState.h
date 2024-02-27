@@ -86,6 +86,9 @@ namespace NCL {
 
             void JumpCamera(float dt);
             float jumpTimer = 0.0f;
+
+            void LandCamera(float dt);
+            float landTimer = 0.0f;
         };
     }
 }
