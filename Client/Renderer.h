@@ -33,6 +33,7 @@ namespace NCL {
 
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
             void RenderUI();
+            void CreatePostProcessQuad();
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
@@ -103,6 +104,9 @@ namespace NCL {
             GLuint textColourVBO;
             GLuint textTexVBO;
             size_t textCount = 0;
+
+            GLuint quadVBO;
+            GLuint quadVAO;
 
             GLuint uiVAO;
             GLuint uiVBO;
