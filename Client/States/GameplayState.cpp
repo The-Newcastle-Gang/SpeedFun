@@ -119,12 +119,18 @@ void GameplayState::ReadNetworkFunctions() {
             auto grounded = handler.Unpack<bool>();
             jumpTimer = 3.14f;
         }
+        else if (packet.functionId == Replicated::Camera_Land) {
+            DataHandler handler(&packet.data);
+            auto grounded = handler.Unpack<bool>();
+            //jumpTimer = 3.14f;
+        }
 
 
     }
 }
 void GameplayState::ResetCameraAnimation() {
-    playerMovement = 0.0f;
+    playerMovement = playerMovement * 0.95f;
+    std::cout << playerMovement << "\n";
 }
 void GameplayState::WalkCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(-0.015f + 0.1f*sin(walkTimer)) * (playerMovement/15.0f), 0));
