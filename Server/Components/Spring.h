@@ -21,13 +21,13 @@ using namespace Maths;
 class Spring : public Component {
 public:
     Spring(GameObject* g, Vector3 bI = Vector3(0, 5, 0), float aT = 1.0f, bool c = false, Vector3 cf = Vector3(0,0,0));
-    void OnCollisionEnter(const GameObject* otherObject) override;
+    void OnCollisionEnter(GameObject* otherObject) override;
     void Update(float dt) override;
 
 private:
     Vector3 bounceForce; 
     float springActiveTime;
-    std::map<const GameObject*, float> pushableObject;
+    std::unordered_map<const GameObject*, float> pushableObject;
     bool continuous = false;
     Vector3 continuousForce; 
     

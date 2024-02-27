@@ -86,6 +86,9 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void SetTestSprings();
+            void SetTestFloor();
         };
     }
 }

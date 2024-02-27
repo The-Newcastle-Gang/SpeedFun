@@ -185,7 +185,14 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
-    //* =================SPRING STUFF=================
+
+    SetTestSprings();
+
+    SetTestFloor();
+
+}
+
+void GameplayState::SetTestSprings() {
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject();
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
@@ -199,8 +206,9 @@ void GameplayState::InitLevel() {
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
     }
-    //*/
+}
 
+void GameplayState::SetTestFloor() {
     auto g2 = new GameObject();
     auto x = new PrimitiveGameObject();
     x->position = Vector3(0, -5, 0);
@@ -209,11 +217,7 @@ void GameplayState::InitLevel() {
 
     replicated->AddBlockToLevel(g2, *world, x);
     g2->SetRenderObject(new RenderObject(&g2->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-
 }
-
-
-
 
 bool GameplayState::IsDisconnected() {
     return false;

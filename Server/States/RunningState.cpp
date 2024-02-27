@@ -200,24 +200,28 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+    SetTestSprings();
+    SetTestFloor();
+}
 
-    //* =================SPRING STUFF=================
+void RunningState::SetTestSprings() {
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject("Spring");
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->AddComponent((Component*)(new Spring(g, Vector3(500.0f*pow(i, 5), 1000, 0), false)));
+        g->AddComponent((Component*)(new Spring(g, Vector3(500.0f * pow(i, 5), 1000, 0), false)));
     }
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject("Spring");
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->AddComponent((Component*)(new Spring(g, Vector3(0.0f, 1000.0f, 0), true, 1.0f, Vector3(0.5f * pow(i, 4),0,0))));
+        g->AddComponent((Component*)(new Spring(g, Vector3(0.0f, 1000.0f, 0), true, 1.0f, Vector3(0.5f * pow(i, 4), 0, 0))));
     }
-    //*/
+}
 
+void RunningState::SetTestFloor() {
     auto g2 = new GameObject();
     auto x = new PrimitiveGameObject();
     x->position = Vector3(0, -5, 0);
