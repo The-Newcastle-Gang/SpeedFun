@@ -199,4 +199,9 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
     AddTriggersToLevel();
+
+    auto testTrapBlock = new GameObject();
+    replicated->AddTrapBlockToLevel(testTrapBlock, *world);
+    testTrapBlock->SetPhysicsObject(new PhysicsObject(&testTrapBlock->GetTransform(), testTrapBlock->GetBoundingVolume(), new PhysicsMaterial()));
+    testTrapBlock->GetPhysicsObject()->SetInverseMass(0.0f);
 }

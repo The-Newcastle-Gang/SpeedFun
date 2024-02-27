@@ -3,24 +3,21 @@
 using namespace NCL;
 using namespace CSC8503;
 
-//void TrapObject::Update(float dt, GameObject* go, bool isTimeout)
-//{
-//	gameObject->GetTransform().SetPosition();
-//	if (/*Detected collision between trap object and player*/) {
-//		timer += dt;
-//	}
-//	CheckTimerState();
-//	Disappear(isTimeout);
-//}
-//
-//void TrapObject::CheckTimerState()
-//{
-//	if (timer >= MAX_TIMER) { isTimeout = true; }
-//	if (timer < MAX_TIMER) { isTimeout = false; }
-//}
-//
-//void Disappear(bool isTimeout){
-//	if (isTimeout == true) {
-//		//Trap block disappear
-//	}
-//}
+void TestTrapBlock::Update(float dt) {
+	//bool BlockFall = hasCollision(gameObject);
+	//if (true) {
+	//	TrapBlockFall(dt);
+	//}
+}
+
+bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
+	return true;
+}
+
+void TestTrapBlock::TrapBlockFall(float dt) {
+	warningTime += dt;
+	if (warningTime >= 10) {
+		gameObject->GetTransform().SetPosition(Vector3(-110, -10, -10));
+		warningTime = 0.0;
+	}
+}

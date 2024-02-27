@@ -185,11 +185,15 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 
+    TrapBlockTest();
+}
+
+void GameplayState::TrapBlockTest() {
     auto trapBlock = new GameObject();
     replicated->AddTrapBlockToLevel(trapBlock, *world);
     trapBlock->SetRenderObject(new RenderObject(&trapBlock->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-}
 
+}
 
 
 bool GameplayState::IsDisconnected() {

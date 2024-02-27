@@ -42,6 +42,7 @@ namespace NCL {
             void CreateNetworkThread();
             void InitLevel();
             void InitCanvas();
+            void TrapBlockTest();
 
 
 #ifdef USEVULKAN
