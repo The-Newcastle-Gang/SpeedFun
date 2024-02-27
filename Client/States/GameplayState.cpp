@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "Maths.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -84,7 +85,9 @@ void GameplayState::Update(float dt) {
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
-        RaycastEnemy(dt, firstPersonPosition);
+        RaycastEnemy(dt, firstPersonPosition);  
+        //the firstpersonposition is important to my function "RaycastEnemy"  so I have to call the function here
+        //any better ways to solve it can tell me 
     }
 
     world->GetMainCamera()->UpdateCamera(dt);
@@ -166,7 +169,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     CreatePlayers();
     InitLevel();
-    AddRaycastEnemy(Vector3(-80, 6, -7));
+
 }
 
 void GameplayState::CreatePlayers() {
@@ -186,6 +189,9 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
+
+    replicated->AddRaycastEnemy(raycastEnemy, *world, Vector3(-80, 6, -7));
+    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
 }
 
 
@@ -203,42 +209,24 @@ void GameplayState::AssignPlayer(int netObject) {
 
 }
 
-void GameplayState::RaycastEnemy(float dt, Transform* playerPos) {
-    Vector3 rayPos;
-    Vector3 rayDir;
-    Vector3 player1Pos;
+void GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
+    //Vector3 rayPos;
+    //Vector3 rayDir;
+    Vector3 playerPos;
     Vector3 enemyPos;
     Vector3 enemyDir;
     Quaternion enemyOrientation;
 
-    player1Pos = playerPos->GetPosition();
+    playerPos = playerPosition->GetPosition();
     enemyPos = raycastEnemy->GetTransform().GetPosition();
 
-    if (player1Pos.x >= enemyPos.x - 10 && player1Pos.x <= enemyPos.x + 10
-        && player1Pos.z >= enemyPos.z - 10 && player1Pos.z <= enemyPos.z + 10) {
-         warnningTime += dt;
-         if (warnningTime >= 5) {
-             std::cout << "You are shooted by the enemy" << std::endl;
-             warnningTime = 0.0;
-         }    // didn't cout the word
-         //rayDir = (player1Pos - enemyPos).Normalised();
-         //rayPos = raycastEnemy->GetTransform().GetPosition();
-         //Debug::DrawLine(rayPos, player1Pos, Vector4(1, 0, 0, 1));//someting problem on it   wrong phenomenon
-
-         enemyDir = (enemyPos - player1Pos).Normalised();
-         float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / 3.14159265358979323846f;
+    if (playerPos.x >= enemyPos.x - 10 && playerPos.x <= enemyPos.x + 10
+        && playerPos.z >= enemyPos.z - 10 && playerPos.z <= enemyPos.z + 10) {
+         enemyDir = (enemyPos - playerPos).Normalised();
+         float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / PI;
          enemyOrientation = Quaternion::EulerAnglesToQuaternion(0.0f, transDegree, 0.0f);
-         raycastEnemy->GetTransform().SetOrientation(enemyOrientation);
+         raycastEnemy->GetTransform().SetOrientation(enemyOrientation);  //make the enemy will keep facing the player
+         //Debug::DrawLine(playerPos, enemyPos, Vector4(1, 0, 0, 1), 0.1);
      }
  }
 
- GameObject* GameplayState::AddRaycastEnemy(const Vector3& position) {
-     float meshSize = 0.5f;
-     raycastEnemy->GetTransform()
-         .SetScale(Vector3(meshSize, meshSize, meshSize))
-         .SetPosition(position);
-     raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
-     world->AddGameObject(raycastEnemy, true);
-
-     return raycastEnemy;
- }

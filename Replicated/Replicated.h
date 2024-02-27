@@ -41,6 +41,7 @@ public:
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
+    void AddRaycastEnemy(GameObject* g, GameWorld& world, const Vector3 position);
   
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;

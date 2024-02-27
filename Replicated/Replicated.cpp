@@ -10,12 +10,12 @@ Replicated::Replicated() {
 
 }
 
-int Replicated::GetCurrentLevelLen(){
+int Replicated::GetCurrentLevelLen() {
     return levelReader->GetLevelSize();
 }
 
 
-void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
+void Replicated::AddBlockToLevel(GameObject* g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
 
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new AABBVolume(currentPrimitive->colliderExtents * 0.5f);
@@ -26,19 +26,19 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
         .SetPosition(currentPrimitive->position);
 }
 
-void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
+void Replicated::CreatePlayer(GameObject* g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
     auto volume = new AABBVolume(Vector3(meshSize, meshSize, meshSize));
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-            .SetScale(Vector3(meshSize, meshSize, meshSize))
-            .SetPosition(Vector3(0 + (g->GetWorldID()%2) * 10,0,10 * (g->GetWorldID()/2)));
+        .SetScale(Vector3(meshSize, meshSize, meshSize))
+        .SetPosition(Vector3(0 + (g->GetWorldID() % 2) * 10, 0, 10 * (g->GetWorldID() / 2)));
 
 }
 
-void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world){
+void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject* g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, false);
     auto volume = new AABBVolume(dimensions * 0.5f);
@@ -47,6 +47,13 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
         .SetScale(Vector3(meshSize, meshSize, meshSize));
 }
 
-
+void Replicated::AddRaycastEnemy(GameObject* g, GameWorld& world, const Vector3 position){
+    constexpr float meshSize = 1.0f;
+    world.AddGameObject(g, true);
+    auto volume = new AABBVolume(Vector3(meshSize, meshSize, meshSize));
+    g->GetTransform()
+        .SetScale(Vector3(meshSize, meshSize, meshSize))
+        .SetPosition(position);
+}
 
 
