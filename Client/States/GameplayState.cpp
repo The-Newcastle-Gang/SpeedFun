@@ -240,6 +240,11 @@ void GameplayState::InitLevel() {
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+
+    auto tem = new GameObject();
+    replicated->AddTestObjectToLevel(tem, *world, {10,10,10}, {0,10,0});
+    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetQuadMesh(),nullptr, nullptr));
+
 }
 
 void GameplayState::SetTestSprings() {

@@ -16,6 +16,7 @@ public:
     Resources(GameTechRenderer* pRenderer) : renderer(pRenderer) {}
 
     MeshGeometry *GetMesh(const string &name);
+    MeshGeometry *GetQuadMesh();
     ShaderBase *GetShader(const string &name);
 private:
     GameTechRenderer* renderer;

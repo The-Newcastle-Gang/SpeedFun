@@ -197,6 +197,7 @@ void GameTechRenderer::RenderFrame() {
 	NewRenderLines();
 	NewRenderText();
     RenderUI();
+
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -245,7 +246,6 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
-
 
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -482,21 +482,8 @@ void GameTechRenderer::NewRenderText() {
 
     for (const auto& s : strings) {
         float size = 0.5f;
-//		Debug::GetDebugFont()->BuildVerticesForString(s.data, s.position, s.colour, size, debugTextPos, debugTextUVs, debugTextColours);
         RenderText(s.data, debugFont.get(), s.position.x, s.position.y, size, s.colour);
     }
-//
-//
-//	glBindBuffer(GL_ARRAY_BUFFER, textVertVBO);
-//	glBufferSubData(GL_ARRAY_BUFFER, 0, frameVertCount * sizeof(Vector3), debugTextPos.data());
-//	glBindBuffer(GL_ARRAY_BUFFER, textColourVBO);
-//	glBufferSubData(GL_ARRAY_BUFFER, 0, frameVertCount * sizeof(Vector4), debugTextColours.data());
-//	glBindBuffer(GL_ARRAY_BUFFER, textTexVBO);
-//	glBufferSubData(GL_ARRAY_BUFFER, 0, frameVertCount * sizeof(Vector2), debugTextUVs.data());
-//
-//	glBindVertexArray(textVAO);
-//	glDrawArrays(GL_TRIANGLES, 0, frameVertCount);
-//	glBindVertexArray(0);
 }
 
 
