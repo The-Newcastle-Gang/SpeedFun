@@ -3,8 +3,7 @@ project(replicated)
 
 add_library(replicated STATIC Replicated.cpp
 "LevelReader.cpp"
-"LevelBuilder.cpp"
-"Component.h"
+        "Component.h"
 "TestComponent.h"
 "InputListener.cpp"
 "SafeQueue.cpp"
