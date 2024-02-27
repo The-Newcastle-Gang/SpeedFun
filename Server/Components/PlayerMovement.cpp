@@ -16,7 +16,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     dragFactor = 10.0f;
 
     grappleProjectileInfo.travelSpeed = 100.0f;
-    grappleProjectileInfo.maxDistance = 5000.0f;
+    grappleProjectileInfo.maxDistance = 100.0f;
     grappleProjectileInfo.SetActive(false);
 
     maxHorizontalVelocity = 7.0f;
@@ -61,7 +61,20 @@ void PlayerMovement::OnGrappleStart() {
 }
 
 void PlayerMovement::OnGrappleUpdate(float dt) {
+    static float grappleSpeed = 5000.0f;
 
+    Debug::DrawLine(gameObject->GetTransform().GetPosition(), grapplePoint);
+
+    Vector3 delta = grapplePoint - gameObject->GetTransform().GetPosition();
+
+    if (delta.Length() < 2.0f) {
+        SwitchToState(&air);
+        return;
+    }
+
+    auto forceDirection = delta.Normalised();
+
+    gameObject->GetPhysicsObject()->AddForce(forceDirection * grappleSpeed * dt);
 }
 
 void PlayerMovement::StartInAir() {
@@ -165,6 +178,11 @@ void PlayerMovement::Grapple() {
         return;
     }
 
+    if (activeState == &grapple) {
+        SwitchToState(&air);
+        return;
+    }
+
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
     grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
     grappleProjectileInfo.travelDistance = 0;
@@ -179,8 +197,9 @@ void PlayerMovement::UpdateGrapple(float dt) {
 
     RayCollision collision;
     if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject)) {
-        grapplePoint = collision.collidedAt;
-        if ((grappleProjectileInfo.grappleRay.GetPosition() - grapplePoint).Length() < grappleProjectileInfo.travelDistance) {
+        auto tempGrapplePoint = collision.collidedAt;
+        if ((grappleProjectileInfo.grappleRay.GetPosition() - tempGrapplePoint).Length() < grappleProjectileInfo.travelDistance) {
+            grapplePoint = tempGrapplePoint;
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
             return;
