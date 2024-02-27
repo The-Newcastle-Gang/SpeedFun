@@ -184,6 +184,10 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
+
+    auto trapBlock = new GameObject();
+    replicated->AddTrapBlockToLevel(trapBlock, *world);
+    trapBlock->SetRenderObject(new RenderObject(&trapBlock->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 }
 
 
