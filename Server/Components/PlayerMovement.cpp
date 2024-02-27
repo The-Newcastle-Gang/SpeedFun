@@ -78,12 +78,12 @@ void PlayerMovement::StartGround() {
     jumpVelocity = groundJumpVelocity;
     dragFactor = groundDragFactor;
     maxHorizontalVelocity = groundMaxHorizontalVelocity;
+
+    hasCoyoteExpired = false;
 }
 
 void PlayerMovement::UpdateOnGround(float dt) {
     bool isGrounded = GroundCheck();
-    std::cout << hasCoyoteExpired << "\n";
-    std::cout << coyoteTimeTimer<< "\n";
     if (!hasCoyoteExpired) {
         if (isGrounded) {
             coyoteTimeTimer = coyoteTime;
@@ -100,9 +100,7 @@ void PlayerMovement::UpdateOnGround(float dt) {
     }
 }
 
-void PlayerMovement::LeaveGround() {
-    hasCoyoteExpired = false;
-}
+void PlayerMovement::LeaveGround() {}
 
 
 void PlayerMovement::PhysicsUpdate(float fixedTime) {
@@ -115,8 +113,6 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
     auto dDragHorizontalVel = (dhorizontalVel * -1) * fixedTime * dragFactor;
     dhorizontalVel += dDragHorizontalVel;
     gameObject->GetPhysicsObject()->SetLinearVelocity({dhorizontalVel.x, dlinearVel.y, dhorizontalVel.y});
-
-
 
     // Clamp max speed
     Vector3 linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
