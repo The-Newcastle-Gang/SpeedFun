@@ -163,8 +163,8 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    CreatePlayers();
     InitLevel();
+    CreatePlayers();
 }
 
 void GameplayState::CreatePlayers() {
