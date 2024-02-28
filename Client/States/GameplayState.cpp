@@ -171,19 +171,19 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
-                groundedMovementSpeed = intesnity;
+                currentGroundSpeed = intesnity;
             }
             break;
 
             case(Replicated::Camera_Jump): {
-                jumpTimer = 3.14f;
+                jumpTimer = PI;
             }
             break;
             
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
-                landTimer = 3.14f;
+                landTimer = PI;
             }
             break;
             
@@ -197,10 +197,11 @@ void GameplayState::ReadNetworkFunctions() {
     }
 }
 void GameplayState::ResetCameraAnimation() {
-    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
+    currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
 }
 void GameplayState::WalkCamera(float dt) {
+    groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
     walkTimer += dt * groundedMovementSpeed * 0.75f;
 }

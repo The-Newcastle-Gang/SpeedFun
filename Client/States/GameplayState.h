@@ -93,6 +93,7 @@ namespace NCL {
 
             void WalkCamera(float dt);
             float groundedMovementSpeed = 0.0f;
+            float currentGroundSpeed = 0.0f;
             float walkTimer = 0.0f;
             float maxMoveSpeed = 15.0f;
             const float bobAmount = 0.1f;

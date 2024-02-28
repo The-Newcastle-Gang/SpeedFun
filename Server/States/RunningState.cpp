@@ -188,7 +188,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         std::cerr << "Where tf player movement" << std::endl;
     }
 
-    if (playerMovement->cameraAnimationCalls.groundMovement != 0.0f) {
+    if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
