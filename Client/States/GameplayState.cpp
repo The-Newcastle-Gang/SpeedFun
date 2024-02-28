@@ -3,6 +3,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
+# define PI 3.141592f
+
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -122,6 +124,7 @@ void GameplayState::OnExit() {
 }
 
 void GameplayState::Update(float dt) {
+    ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
 
@@ -131,6 +134,10 @@ void GameplayState::Update(float dt) {
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
+    WalkCamera(dt);
+    if (jumpTimer > 0) JumpCamera(dt);
+    if (landTimer > 0) LandCamera(dt);
+    StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
@@ -154,12 +161,64 @@ void GameplayState::ResetCameraToForwards() {
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
-        if (packet.functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&packet.data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
+        DataHandler handler(&packet.data);
+        switch (packet.functionId) {
+            case(Replicated::AssignPlayer): {
+                int networkId = handler.Unpack<int>();
+                AssignPlayer(networkId);
+            }
+            break;
+
+            case(Replicated::Camera_GroundedMove): {
+                float intesnity = handler.Unpack<float>();
+                groundedMovementSpeed = intesnity;
+            }
+            break;
+
+            case(Replicated::Camera_Jump): {
+                jumpTimer = 3.14f;
+            }
+            break;
+            
+            case(Replicated::Camera_Land): {
+                float grounded = handler.Unpack<float>();
+                landIntensity = std::clamp(grounded, 0.0f, landFallMax);
+                landTimer = 3.14f;
+            }
+            break;
+            
+            case(Replicated::Camera_Strafe): {
+                float strfSpd = handler.Unpack<float>();
+                strafeSpeed = strfSpd;
+            }
+            break;
         }
+
     }
+}
+void GameplayState::ResetCameraAnimation() {
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
+    strafeSpeed = 0.0f;
+}
+void GameplayState::WalkCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    walkTimer += dt * groundedMovementSpeed * 0.75f;
+}
+
+void GameplayState::JumpCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
+    jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::LandCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+                                              Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
+    landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::StrafeCamera(float dt) {
+    strafeAmount = strafeAmount * 0.95f + strafeSpeed * 0.05f;
+    world->GetMainCamera()->SetRoll(-strafeTiltAmount * (strafeAmount / strafeSpeedMax));
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.
@@ -241,12 +300,18 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 
+
+    //SetTestSprings();
+
+    SetTestFloor();
+
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+
 }
 
 void GameplayState::SetTestSprings() {
