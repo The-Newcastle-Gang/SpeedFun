@@ -176,14 +176,14 @@ void GameplayState::ReadNetworkFunctions() {
             break;
 
             case(Replicated::Camera_Jump): {
-                jumpTimer = 3.14f;
+                jumpTimer = PI;
             }
             break;
             
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
-                landTimer = 3.14f;
+                landTimer = PI;
             }
             break;
             
