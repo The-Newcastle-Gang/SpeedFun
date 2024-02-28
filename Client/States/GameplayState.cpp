@@ -1,4 +1,6 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -18,6 +20,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete testParticles;
 }
 
 
@@ -57,6 +60,26 @@ void GameplayState::InitTimerBar(){
             .SetAbsoluteSize({800, 30})
             .AlignCenter()
             .AlignTop(30);
+}
+
+void GameplayState::LoadParticleSystems()
+{
+    // TODO - load a texture here
+    GLuint testTex;
+    testParticles = new ParticleSystem({ 0, 0, 0 }, { 1, 1, 1 }, { 4, 4, 4 }, 3, 5, 5, 7, testTex);
+    particleSystems.push_back(testParticles);
+    
+
+
+    renderer->PassParticleSystems(particleSystems);
+}
+
+void GameplayState::UpdateParticleSystems(float dt)
+{
+    for (auto ps : particleSystems)
+    {
+        ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
+    }
 }
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
@@ -143,6 +166,9 @@ void GameplayState::Update(float dt) {
     world->UpdateWorld(dt);
 
     ReadNetworkPackets();
+
+    // particle updates
+    UpdateParticleSystems(dt);
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
@@ -311,6 +337,9 @@ void GameplayState::InitLevel() {
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+
+    // load particles
+    LoadParticleSystems();
 
 }
 

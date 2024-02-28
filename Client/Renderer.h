@@ -14,6 +14,8 @@
 #include "Element.h"
 #include "Canvas.h"
 
+#include "ParticleSystem.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -36,6 +38,8 @@ namespace NCL {
             void CreatePostProcessQuad();
 
             OGLMesh* GetUIMesh() {return UIMesh;}
+
+            void PassParticleSystems(vector<ParticleSystem*> ps) { particleSystems = ps; }
 
         protected:
             void NewRenderLines();
@@ -107,6 +111,11 @@ namespace NCL {
 
             GLuint quadVBO;
             GLuint quadVAO;
+
+
+            vector<ParticleSystem*> particleSystems;
+            OGLShader* particleShader;
+            void RenderParticles();
 
             GLuint uiVAO;
             GLuint uiVBO;

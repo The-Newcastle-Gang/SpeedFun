@@ -16,6 +16,7 @@ add_library(client
         UI/Element.cpp
         UI/CanvasLayer.cpp
         TweenManager.cpp
+        ParticleSystem.cpp
 )
 
 target_include_directories(client PUBLIC

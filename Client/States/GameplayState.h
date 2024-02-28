@@ -16,6 +16,7 @@
 #include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "ParticleSystem.h"
 
 #include <thread>
 #include <iostream>
@@ -123,6 +124,11 @@ namespace NCL {
             float CalculateCompletion(Vector3 cp);
             Element* timeBar;
             int PlayerBlip;
+
+            ParticleSystem* testParticles;
+            vector<ParticleSystem*> particleSystems;
+            void LoadParticleSystems();
+            void UpdateParticleSystems(float dt);
 
             void UpdatePlayerBlip(Element &element, float dt);
 

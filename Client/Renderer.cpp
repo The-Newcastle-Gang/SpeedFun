@@ -1,4 +1,6 @@
 #include "Renderer.h"
+#include "Renderer.h"
+#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
 
@@ -18,6 +20,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    particleShader = new OGLShader("InstancedParticle.vert", "scene.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -85,6 +88,16 @@ GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
     glDeleteFramebuffers(1, &shadowFBO);
     delete defaultShader;
+}
+
+
+
+void NCL::CSC8503::GameTechRenderer::RenderParticles()
+{
+    for (auto ps : particleSystems)
+    {
+        ps->DrawParticles();
+    }
 }
 
 void GameTechRenderer::InitUIQuad() {
@@ -190,6 +203,8 @@ void GameTechRenderer::RenderFrame() {
 	RenderShadowMap();
 	RenderSkybox();
 	RenderCamera();
+    RenderParticles();
+    // Render the particles
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
