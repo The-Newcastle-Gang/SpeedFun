@@ -57,6 +57,8 @@ namespace NCL {
 			return fov;
 		}
 
+		Camera& SetFieldOfVision(float f) { fov = f;  return *this; }
+
 		float GetNearPlane() const {
 			return nearPlane;
 		}

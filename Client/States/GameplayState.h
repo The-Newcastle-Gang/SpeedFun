@@ -91,6 +91,13 @@ namespace NCL {
             float landTimer = 0.0f;
             const float landFallMax = 10.0f;
             float landIntensity = 0.0f;
+
+            void StrafeCamera(float dt);
+            float strafeSpeed = 0.0f;
+            float strafeAmount = 0.0f;
+            const float strafeSpeedMax = 12.0f;
+            const float strafeTiltAmount = 0.5f;
+            
         };
     }
 }

@@ -35,7 +35,7 @@ public:
         float land = 0.0f;
         float fallDistance = 0.0f;
         float groundMovement = 0.0f;
-        float tilt = 0.0f;
+        float strafeSpeed = 0.0f;
         float shakeIntensity = 0.0f;
     };
 

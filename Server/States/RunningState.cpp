@@ -168,6 +168,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     } else {
         std::cerr << "Where tf player movement" << std::endl;
     }
+
     if (playerMovement->cameraAnimationCalls.groundMovement != 0.0f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -185,6 +186,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Jump, &data)));
         playerMovement->cameraAnimationCalls.jump = false;
     }
+
     if (playerMovement->cameraAnimationCalls.land > 0.0f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -193,6 +195,15 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Land, &data)));
         playerMovement->cameraAnimationCalls.land = 0.0f;
     }
+
+    if (abs(playerMovement->cameraAnimationCalls.strafeSpeed) > 0.5f) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
+    }
+    
 }
 
 void RunningState::ApplyPlayerMovement() {

@@ -87,8 +87,9 @@ void GameplayState::Update(float dt) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
     WalkCamera(dt);
-    if(jumpTimer > 0) JumpCamera(dt);
+    if (jumpTimer > 0) JumpCamera(dt);
     if (landTimer > 0) LandCamera(dt);
+    StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
@@ -129,12 +130,18 @@ void GameplayState::ReadNetworkFunctions() {
             }
             break;
             
+            case(Replicated::Camera_Strafe): {
+                float strfSpd = handler.Unpack<float>();
+                strafeSpeed = strfSpd;
+            }
+            break;
         }
 
     }
 }
 void GameplayState::ResetCameraAnimation() {
     playerMovement = playerMovement * 0.95f;
+    strafeSpeed = 0.0f;
 }
 void GameplayState::WalkCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(-0.015f + 0.1f*sin(walkTimer)) * (playerMovement/15.0f), 0));
@@ -150,6 +157,12 @@ void GameplayState::LandCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
                                               Vector3(0, -0.2f * sin(3.14f - 3.14f * sin(3.14f/2 - landTimer/2)) / landFallMax * landIntensity, 0));
     landTimer = std::clamp(landTimer - dt * 15.0f, 0.0f, 3.14f);
+}
+
+void GameplayState::StrafeCamera(float dt) {
+    strafeAmount = strafeAmount * 0.95f + strafeSpeed * 0.05f;
+    //std::cout << strafeAmount << "\n";
+    world->GetMainCamera()->SetRoll(-strafeTiltAmount * (strafeAmount / strafeSpeedMax));
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.

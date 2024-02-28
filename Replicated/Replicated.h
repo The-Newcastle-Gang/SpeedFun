@@ -28,7 +28,7 @@ public:
         Camera_GroundedMove,
         Camera_Jump,
         Camera_Land,
-        Camera_Tilt
+        Camera_Strafe
     };
 
     // In the situation where the server is the remote (Client to server)

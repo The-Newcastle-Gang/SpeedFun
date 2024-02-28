@@ -178,6 +178,10 @@ void PlayerMovement::Update(float dt) {
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
     cameraAnimationCalls.groundMovement = (gameObject->GetPhysicsObject()->GetLinearVelocity() * Vector3 (1,0,1)).Length();
     if (cameraAnimationCalls.groundMovement < 0.05f || activeState == &air) cameraAnimationCalls.groundMovement = 0.0f;
+
+    Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
+    float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
+    cameraAnimationCalls.strafeSpeed = strafeSpeed;
 }
 
 void PlayerMovement::Grapple() {
