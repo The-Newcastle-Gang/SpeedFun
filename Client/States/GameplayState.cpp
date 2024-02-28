@@ -3,6 +3,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
+# define PI 3.141592f
+
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -114,7 +116,7 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
-                playerMovement = intesnity;
+                groundedMovementSpeed = intesnity;
             }
             break;
 
@@ -140,28 +142,27 @@ void GameplayState::ReadNetworkFunctions() {
     }
 }
 void GameplayState::ResetCameraAnimation() {
-    playerMovement = playerMovement * 0.95f;
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
     strafeSpeed = 0.0f;
 }
 void GameplayState::WalkCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(-0.015f + 0.1f*sin(walkTimer)) * (playerMovement/15.0f), 0));
-    walkTimer += dt * playerMovement * 0.75f;
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    walkTimer += dt * groundedMovementSpeed * 0.75f;
 }
 
 void GameplayState::JumpCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.55f * sin(3.14f - jumpTimer), 0));
-    jumpTimer = std::clamp(jumpTimer - dt * 18.0f, 0.0f, 3.14f);
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
+    jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
 }
 
 void GameplayState::LandCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
-                                              Vector3(0, -0.2f * sin(3.14f - 3.14f * sin(3.14f/2 - landTimer/2)) / landFallMax * landIntensity, 0));
-    landTimer = std::clamp(landTimer - dt * 15.0f, 0.0f, 3.14f);
+                                              Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
+    landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
 }
 
 void GameplayState::StrafeCamera(float dt) {
     strafeAmount = strafeAmount * 0.95f + strafeSpeed * 0.05f;
-    //std::cout << strafeAmount << "\n";
     world->GetMainCamera()->SetRoll(-strafeTiltAmount * (strafeAmount / strafeSpeedMax));
 }
 

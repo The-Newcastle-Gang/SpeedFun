@@ -29,7 +29,7 @@ public:
     void Jump();
     void Grapple();
 
-    struct CameraAnimationCalls {
+    struct CameraAnimationCallData {
         bool jump = false;
         bool isGrounded = false;
         float land = 0.0f;
@@ -39,7 +39,7 @@ public:
         float shakeIntensity = 0.0f;
     };
 
-    CameraAnimationCalls cameraAnimationCalls;
+    CameraAnimationCallData cameraAnimationCalls;
 
 private:
     GameWorld* world;

@@ -65,7 +65,7 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
-            float playerMovement = 0.0f;
+            
 
             void SendInputData();
             void CreatePlayers();
@@ -79,18 +79,28 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ResetCameraAnimation();
+
+
             void WalkCamera(float dt);
+            float groundedMovementSpeed = 0.0f;
             float walkTimer = 0.0f;
+            float maxMoveSpeed = 15.0f;
+            const float bobAmount = 0.1f;
+            const float bobFloor = -0.015f;
 
             bool isGrounded = false;
 
             void JumpCamera(float dt);
             float jumpTimer = 0.0f;
+            const float jumpBobAmount = 0.55f;
+            const float jumpAnimationSpeed = 18.0f;
 
             void LandCamera(float dt);
             float landTimer = 0.0f;
             const float landFallMax = 10.0f;
             float landIntensity = 0.0f;
+            const float landBobAmount = 0.2f;
+            const float landAnimationSpeed = 15.0f;
 
             void StrafeCamera(float dt);
             float strafeSpeed = 0.0f;
