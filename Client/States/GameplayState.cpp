@@ -103,33 +103,28 @@ void GameplayState::Update(float dt) {
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
-        std::cout << packet.functionId << "\n";
         DataHandler handler(&packet.data);
         switch (packet.functionId) {
-            case(Replicated::AssignPlayer):
-            {
+            case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
                 AssignPlayer(networkId);
             }
             break;
 
-            case(Replicated::Camera_GroundedMove):
-            {
+            case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
                 playerMovement = intesnity;
             }
             break;
 
-            case(Replicated::Camera_Jump):
-            {
+            case(Replicated::Camera_Jump): {
                 jumpTimer = 3.14f;
             }
             break;
             
-            case(Replicated::Camera_Land):
-            {
+            case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
-                landIntensity = std::clamp(grounded, 0.0f, landFallMax);;
+                landIntensity = std::clamp(grounded, 0.0f, landFallMax);
                 landTimer = 3.14f;
             }
             break;
