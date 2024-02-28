@@ -16,7 +16,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     debugShader  = new OGLShader("debug.vert", "debug.frag");
     shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
-    defaultShader = new OGLShader("scene.vert", "scene.frag");
+    defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
     combineShader = new OGLShader("defaultUi.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
@@ -242,8 +242,9 @@ void GameTechRenderer::RenderFrame() {
 
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
-    RenderCamera();
+    glDepthFunc(GL_LEQUAL);
     RenderSkybox();
+    RenderCamera();
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
@@ -272,7 +273,7 @@ void GameTechRenderer::RenderDeferredLighting() {
 
     float* camPos = (float*)&gameWorld.GetMainCamera()->GetPosition().array[0];
 
-    glUniform3fv(glGetUniformLocation(shaderProg, "cameraPos"), 1, camPos); //fix this? cant & the Vec3 cos its temporary
+    glUniform3fv(glGetUniformLocation(shaderProg, "cameraPos"), 1, camPos);
     glUniform2f(glGetUniformLocation(shaderProg, "pixelSize"), 1.0f / windowWidth, 1.0f / windowHeight);
 
     Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
@@ -292,7 +293,7 @@ void GameTechRenderer::RenderDeferredLighting() {
     glDepthFunc(GL_LEQUAL);
 
     glDepthMask(GL_TRUE);
-    glClearColor(0.2f, 0.2f, 0.2f, 1);
+    glClearColor(0, 0, 0, 1);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -317,14 +318,14 @@ void GameTechRenderer::CombineBuffers() {
     glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
 
     glUniform1i(glGetUniformLocation(shaderID, "diffuseLight"), 2);
-    glActiveTexture(GL_TEXTURE3);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, lightDiffuseTex);
 
     glUniform1i(glGetUniformLocation(shaderID, "specularLight"), 3);
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
 
-    glBindBuffer(GL_ARRAY_BUFFER,quadVAO);
+    glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP,0, 6);
     glDepthMask(true);
 }
@@ -474,6 +475,7 @@ void GameTechRenderer::RenderSkybox() {
 }
 
 void GameTechRenderer::RenderCamera() {
+    glEnable(GL_DEPTH_TEST);
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -486,6 +488,7 @@ void GameTechRenderer::RenderCamera() {
     int hasVColLocation = 0;
     int hasTexLocation  = 0;
     int shadowLocation  = 0;
+    int isLitLocation   = 0;
 
     int lightPosLocation	= 0;
     int lightColourLocation = 0;
@@ -518,6 +521,7 @@ void GameTechRenderer::RenderCamera() {
             colourLocation  = glGetUniformLocation(shader->GetProgramID(), "objectColour");
             hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
             hasTexLocation  = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
+            isLitLocation   = glGetUniformLocation(shader->GetProgramID(), "isLit");
 
             lightPosLocation	= glGetUniformLocation(shader->GetProgramID(), "lightPos");
             lightColourLocation = glGetUniformLocation(shader->GetProgramID(), "lightColour");
@@ -553,6 +557,8 @@ void GameTechRenderer::RenderCamera() {
         glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
 
         glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1:0);
+
+        glUniform1i(isLitLocation, 1);
 
         BindMesh((*i).GetMesh());
         int layerCount = (*i).GetMesh()->GetSubMeshCount();
