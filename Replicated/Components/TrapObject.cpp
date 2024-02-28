@@ -5,9 +5,9 @@ using namespace CSC8503;
 
 void TestTrapBlock::Update(float dt) {
 	//bool BlockFall = hasCollision(gameObject);
-	//if (true) {
-	//	TrapBlockFall(dt);
-	//}
+	if (true) {
+		TrapBlockFall(dt);
+	}
 }
 
 bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
@@ -17,7 +17,7 @@ bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
 void TestTrapBlock::TrapBlockFall(float dt) {
 	warningTime += dt;
 	if (warningTime >= 10) {
-		gameObject->GetTransform().SetPosition(Vector3(-110, -10, -10));
+		gameObject->GetTransform().SetPosition(Vector3(-110, -20, -10));
 		warningTime = 0.0;
 	}
 }

@@ -8,6 +8,8 @@
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
 
+#include "Components/TrapObject.h"
+
 #include <iostream>
 #include <thread>
 
@@ -81,6 +83,8 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void AddTestTrapBlock();
         };
     }
 }
