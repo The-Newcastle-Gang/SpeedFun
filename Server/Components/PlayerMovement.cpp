@@ -12,8 +12,12 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     gameObject = g;
 
     runSpeed = 5000.0f;
-    jumpForce = 500.0f;
+    jumpVelocity = 500.0f;
+
     dragFactor = 10.0f;
+    coyoteTime = 0.5f;
+    coyoteTimeTimer = coyoteTime;
+    hasCoyoteExpired = false;
 
     grappleProjectileInfo.travelSpeed = 100.0f;
     grappleProjectileInfo.maxDistance = 100.0f;
@@ -78,13 +82,13 @@ void PlayerMovement::OnGrappleUpdate(float dt) {
 }
 
 void PlayerMovement::StartInAir() {
-    static float airRunSpeed = 300.0f;
-    static float airJumpForce = 0.0f;
+    static float airRunSpeed = 1000.0f;
+    static float airJumpVelocity = 0.0f;
     static float airDragFactor = 0.5f;
-    static float airMaxHorizontalVelocity = 15.0f;
+    static float airMaxHorizontalVelocity = 20.0f;
 
     runSpeed = airRunSpeed;
-    jumpForce = airJumpForce;
+    jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
     maxHorizontalVelocity = airMaxHorizontalVelocity;
 }
@@ -96,19 +100,35 @@ void PlayerMovement::UpdateInAir(float dt) {
 void PlayerMovement::LeaveInAir() {}
 
 void PlayerMovement::StartGround() {
-    static float groundRunSpeed = 5000.0f;
-    static float groundJumpForce = 500.f;
-    static float groundDragFactor = 9.0f;
-    static float groundMaxHorizontalVelocity = 7.0f;
+    static float groundRunSpeed = 7000.0f;
+    static float groundJumpVelocity = 7.0f;
+    static float groundDragFactor = 8.5f;
+    static float groundMaxHorizontalVelocity = 20.0f;
 
     runSpeed = groundRunSpeed;
-    jumpForce = groundJumpForce;
+    jumpVelocity = groundJumpVelocity;
     dragFactor = groundDragFactor;
     maxHorizontalVelocity = groundMaxHorizontalVelocity;
+
+    hasCoyoteExpired = false;
 }
 
 void PlayerMovement::UpdateOnGround(float dt) {
-    if (!GroundCheck()) return SwitchToState(&air);
+    bool isGrounded = GroundCheck();
+    if (!hasCoyoteExpired) {
+        if (isGrounded) {
+            coyoteTimeTimer = coyoteTime;
+            hasCoyoteExpired = false;
+        }
+        else { coyoteTimeTimer -= dt; }
+
+        if (coyoteTimeTimer <= 0.0f)hasCoyoteExpired = true;
+    }
+
+    if (!isGrounded && hasCoyoteExpired) {
+        hasCoyoteExpired = false;
+        return SwitchToState(&air); 
+    }
 }
 
 void PlayerMovement::LeaveGround() {}
@@ -134,7 +154,6 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
         gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
     }
 }
-
 
 bool PlayerMovement::GroundCheck() {
 
@@ -235,6 +254,12 @@ void PlayerMovement::FireGrapple() {
 
 
 void PlayerMovement::Jump() {
-    gameObject->GetPhysicsObject()->AddForce(Vector3{0, 1, 0} * jumpForce);
+    hasCoyoteExpired = false;
+    PhysicsObject* physOb = gameObject->GetPhysicsObject();
+
+    Vector3 currentVelocity = physOb->GetLinearVelocity();
+    gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
+    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocity);
+    SwitchToState(&air);
 }
 

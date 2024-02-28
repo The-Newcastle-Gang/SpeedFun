@@ -36,8 +36,12 @@ private:
         std::function<void()> OnExit;
     };
 
+    bool hasCoyoteExpired;
+
+    float coyoteTime;
+    float coyoteTimeTimer;
     float runSpeed;
-    float jumpForce;
+    float jumpVelocity;
     float dragFactor;
     float maxHorizontalVelocity;
     int jumpQueued;

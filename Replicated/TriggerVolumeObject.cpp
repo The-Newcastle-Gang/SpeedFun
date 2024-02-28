@@ -6,7 +6,7 @@
 
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
-    if(otherObject->GetIsPlayerBool()){
+    if(otherObject->GetTag() == Tag::PLAYER){
         switch (triggerType) {
             case TriggerType::Start: // Start volume
                 std::cout << "Start volume\n";
@@ -26,7 +26,7 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
 }
 
 void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
-    if(otherObject->GetIsPlayerBool()){
+    if(otherObject->GetTag() == Tag::PLAYER){
         std::cout << "Collision with player has ended\n";
     }
 }
