@@ -77,10 +77,13 @@ private:
         }
     private:
         bool isActive;
-    } grappleInfo;
+    } grappleProjectileInfo;
+
+    Vector3 grapplePoint;
 
     MovementState ground;
     MovementState air;
+    MovementState grapple;
 
     MovementState* activeState;
 
@@ -98,7 +101,13 @@ private:
     void SwitchToState(MovementState *state);
 
     void UpdateGrapple(float dt);
-    void FireGrapple(Vector3 grapplePoint);
+    void FireGrapple();
+
+    void OnGrappleStart();
+
+    void OnGrappleLeave();
+
+    void OnGrappleUpdate(float dt);
 };
 
 

@@ -11,6 +11,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     resources = pResources;
     replicated = std::make_unique<Replicated>();
     canvas = pCanvas;
+
+    timeBar = new Element(1);
 }
 
 GameplayState::~GameplayState() {
@@ -24,17 +26,61 @@ void GameplayState::InitCanvas(){
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
 
+    InitCrossHeir();
+    InitTimerBar();
+    InitLevelMap();
+}
+
+void GameplayState::InitCrossHeir(){
+    //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.2,0.2,0.2,1.0})
+            .SetColor({0.0,0.0,0.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.2,0.2,0.2,1.0})
+            .SetColor({0.0,0.0,0.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
+
+}
+
+void GameplayState::InitTimerBar(){
+
+    //timer Bar
+    timeBar = &canvas->AddElement()
+            .SetColor({0,1,0,1})
+            .SetAbsoluteSize({800, 30})
+            .AlignCenter()
+            .AlignTop(30);
+}
+
+void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
+    if (!firstPersonPosition) return;
+    float tVal = CalculateCompletion(firstPersonPosition->GetPosition());
+    tVal = std::clamp(tVal, 0.0f, 1.0f);
+    tVal = tVal * 300 - 150;
+
+    element.AlignMiddle((int)tVal);
+}
+
+void GameplayState::InitLevelMap(){
+    //map bar
+    auto& levelBar = canvas->AddElement()
+            .SetColor({1,1,1,1})
+            .SetAbsoluteSize({20, 300})
+            .AlignRight(20)
+            .AlignMiddle();
+
+    auto& playerElement = canvas->AddElement()
+            .SetColor({0.0,0.0,0.,1})
+            .SetAbsoluteSize({20,20})
+            .AlignRight(20)
+            .AlignMiddle(-150);
+
+    playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
 
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
@@ -98,6 +144,15 @@ void GameplayState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
+        ResetCameraToForwards();
+    }
+}
+
+void GameplayState::ResetCameraToForwards() {
+    world->GetMainCamera()->SetPitch(0.68f);
+    world->GetMainCamera()->SetYaw(269.43f);
 
 }
 
@@ -244,9 +299,17 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
     }
 
+
     //SetTestSprings();
 
     SetTestFloor();
+
+    levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
+    startPos = lr->GetStartPosition();
+    // TEST SWINGING OBJECT ON THE CLIENT
+    auto swingingTemp = new GameObject();
+    replicated->AddSwingingBlock(swingingTemp, *world);
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 
 }
 
@@ -264,6 +327,7 @@ void GameplayState::SetTestSprings() {
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
     }
+
 }
 
 void GameplayState::SetTestFloor() {
@@ -288,4 +352,9 @@ void GameplayState::AssignPlayer(int netObject) {
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
+}
+
+float GameplayState::CalculateCompletion(Vector3 playerCurPos){
+    auto progress = playerCurPos - startPos;
+    return progress.Length()/levelLen;
 }

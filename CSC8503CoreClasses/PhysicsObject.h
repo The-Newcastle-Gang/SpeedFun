@@ -68,6 +68,7 @@ namespace NCL {
 
 
 			void ClearForces();
+			void ClearVelocity();
 
 			void SetLinearVelocity(const Vector3& v) {
 				linearVelocity = v;

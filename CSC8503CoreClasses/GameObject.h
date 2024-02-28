@@ -123,12 +123,17 @@ namespace NCL::CSC8503 {
 
         void DrawCollision();
 
+        [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
+        void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
+
     protected:
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;
         RenderObject*		renderObject;
         NetworkObject*		networkObject;
+
+        Vector3 checkPointPos;
 
         bool		isActive;
         bool        hasComponent;
