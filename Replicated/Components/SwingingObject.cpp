@@ -8,9 +8,10 @@ void SwingingObject::Update(float dt)
 {
     ascending ? timer += dt : timer -= dt;
 
+
     Vector3 tempPos = startingPos;
     tempPos.y = startingPos.y + sin(timer) * radius;
-    tempPos.z = startingPos.y + cos(timer) * radius;
+    tempPos.z = startingPos.z + cos(timer) * radius;
     gameObject->GetTransform().SetPosition(tempPos);
 
 
