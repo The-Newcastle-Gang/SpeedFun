@@ -4,14 +4,23 @@ using namespace NCL;
 using namespace CSC8503;
 
 void TestTrapBlock::Update(float dt) {
-	//bool BlockFall = hasCollision(gameObject);
-	if (true) {
+	bool collisionResult = OnCollisionEnter(gameObject);
+	if (collisionResult) {
 		TrapBlockFall(dt);
 	}
 }
 
-bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
-	return true;
+//bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
+//	return true;
+//}
+bool TestTrapBlock::OnCollisionEnter(GameObject* otherObject) {
+	if (pushableObject.find(otherObject) != pushableObject.end()) {
+		std::cout << "cnm" << std::endl;
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void TestTrapBlock::TrapBlockFall(float dt) {
