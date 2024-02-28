@@ -144,7 +144,12 @@ void RunningState::CreatePlayers() {
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
         auto trigger = new TriggerVolumeObject(triggerVec.first);
-        replicated->AddTriggerVolumeToWorld(Vector3(10,10,10), trigger, *world);
+
+        Vector4 colour = Vector4();
+        Vector3 tempSize = Vector3();
+        SortTriggerInfoByType(triggerVec.first, (Vector4&)colour, (Vector3&)tempSize);
+
+        replicated->AddTriggerVolumeToWorld(tempSize, trigger, *world);
         trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
                                                     trigger->GetBoundingVolume(),
                                                     physics->GetPhysMat("Default")));
@@ -153,26 +158,35 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
 
-        Vector4 colour = Vector4();
-        switch (triggerVec.first){
-            case TriggerVolumeObject::TriggerType::Start:
-                colour = {1,1,1,1};
-                break;
-            case TriggerVolumeObject::TriggerType::End:
-                colour = {0,1,0,1};
-                break;
-            case TriggerVolumeObject::TriggerType::Death:
-                colour = {1,0,0,1};
-                break;
-            case TriggerVolumeObject::TriggerType::CheckPoint:
-                colour = {1,0.4f,1,1};
-                break;
-            default:
-                colour = {0,0,0,1};
-                break;
-        }
-        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5),
+        Debug::DrawAABBLines(triggerVec.second, tempSize,
                              colour, 1000.0f);
+    }
+}
+
+void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType,
+                                         Vector4 &colour,
+                                         Vector3 &tempSize) {
+    switch (triggerType) {
+        case TriggerVolumeObject::TriggerType::Start:
+            colour = {1, 1, 1, 1};
+            tempSize = Vector3(10, 10, 10);
+            break;
+        case TriggerVolumeObject::TriggerType::End:
+            colour = {0, 1, 0, 1};
+            tempSize = Vector3(10, 10, 10);
+            break;
+        case TriggerVolumeObject::TriggerType::Death:
+            colour = {1, 0, 0, 1};
+            tempSize = Vector3(1000, 10, 1000);
+            break;
+        case TriggerVolumeObject::TriggerType::CheckPoint:
+            colour = {1, 0.4f, 1, 1};
+            tempSize = Vector3(10, 10, 10);
+            break;
+        default:
+            colour = {0, 0, 0, 1};
+            tempSize = Vector3(10, 10, 10);
+            break;
     }
 }
 
@@ -205,7 +219,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
     currentLevelStartPos = levelReader->GetStartPosition();
     currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
