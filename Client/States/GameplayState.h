@@ -96,7 +96,7 @@ namespace NCL {
             float strafeSpeed = 0.0f;
             float strafeAmount = 0.0f;
             const float strafeSpeedMax = 12.0f;
-            const float strafeTiltAmount = 0.5f;
+            const float strafeTiltAmount = 1.0f;
             
         };
     }
