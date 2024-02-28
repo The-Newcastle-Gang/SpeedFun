@@ -103,35 +103,43 @@ void GameplayState::Update(float dt) {
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
+        std::cout << packet.functionId << "\n";
+        DataHandler handler(&packet.data);
+        switch (packet.functionId) {
+            case(Replicated::AssignPlayer):
+            {
+                int networkId = handler.Unpack<int>();
+                AssignPlayer(networkId);
+            }
+            break;
 
-        if (packet.functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&packet.data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
-        }
-        else if (packet.functionId == Replicated::Camera_GroundedMove) {
-            DataHandler handler(&packet.data);
-            auto intesnity = handler.Unpack<float>();
-            //std::cout << intesnity << "\n";
-            playerMovement = intesnity;
-        }
-        else if (packet.functionId == Replicated::Camera_Jump) {
-            DataHandler handler(&packet.data);
-            auto grounded = handler.Unpack<bool>();
-            jumpTimer = 3.14f;
-        }
-        else if (packet.functionId == Replicated::Camera_Land) {
-            DataHandler handler(&packet.data);
-            auto grounded = handler.Unpack<bool>();
-            landTimer = 3.14f;
-        }
+            case(Replicated::Camera_GroundedMove):
+            {
+                float intesnity = handler.Unpack<float>();
+                playerMovement = intesnity;
+            }
+            break;
 
+            case(Replicated::Camera_Jump):
+            {
+                jumpTimer = 3.14f;
+            }
+            break;
+            
+            case(Replicated::Camera_Land):
+            {
+                float grounded = handler.Unpack<float>();
+                landIntensity = std::clamp(grounded, 0.0f, landFallMax);;
+                landTimer = 3.14f;
+            }
+            break;
+            
+        }
 
     }
 }
 void GameplayState::ResetCameraAnimation() {
     playerMovement = playerMovement * 0.95f;
-    std::cout << playerMovement << "\n";
 }
 void GameplayState::WalkCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(-0.015f + 0.1f*sin(walkTimer)) * (playerMovement/15.0f), 0));
@@ -144,7 +152,8 @@ void GameplayState::JumpCamera(float dt) {
 }
 
 void GameplayState::LandCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -0.2f * sin(3.14f - 3.14f * sin(3.14f/2 - landTimer/2)), 0));
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+                                              Vector3(0, -0.2f * sin(3.14f - 3.14f * sin(3.14f/2 - landTimer/2)) / landFallMax * landIntensity, 0));
     landTimer = std::clamp(landTimer - dt * 15.0f, 0.0f, 3.14f);
 }
 

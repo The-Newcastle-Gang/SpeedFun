@@ -32,7 +32,8 @@ public:
     struct CameraAnimationCalls {
         bool jump = false;
         bool isGrounded = false;
-        bool land = false;
+        float land = 0.0f;
+        float fallDistance = 0.0f;
         float groundMovement = 0.0f;
         float tilt = 0.0f;
         float shakeIntensity = 0.0f;
@@ -58,6 +59,8 @@ private:
     float dragFactor;
     float maxHorizontalVelocity;
     int jumpQueued;
+    float fallApex = 0.0f;
+    bool isFalling = false;
 
     struct GrappleInfo {
         Ray grappleRay;

@@ -68,11 +68,21 @@ void PlayerMovement::UpdateInAir(float dt) {
     if (GroundCheck()) {
         return SwitchToState(&ground);
     }
+    if (gameObject->GetPhysicsObject()->GetLinearVelocity().y < 0) {
+        if (!isFalling) {
+            fallApex = gameObject->GetTransform().GetPosition().y;
+            isFalling = true;
+        }
+        cameraAnimationCalls.fallDistance = fallApex - gameObject->GetTransform().GetPosition().y;
+        return;
+    }
+    
 }
 
 void PlayerMovement::LeaveInAir() {
-    cameraAnimationCalls.land = true;
+    cameraAnimationCalls.land = cameraAnimationCalls.fallDistance;
     cameraAnimationCalls.isGrounded = true;
+    isFalling = false;
 }
 
 void PlayerMovement::StartGround() {

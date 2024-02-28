@@ -89,6 +89,8 @@ namespace NCL {
 
             void LandCamera(float dt);
             float landTimer = 0.0f;
+            const float landFallMax = 10.0f;
+            float landIntensity = 0.0f;
         };
     }
 }

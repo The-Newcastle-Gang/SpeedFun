@@ -185,13 +185,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Jump, &data)));
         playerMovement->cameraAnimationCalls.jump = false;
     }
-    if (playerMovement->cameraAnimationCalls.land) {
+    if (playerMovement->cameraAnimationCalls.land > 0.0f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(true);
+        handler.Pack(playerMovement->cameraAnimationCalls.land);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Land, &data)));
-        playerMovement->cameraAnimationCalls.land = false;
+        playerMovement->cameraAnimationCalls.land = 0.0f;
     }
 }
 
