@@ -19,9 +19,9 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     coyoteTimeTimer = coyoteTime;
     hasCoyoteExpired = false;
 
-    grappleInfo.travelSpeed = 100.0f;
-    grappleInfo.maxDistance = 5000.0f;
-    grappleInfo.SetActive(false);
+    grappleProjectileInfo.travelSpeed = 100.0f;
+    grappleProjectileInfo.maxDistance = 100.0f;
+    grappleProjectileInfo.SetActive(false);
 
     maxHorizontalVelocity = 7.0f;
 
@@ -36,6 +36,10 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     air.OnExit = [this](){ LeaveInAir(); };
     air.OnStart = [this](){ StartInAir(); };
 
+    grapple.UpdateState = [this](float dt) { OnGrappleUpdate(dt); };
+    grapple.OnExit = [this]() { OnGrappleLeave(); };
+    grapple.OnStart = [this]() { OnGrappleStart(); };
+
     activeState = &air;
 }
 
@@ -49,6 +53,32 @@ void PlayerMovement::SwitchToState(MovementState* state) {
     activeState->OnExit();
     activeState = state;
     activeState->OnStart();
+}
+
+void PlayerMovement::OnGrappleLeave() {
+
+}
+
+void PlayerMovement::OnGrappleStart() {
+    StartInAir();
+
+}
+
+void PlayerMovement::OnGrappleUpdate(float dt) {
+    static float grappleSpeed = 5000.0f;
+
+    Debug::DrawLine(gameObject->GetTransform().GetPosition(), grapplePoint);
+
+    Vector3 delta = grapplePoint - gameObject->GetTransform().GetPosition();
+
+    if (delta.Length() < 2.0f) {
+        SwitchToState(&air);
+        return;
+    }
+
+    auto forceDirection = delta.Normalised();
+
+    gameObject->GetPhysicsObject()->AddForce(forceDirection * grappleSpeed * dt);
 }
 
 void PlayerMovement::StartInAir() {
@@ -119,7 +149,6 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
     Vector3 linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
     auto horizontalVel = Vector2(linearVel.x, linearVel.z);
 
-
     if (horizontalVel.Length() > maxHorizontalVelocity) {
         auto newHorizontalVel = horizontalVel.Normalised() * maxHorizontalVelocity;
         gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
@@ -164,55 +193,63 @@ void PlayerMovement::Update(float dt) {
 
 void PlayerMovement::Grapple() {
 
-    Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
-    grappleInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
-    grappleInfo.travelDistance = 0;
+    if (grappleProjectileInfo.GetActive()) {
+        return;
+    }
 
-    grappleInfo.SetActive(true);
+    if (activeState == &grapple) {
+        SwitchToState(&air);
+        return;
+    }
+
+    Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
+    grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
+    grappleProjectileInfo.travelDistance = 0;
+
+    grappleProjectileInfo.SetActive(true);
 }
 
 void PlayerMovement::UpdateGrapple(float dt) {
-    if (!grappleInfo.GetActive()) return;
+    if (!grappleProjectileInfo.GetActive()) return;
 
-    grappleInfo.travelDistance += grappleInfo.travelSpeed * dt;
+    grappleProjectileInfo.travelDistance += grappleProjectileInfo.travelSpeed * dt;
 
     RayCollision collision;
-    if (world->Raycast(grappleInfo.grappleRay, collision, true, gameObject)) {
-        Vector3 grapplePoint = collision.collidedAt;
-        if ((grappleInfo.grappleRay.GetPosition() - grapplePoint).Length() < grappleInfo.travelDistance) {
-            FireGrapple(grapplePoint);
-            grappleInfo.SetActive(false);
+    if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject)) {
+        auto tempGrapplePoint = collision.collidedAt;
+        if ((grappleProjectileInfo.grappleRay.GetPosition() - tempGrapplePoint).Length() < grappleProjectileInfo.travelDistance) {
+            grapplePoint = tempGrapplePoint;
+            FireGrapple();
+            grappleProjectileInfo.SetActive(false);
             return;
         }
     }
 
-    auto dir = grappleInfo.grappleRay.GetDirection().Normalised() * grappleInfo.travelDistance;
+    auto dir = grappleProjectileInfo.grappleRay.GetDirection().Normalised() * grappleProjectileInfo.travelDistance;
 
-    Debug::DrawLine(grappleInfo.grappleRay.GetPosition(), grappleInfo.grappleRay.GetPosition() + dir);
+    Debug::DrawLine(grappleProjectileInfo.grappleRay.GetPosition(), grappleProjectileInfo.grappleRay.GetPosition() + dir);
 
-
-    if (grappleInfo.travelDistance >= grappleInfo.maxDistance) {
-        grappleInfo.SetActive(false);
+    if (grappleProjectileInfo.travelDistance >= grappleProjectileInfo.maxDistance) {
+        grappleProjectileInfo.SetActive(false);
     }
 }
 
-void PlayerMovement::FireGrapple(Vector3 grapplePoint) {
-    auto pos = gameObject->GetTransform().GetPosition();
-
-    float gravity = -9.8;
-
-    float displaceY = grapplePoint.y - pos.y;
-    Vector3 displaceXZ = Vector3(grapplePoint.x - pos.x, 0, grapplePoint.z - pos.z);
-    float inAirTime = sqrt(abs(-2 * displaceY / gravity));
-    Vector3 velocityY = Vector3(0,1,0) * sqrt(abs((-2 * gravity* displaceY)));
-
-    Vector3 velocityXZ = displaceXZ / inAirTime;
-    if(displaceY < 0){
-        velocityY *= -1 * 0.3f;
-    }
-    Vector3 totalVel = velocityY  + velocityXZ;
-    gameObject->GetPhysicsObject()->ClearForces();
-    gameObject->GetPhysicsObject()->SetLinearVelocity(totalVel * 2.0f);
+void PlayerMovement::FireGrapple() {
+    SwitchToState(&grapple);
+//    float gravity = -9.8;
+//
+//    float displaceY = grapplePoint.y - pos.y;
+//    Vector3 displaceXZ = Vector3(grapplePoint.x - pos.x, 0, grapplePoint.z - pos.z);
+//    float inAirTime = sqrt(abs(-2 * displaceY / gravity));
+//    Vector3 velocityY = Vector3(0,1,0) * sqrt(abs((-2 * gravity* displaceY)));
+//
+//    Vector3 velocityXZ = displaceXZ / inAirTime;
+//    if(displaceY < 0){
+//        velocityY *= -1 * 0.3f;
+//    }
+//    Vector3 totalVel = velocityY  + velocityXZ;
+//    gameObject->GetPhysicsObject()->ClearForces();
+//    gameObject->GetPhysicsObject()->SetLinearVelocity(totalVel * 2.0f);
 }
 
 
