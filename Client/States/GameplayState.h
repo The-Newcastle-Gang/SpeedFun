@@ -43,9 +43,13 @@ namespace NCL {
 
             void InitLevel();
             void InitCanvas();
+
+            void ResetCameraToForwards();
+
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
+
 
             void SetTestSprings();
             void SetTestFloor();

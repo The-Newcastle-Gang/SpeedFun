@@ -48,6 +48,10 @@ void PhysicsObject::ClearForces() {
 	torque				= Vector3();
 }
 
+void PhysicsObject::ClearVelocity() {
+    linearVelocity      = Vector3();
+}
+
 void PhysicsObject::InitCubeInertia() {
 	Vector3 dimensions	= transform->GetScale();
 

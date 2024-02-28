@@ -153,7 +153,26 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
 
-        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5), Debug::MAGENTA, 1000.0f);
+        Vector4 colour = Vector4();
+        switch (triggerVec.first){
+            case TriggerVolumeObject::TriggerType::Start:
+                colour = {1,1,1,1};
+                break;
+            case TriggerVolumeObject::TriggerType::End:
+                colour = {0,1,0,1};
+                break;
+            case TriggerVolumeObject::TriggerType::Death:
+                colour = {1,0,0,1};
+                break;
+            case TriggerVolumeObject::TriggerType::CheckPoint:
+                colour = {1,0.4f,1,1};
+                break;
+            default:
+                colour = {0,0,0,1};
+                break;
+        }
+        Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5),
+                             colour, 1000.0f);
     }
 }
 
@@ -188,9 +207,12 @@ void RunningState::BuildLevel(const std::string &levelName)
     currentLevelEndPos = levelReader->GetEndPosition();
     currentLevelDeathPos = levelReader->GetDeathBoxPosition();
     triggersVector = {
-            std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
-            std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
-            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
+            std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
     };
 
     auto plist = levelReader->GetPrimitiveList();

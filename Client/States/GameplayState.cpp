@@ -140,7 +140,14 @@ void GameplayState::Update(float dt) {
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
+        ResetCameraToForwards();
+    }
+}
 
+void GameplayState::ResetCameraToForwards() {
+    world->GetMainCamera()->SetPitch(0.68f);
+    world->GetMainCamera()->SetYaw(269.43f);
 
 }
 
