@@ -50,10 +50,10 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
 void Replicated::AddTrapBlockToLevel(GameObject* g, GameWorld& world) {
     //constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
-    auto volume = new AABBVolume(Vector3(10, 0.5, 10));
+    auto volume = new AABBVolume(Vector3(5, 0.25, 10));
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-        .SetScale(Vector3(20, 1, 20))
-        .SetPosition(Vector3(-110,5,-10));
+        .SetScale(Vector3(10, 0.5, 20))
+        .SetPosition(Vector3(-107,5,-15));
 }

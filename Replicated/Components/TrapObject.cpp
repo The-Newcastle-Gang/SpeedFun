@@ -17,7 +17,7 @@ bool TestTrapBlock::hasCollision(const GameObject* otherObject) {
 void TestTrapBlock::TrapBlockFall(float dt) {
 	warningTime += dt;
 	if (warningTime >= 10) {
-		gameObject->GetTransform().SetPosition(Vector3(-110, -20, -10));
-		warningTime = 0.0;
+		gameObject->GetTransform().SetPosition(Vector3(-107, -5 - 10 * warningTime, -15));
+		//warningTime = 0.0;
 	}
 }
