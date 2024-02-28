@@ -6,6 +6,8 @@ uniform sampler2D depthBuffer;
 uniform mat4 invViewPersp;
 uniform vec3 lightPos;
 
+#define M_PI 3.1415926535897932384626433832795
+
 in Vertex {
     vec2 texCoord;
 } IN;
@@ -99,15 +101,79 @@ vec3 unproject(vec3 position) {
     return transformed.xyz;
 }
 
+mat3 horizontal = mat3(
+    1.0, 2.0, 1.0,
+    0.0, 0.0, 0.0,
+    -1.0, -2.0, -1.0
+);
 
+mat3 vertical = mat3(
+    1.0, 0.0, -1.0,
+    2.0, 0.0, -2.0,
+    1.0, 0.0, -1.0
+);
+
+
+void samplePoints(inout float n[9], vec2 uv, float thickness)
+{
+    float w = 1.0 * thickness;
+    float h = 1.0 * thickness;
+    n[0] = linearDepth(texture(depthBuffer, uv + vec2( -w, -h)).r) * 0.002;
+    n[1] = linearDepth(texture(depthBuffer, uv + vec2(0.0, -h)).r) * 0.002;
+    n[2] = linearDepth(texture(depthBuffer, uv + vec2(  w, -h)).r) * 0.002;
+    n[3] = linearDepth(texture(depthBuffer, uv + vec2( -w, 0.0)).r) * 0.002;
+    n[4] = linearDepth(texture(depthBuffer, uv + vec2(0.0, 0.0)).r) * 0.002;
+    n[5] = linearDepth(texture(depthBuffer, uv + vec2(  w, 0.0)).r) * 0.002;
+    n[6] = linearDepth(texture(depthBuffer, uv + vec2( -w, h)).r) * 0.002;
+    n[7] = linearDepth(texture(depthBuffer, uv + vec2(0.0, h)).r) * 0.002;
+    n[8] = linearDepth(texture(depthBuffer, uv + vec2(  w, h)).r) * 0.002;
+}
+
+float sobelResult(vec2 uv, float thickness) {
+    float points[9];
+    samplePoints(points, uv, thickness);
+    float horizontalEdge = points[2] + (2.0*points[5]) + points[8] - (points[0] + (2.0*points[3]) + points[6]);
+    float verticalEdge = points[0] + (2.0*points[1]) + points[2] - (points[6] + (2.0*points[7]) + points[8]);
+    return length(vec2(horizontalEdge, verticalEdge));
+}
+
+float correctDepthForThreshold(float x) {
+    return min(1, 1 - cos(x*M_PI*2));
+}
 
 void main() {
-    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
+
+    // 1 / 500 (far plane) = 0.002;
+    float far = 0.002;
+    float threshold = 0.003;
+    float thickness = 0.001;
+    float tighten = 30;
+    float strength = 1.0;
+    float depthThreshold = 0.8;
+
+//    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
+
+//    vec2 samplePoints[9] = {
+//        {-1, 1}, {0, 1}, {1, 1},
+//        {-1, 0}, {0, 0}, {1, 1},
+//        { -1, -1}, {0, -1}, {1, -1}
+//    };
 
     vec4 hdrColor = texture(hdrBuffer, IN.texCoord).rgba;
-    vec3 rayOrigin = unproject(vec3(uv.x, uv.y, -1.0f));
-    vec3 rayDirection = normalize(unproject(vec3(uv.x, uv.y, 1.0f)) - rayOrigin);
-    vec4 raySphere = ray_march(rayOrigin, rayDirection);
+    float worldDepth = linearDepth(texture(depthBuffer, IN.texCoord).r) * far;
+//    vec3 rayOrigin = unproject(vec3(uv.x, uv.y, -1.0f));
+//    vec3 rayDirection = normalize(unproject(vec3(uv.x, uv.y, 1.0f)) - rayOrigin);
+//    vec4 raySphere = ray_march(rayOrigin, rayDirection);
 
-    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a), raySphere.a + hdrColor.a);
+    threshold += correctDepthForThreshold(worldDepth) * depthThreshold;
+
+    float border = sobelResult(IN.texCoord, thickness);
+    border = smoothstep(0, threshold, border);
+    border = pow(border, tighten);
+    border *= strength;
+
+//
+//    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a), raySphere.a + hdrColor.a);
+
+    fragColor = vec4(hdrColor.rgb - border, step(0.99, border) + hdrColor.a);
 }

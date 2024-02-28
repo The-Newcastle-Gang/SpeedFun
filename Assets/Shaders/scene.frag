@@ -28,7 +28,7 @@ void main(void)
 	float shadow = 1.0; // New !
 	
 	if( IN . shadowProj . w > 0.0) { // New !
-		shadow = textureProj ( shadowTex , IN . shadowProj ) * 0.5f;
+		shadow = textureProj ( shadowTex , IN . shadowProj, 1.0) * 0.5f;
 	}
 
 	vec3  incident = normalize ( lightPos - IN.worldPos );
@@ -49,10 +49,13 @@ void main(void)
 	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	
 	fragColor.rgb = albedo.rgb * 0.05f; //ambient
+
+	float toonLambert = smoothstep(0.0, 0.01, dot(normalize(lightPos - IN.worldPos), IN.normal));
+	float toonSpecular = smoothstep(0.155, 0.16, sFactor);
 	
-	fragColor.rgb += albedo.rgb * lightColour.rgb * lambert * shadow; //diffuse light
+	fragColor.rgb += albedo.rgb * lightColour.rgb * toonLambert;// * shadow; //diffuse light
 	
-	fragColor.rgb += lightColour.rgb * sFactor * shadow; //specular light
+	fragColor.rgb += lightColour.rgb * toonSpecular;// * shadow; //specular light
 	
 	fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
 	
