@@ -13,14 +13,15 @@ out vec4 fragColour;
 
 void main(void){
 	vec3 diffuse = texture(diffuseTex, IN.texCoord).xyz;
-	float isLit = texture(diffuseNorm, IN.texCoord).w;
-	vec3 light = texture(diffuseLight,IN.texCoord).xyz;
-	vec3 specular = texture(specularLight, IN.texCoord).xyz;
+	//float isLit = texture(diffuseNorm, IN.texCoord).w;
+	//vec3 light = texture(diffuseLight,IN.texCoord).xyz;
+	//vec3 specular = texture(specularLight, IN.texCoord).xyz;
 
-	isLit = 0; 
-	fragColour.xyz = diffuse * 0.1 * isLit + diffuse * (1-isLit);
-	fragColour.xyz += diffuse * light* isLit;
-	fragColour.xyz += specular* isLit;
-	fragColour.a = 1.0;
+	//isLit = 0; 
+	//fragColour.xyz = diffuse * 0.1 * isLit + diffuse * (1-isLit);
+	//fragColour.xyz += diffuse * light* isLit;
+	//fragColour.xyz += specular* isLit;
+	//fragColour.a = 1.0;
 	
+	fragColour.xyz = diffuse;
 }
