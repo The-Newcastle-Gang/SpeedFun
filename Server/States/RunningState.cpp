@@ -163,12 +163,10 @@ void RunningState::AddTriggersToLevel(){
     }
 }
 
-void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType,
-                                         Vector4 &colour,
-                                         Vector3 &tempSize) {
+void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, TriggerVolumeObject trigger) {
     switch (triggerType) {
         case TriggerVolumeObject::TriggerType::Start:
-            colour = {1, 1, 1, 1};
+            trigger.triggerInfo.colour = {1, 1, 1, 1};
             tempSize = Vector3(10, 10, 10);
             break;
         case TriggerVolumeObject::TriggerType::End:
