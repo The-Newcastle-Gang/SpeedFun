@@ -9,6 +9,7 @@
 #include "Vector4.h"
 #include "Vector2.h"
 #include "Font.h"
+#include "Frustum.h"
 
 #include "Assets.h"
 #include "Element.h"
@@ -22,6 +23,8 @@ namespace NCL {
     namespace CSC8503 {
         class RenderObject;
 
+        using namespace NCL;
+        using namespace Maths;
         class GameTechRenderer : public OGLRenderer	{
         public:
             GameTechRenderer(GameWorld& world, Canvas& canvas);
@@ -121,6 +124,8 @@ namespace NCL {
             GLuint sceneDepthTexture;
 
             GLuint hdrFramebuffer;
+
+            Frustum frameFrustum;
 
             void InitUIQuad();
 

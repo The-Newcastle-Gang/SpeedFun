@@ -423,6 +423,9 @@ void GameTechRenderer::RenderCamera() {
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
 
+    frameFrustum = Frustum::FromViewProjMatrix(projMatrix * viewMatrix);
+
+
     OGLShader* activeShader = nullptr;
     int projLocation	= 0;
     int viewLocation	= 0;
@@ -447,6 +450,9 @@ void GameTechRenderer::RenderCamera() {
     glBindTexture(GL_TEXTURE_2D, shadowTex);
 
     for (const auto&i : activeObjects) {
+        Vector3 scale = i->GetTransform()->GetScale();
+        float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
+        if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
         OGLShader* shader = (OGLShader*)(*i).GetShader();
         if (!shader) {
             shader = defaultShader;
