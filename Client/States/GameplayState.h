@@ -43,9 +43,13 @@ namespace NCL {
 
             void InitLevel();
             void InitCanvas();
+
+            void ResetCameraToForwards();
+
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
+
 
             void SetTestSprings();
             void SetTestFloor();
@@ -71,6 +75,8 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
+            
+
             void SendInputData();
             void CreatePlayers();
 
@@ -82,6 +88,37 @@ namespace NCL {
 
             void ReadNetworkPackets();
 
+            void ResetCameraAnimation();
+
+
+            void WalkCamera(float dt);
+            float groundedMovementSpeed = 0.0f;
+            float currentGroundSpeed = 0.0f;
+            float walkTimer = 0.0f;
+            float maxMoveSpeed = 15.0f;
+            const float bobAmount = 0.1f;
+            const float bobFloor = -0.015f;
+
+            bool isGrounded = false;
+
+            void JumpCamera(float dt);
+            float jumpTimer = 0.0f;
+            const float jumpBobAmount = 0.55f;
+            const float jumpAnimationSpeed = 18.0f;
+
+            void LandCamera(float dt);
+            float landTimer = 0.0f;
+            const float landFallMax = 10.0f;
+            float landIntensity = 0.0f;
+            const float landBobAmount = 0.2f;
+            const float landAnimationSpeed = 15.0f;
+
+            void StrafeCamera(float dt);
+            float strafeSpeed = 0.0f;
+            float strafeAmount = 0.0f;
+            const float strafeSpeedMax = 12.0f;
+            const float strafeTiltAmount = 1.0f;
+
             float levelLen;
             Vector3 startPos;
             float CalculateCompletion(Vector3 cp);
@@ -90,6 +127,7 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
         };
     }
 }

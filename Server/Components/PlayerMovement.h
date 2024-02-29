@@ -17,6 +17,8 @@ using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
 
+
+
 class PlayerMovement : public Component {
 public:
     PlayerMovement(GameObject* g, GameWorld* w);
@@ -26,6 +28,18 @@ public:
 
     void Jump();
     void Grapple();
+
+    struct CameraAnimationCallData {
+        bool jump = false;
+        bool isGrounded = false;
+        float land = 0.0f;
+        float fallDistance = 0.0f;
+        float groundMovement = 0.0f;
+        float strafeSpeed = 0.0f;
+        float shakeIntensity = 0.0f;
+    };
+
+    CameraAnimationCallData cameraAnimationCalls;
 
 private:
     GameWorld* world;
@@ -45,6 +59,8 @@ private:
     float dragFactor;
     float maxHorizontalVelocity;
     int jumpQueued;
+    float fallApex = 0.0f;
+    bool isFalling = false;
 
     struct GrappleInfo {
         Ray grappleRay;
@@ -61,10 +77,13 @@ private:
         }
     private:
         bool isActive;
-    } grappleInfo;
+    } grappleProjectileInfo;
+
+    Vector3 grapplePoint;
 
     MovementState ground;
     MovementState air;
+    MovementState grapple;
 
     MovementState* activeState;
 
@@ -82,7 +101,13 @@ private:
     void SwitchToState(MovementState *state);
 
     void UpdateGrapple(float dt);
-    void FireGrapple(Vector3 grapplePoint);
+    void FireGrapple();
+
+    void OnGrappleStart();
+
+    void OnGrappleLeave();
+
+    void OnGrappleUpdate(float dt);
 };
 
 

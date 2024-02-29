@@ -3,6 +3,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
+# define PI 3.141592f
+
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -122,6 +124,7 @@ void GameplayState::OnExit() {
 }
 
 void GameplayState::Update(float dt) {
+    ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
 
@@ -131,6 +134,10 @@ void GameplayState::Update(float dt) {
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
+    WalkCamera(dt);
+    if (jumpTimer > 0) JumpCamera(dt);
+    if (landTimer > 0) LandCamera(dt);
+    StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
@@ -140,19 +147,79 @@ void GameplayState::Update(float dt) {
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
+        ResetCameraToForwards();
+    }
+}
 
+void GameplayState::ResetCameraToForwards() {
+    world->GetMainCamera()->SetPitch(0.68f);
+    world->GetMainCamera()->SetYaw(269.43f);
 
 }
 
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
-        if (packet.functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&packet.data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
+        DataHandler handler(&packet.data);
+        switch (packet.functionId) {
+            case(Replicated::AssignPlayer): {
+                int networkId = handler.Unpack<int>();
+                AssignPlayer(networkId);
+            }
+            break;
+
+            case(Replicated::Camera_GroundedMove): {
+                float intesnity = handler.Unpack<float>();
+                currentGroundSpeed = intesnity;
+            }
+            break;
+
+            case(Replicated::Camera_Jump): {
+                jumpTimer = PI;
+            }
+            break;
+            
+            case(Replicated::Camera_Land): {
+                float grounded = handler.Unpack<float>();
+                landIntensity = std::clamp(grounded, 0.0f, landFallMax);
+                landTimer = PI;
+            }
+            break;
+            
+            case(Replicated::Camera_Strafe): {
+                float strfSpd = handler.Unpack<float>();
+                strafeSpeed = strfSpd;
+            }
+            break;
         }
+
     }
+}
+void GameplayState::ResetCameraAnimation() {
+    currentGroundSpeed = 0.0f;
+    strafeSpeed = 0.0f;
+}
+void GameplayState::WalkCamera(float dt) {
+    groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    walkTimer += dt * groundedMovementSpeed * 0.75f;
+}
+
+void GameplayState::JumpCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
+    jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::LandCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+                                              Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
+    landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::StrafeCamera(float dt) {
+    strafeAmount = strafeAmount * 0.95f + strafeSpeed * 0.05f;
+    world->GetMainCamera()->SetRoll(-strafeTiltAmount * (strafeAmount / strafeSpeedMax));
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.
@@ -217,10 +284,23 @@ void GameplayState::InitWorld() {
 }
 
 void GameplayState::CreatePlayers() {
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
+    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
+      
+        playerMesh->AddAnimationToMesh("Run", testAnimation);
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+
+        AnimatorObject* newAnimator = new AnimatorObject();
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        player->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+
+        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
@@ -232,17 +312,21 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+
     }
+
+
+    //SetTestSprings();
+
+    SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-
     AddLava({0,-30,0});
-
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
@@ -259,7 +343,6 @@ void GameplayState::SetTestSprings() {
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
     }
-
 }
 
 void GameplayState::SetTestFloor() {
