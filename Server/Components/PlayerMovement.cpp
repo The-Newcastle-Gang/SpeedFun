@@ -240,7 +240,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
     grappleProjectileInfo.travelDistance += grappleProjectileInfo.travelSpeed * dt;
 
     RayCollision collision;
-    if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject)) {
+    if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject, TRIGGER_LAYER ^ ~MAX_LAYER)) {
         auto tempGrapplePoint = collision.collidedAt;
         if ((grappleProjectileInfo.grappleRay.GetPosition() - tempGrapplePoint).Length() < grappleProjectileInfo.travelDistance) {
             grapplePoint = tempGrapplePoint;

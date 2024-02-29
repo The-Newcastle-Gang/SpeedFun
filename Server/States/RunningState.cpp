@@ -130,6 +130,7 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetInverseMass(2.0f);
         player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+        player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
 
         //TODO: clean up
@@ -152,6 +153,8 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetInverseMass(0.0f);
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+        trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
+
 
         Vector4 colour = Vector4();
         switch (triggerVec.first){
@@ -256,6 +259,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
     }
 
     //SetTestSprings();
