@@ -61,7 +61,6 @@ void PlayerMovement::OnGrappleLeave() {
 
 void PlayerMovement::OnGrappleStart() {
     StartInAir();
-
 }
 
 void PlayerMovement::OnGrappleUpdate(float dt) {

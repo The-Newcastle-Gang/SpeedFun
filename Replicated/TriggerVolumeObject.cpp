@@ -33,6 +33,7 @@ void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
         std::cout << "Collision with player has ended\n";
         switch (triggerType) {
             case TriggerType::Start:
+                otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;
             case TriggerType::End:
                 break;
