@@ -64,10 +64,11 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    // TODO - load a texture here
-    GLuint testTex;
-    testParticles = new ParticleSystem({ 0, 0, 0 }, { 1, 1, 1 }, { 4, 4, 4 }, 3, 5, 5, 7, testTex);
+    GLuint testTex = ((OGLTexture*)resources->GetTexture("Default.png"))->GetObjectID();
+    testParticles = new ParticleSystem({ 0, 0, 0 }, { -24, -24, -24 }, { 24, 24, 24 }, 2, 0.05f, 10, 100, testTex);
+
     particleSystems.push_back(testParticles);
+
     
 
 
@@ -78,6 +79,7 @@ void GameplayState::UpdateParticleSystems(float dt)
 {
     for (auto ps : particleSystems)
     {
+        ps->CreateNewParticles(dt);
         ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
     }
 }
@@ -329,7 +331,7 @@ void GameplayState::InitLevel() {
 
     //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();

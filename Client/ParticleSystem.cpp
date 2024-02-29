@@ -35,7 +35,6 @@ void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 	particlesCount = 0;
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 		Particle& p = particles[i];
-
 		if (p.life > 0.0f) {
 			p.life -= dt;
 			p.position += p.speed * dt;
@@ -56,15 +55,16 @@ void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 		}
 		particlesCount++;
 	}
-
 	SortParticles();
 }
 
 void ParticleSystem::CreateNewParticles(float dt) {
-	int newParticles = (int)((dt>0.016f?0.016f:dt) * particlesPerSecond);
-
+	//int newParticles = (int)((dt>0.016f?0.016f:dt) * particlesPerSecond);
+	int newParticles = (int)((1) * particlesPerSecond);
+	std::cout << "new particle: " << newParticles << std::endl;
 	for (int i = 0; i < newParticles; i++) {
 		int particleIndex = FindUnusedParticle();
+		std::cout << "Particle index" + std::to_string(particleIndex) << std::endl;
 		particles[particleIndex].life = 0.01f*(rand() % 20)+lifeSpan;
 		particles[particleIndex].position = startPos + 
 			Vector3(rngLower.x + rand()%(int)rngRange.x,

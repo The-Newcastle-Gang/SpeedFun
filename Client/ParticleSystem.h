@@ -40,6 +40,9 @@ namespace NCL
 			void DrawParticles();
 			void CreateNewParticles(float dt);
 			GLuint GetTexture() { return texture; }
+			int GetParticleCount() { return particlesCount; }
+			Particle GetParticle() { return particles[0];}
+			
 		protected:
 			GLuint texture;
 			GLuint positionBuffer;
@@ -48,8 +51,8 @@ namespace NCL
 			OGLShader* shader;
 			GLfloat vertices[12] = { -0.5f, -0.5f, 0.0f,0.5f, -0.5f, 0.0f,-0.5f, 0.5f, 0.0f,0.5f, 0.5f, 0.0f };
 
-			Particle particles[MAX_PARTICLES];
-			int lastUsedParticle;
+			Particle particles[MAX_PARTICLES] = {};
+			int lastUsedParticle = 0;
 			int particlesPerSecond;
 			Vector3 startPos; //default position of particles
 			Vector3 rngLower; //the lower bound for random particle placement
