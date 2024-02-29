@@ -311,8 +311,7 @@ void GameplayState::InitLevel() {
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
@@ -329,7 +328,6 @@ void GameplayState::SetTestSprings() {
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
     }
-
 }
 
 void GameplayState::SetTestFloor() {

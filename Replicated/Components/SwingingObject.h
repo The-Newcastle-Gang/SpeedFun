@@ -13,7 +13,7 @@ namespace NCL::CSC8503 {
 	{
 	public:
 
-		SwingingObject(GameObject* go) { gameObject = go; }
+		SwingingObject(GameObject* go) { gameObject = go; Start(); }
 		void Update(float dt)override;
 
 		void Start()override {
