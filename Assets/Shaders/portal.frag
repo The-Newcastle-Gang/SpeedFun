@@ -1,17 +1,5 @@
 #version 400 core
 
-uniform vec4 		objectColour;
-uniform sampler2D 	mainTex;
-uniform sampler2DShadow shadowTex;
-
-uniform vec3	lightPos;
-uniform float	lightRadius;
-uniform vec4	lightColour;
-
-uniform vec3	cameraPos;
-
-uniform bool hasTexture;
-
 uniform float u_time;
 
 in Vertex
