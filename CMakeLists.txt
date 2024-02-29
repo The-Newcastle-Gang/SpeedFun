@@ -13,6 +13,7 @@ endif()
 
 include_directories(enet)
 include_directories(entt)
+include_directories(External)
 
 add_subdirectory(raudio)
 add_subdirectory(enet)

@@ -133,6 +133,8 @@ namespace NCL {
             GLuint CreateDepthTexture();
 
             GLuint CreateHDRTexture();
+
+            MeshGeometry *LoadOBJMesh(const string &name);
         };
     }
 }

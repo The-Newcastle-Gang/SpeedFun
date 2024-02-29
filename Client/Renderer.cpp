@@ -2,6 +2,9 @@
 #include "RenderObject.h"
 #include "TextureLoader.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tinyobjloader.h"
+
 using namespace NCL;
 using namespace Rendering;
 using namespace CSC8503;
@@ -539,6 +542,50 @@ MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {
     OGLMesh* mesh = new OGLMesh(name);
     mesh->SetPrimitiveType(GeometryPrimitive::Triangles);
     mesh->UploadToGPU();
+    return mesh;
+}
+
+MeshGeometry* GameTechRenderer::LoadOBJMesh(const string& name) {
+    OGLMesh* mesh = new OGLMesh();
+    mesh->SetPrimitiveType(GeometryPrimitive::Triangles);
+
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+
+    std::string err;
+
+    bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, (Assets::MESHDIR + name).c_str(), (Assets::MESHDIR).c_str());
+
+    if (!err.empty()) {
+        std::cerr << err << std::endl;
+    }
+
+    if (!ret) {
+        std::cerr << "Definitely didn't work" << std::endl;
+    }
+
+    const std::vector<tinyobj::index_t>& indices = shapes[0].mesh.indices;
+    const std::vector<int>& material_ids = shapes[0].mesh.material_ids;
+
+    std::vector<Vector3> vertexPositions;
+    vertexPositions.reserve(attrib.vertices.size() / 3);
+
+    // Must be better way of this, it's literally the same in memory
+    for (int i = 0; i < attrib.vertices.size(); i += 3) {
+        vertexPositions.emplace_back(attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2]);
+    }
+
+    mesh->SetVertexPositions(vertexPositions);
+
+    for (auto index = 0; index < material_ids.size(); index++) {
+
+    }
+
+    mesh->SetVertexTextureCoords(vertexTexcoords);
+
+    mesh->RecalculateNormals();
+
     return mesh;
 }
 

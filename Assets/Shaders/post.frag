@@ -153,12 +153,6 @@ void main() {
 
 //    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
 
-//    vec2 samplePoints[9] = {
-//        {-1, 1}, {0, 1}, {1, 1},
-//        {-1, 0}, {0, 0}, {1, 1},
-//        { -1, -1}, {0, -1}, {1, -1}
-//    };
-
     vec4 hdrColor = texture(hdrBuffer, IN.texCoord).rgba;
     float worldDepth = linearDepth(texture(depthBuffer, IN.texCoord).r) * far;
 //    vec3 rayOrigin = unproject(vec3(uv.x, uv.y, -1.0f));
