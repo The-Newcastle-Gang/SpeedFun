@@ -59,6 +59,7 @@ void SoundManager::UnloadSoundList() {
 	sounds.clear();
 	soundFileNames.clear();
 }
+
 SoundManager::~SoundManager() {
 	CloseAudioDevice();
 }
