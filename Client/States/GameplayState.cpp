@@ -18,6 +18,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete debugger;
 }
 
 
@@ -103,6 +104,7 @@ void GameplayState::OnEnter() {
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
+    debugger = new DebugMode();
     InitCanvas();
 }
 
@@ -143,6 +145,9 @@ void GameplayState::Update(float dt) {
     world->UpdateWorld(dt);
 
     ReadNetworkPackets();
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (displayDebugger) debugger->DisplayDebug(dt);
 
     renderer->Render();
     Debug::UpdateRenderables(dt);

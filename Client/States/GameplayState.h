@@ -16,12 +16,15 @@
 #include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "DebugMode.h"
 
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
         class GameplayState : public State
         {
         public:
@@ -126,6 +129,9 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            DebugMode* debugger;
+            bool displayDebugger = false;
 
         };
     }
