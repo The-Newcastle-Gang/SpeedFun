@@ -188,7 +188,8 @@ void RunningState::BuildLevel(const std::string &levelName)
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
-            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos)
+            std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos),
+            std::make_pair((TriggerVolumeObject::TriggerType)1, Vector3(-110,5,-15))
     };
 
     auto plist = levelReader->GetPrimitiveList();
