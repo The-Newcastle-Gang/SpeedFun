@@ -68,6 +68,8 @@ void main(void)	{
 	
 	fragColour[0].a = albedo.a;
 
+	fragColour[1].rgb = IN.normal;
+
 	
 
 

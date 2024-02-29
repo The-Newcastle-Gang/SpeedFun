@@ -21,16 +21,13 @@ namespace NCL {
     namespace CSC8503 {
         class RenderObject;
 
-        struct PointLightInfo {
-            Vector4		lightColour;
-            float		lightRadius;
-            Vector3		lightPosition;
-        };
-
         class GameTechRenderer : public OGLRenderer	{
         public:
             GameTechRenderer(GameWorld& world, Canvas& canvas);
             ~GameTechRenderer();
+
+            void SetPointLights(std::vector<PointLightInfo>* lights) { pointLights = lights; }
+            void SetPointLightMesh(MeshGeometry* mesh) { pointLightSphereMesh = mesh; }
 
             MeshGeometry*	LoadMesh(const string& name);
             TextureBase*	LoadTexture(const string& name);
@@ -40,6 +37,7 @@ namespace NCL {
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
             void RenderUI();
             void CreatePostProcessQuad();
+            void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
@@ -73,6 +71,8 @@ namespace NCL {
             vector<const RenderObject*> activeObjects;
 
 
+            bool doDeferred = false;
+
             GLuint bufferColourTex;
             GLuint bufferNormalTex;
             GLuint bufferDepthTex;
@@ -104,7 +104,7 @@ namespace NCL {
 
 
             PointLightInfo sunlight;
-            std::vector<PointLightInfo> pointLights;
+            std::vector<PointLightInfo>* pointLights;
 
             //Debug data storage things
             vector<Vector3> debugLineData;
@@ -117,6 +117,8 @@ namespace NCL {
             std::vector<OGLMesh*> UIQuads;
             OGLMesh* UIMesh;
             OGLShader* uiShader;
+
+            MeshGeometry* pointLightSphereMesh;
 
             GLuint lineVAO;
             GLuint lineVertVBO;

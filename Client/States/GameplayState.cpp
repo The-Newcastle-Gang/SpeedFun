@@ -48,6 +48,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
@@ -56,6 +57,8 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
+    renderer->SetPointLights(world->GetPointLights());
+    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -198,6 +201,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f);
+        light.lightRadius = 10.0f;
+        world->AddPointLightToWorld(light);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -205,6 +214,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f);
+        light.lightRadius = 10.0f;
+        world->AddPointLightToWorld(light);
     }
 }
 

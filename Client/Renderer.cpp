@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "Resources.h"
 
 using namespace NCL;
 using namespace Rendering;
@@ -20,12 +21,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
-
-    PointLightInfo testLight;
-    testLight.lightPosition = {5,5,5};
-    testLight.lightColour = {1,1,1,1};
-    testLight.lightRadius = 20.0f;
-    pointLights.push_back(testLight);
 
 	lineCount = 0;
 	textCount = 0;
@@ -230,15 +225,11 @@ void GameTechRenderer::RenderFrame() {
     RenderDeferredLighting();
     CombineBuffers();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	NewRenderLines();
 	NewRenderText();
     RenderUI();
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void GameTechRenderer::FillDiffuseBuffer() {
@@ -251,6 +242,8 @@ void GameTechRenderer::FillDiffuseBuffer() {
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -261,10 +254,11 @@ void GameTechRenderer::RenderDeferredLighting() {
 
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
+    if (!doDeferred)return;
     glBlendFunc(GL_ONE, GL_ONE);
     glCullFace(GL_FRONT);
     glDepthFunc(GL_ALWAYS);
-    glDepthMask(GL_FALSE);
+    
 
     glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 0);
     glActiveTexture(GL_TEXTURE0);
@@ -281,19 +275,23 @@ void GameTechRenderer::RenderDeferredLighting() {
 
     Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
     glUniformMatrix4fv(glGetUniformLocation(shaderProg, "inverseProjView"), 1, false, (float*)invViewProj.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "viewMatrix"), 1, false, (float*)viewMatrix.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "projMatrix"), 1, false, (float*)projMatrix.array);
 
-    for (int i = 0; i < pointLights.size(); i++) {
-        PointLightInfo& l = pointLights[i];
+    BindMesh(pointLightSphereMesh);
+    for (int i = 0; i < (*pointLights).size(); i++) {
+        PointLightInfo& l = (*pointLights)[i];
         glUniform3fv(glGetUniformLocation(shaderProg, "lightPos"), 1, (float*)&l.lightPosition);
         glUniform4fv(glGetUniformLocation(shaderProg, "lightColour"), 1, (float*)&l.lightColour);
         glUniform1f(glGetUniformLocation(shaderProg, "lightRadius"), l.lightRadius);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVAO);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+        DrawBoundMesh();
+
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
 
     glDepthMask(GL_TRUE);
     glClearColor(0, 0, 0, 1);
@@ -303,6 +301,8 @@ void GameTechRenderer::RenderDeferredLighting() {
 
 void GameTechRenderer::CombineBuffers() {
     glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glDisable(GL_CULL_FACE);
+
     BindShader(combineShader);
     Matrix4 modelTemp;
     Matrix4 viewTemp;
@@ -336,11 +336,12 @@ void GameTechRenderer::CombineBuffers() {
 
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP,0, 6);
+    glEnable(GL_CULL_FACE);
+
     glDepthMask(true);
 }
 
 void GameTechRenderer::RenderUI() {
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     auto& layers = canvas.GetActiveLayers();
     for (auto i = layers.rbegin(); i != layers.rend(); i++) {
@@ -734,7 +735,6 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
 }
 
 void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color) {
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     BindShader(font->fontShader.get());
 

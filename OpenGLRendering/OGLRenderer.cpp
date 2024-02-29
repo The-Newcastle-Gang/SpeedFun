@@ -109,6 +109,7 @@ void OGLRenderer::BindMesh(MeshGeometry*m) {
 		if (oglMesh->GetVAO() == 0) {
 			std::cout << __FUNCTION__ << " has received invalid mesh?!" << std::endl;
 		}
+        if (boundMesh == m)return;
 		glBindVertexArray(oglMesh->GetVAO());
 		boundMesh = oglMesh;
 	}
