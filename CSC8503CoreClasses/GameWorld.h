@@ -6,6 +6,7 @@
 #include "CollisionDetection.h"
 #include "QuadTree.h"
 #include "NetworkObject.h"
+#include "PhysicsObject.h"
 
 namespace NCL {
         class Camera;
@@ -43,7 +44,7 @@ namespace NCL {
                 shuffleObjects = state;
             }
 
-            bool Raycast(Ray& r, RayCollision& closestCollision, bool closestObject = false, GameObject* ignore = nullptr) const;
+            bool Raycast(Ray& r, RayCollision& closestCollision, bool closestObject = false, GameObject* ignore = nullptr, int layerMask = ~MAX_LAYER) const;
 
 			virtual void UpdateWorld(float dt);
 			virtual void StartWorld();

@@ -6,17 +6,17 @@
 #include "Debug.h"
 using namespace NCL::CSC8503;
 
-GameObject::GameObject(string objectName)	{
+GameObject::GameObject(std::string objectName)	{
     name			= objectName;
     worldID			= -1;
     isActive		= true;
+    hasComponent    = false;
     boundingVolume	= nullptr; // Replicated
     networkObject	= nullptr; // Replicated
     physicsObject	= nullptr; // Server
     renderObject	= nullptr; // Client
     animatorObject = nullptr;
     isPlayer        = false;
-
 }
 
 GameObject::~GameObject()	{
@@ -29,7 +29,6 @@ GameObject::~GameObject()	{
 	for (Component* c : components) {
 		delete c;
 	}
-
 }
 
 bool GameObject::GetBroadphaseAABB(Vector3&outSize) const {
