@@ -61,7 +61,6 @@ void PlayerMovement::OnGrappleLeave() {
 
 void PlayerMovement::OnGrappleStart() {
     StartInAir();
-
 }
 
 void PlayerMovement::OnGrappleUpdate(float dt) {
@@ -131,6 +130,10 @@ void PlayerMovement::StartGround() {
 }
 
 void PlayerMovement::UpdateOnGround(float dt) {
+
+    cameraAnimationCalls.groundMovement = (gameObject->GetPhysicsObject()->GetLinearVelocity() * Vector3(1, 0, 1)).Length();
+    if (cameraAnimationCalls.groundMovement < 0.05f || activeState == &air) cameraAnimationCalls.groundMovement = 0.0f;
+
     bool isGrounded = GroundCheck();
     if (!hasCoyoteExpired) {
         if (isGrounded) {
@@ -205,8 +208,7 @@ void PlayerMovement::Update(float dt) {
     auto fwdAxis = Vector3::Cross(Vector3(0,1,0), rightAxis);
     gameObject->GetPhysicsObject()->AddForce(fwdAxis * inputDirection.y * runSpeed * dt);
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
-    cameraAnimationCalls.groundMovement = (gameObject->GetPhysicsObject()->GetLinearVelocity() * Vector3 (1,0,1)).Length();
-    if (cameraAnimationCalls.groundMovement < 0.05f || activeState == &air) cameraAnimationCalls.groundMovement = 0.0f;
+    
 
     Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
     float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
@@ -237,7 +239,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
     grappleProjectileInfo.travelDistance += grappleProjectileInfo.travelSpeed * dt;
 
     RayCollision collision;
-    if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject)) {
+    if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject, TRIGGER_LAYER ^ ~MAX_LAYER)) {
         auto tempGrapplePoint = collision.collidedAt;
         if ((grappleProjectileInfo.grappleRay.GetPosition() - tempGrapplePoint).Length() < grappleProjectileInfo.travelDistance) {
             grapplePoint = tempGrapplePoint;

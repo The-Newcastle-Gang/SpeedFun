@@ -7,6 +7,7 @@
 
 #include "GameObject.h"
 #include "PhysicsObject.h"
+#include "Vector4.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -18,6 +19,11 @@ public:
         End = 2,
         Death = 4,
         CheckPoint = 8,
+    };
+
+    struct triggerInfo{
+        Vector4 colour;
+        Vector3 size;
     };
 
     TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }

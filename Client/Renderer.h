@@ -36,6 +36,8 @@ namespace NCL {
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
             void RenderUI();
             void CreatePostProcessQuad();
+            void CreateQuad();
+            void RenderQuad();
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
@@ -121,6 +123,12 @@ namespace NCL {
             GLuint uiVBO;
 
             void InitUIQuad();
+
+            OGLMesh*    LQuad;
+            OGLShader*  LShader;
+            float u_time;
+
+
         };
     }
 }
