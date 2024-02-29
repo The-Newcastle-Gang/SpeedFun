@@ -117,6 +117,7 @@ namespace NCL {
 
             OGLMesh*    LQuad;
             OGLShader*  LShader;
+            float u_time;
 
 
         };

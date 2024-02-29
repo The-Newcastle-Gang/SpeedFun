@@ -24,6 +24,17 @@ ShaderBase *Resources::GetShader(const std::string& name) {
     return shaders[name].get();
 }
 
+TextureBase *Resources::GetTexture(const string &name) {
+    if(textures.find(name)== textures.end()){
+        auto texture = std::unique_ptr<TextureBase>(renderer->LoadTexture(name));
+        textures.insert(std::make_pair(name, std::move(texture)));
+        return textures[name].get();
+
+    }
+    return textures[name].get();
+}
+
+
 MeshAnimation *Resources::GetAnimation(const std::string& name) {
     if (animations.find(name) == animations.end()) {
         auto animation = std::unique_ptr<MeshAnimation>(new MeshAnimation(name));
@@ -44,3 +55,5 @@ MeshMaterial* Resources::GetMeshMaterial(const std::string& name) {
 
     return meshMaterials[name].get();
 }
+
+

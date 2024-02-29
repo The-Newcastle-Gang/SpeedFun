@@ -325,7 +325,7 @@ void GameplayState::InitLevel() {
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
-    AddLava({0,-30,0});
+    AddLava({-91,8,13});
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
@@ -376,8 +376,8 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
 
 void GameplayState::AddLava(Vector3 position){
     auto tem = new GameObject();
-    replicated->AddTestObjectToLevel(tem, *world, {1000,1000,10}, position);
-    tem->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
-    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),nullptr, nullptr));
-    tem->GetRenderObject()->SetColour({1,0,0,1});
+    replicated->AddTestObjectToLevel(tem, *world, {10,10,10}, position);
+//    tem->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
+    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
+//    tem->GetRenderObject()->SetColour({1,0,0,1});/
 }

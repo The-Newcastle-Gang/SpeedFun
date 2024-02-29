@@ -78,6 +78,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     // move to own function.
     InitUIQuad();
+    u_time = 0.0f;
 
 }
 
@@ -366,6 +367,8 @@ void GameTechRenderer::RenderCamera() {
     int lightRadiusLocation = 0;
 
     int cameraLocation = 0;
+
+    float uTimeLocation = 0;
 
     //TODO - PUT IN FUNCTION
     glActiveTexture(GL_TEXTURE0 + 1);
