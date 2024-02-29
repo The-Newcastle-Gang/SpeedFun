@@ -45,6 +45,7 @@ void main(void)
 	uv *=3.;
 	uv= twirl (5.0  + (sin(u_time)), uv-1.5, u_time);
     uv = rotTwo(u_time, uv);
+	
 
 	vec3 col = vec3(0.);
 	vec2 currentGridID = floor(uv);
@@ -69,6 +70,6 @@ void main(void)
   col = vec3(smoothstep(0., 0.9, 1.0-minDistFromPixel));
   col *= vignette(1.0, uvOriginal);
   col *= vec3(1.0, 0.5*sin(u_time), 0.0);
-  fragColor = vec4(col, smoothstep(0.01, 0.05, length(col)));
+  fragColor = vec4(col, smoothstep(0.2, 0.25, length(col)));
 
 }
