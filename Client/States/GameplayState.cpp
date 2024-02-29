@@ -221,7 +221,6 @@ void GameplayState::WalkCamera(float dt) {
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         soundManager->SM_PlaySound("footsteps.wav");
-        std::cout << "foot\n";
         walkSoundTimer += PI;
     }
     float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
