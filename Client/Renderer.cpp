@@ -202,6 +202,8 @@ void GameTechRenderer::RenderFrame() {
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    u_time += 0.01;
 }
 
 void GameTechRenderer::RenderUI() {
@@ -349,6 +351,8 @@ void GameTechRenderer::RenderSkybox() {
 }
 
 void GameTechRenderer::RenderCamera() {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -401,6 +405,7 @@ void GameTechRenderer::RenderCamera() {
             lightRadiusLocation = glGetUniformLocation(shader->GetProgramID(), "lightRadius");
 
             cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
+            uTimeLocation = glGetUniformLocation(shader->GetProgramID(), "u_time");
 
             Vector3 camPos = gameWorld.GetMainCamera()->GetPosition();
             glUniform3fv(cameraLocation, 1, camPos.array);
@@ -411,6 +416,7 @@ void GameTechRenderer::RenderCamera() {
             glUniform3fv(lightPosLocation	, 1, (float*)&lightPosition);
             glUniform4fv(lightColourLocation, 1, (float*)&lightColour);
             glUniform1f(lightRadiusLocation , lightRadius);
+            glUniform1f(uTimeLocation, u_time);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);
@@ -449,6 +455,7 @@ void GameTechRenderer::RenderCamera() {
             DrawBoundMesh(i);
         }
     }
+    glDisable(GL_BLEND);
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {
