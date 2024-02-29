@@ -6,7 +6,7 @@
 #define GITIGNORE_TRIGGERVOLUMEOBJECT_H
 
 #include "GameObject.h"
-#include <iostream>
+#include "PhysicsObject.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -17,6 +17,7 @@ public:
         Start = 1,
         End = 2,
         Death = 4,
+        CheckPoint = 8,
     };
 
     TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
@@ -26,7 +27,6 @@ public:
 
 private:
     TriggerType triggerType;
-
 };
 
 

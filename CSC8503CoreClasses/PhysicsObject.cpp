@@ -9,6 +9,7 @@ PhysicsObject::PhysicsObject(Transform* parentTransform, const CollisionVolume* 
 	volume		= parentVolume;
     physicsMaterial = physMat;
 	inverseMass = 1.0f;
+    isTrigger = false;
 }
 
 PhysicsObject::~PhysicsObject()	{
@@ -45,6 +46,10 @@ void PhysicsObject::AddTorque(const Vector3& addedTorque) {
 void PhysicsObject::ClearForces() {
 	force				= Vector3();
 	torque				= Vector3();
+}
+
+void PhysicsObject::ClearVelocity() {
+    linearVelocity      = Vector3();
 }
 
 void PhysicsObject::InitCubeInertia() {

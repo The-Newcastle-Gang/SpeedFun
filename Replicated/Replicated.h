@@ -22,9 +22,13 @@ using namespace CSC8503;
 class Replicated {
 public:
     // In the situation where the client is the remote (Server to client)
-    enum RemoteClientCalls { 
+    enum RemoteClientCalls {
         AssignPlayer,
         LoadGame,
+        Camera_GroundedMove,
+        Camera_Jump,
+        Camera_Land,
+        Camera_Strafe
     };
 
     // In the situation where the server is the remote (Client to server)
@@ -39,11 +43,12 @@ public:
     void InitLevel();
     int GetCurrentLevelLen();
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
-    void AddTestObstacleToLevel(GameObject *g, GameWorld& world);
+    void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
+    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
     void AddSwingingBlock(GameObject* g, GameWorld& world);
-  
+
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
