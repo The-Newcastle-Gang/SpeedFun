@@ -11,21 +11,23 @@ namespace NCL {
             SoundManager();
             ~SoundManager();
 
-            void AddSoundToLoad(std::string);
+            void AddSoundsToLoad(std::vector<std::string> sounds);
+            void AddSoundToLoad(std::string fileName);
 
             bool LoadSoundList();
             void UnloadSoundList();
 
-            void PlaySound(std::string);
-            void StopSound(std::string);
-            void ResumeSound(std::string);
-
+            void SM_PlaySound(std::string soundName);
+            void SM_StopSound(std::string soundName);
+            void SM_ResumeSound(std::string soundName);
+            bool SM_IsSoundPlaying(std::string soundName);
 
 
         protected:
 
-            std::vector<std::string> fileNames;
-            std::unordered_map<std::string, Sound> sounds;
+            std::vector<std::string> soundFileNames;
+            std::unordered_map<std::string, Sound*> sounds;
+
         };
 
 

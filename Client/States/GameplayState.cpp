@@ -5,9 +5,10 @@ using namespace CSC8503;
 
 # define PI 3.141592f
 
-GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas, SoundManager* pSoundManager) : State() {
     renderer = pRenderer;
     world = pGameworld;
+    soundManager = pSoundManager;
     // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
     resources = pResources;
@@ -105,6 +106,15 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
+    InitSounds();
+
+}
+
+void GameplayState::InitSounds() {
+    soundManager->AddSoundToLoad("koppen.ogg");
+    soundManager->AddSoundToLoad("footsteps.wav");
+    soundManager->LoadSoundList();
+    soundManager->SM_PlaySound("koppen.ogg");
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -121,6 +131,7 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
+    soundManager->UnloadSoundList();
     delete networkThread;
 }
 
@@ -206,9 +217,17 @@ void GameplayState::ResetCameraAnimation() {
     strafeSpeed = 0.0f;
 }
 void GameplayState::WalkCamera(float dt) {
+    
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
-    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    if (walkSoundTimer <= 0) {
+        soundManager->SM_PlaySound("footsteps.wav");
+        std::cout << "foot\n";
+        walkSoundTimer += PI;
+    }
+    float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, bobHeight * (groundedMovementSpeed / maxMoveSpeed), 0));
     walkTimer += dt * groundedMovementSpeed * 0.75f;
+    walkSoundTimer -= dt * groundedMovementSpeed * 0.75f;
 }
 
 void GameplayState::JumpCamera(float dt) {
