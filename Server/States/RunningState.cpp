@@ -163,27 +163,27 @@ void RunningState::AddTriggersToLevel(){
     }
 }
 
-void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, TriggerVolumeObject trigger) {
+void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {
     switch (triggerType) {
         case TriggerVolumeObject::TriggerType::Start:
-            trigger.triggerInfo.colour = {1, 1, 1, 1};
-            tempSize = Vector3(10, 10, 10);
+            colour = {1, 1, 1, 1};
+            dimensions = Vector3(10, 10, 10);
             break;
         case TriggerVolumeObject::TriggerType::End:
             colour = {0, 1, 0, 1};
-            tempSize = Vector3(10, 10, 10);
+            dimensions = Vector3(10, 10, 10);
             break;
         case TriggerVolumeObject::TriggerType::Death:
             colour = {1, 0, 0, 1};
-            tempSize = Vector3(1000, 10, 1000);
+            dimensions = Vector3(1000, 10, 1000);
             break;
         case TriggerVolumeObject::TriggerType::CheckPoint:
             colour = {1, 0.4f, 1, 1};
-            tempSize = Vector3(10, 10, 10);
+            dimensions = Vector3(10, 10, 10);
             break;
         default:
             colour = {0, 0, 0, 1};
-            tempSize = Vector3(10, 10, 10);
+            dimensions = Vector3(10, 10, 10);
             break;
     }
 }
