@@ -241,9 +241,7 @@ void GameplayState::InitLevel() {
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 
-    auto tem = new GameObject();
-    replicated->AddTestObjectToLevel(tem, *world, {10,10,10}, {0,10,0});
-    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetQuadMesh(),nullptr, nullptr));
+    AddLava({0,-30,0});
 
 }
 
@@ -291,4 +289,12 @@ void GameplayState::AssignPlayer(int netObject) {
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     auto progress = playerCurPos - startPos;
     return progress.Length()/levelLen;
+}
+
+void GameplayState::AddLava(Vector3 position){
+    auto tem = new GameObject();
+    replicated->AddTestObjectToLevel(tem, *world, {1000,1000,10}, position);
+    tem->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
+    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),nullptr, nullptr));
+    tem->GetRenderObject()->SetColour({1,0,0,1});
 }

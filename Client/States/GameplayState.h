@@ -85,6 +85,7 @@ namespace NCL {
             float levelLen;
             Vector3 startPos;
             float CalculateCompletion(Vector3 cp);
+            void AddLava( Vector3 pos );
             Element* timeBar;
             int PlayerBlip;
 

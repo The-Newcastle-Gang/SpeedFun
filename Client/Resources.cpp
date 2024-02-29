@@ -26,13 +26,16 @@ ShaderBase *Resources::GetShader(const std::string& name) {
 
 
 MeshGeometry *Resources::GetQuadMesh() {
+
     OGLMesh* tempQuad = new OGLMesh();
+//    MeshGeometry::GenerateTriangle(tempQuad);
     tempQuad->SetVertexPositions({Vector3(-1, 1,0),
                                   Vector3(-1,-1,0),
                                   Vector3(1,1,0),
                                   Vector3(1,-1,0) });
     tempQuad->SetVertexTextureCoords({Vector2(0,1), Vector2(0,0), Vector2(1,1), Vector2(1,0)});
-//    tempQuad->SetVertexIndices({0,1,2,2,3,0});
+    tempQuad->SetVertexIndices({0,1,2,2,3,0});
     tempQuad->UploadToGPU();
+    tempQuad->SetDebugName("LAVA QUAD");
     return tempQuad;
 }
