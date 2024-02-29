@@ -74,6 +74,7 @@ namespace NCL {
 
             void ReadNetworkPackets();
 
+            void CreateRock();
         };
     }
 }

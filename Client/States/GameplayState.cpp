@@ -158,6 +158,20 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     CreatePlayers();
     InitLevel();
+    CreateRock();
+}
+
+void GameplayState::CreateRock() {
+    auto rock = new GameObject("Rock");
+    world->AddGameObject(rock, true);
+    auto volume = new AABBVolume(Vector3(1.0, 1.0, 1.0));
+    rock->SetBoundingVolume((CollisionVolume*)volume);
+
+    rock->GetTransform()
+            .SetScale(Vector3(1.0, 1.0, 1.0))
+            .SetPosition(Vector3(0, 20, 0));
+
+    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("stone_tallA.obj"), nullptr, nullptr));
 }
 
 void GameplayState::CreatePlayers() {

@@ -26,6 +26,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	lineCount = 0;
 	textCount = 0;
 
+    LoadOBJMesh("stone_tallA.obj");
+
 	glGenTextures(1, &shadowTex);
 	glBindTexture(GL_TEXTURE_2D, shadowTex);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -450,7 +452,6 @@ void GameTechRenderer::RenderCamera() {
             shader = defaultShader;
         }
 
-
         BindShader(shader);
 
         if (i->GetDefaultTexture()) {
@@ -503,9 +504,14 @@ void GameTechRenderer::RenderCamera() {
 
         BindMesh((*i).GetMesh());
         int layerCount = (*i).GetMesh()->GetSubMeshCount();
-        for (int i = 0; i < layerCount; ++i) {
-            DrawBoundMesh(i);
+        if (layerCount == 0) {
+            DrawBoundMesh();
+        } else {
+            for (int i = 0; i < layerCount; ++i) {
+                DrawBoundMesh(i);
+            }
         }
+
     }
 
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -578,13 +584,20 @@ MeshGeometry* GameTechRenderer::LoadOBJMesh(const string& name) {
 
     mesh->SetVertexPositions(vertexPositions);
 
-    for (auto index = 0; index < material_ids.size(); index++) {
+    std::vector<GLuint> vertexIndicies;
 
+    for (int i = 0; i < indices.size(); i++) {
+        vertexIndicies.push_back(indices[i].vertex_index);
     }
 
-    mesh->SetVertexTextureCoords(vertexTexcoords);
+    mesh->SetVertexIndices(vertexIndicies);
+
+//    std::vector<Vector2> vertexTexcoords;
+//    vertexTexcoords.resize(attrib.vertices.size() / 3);
+//    std::fill(vertexTexcoords.begin(), vertexTexcoords.end(), Vector2(0,0));
 
     mesh->RecalculateNormals();
+    mesh->UploadToGPU();
 
     return mesh;
 }

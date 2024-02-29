@@ -37,6 +37,8 @@ namespace NCL {
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
+            MeshGeometry *LoadOBJMesh(const string &name);
+
         protected:
             void NewRenderLines();
             void NewRenderText();
@@ -134,7 +136,6 @@ namespace NCL {
 
             GLuint CreateHDRTexture();
 
-            MeshGeometry *LoadOBJMesh(const string &name);
         };
     }
 }
