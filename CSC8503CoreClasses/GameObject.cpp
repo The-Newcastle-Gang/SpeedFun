@@ -16,7 +16,6 @@ GameObject::GameObject(std::string objectName)	{
     physicsObject	= nullptr; // Server
     renderObject	= nullptr; // Client
     animatorObject = nullptr;
-    isPlayer        = false;
 }
 
 GameObject::~GameObject()	{
