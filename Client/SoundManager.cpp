@@ -34,6 +34,10 @@ bool SoundManager::SM_IsSoundPlaying(std::string soundName) {
 	return IsSoundPlaying(*sounds[soundName]);
 }
 
+void SoundManager::SM_LoopIfEnd(std::string soundName) {
+	if (!SM_IsSoundPlaying(soundName)) SM_PlaySound(soundName);
+}
+
 bool SoundManager::LoadSoundList() {
 
 	for (std::string fn : soundFileNames) {
@@ -55,6 +59,7 @@ void SoundManager::UnloadSoundList() {
 	sounds.clear();
 	soundFileNames.clear();
 }
+
 SoundManager::~SoundManager() {
 	CloseAudioDevice();
 }

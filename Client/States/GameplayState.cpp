@@ -111,8 +111,7 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitSounds() {
-    soundManager->AddSoundToLoad("koppen.ogg");
-    soundManager->AddSoundToLoad("footsteps.wav");
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
     soundManager->LoadSoundList();
     soundManager->SM_PlaySound("koppen.ogg");
 }
@@ -136,10 +135,6 @@ void GameplayState::OnExit() {
 }
 
 void GameplayState::Update(float dt) {
-    //UpdateMusicStream(music);
-
-
-    //std::cout << "\nSOUND IS PLAYING: " << IsSoundPlaying(sound) << "\n";
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();

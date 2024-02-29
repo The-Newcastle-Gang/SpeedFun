@@ -1,6 +1,7 @@
 #pragma once
 #include "raudio.h"
 
+
 namespace NCL {
     namespace CSC8503 {
 
@@ -17,11 +18,16 @@ namespace NCL {
             bool LoadSoundList();
             void UnloadSoundList();
 
+            // SM_ is here cuz Raudio has already claimed the names I wanted and now I am malding.
             void SM_PlaySound(std::string soundName);
             void SM_StopSound(std::string soundName);
             void SM_ResumeSound(std::string soundName);
             bool SM_IsSoundPlaying(std::string soundName);
+            void SM_LoopIfEnd(std::string soundName);
 
+            int GetLoadedSoundCount() {
+                return sounds.size();
+            }
 
         protected:
 
