@@ -9,6 +9,7 @@ void NCL::CSC8503::DebugMode::DisplayDebug(float dt)
 {
 	GetFPSCount(dt);
 	GetMemoryUsage();
+	GetCameraInfo();
 }
 
 void DebugMode::GetFPSCount(float dt)
@@ -36,4 +37,11 @@ void DebugMode::GetMemoryUsage()
 
 void DebugMode::GetCameraInfo()
 {
+	Debug::Print("Camera info:", Vector2(75, 35), Debug::BLACK);
+	Debug::Print("X: " + std::to_string(currentCam->GetPosition().x), Vector2(75, 30), Debug::BLACK);
+	Debug::Print("Y: " + std::to_string(currentCam->GetPosition().y), Vector2(75, 25), Debug::BLACK);
+	Debug::Print("Z: " + std::to_string(currentCam->GetPosition().z), Vector2(75, 20), Debug::BLACK);
+	Debug::Print("Roll: " + std::to_string(currentCam->GetRoll()), Vector2(75, 15), Debug::BLACK);
+	Debug::Print("Pitch: " + std::to_string(currentCam->GetPitch()), Vector2(75, 10), Debug::BLACK);
+	Debug::Print("Yaw: " + std::to_string(currentCam->GetYaw()), Vector2(75, 5), Debug::BLACK);
 }

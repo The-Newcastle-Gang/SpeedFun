@@ -104,7 +104,7 @@ void GameplayState::OnEnter() {
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
-    debugger = new DebugMode();
+    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 }
 
@@ -323,7 +323,7 @@ void GameplayState::InitLevel() {
 
     //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();

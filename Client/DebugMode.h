@@ -10,6 +10,12 @@ namespace NCL {
 		{
 
 		public:
+
+			DebugMode(Camera* cam)
+			{
+				currentCam = cam;
+			}
+
 			void DisplayDebug(float dt);
 		protected:
 			void GetFPSCount(float dt);
