@@ -24,4 +24,5 @@ void main(void){
 	//fragColour.a = 1.0;
 	
 	fragColour.xyz = diffuse;
+	fragColour.a = 1.0;
 }

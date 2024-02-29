@@ -44,6 +44,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenFramebuffers(1, &shadowFBO);
+    glGenFramebuffers(1, &lightFBO);
+    glGenFramebuffers(1, &bufferFBO);
 
     GenerateScreenTexture(bufferColourTex, false);
     GenerateScreenTexture(bufferNormalTex, false);
@@ -51,9 +54,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     GenerateScreenTexture(lightSpecularTex, false);
     GenerateScreenTexture(bufferDepthTex, true);
 
-	glGenFramebuffers(1, &shadowFBO);
-    glGenFramebuffers(1, &lightFBO);
-    glGenFramebuffers(1, &bufferFBO);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
@@ -63,6 +63,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bufferNormalTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
     glDrawBuffers(2, buffers);
 
     glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
@@ -217,10 +218,10 @@ void GameTechRenderer::LoadSkybox() {
 void GameTechRenderer::RenderFrame() {
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
-
+    glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glClearColor(1, 1, 1, 1);
 	BuildObjectList();
 	SortObjectList();
@@ -243,8 +244,10 @@ void GameTechRenderer::RenderFrame() {
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glDepthFunc(GL_LEQUAL);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
+
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
@@ -308,8 +311,14 @@ void GameTechRenderer::CombineBuffers() {
     viewTemp.ToIdentity();
     projTemp.ToIdentity();
 
+
+
     glDepthMask(false);
     GLuint shaderID = combineShader->GetProgramID();
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "modelMatrix"), 1, false, (float*)modelTemp.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "viewMatrix"), 1, false, (float*)viewTemp.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "projMatrix"), 1, false, (float*)projTemp.array);
+
     glUniform1i(glGetUniformLocation(shaderID, "diffuseTex"), 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, bufferColourTex);
@@ -448,6 +457,7 @@ void GameTechRenderer::RenderSkybox() {
     glDisable(GL_CULL_FACE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
@@ -472,6 +482,7 @@ void GameTechRenderer::RenderSkybox() {
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 }
 
 void GameTechRenderer::RenderCamera() {
@@ -497,7 +508,7 @@ void GameTechRenderer::RenderCamera() {
     int cameraLocation = 0;
 
     //TODO - PUT IN FUNCTION
-    glActiveTexture(GL_TEXTURE0 + 1);
+    glActiveTexture(GL_TEXTURE0+1);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
 
     for (const auto&i : activeObjects) {
