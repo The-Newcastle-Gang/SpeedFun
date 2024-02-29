@@ -111,8 +111,7 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitSounds() {
-    soundManager->AddSoundToLoad("koppen.ogg");
-    soundManager->AddSoundToLoad("footsteps.wav");
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
     soundManager->LoadSoundList();
     soundManager->SM_PlaySound("koppen.ogg");
 }
