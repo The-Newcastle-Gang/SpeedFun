@@ -90,6 +90,8 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
+
+            void SetTriggerTypePositions();
         };
     }
 }

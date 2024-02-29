@@ -158,8 +158,7 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetTransform().SetPosition(triggerVec.second);
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
 
-        Debug::DrawAABBLines(triggerVec.second, tempSize,
-                             colour, 1000.0f);
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
 
@@ -175,7 +174,7 @@ void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &trigg
             break;
         case TriggerVolumeObject::TriggerType::Death:
             colour = {1, 0, 0, 1};
-            dimensions = Vector3(1000, 10, 1000);
+            dimensions = Vector3(2000, 10, 2000);
             break;
         case TriggerVolumeObject::TriggerType::CheckPoint:
             colour = {1, 0.4f, 1, 1};
@@ -218,14 +217,8 @@ void RunningState::BuildLevel(const std::string &levelName)
     currentLevelStartPos = levelReader->GetStartPosition();
     currentLevelEndPos = levelReader->GetEndPosition();
     currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
-    triggersVector = {
-            std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
-    };
+
+    SetTriggerTypePositions();
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
@@ -234,6 +227,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
+}
+
+void RunningState::SetTriggerTypePositions(){
+    triggersVector = {
+            std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
+    };
 }
 
 void RunningState::SetTestSprings() {
