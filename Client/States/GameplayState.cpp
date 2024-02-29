@@ -135,10 +135,6 @@ void GameplayState::OnExit() {
 }
 
 void GameplayState::Update(float dt) {
-    //UpdateMusicStream(music);
-
-
-    //std::cout << "\nSOUND IS PLAYING: " << IsSoundPlaying(sound) << "\n";
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();

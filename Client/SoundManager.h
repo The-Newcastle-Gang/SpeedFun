@@ -25,6 +25,10 @@ namespace NCL {
             bool SM_IsSoundPlaying(std::string soundName);
             void SM_LoopIfEnd(std::string soundName);
 
+            int GetLoadedSoundCount() {
+                return sounds.size();
+            }
+
         protected:
 
             std::vector<std::string> soundFileNames;
