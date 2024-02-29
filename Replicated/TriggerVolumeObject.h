@@ -8,9 +8,12 @@
 #include "GameObject.h"
 #include "PhysicsObject.h"
 #include "Vector4.h"
+#include "entt.hpp"
 
 using namespace NCL;
 using namespace CSC8503;
+
+typedef entt::sigh<void()> TriggerSignal;
 
 class TriggerVolumeObject : public GameObject {
 public:
@@ -21,19 +24,16 @@ public:
         CheckPoint = 8,
     };
 
-    struct triggerInfo{
-        Vector4 colour;
-        Vector3 size;
-    };
-
-    TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
+    TriggerVolumeObject(TriggerType triggerEnum);
 
     virtual void OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
+    entt::sink<TriggerSignal> TriggerSink;
+
 private:
     TriggerType triggerType;
+    TriggerSignal triggerSignal;
 };
-
 
 #endif //GITIGNORE_TRIGGERVOLUMEOBJECT_H

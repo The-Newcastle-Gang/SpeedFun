@@ -92,6 +92,7 @@ namespace NCL {
             void SetTestFloor();
 
             void SetTriggerTypePositions();
+            void beans();
         };
     }
 }

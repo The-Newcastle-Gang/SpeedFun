@@ -204,7 +204,6 @@ void GameplayState::ReadNetworkFunctions() {
             }
             break;
         }
-
     }
 }
 void GameplayState::ResetCameraAnimation() {

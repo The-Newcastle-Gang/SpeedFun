@@ -2,11 +2,17 @@
 
 using namespace NCL::CSC8503;
 
+TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum) : TriggerSink(triggerSignal) {
+    triggerType = triggerEnum;
+
+}
+
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
     if(otherObject->GetTag() == Tag::PLAYER){
         switch (triggerType) {
             case TriggerType::Start:
                 std::cout << "Start volume\n";
+                triggerSignal.publish();
                 break;
             case TriggerType::End:
                 std::cout << "End volume\n";
@@ -33,6 +39,7 @@ void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
         std::cout << "Collision with player has ended\n";
         switch (triggerType) {
             case TriggerType::Start:
+                if(otherObject->GetCurrentCheckPointPos() != Vector3()) { return; }
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;
             case TriggerType::End:

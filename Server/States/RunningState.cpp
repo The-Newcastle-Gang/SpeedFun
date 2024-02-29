@@ -142,6 +142,10 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::beans(){
+    std::cout << "Trigger signal\n";
+}
+
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
         auto trigger = new TriggerVolumeObject(triggerVec.first);
@@ -160,10 +164,13 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
         trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
 
+        trigger->TriggerSink.connect<&RunningState::beans>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
+
+
 
 void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {
     switch (triggerType) {
