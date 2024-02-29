@@ -4,8 +4,8 @@ using namespace NCL;
 using namespace CSC8503;
 
 void TestTrapBlock::Update(float dt) {
-	bool collisionResult = OnCollisionEnter(gameObject);
-	if (collisionResult) {
+	//bool collisionResult = OnCollisionEnter(gameObject);
+	if (blockFall) {
 		TrapBlockFall(dt);
 	}
 }
@@ -25,7 +25,7 @@ bool TestTrapBlock::OnCollisionEnter(GameObject* otherObject) {
 
 void TestTrapBlock::TrapBlockFall(float dt) {
 	warningTime += dt;
-	if (warningTime >= 10) {
+	if (warningTime >= 5) {
 		gameObject->GetTransform().SetPosition(Vector3(-107, -5 - 10 * warningTime, -15));
 		//warningTime = 0.0;
 	}

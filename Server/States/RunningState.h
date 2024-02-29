@@ -49,6 +49,7 @@ namespace NCL {
             std::unordered_map<int, PlayerInfo> playerInfo;
 
             std::vector<std::pair<TriggerVolumeObject::TriggerType, Vector3>> triggersVector;
+
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;
@@ -85,6 +86,8 @@ namespace NCL {
             void ApplyPlayerMovement();
 
             void AddTestTrapBlock();
+
+            bool blockStartFall = true;
         };
     }
 }

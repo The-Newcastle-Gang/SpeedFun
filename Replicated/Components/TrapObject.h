@@ -20,7 +20,7 @@ namespace NCL::CSC8503 {
 	{
 	public:
 
-		TestTrapBlock(GameObject* go) { gameObject = go; }
+		TestTrapBlock(GameObject* go, bool start) { gameObject = go; blockFall = start; }
 
 		void Update(float dt)override;
 
@@ -32,6 +32,7 @@ namespace NCL::CSC8503 {
 
 	protected:
 		double warningTime = 0.0;
+		bool blockFall;
 		std::unordered_map<const GameObject*, float> pushableObject;
 	};
 }

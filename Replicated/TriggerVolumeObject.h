@@ -21,12 +21,12 @@ public:
 
     TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
 
-    virtual void OnCollisionBegin(GameObject* otherObject);
+    virtual bool OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
 private:
     TriggerType triggerType;
-
+    bool startfall;
 };
 
 

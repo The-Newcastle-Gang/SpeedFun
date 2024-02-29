@@ -88,8 +88,9 @@ namespace NCL::CSC8503 {
             worldID = newID;
         }
     
-        virtual void OnCollisionBegin(GameObject* otherObject) {
+        virtual bool OnCollisionBegin(GameObject* otherObject) {
             //std::cout << "OnCollisionBegin event occured!\n";
+            return true;
         }
 
         virtual void OnCollisionEnd(GameObject* otherObject) {

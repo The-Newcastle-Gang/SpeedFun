@@ -153,6 +153,7 @@ void RunningState::AddTriggersToLevel(){
 
         Debug::DrawAABBLines(triggerVec.second, Vector3(5,5,5), Debug::MAGENTA, 1000.0f);
     }
+
 }
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
@@ -186,7 +187,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     currentLevelEndPos = levelReader->GetEndPosition();
     currentLevelDeathPos = levelReader->GetDeathBoxPosition();
     triggersVector = {
-            std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
+            //std::make_pair((TriggerVolumeObject::TriggerType)1, currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType)2, currentLevelEndPos),
             std::make_pair((TriggerVolumeObject::TriggerType)4, currentLevelDeathPos),
             std::make_pair((TriggerVolumeObject::TriggerType)1, Vector3(-110,5,-15))
@@ -209,5 +210,5 @@ void RunningState::AddTestTrapBlock() {
     replicated->AddTrapBlockToLevel(testTrapBlock, *world);
     testTrapBlock->SetPhysicsObject(new PhysicsObject(&testTrapBlock->GetTransform(), testTrapBlock->GetBoundingVolume(), new PhysicsMaterial()));
     testTrapBlock->GetPhysicsObject()->SetInverseMass(0.0f);
-    testTrapBlock->AddComponent((Component*)(new TestTrapBlock(testTrapBlock)));
+    testTrapBlock->AddComponent((Component*)(new TestTrapBlock(testTrapBlock,false)));
 }
