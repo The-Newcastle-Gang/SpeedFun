@@ -219,6 +219,14 @@ MeshGeometry::MeshGeometry(const std::string&filename) {
 	}
 }
 
+bool MeshGeometry::GetBindPoseState(int subMesh, SubMeshPoses& pose) const {
+    if (subMesh < 0 || subMesh >= (int)bindPoseStates.size()) {
+        return false;
+    }
+    pose = bindPoseStates[subMesh];
+    return true;
+}
+
 MeshGeometry::~MeshGeometry()
 {
 }

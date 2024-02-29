@@ -2,8 +2,8 @@
 #include "GameObject.h"
 #include "Constraint.h"
 #include "CollisionDetection.h"
+#include "AnimatorObject.h"
 #include "Camera.h"
-
 
 using namespace NCL;
 using namespace NCL::CSC8503;
@@ -74,11 +74,18 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 
 void GameWorld::UpdateWorld(float dt) {
 
+    for (GameObject* g : gameObjects) {
+        if (g->GetAnimatorObject()) {
+            g->GetAnimatorObject()->UpdateAnimation(dt);
+        }
+    }
+
 	for (GameObject* gameObject : gameObjects)gameObject->Update(dt);
 
 	auto rng = std::default_random_engine{};
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine e(seed);
+
 
     if (shuffleObjects) {
         std::shuffle(gameObjects.begin(), gameObjects.end(), e);

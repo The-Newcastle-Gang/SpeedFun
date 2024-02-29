@@ -1,13 +1,17 @@
 #pragma once
 #include "TextureBase.h"
 #include "ShaderBase.h"
+#include "MeshAnimation.h"
+#include "MeshGeometry.h"
+#include "MeshMaterial.h"
+#include "AnimatorObject.h"
 
 namespace NCL {
 	using namespace NCL::Rendering;
-
 	class MeshGeometry;
 	namespace CSC8503 {
 		class Transform;
+        
 		using namespace Maths;
 
 		class RenderObject
@@ -32,6 +36,14 @@ namespace NCL {
 				return transform;
 			}
 
+            void SetMeshMaterial(MeshMaterial* m) {
+                meshMaterial = m;
+            }
+
+            MeshMaterial* GetMeshMaterial() const {
+                return meshMaterial;
+            }
+
 			ShaderBase*		GetShader() const {
 				return shader;
 			}
@@ -44,11 +56,21 @@ namespace NCL {
 				return colour;
 			}
 
+            void SetAnimatorObject(AnimatorObject* a) {
+                animatorObject = a;
+            }
+            AnimatorObject* GetAnimatorObject() const {
+                return animatorObject;
+            }
+
+
 		protected:
 			MeshGeometry*	mesh;
+            MeshMaterial* meshMaterial;
 			TextureBase*	texture;
 			ShaderBase*		shader;
 			Transform*		transform;
+            AnimatorObject* animatorObject;
 			Vector4			colour;
 		};
 	}

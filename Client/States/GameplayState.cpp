@@ -284,10 +284,23 @@ void GameplayState::InitWorld() {
 }
 
 void GameplayState::CreatePlayers() {
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
+    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
+      
+        playerMesh->AddAnimationToMesh("Run", testAnimation);
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+
+        AnimatorObject* newAnimator = new AnimatorObject();
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        player->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+
+        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
@@ -299,6 +312,7 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+
     }
 
 

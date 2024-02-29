@@ -1,6 +1,7 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include "AnimatorObject.h"
 #include "Component.h"
 
 namespace NCL::CSC8503 {
@@ -68,6 +69,10 @@ namespace NCL::CSC8503 {
             return networkObject;
         }
 
+        AnimatorObject* GetAnimatorObject() const {
+            return animatorObject;
+        }
+
         void SetRenderObject(RenderObject* newObject) {
             renderObject = newObject;
         }
@@ -78,6 +83,10 @@ namespace NCL::CSC8503 {
 
         void SetNetworkObject(NetworkObject* newObject) {
             networkObject = newObject;
+        }
+
+        void SetAnimatorObject(AnimatorObject* newObject) {
+            animatorObject = newObject;
         }
 
         const std::string& GetName() const {
@@ -132,6 +141,7 @@ namespace NCL::CSC8503 {
         PhysicsObject*		physicsObject;
         RenderObject*		renderObject;
         NetworkObject*		networkObject;
+        AnimatorObject*		    animatorObject;
 
         Vector3 checkPointPos;
 
