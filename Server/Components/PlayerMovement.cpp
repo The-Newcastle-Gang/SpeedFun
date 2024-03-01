@@ -178,7 +178,7 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
 bool PlayerMovement::GroundCheck() {
 
     constexpr static float groundOffset = 0.1;
-    constexpr static float groundDistanceCheck = 0.4;
+    constexpr static float groundDistanceCheck = 0.2;
 
     auto physicsObject = gameObject->GetPhysicsObject();
     auto position = gameObject->GetTransform().GetPosition();
@@ -192,6 +192,9 @@ bool PlayerMovement::GroundCheck() {
 
     if (world->Raycast(ray, closestCollision, true, gameObject)) {
         Vector3 dist = closestCollision.collidedAt - capBottom;
+        std::cout << closestCollision.collidedAt << "\n";
+        std::cout << closestCollision.collidedAt - capBottom << "\n";
+        std::cout << dist.Length() << "\n";
         if (dist.Length() < groundDistanceCheck) {
             return true;
         }
