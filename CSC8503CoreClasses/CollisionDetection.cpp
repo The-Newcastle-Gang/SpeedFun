@@ -480,6 +480,7 @@ bool CollisionDetection::OBBCapsuleIntersection(const CapsuleVolume& volumeA, co
 	bool collided = AABBCapsuleIntersection(volumeA, tempTransform, AABBVolume(volumeB.GetHalfDimensions()), worldTransformB, collisionInfo);
 
 	if (collided) {
+		
 		collisionInfo.point.localA = boxTransform * collisionInfo.point.localA;
 		collisionInfo.point.localB = boxTransform * collisionInfo.point.localB;
 		collisionInfo.point.normal = boxTransform * collisionInfo.point.normal;

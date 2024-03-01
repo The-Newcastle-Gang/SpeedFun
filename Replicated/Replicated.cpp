@@ -18,10 +18,11 @@ int Replicated::GetCurrentLevelLen(){
 void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
 
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
-    auto volume = new AABBVolume(currentPrimitive->colliderExtents * 0.5f);
+    auto volume = new OBBVolume(currentPrimitive->colliderExtents * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
+        .SetOrientation(Quaternion::EulerAnglesToQuaternion(0.0f, 0, 0))
         .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position);
 }
@@ -69,7 +70,7 @@ void Replicated::AddSwingingBlock(GameObject* g, GameWorld& world) {
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
-    auto volume = new AABBVolume(Vector3(meshSize, meshSize, meshSize));
+    auto volume = new CapsuleVolume(meshSize/2, meshSize/2);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
