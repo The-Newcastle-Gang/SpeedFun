@@ -116,9 +116,18 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
 GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
+    glDeleteTextures(1, &bufferColourTex);
+    glDeleteTextures(1, &bufferNormalTex);
+    glDeleteTextures(1, &lightDiffuseTex);
+    glDeleteTextures(1, &lightSpecularTex);
     glDeleteFramebuffers(1, &shadowFBO);
+    glDeleteFramebuffers(1, &lightFBO);
+    glDeleteFramebuffers(1, &bufferFBO);
+    delete shadowShader;
     delete defaultShader;
     delete combineShader;
+    delete pointLightShader;
+    delete skyboxShader;
 }
 
 void GameTechRenderer::InitUIQuad() {
