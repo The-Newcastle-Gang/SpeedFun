@@ -63,6 +63,7 @@ namespace NCL {
             void SortObjectList();
             void RenderShadowMap();
             void RenderCamera();
+            void ApplyPostProcessing();
             void RenderSkybox();
             void FillDiffuseBuffer();
             void RenderDeferredLighting();

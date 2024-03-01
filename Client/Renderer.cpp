@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
 #include "Resources.h"
@@ -290,6 +291,7 @@ void GameTechRenderer::RenderFrame() {
     FillDiffuseBuffer();
     RenderDeferredLighting();
     CombineBuffers();
+    //ApplyPostProcessing();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -356,7 +358,7 @@ void GameTechRenderer::RenderDeferredLighting() {
 
     }
 
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
@@ -699,6 +701,14 @@ void GameTechRenderer::RenderCamera() {
         }
     }
 
+    
+
+
+}
+
+void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
+{
+    float screenAspect = (float)windowWidth / (float)windowHeight;
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -719,15 +729,13 @@ void GameTechRenderer::RenderCamera() {
     int lightLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
     int depthLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
-    glUniform3fv(lightLoc, 1, (float*)&lightPosition);
+    glUniform3fv(lightLoc, 1, (float*)&sunlight.lightPosition);
     glUniform1i(depthLoc, 1);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
-
-
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {

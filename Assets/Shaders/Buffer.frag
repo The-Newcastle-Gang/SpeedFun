@@ -43,6 +43,10 @@ void main(void)	{
 
 	vec3  incident = normalize ( lightPos - IN.worldPos );
 	float lambert  = max (0.0 , dot ( incident , IN.normal )) * 0.9; 
+
+	//float toonLambert = smoothstep(0.0, 0.01, dot(normalize(lightPos - IN.worldPos), IN.normal));
+	//float toonSpecular = smoothstep(0.155, 0.16, sFactor);
+
 	
 	vec3 viewDir = normalize ( cameraPos - IN . worldPos );
 	vec3 halfDir = normalize ( incident + viewDir );
