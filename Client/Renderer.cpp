@@ -20,7 +20,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
-    particleShader = new OGLShader("InstancedParticle.vert", "scene.frag");
+    particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticle.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -93,11 +93,25 @@ GameTechRenderer::~GameTechRenderer()	{
 
 
 
-void NCL::CSC8503::GameTechRenderer::RenderParticles()
+void GameTechRenderer::RenderParticles()
 {
+    BindShader(particleShader);
+
+    float screenAspect = (float)windowWidth / (float)windowHeight;
+    Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+    Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+
+    int projLocation = glGetUniformLocation(particleShader->GetProgramID(), "projMatrix");
+    int viewLocation = glGetUniformLocation(particleShader->GetProgramID(), "viewMatrix");
+
+    glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
+    glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+
+
+
+
     for (auto ps : particleSystems)
     {
-        std::cout << "drawing at: " << ps->GetParticle().position << std::endl;
         ps->DrawParticles();
     }
 }
