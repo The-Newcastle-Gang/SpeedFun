@@ -326,7 +326,7 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("debuglvl.json");
+    lr->HasReadLevel("dbtest.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();

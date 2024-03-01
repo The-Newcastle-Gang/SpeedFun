@@ -89,7 +89,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("debuglvl");
+    BuildLevel("dbtest");
     AddTriggersToLevel();
     CreatePlayers();
 }
