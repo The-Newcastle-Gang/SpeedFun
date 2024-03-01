@@ -203,6 +203,12 @@ void GameplayState::ReadNetworkFunctions() {
                 strafeSpeed = strfSpd;
             }
             break;
+
+            case(Replicated::Grapple_Event): {
+                int eventType = handler.Unpack<int>();
+                HandleGrappleEvent(eventType);
+            }
+            break;
         }
 
     }
@@ -227,6 +233,19 @@ void GameplayState::WalkCamera(float dt) {
 void GameplayState::JumpCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
     jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::HandleGrappleEvent(int event) {
+    switch (event) {
+        case 1: {
+            strafeTiltAmount = strafeTiltAmountGrappling;
+            break;
+        }
+        case 2: {
+            strafeTiltAmount = strafeTiltAmountGrounded;
+           break;
+        }
+    }
 }
 
 void GameplayState::LandCamera(float dt) {

@@ -236,6 +236,16 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
     }
+
+    if ( int state = playerMovement->cameraAnimationCalls.grapplingState != 0) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.grapplingState);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
+        playerMovement->cameraAnimationCalls.grapplingState = 0;
+
+    }
     
 }
 
