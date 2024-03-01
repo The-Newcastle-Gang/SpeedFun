@@ -20,6 +20,7 @@ https://research.ncl.ac.uk/game/
 
 #include "MeshGeometry.h"
 
+
 #ifdef _WIN32
 #include "Win32Window.h"
 
@@ -44,6 +45,8 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 #endif
 	boundMesh	= nullptr;
 	boundShader = nullptr;
+    boundAnimation = nullptr;
+    boundMeshMaterial = nullptr;
 
 	windowWidth	= (int)w.GetScreenSize().x;
 	windowHeight	= (int)w.GetScreenSize().y;
@@ -51,7 +54,6 @@ OGLRenderer::OGLRenderer(Window& w) : RendererBase(w)	{
 	if (initState) {
 		TextureLoader::RegisterAPILoadFunction(OGLTexture::RGBATextureFromFilename);
 	}
-
 	forceValidDebugState = false;
 }
 
@@ -119,6 +121,14 @@ void OGLRenderer::BindMesh(MeshGeometry*m) {
 	}
 }
 
+void OGLRenderer::BindAnimation(AnimatorObject* a) {
+    boundAnimation = a;
+}
+
+void OGLRenderer::BindMeshMaterial(MeshMaterial* m) {
+    boundMeshMaterial = m;
+}
+
 void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 	if (!boundMesh) {
 		std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
@@ -128,6 +138,8 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
 		return;
 	}
+
+    
 	GLuint	mode	= 0;
 	int		count	= 0;
 	int		offset	= 0;
@@ -154,14 +166,59 @@ void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 		case GeometryPrimitive::TriangleStrip:	mode = GL_TRIANGLE_STRIP;	break;
 		case GeometryPrimitive::Patches:		mode = GL_PATCHES;			break;
 	}
-
 	if (boundMesh->GetIndexCount() > 0) {
 		glDrawElements(mode, count, GL_UNSIGNED_INT, (const GLvoid*)(offset * sizeof(unsigned int)));
 	}
 	else {
 		glDrawArrays(mode, 0, count);
 	}
+    
 }
+
+void OGLRenderer::DrawBoundAnimation(int layerCount)
+{
+    const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
+    const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
+    const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
+    const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
+    const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
+    SubMeshPoses pose;
+
+    for (int l = 0; l < layerCount; l++) {
+
+        boundMesh->GetBindPoseState(l, pose);
+
+        int jointLoc = glGetUniformLocation(boundShader->programID, "joints");
+        int nextJointLoc = glGetUniformLocation(boundShader->programID, "nextJoints");
+        int frameLerpLoc = glGetUniformLocation(boundShader->programID, "frameLerp");
+
+        float framePercentage = boundAnimation->GetFramePercent();
+
+        vector<Matrix4> frameMatrices;
+        vector<Matrix4> nextFrameMatrices;
+        for (unsigned int i = 0; i < pose.count; ++i) {
+            int jointID = bindPoseIndices[pose.start + i];
+
+            Matrix4 mat = frameData[jointID] * invBindPose[pose.start + i];
+            Matrix4 nextMat = nextFrameData[jointID] * invBindPose[pose.start + i];
+
+            frameMatrices.emplace_back(mat);
+            nextFrameMatrices.emplace_back(nextMat);
+        }
+
+        glUniformMatrix4fv(jointLoc, frameMatrices.size(), false, (float*)frameMatrices.data());
+        glUniformMatrix4fv(nextJointLoc, nextFrameMatrices.size(), false, (float*)nextFrameMatrices.data());
+        glUniform1f(frameLerpLoc, framePercentage);
+
+        OGLTexture* layerTex = (OGLTexture*)boundMeshMaterial->GetMaterialForLayer(l)->GetEntry("Diffuse");
+        
+        BindTextureToShader(layerTex, "mainTex", 0);
+
+        DrawBoundMesh(l);
+    }
+}
+
+
 
 void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& uniform, int texUnit) const{
 	GLint texID = 0;

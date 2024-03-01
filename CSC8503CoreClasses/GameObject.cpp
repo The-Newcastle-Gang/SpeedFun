@@ -6,7 +6,7 @@
 #include "Debug.h"
 using namespace NCL::CSC8503;
 
-GameObject::GameObject(string objectName)	{
+GameObject::GameObject(std::string objectName)	{
     name			= objectName;
     worldID			= -1;
     isActive		= true;
@@ -15,13 +15,15 @@ GameObject::GameObject(string objectName)	{
     networkObject	= nullptr; // Replicated
     physicsObject	= nullptr; // Server
     renderObject	= nullptr; // Client
+    animatorObject = nullptr;
 }
 
 GameObject::~GameObject()	{
-	delete boundingVolume;
-	delete physicsObject;
-	delete renderObject;
-	delete networkObject;
+    delete boundingVolume;
+    delete physicsObject;
+    delete renderObject;
+    delete animatorObject;
+    delete networkObject;
 
 	for (Component* c : components) {
 		delete c;

@@ -183,14 +183,16 @@ void GameTechRenderer::CreatePostProcessQuad() {
 }
 
 void GameTechRenderer::LoadSkybox() {
+    // THE TEMP SKYBOX IS FROM HERE: https://assetstore.unity.com/packages/2d/textures-materials/sky/8k-skybox-pack-free-150926
     string filenames[6] = {
-        "/Cubemap/skyrender0004.png",
-        "/Cubemap/skyrender0001.png",
-        "/Cubemap/skyrender0003.png",
-        "/Cubemap/skyrender0006.png",
-        "/Cubemap/skyrender0002.png",
-        "/Cubemap/skyrender0005.png"
+        "/Cubemap/nx.png",
+        "/Cubemap/px.png",
+        "/Cubemap/py.png",
+        "/Cubemap/ny.png",
+        "/Cubemap/nz.png",
+        "/Cubemap/pz.png"
     };
+
 
     int width[6]	= { 0 };
     int height[6]	= { 0 };
@@ -525,7 +527,7 @@ void GameTechRenderer::RenderCamera() {
     glActiveTexture(GL_TEXTURE0+1);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
 
-    for (const auto&i : activeObjects) {
+    for (const RenderObject* i : activeObjects) {
         OGLShader* shader = (OGLShader*)(*i).GetShader();
         if (!shader) {
             shader = defaultShader;
@@ -581,12 +583,24 @@ void GameTechRenderer::RenderCamera() {
 
         glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
 
-        glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() ? 1:0);
+        glUniform1i(hasTexLocation, (OGLTexture*)(*i).GetDefaultTexture() || (*i).GetMeshMaterial()  ? 1:0);
 
         glUniform1i(isLitLocation, 1);
 
         BindMesh((*i).GetMesh());
+
         int layerCount = (*i).GetMesh()->GetSubMeshCount();
+
+        if (MeshMaterial* m = (*i).GetMeshMaterial())BindMeshMaterial(m);
+        else(BindMeshMaterial(nullptr));
+
+        if ((*i).GetAnimatorObject()) {
+            BindAnimation(i->GetAnimatorObject());
+            DrawBoundAnimation(layerCount);
+            BindAnimation(nullptr);
+            continue;
+        }
+
         for (int i = 0; i < layerCount; ++i) {
             DrawBoundMesh(i);
         }

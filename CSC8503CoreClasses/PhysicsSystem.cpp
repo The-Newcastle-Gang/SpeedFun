@@ -240,6 +240,8 @@ void PhysicsSystem::BasicCollisionDetection() {
                 continue;
             }
 
+            if (!layerMatrix[(*j)->GetPhysicsObject()->GetLayer() | (*i)->GetPhysicsObject()->GetLayer()])continue;
+
             CollisionDetection::CollisionInfo info;
 
             if(CollisionDetection::ObjectIntersection(*i,*j,info)){

@@ -19,6 +19,7 @@ MeshAnimation::MeshAnimation(unsigned int jointCount, unsigned int frameCount, f
 	this->frameCount = frameCount;
 	this->frameRate  = frameRate;
 	this->allJoints  = frames;
+    this->frameTimeDelta = 0;
 }
 
 MeshAnimation::MeshAnimation(const std::string& filename) : MeshAnimation() {
@@ -37,6 +38,7 @@ MeshAnimation::MeshAnimation(const std::string& filename) : MeshAnimation() {
 	file >> frameCount;
 	file >> jointCount;
 	file >> frameRate;
+    frameTimeDelta = 1.0f / frameRate;
 
 	allJoints.reserve((size_t)frameCount * jointCount);
 

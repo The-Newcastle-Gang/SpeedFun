@@ -3,14 +3,20 @@
 using namespace NCL;
 using namespace CSC8503;
 
-GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
+# define PI 3.141592f
+
+GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas, SoundManager* pSoundManager) : State() {
     renderer = pRenderer;
     world = pGameworld;
+    soundManager = pSoundManager;
     // Don't touch base client in here, need some way to protect this.
     baseClient = pClient;
     resources = pResources;
     replicated = std::make_unique<Replicated>();
     canvas = pCanvas;
+
+    timeBar = new Element(1);
+
 }
 
 GameplayState::~GameplayState() {
@@ -24,17 +30,61 @@ void GameplayState::InitCanvas(){
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
 
+    InitCrossHeir();
+    InitTimerBar();
+    InitLevelMap();
+}
+
+void GameplayState::InitCrossHeir(){
+    //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.2,0.2,0.2,1.0})
+            .SetColor({0.0,0.0,0.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.2,0.2,0.2,1.0})
+            .SetColor({0.0,0.0,0.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
+
+}
+
+void GameplayState::InitTimerBar(){
+
+    //timer Bar
+    timeBar = &canvas->AddElement()
+            .SetColor({0,1,0,1})
+            .SetAbsoluteSize({800, 30})
+            .AlignCenter()
+            .AlignTop(30);
+}
+
+void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
+    if (!firstPersonPosition) return;
+    float tVal = CalculateCompletion(firstPersonPosition->GetPosition());
+    tVal = std::clamp(tVal, 0.0f, 1.0f);
+    tVal = tVal * 300 - 150;
+
+    element.AlignMiddle((int)tVal);
+}
+
+void GameplayState::InitLevelMap(){
+    //map bar
+    auto& levelBar = canvas->AddElement()
+            .SetColor({1,1,1,1})
+            .SetAbsoluteSize({20, 300})
+            .AlignRight(20)
+            .AlignMiddle();
+
+    auto& playerElement = canvas->AddElement()
+            .SetColor({0.0,0.0,0.,1})
+            .SetAbsoluteSize({20,20})
+            .AlignRight(20)
+            .AlignMiddle(-150);
+
+    playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
 
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
@@ -59,6 +109,15 @@ void GameplayState::OnEnter() {
     InitCanvas();
     renderer->SetPointLights(world->GetPointLights());
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+
+    InitSounds();
+
+}
+
+void GameplayState::InitSounds() {
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
+    soundManager->LoadSoundList();
+    soundManager->SM_PlaySound("koppen.ogg");
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -75,10 +134,12 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
+    soundManager->UnloadSoundList();
     delete networkThread;
 }
 
 void GameplayState::Update(float dt) {
+    ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
 
@@ -88,6 +149,10 @@ void GameplayState::Update(float dt) {
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
     }
+    WalkCamera(dt);
+    if (jumpTimer > 0) JumpCamera(dt);
+    if (landTimer > 0) LandCamera(dt);
+    StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
@@ -97,17 +162,86 @@ void GameplayState::Update(float dt) {
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
+        ResetCameraToForwards();
+    }
+}
+
+void GameplayState::ResetCameraToForwards() {
+    world->GetMainCamera()->SetPitch(0.68f);
+    world->GetMainCamera()->SetYaw(269.43f);
+
 }
 
 void GameplayState::ReadNetworkFunctions() {
     while (!networkData->incomingFunctions.IsEmpty()) {
         FunctionPacket packet = networkData->incomingFunctions.Pop();
-        if (packet.functionId == Replicated::AssignPlayer) {
-            DataHandler handler(&packet.data);
-            auto networkId = handler.Unpack<int>();
-            AssignPlayer(networkId);
+        DataHandler handler(&packet.data);
+        switch (packet.functionId) {
+            case(Replicated::AssignPlayer): {
+                int networkId = handler.Unpack<int>();
+                AssignPlayer(networkId);
+            }
+            break;
+
+            case(Replicated::Camera_GroundedMove): {
+                float intesnity = handler.Unpack<float>();
+                currentGroundSpeed = intesnity;
+            }
+            break;
+
+            case(Replicated::Camera_Jump): {
+                jumpTimer = PI;
+            }
+            break;
+            
+            case(Replicated::Camera_Land): {
+                float grounded = handler.Unpack<float>();
+                landIntensity = std::clamp(grounded, 0.0f, landFallMax);
+                landTimer = PI;
+            }
+            break;
+            
+            case(Replicated::Camera_Strafe): {
+                float strfSpd = handler.Unpack<float>();
+                strafeSpeed = strfSpd;
+            }
+            break;
         }
+
     }
+}
+void GameplayState::ResetCameraAnimation() {
+    currentGroundSpeed = 0.0f;
+    strafeSpeed = 0.0f;
+}
+void GameplayState::WalkCamera(float dt) {
+    
+    groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
+    if (walkSoundTimer <= 0) {
+        soundManager->SM_PlaySound("footsteps.wav");
+        walkSoundTimer += PI;
+    }
+    float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, bobHeight * (groundedMovementSpeed / maxMoveSpeed), 0));
+    walkTimer += dt * groundedMovementSpeed * 0.75f;
+    walkSoundTimer -= dt * groundedMovementSpeed * 0.75f;
+}
+
+void GameplayState::JumpCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
+    jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::LandCamera(float dt) {
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+                                              Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
+    landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::StrafeCamera(float dt) {
+    strafeAmount = strafeAmount * 0.95f + strafeSpeed * 0.05f;
+    world->GetMainCamera()->SetRoll(-strafeTiltAmount * (strafeAmount / strafeSpeedMax));
 }
 
 // Perhaps replace this with a data structure that won't overlap objects on the same packet.
@@ -151,6 +285,8 @@ void GameplayState::InitialiseAssets() {
     InitCamera();
     InitWorld();
     FinishLoading();
+
+    
 }
 
 void GameplayState::FinishLoading() {
@@ -172,10 +308,23 @@ void GameplayState::InitWorld() {
 }
 
 void GameplayState::CreatePlayers() {
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
+    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
+      
+        playerMesh->AddAnimationToMesh("Run", testAnimation);
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+
+        AnimatorObject* newAnimator = new AnimatorObject();
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        player->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetAnimatorObject(newAnimator);
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+
+        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
@@ -187,12 +336,20 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+
     }
 
-    SetTestSprings();
+
+    //SetTestSprings();
 
     SetTestFloor();
 
+    levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
+    startPos = lr->GetStartPosition();
+    // TEST SWINGING OBJECT ON THE CLIENT
+    auto swingingTemp = new GameObject();
+    replicated->AddSwingingBlock(swingingTemp, *world);
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
@@ -245,4 +402,9 @@ void GameplayState::AssignPlayer(int netObject) {
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
+}
+
+float GameplayState::CalculateCompletion(Vector3 playerCurPos){
+    auto progress = playerCurPos - startPos;
+    return progress.Length()/levelLen;
 }
