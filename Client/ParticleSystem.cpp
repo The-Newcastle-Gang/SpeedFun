@@ -59,12 +59,17 @@ void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 }
 
 void ParticleSystem::CreateNewParticles(float dt) {
-	//int newParticles = (int)((dt>0.016f?0.016f:dt) * particlesPerSecond);
-	int newParticles = (int)((1) * particlesPerSecond);
-	std::cout << "new particle: " << newParticles << std::endl;
+	particleTimer += dt;
+	int newParticles = 0;
+	if (particleTimer >= 1)
+	{
+		particleTimer = 0;
+		newParticles = particlesPerSecond;
+	}
+
 	for (int i = 0; i < newParticles; i++) {
 		int particleIndex = FindUnusedParticle();
-		std::cout << "Particle index" + std::to_string(particleIndex) << std::endl;
+		std::cout << "Last particle" + std::to_string(lastUsedParticle) << std::endl;
 		particles[particleIndex].life = 0.01f*(rand() % 20)+lifeSpan;
 		particles[particleIndex].position = startPos + 
 			Vector3(rngLower.x + rand()%(int)rngRange.x,
@@ -77,20 +82,20 @@ void ParticleSystem::CreateNewParticles(float dt) {
 
 int ParticleSystem::FindUnusedParticle() {
 	for (int i = lastUsedParticle; i < MAX_PARTICLES; i++) {
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			lastUsedParticle = i;
 			return i;
 		}
 	}
 
 	for (int i = 0; i < lastUsedParticle; i++) {
-		if (particles[i].life < 0) {
+		if (particles[i].life <= 0) {
 			lastUsedParticle = i;
 			return i;
 		}
 	}
 
-		return 0;
+	return 0;
 }
 void ParticleSystem::DrawParticles() {
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);

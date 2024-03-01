@@ -63,6 +63,8 @@ namespace NCL
 			float particleSpeed;
 			float particleSize;
 
+			float particleTimer = 0;
+
 			int FindUnusedParticle();
 			void SortParticles() { std::sort(&particles[0], &particles[MAX_PARTICLES]); }
 		};
