@@ -11,7 +11,8 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
-    curvyShader = renderer->LoadShader("defaultUI.vert", "curvyUi.frag");
+    hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
+    titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
     activeText = -1;
     textLimit = 15;
 
@@ -25,29 +26,29 @@ void MenuState::InitMenuSounds() {
 }
 
 MenuState::~MenuState() {
-    delete curvyShader;
+    delete hoverShader;
 }
 
 void MenuState::OptionHover(Element& element) {
 
     if (selected == element.GetIndex()) return;
     soundManager->SM_PlaySound("se_select00.wav");
-    canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
+    canvas->GetElementByIndex(selected).SetColor(inactiveMenuText);
 
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(hoverBox);
-    boxElement.GetAbsolutePosition().y = pos - 33;
+    boxElement.GetAbsolutePosition().y = pos - 35 - boxElement.GetAbsoluteSize().y + element.GetAbsoluteSize().y;
 
     tweenManager->CreateTween(
             TweenManager::EaseOutSine,
-            0,
-            415,
-            &boxElement.GetAbsoluteSize().x,
-            0.2f);
+            0.0f,
+            1.0f,
+            &boxElement.tweenValue1,
+            0.5f);
 
-    element.GetTextData().color = activeMenuText;
+    element.SetColor(activeMenuText);
 }
 
 void MenuState::MultiplayerOptionHover(Element& element) {
@@ -123,6 +124,7 @@ void MenuState::SetActiveTextEntry(Element& element) {
 void MenuState::ConnectWithIp(Element& element) {
     auto& textElement = canvas->GetElementById("IpAddressText", "joinGame");
     ConnectToGame(textElement.GetTextData().text);
+
 }
 
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
@@ -135,25 +137,24 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
     } if (tags.find("textEntry") != tags.end()) {
         element.OnFocusExit.connect<&MenuState::UnsetActiveTextEntry>(this);
         element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
+    } if (tags.find("fireEffect") != tags.end()) {
+        element.SetShader(titleShader);
     }
 
 
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
-        canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
-        canvas->GetElementByIndex(hoverBox).AlignLeft(115);
     } else if (id == "Multiplayer") {
         element.OnMouseUp.connect<&MenuState::ShowMultiplayerOptions>(this);
     } else if (id == "HoverBox") {
         hoverBox = element.GetIndex();
+        element.SetShader(hoverShader);
     } else if (id == "mHoverBox") {
         mHoverBox = element.GetIndex();
     } else if (id == "JoinGame") {
         mSelected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::JoinGame>(this);
-    } else if (id == "PlayerName") {
-        element.SetShader(curvyShader);
     } else if (id == "Connect") {
         element.OnMouseUp.connect<&MenuState::ConnectWithIp>(this);
     }

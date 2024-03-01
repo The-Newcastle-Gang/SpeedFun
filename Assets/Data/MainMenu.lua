@@ -76,9 +76,11 @@ local COLORS = {
     inactive = Vector4:newRGB(40, 40, 40, 255),
     active = Vector4:new(1.0, 1.0, 1.0, 1.0),
     transparent = Vector4:new(0.0, 0.0, 0.0, 0.0),
-    main = Vector4:new(150, 0, 210, 255),
+    main = Vector4:newRGB(120, 10, 10, 255),
     white = Vector4:new(1.0, 1.0, 1.0, 1.0),
-    lightgray = Vector4:newRGB(200, 200, 200, 255),
+    lightgray = Vector4:newRGB(100, 100, 100, 255),
+    black = Vector4:new(0.0, 0.0, 0.0, 1.0);
+    menuBackground = Vector4:new(0.01, 0.01, 0.01, 1.0);
 }
 
 local elementBase = {
@@ -99,8 +101,18 @@ local elementBase = {
     zIndex = 0
 }
 
-function elementBase:MakeList(previous, padding)
-    self.aPos = Vector2:new(self.aPos.x, previous.aPos.y + previous.aSize.y + padding)
+local function MakeList(padding, ...)
+    local listedElements = {}
+    local last
+    for i,v in ipairs({...}) do
+        if i == 1 then goto continue end
+        v.aPos.y = last.aPos.y - last.aSize.y - padding
+        table.insert(listedElements, v);
+        ::continue::
+        last = v
+    end
+    --
+    return table.unpack(listedElements)
 end
 
 local alignBase = {
@@ -115,90 +127,65 @@ local function AlignTo(direction, padding)
     return a
 end
 
+local mainSpace = 80;
+
 canvas = {
     main = {
         {
-            color = COLORS.translucent,
-            rSize = Vector2:new(0, 1),
-            aSize = Vector2:new(415, 0),
-            align = {
-                AlignTo("left", 115)
-            },
+            color = COLORS.menuBackground,
+            rSize = Vector2:new(1, 1),
+
         },
         {
+            image = "hellMain/Hell.png",
             color = COLORS.main,
-            aSize = Vector2:new(0, 150),
-            rSize = Vector2:new(1.0, 0.0),
+            aSize = Vector2:new(309, 68),
             align = {
-                AlignTo("top", 0),
-                AlignTo("left", 0),
-            }
-        },
-        {
-            image = "Menu/TitleSpeed.png",
-            color = COLORS.white,
-            aSize = Vector2:new(290, 97),
-            aPos = Vector2:new(280, 0),
-            align = {
-                AlignTo("top", 35),
-                AlignTo("right", 181)
-            },
-        },
-        {
-            image = "Menu/TitleFun.png",
-            color = COLORS.white,
-            aSize = Vector2:new(151, 77),
-            aPos = Vector2:new(407, 0),
-            align = {
-                AlignTo("top", 35),
-                AlignTo("right", 20)
-            }
-        },
-        {
-            image = "Menu/Dashes.png",
-            color = COLORS.white,
-            aSize = Vector2:new(109, 70),
-            aPos = Vector2:new(285, 0),
-            align = {
-                AlignTo("top", 45),
-                AlignTo("right", 181 + 290 + 10)
-            }
-        },
-        {
-            color = COLORS.main,
-            aSize = Vector2:new(415, 115),
-            align = {
-                AlignTo("top", 180 + 33 - 40),
-                AlignTo("left", 115)
-            },
-            id = "HoverBox",
-        },
-        {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160, 0),
-            align = {
-                AlignTo("top", 180)
-            },
-            text = {
-                text = "Singleplayer",
-                color = COLORS.active,
-                size = 1.0
+                AlignTo("center", 0),
+                AlignTo("top", 76),
             },
             tags = {
-                "option"
+                "fireEffect",
+            }
+        },
+        {
+            image = "hellMain/Runners.png",
+            color = COLORS.lightgray,
+            aSize = Vector2:new(453, 68),
+            align = {
+                AlignTo("center", 0),
+                AlignTo("top", 155),
+            }
+        },
+        {
+            image = "hellMain/Trident.png",
+            color = COLORS.main,
+            aSize = Vector2:new(353, 65),
+            align = {
+                AlignTo("center", -53),
+                AlignTo("top", 161),
+            }
+        },
+        {
+            image = "hellMain/Singleplayer.png",
+            color = COLORS.active,
+            aSize = Vector2:new(157, 25),
+            align = {
+                AlignTo("center", 0),
+                AlignTo("top", 285),
+            },
+            tags = {
+                "option",
             },
             id = "Singleplayer",
         },
         {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160, 0),
+            image = "hellMain/Multiplayer.png",
+            color = COLORS.inactive,
+            aSize = Vector2:new(146, 25),
             align = {
-                AlignTo("top", 290),
-            },
-            text = {
-                text = "Multiplayer",
-                color = COLORS.inactive,
-                size = 1.0,
+                AlignTo("center", 0),
+                AlignTo("top", 285 + mainSpace),
             },
             tags = {
                 "option",
@@ -206,15 +193,12 @@ canvas = {
             id = "Multiplayer",
         },
         {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160, 0),
+            image = "hellMain/Options.png",
+            color = COLORS.inactive,
+            aSize = Vector2:new(99, 25),
             align = {
-                AlignTo("top", 400),
-            },
-            text = {
-                text = "Options",
-                color = COLORS.inactive,
-                size = 1.0,
+                AlignTo("top", 285 + mainSpace * 2),
+                AlignTo("center", 0),
             },
             tags = {
                 "option",
@@ -222,21 +206,28 @@ canvas = {
             id = "Options",
         },
         {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160, 0),
+            image = "hellMain/Exit.png",
+            color = COLORS.inactive,
+            aSize = Vector2:new(48, 20),
             align = {
-                AlignTo("top", 510),
-            },
-            text = {
-                text = "Exit",
-                color = COLORS.inactive,
-                size = 1.0,
+                AlignTo("top", 285 + mainSpace * 3),
+                AlignTo("center", 0),
             },
             tags = {
                 "option",
             },
             id = "Exit",
-        }
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/HoverBar.png",
+            aSize = Vector2:new(170, 34),
+            align = {
+                AlignTo("top", 285 + 35),
+                AlignTo("center", 0)
+            },
+            id = "HoverBox",
+        },
     },
     multiplayer = {
         {

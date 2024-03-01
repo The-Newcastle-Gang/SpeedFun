@@ -42,7 +42,8 @@ namespace NCL {
             std::unique_ptr<Font> menuFont;
             std::string statusText;
             std::unique_ptr<TweenManager> tweenManager;
-            ShaderBase* curvyShader;
+            ShaderBase* hoverShader;
+            ShaderBase* titleShader;
             int hoverBox;
             int mHoverBox;
             int selected;
