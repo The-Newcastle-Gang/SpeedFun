@@ -13,24 +13,8 @@ out vec4 fragColor;
 
 void main(void)
 {
-	
-	//vec3 viewDir = normalize ( cameraPos - IN . worldPos );
-	//vec3 halfDir = normalize ( incident + viewDir );
-
-	//float rFactor = max (0.0 , dot ( halfDir , IN.normal ));
-	//float sFactor = pow ( rFactor , 80.0 );
-	
-	//vec4 albedo = IN.colour;
-	
-	//albedo *= texture(mainTex, IN.texCoord);
-
-	//albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
 	
-	//fragColor.rgb = pow(fragColor.rgb, vec3(1.0 / 2.2f));
-	
-	//fragColor.a = albedo.a;
-
-	fragColor = vec4(1, 0, 0, 1);
+	fragColor = vec4(0.902, 0.3451, 0.7608, 0.733);
 
 }

@@ -66,7 +66,6 @@ void GameplayState::LoadParticleSystems()
 {
     GLuint testTex = ((OGLTexture*)resources->GetTexture("Default.png"))->GetObjectID();
     testParticles = new ParticleSystem({ 0, 0, 0 }, { -24, -24, -24 }, { 24, 24, 24 }, 15, 5.0f, 10, 1, testTex);
-
     particleSystems.push_back(testParticles);
 
     

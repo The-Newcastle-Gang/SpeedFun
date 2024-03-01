@@ -169,14 +169,16 @@ void GameTechRenderer::CreatePostProcessQuad() {
 }
 
 void GameTechRenderer::LoadSkybox() {
+    // THE TEMP SKYBOX IS FROM HERE: https://assetstore.unity.com/packages/2d/textures-materials/sky/8k-skybox-pack-free-150926
     string filenames[6] = {
-        "/Cubemap/skyrender0004.png",
-        "/Cubemap/skyrender0001.png",
-        "/Cubemap/skyrender0003.png",
-        "/Cubemap/skyrender0006.png",
-        "/Cubemap/skyrender0002.png",
-        "/Cubemap/skyrender0005.png"
+        "/Cubemap/nx.png",
+        "/Cubemap/px.png",
+        "/Cubemap/py.png",
+        "/Cubemap/ny.png",
+        "/Cubemap/nz.png",
+        "/Cubemap/pz.png"
     };
+
 
     int width[6]	= { 0 };
     int height[6]	= { 0 };
