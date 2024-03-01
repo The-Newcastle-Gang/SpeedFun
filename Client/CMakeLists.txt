@@ -17,7 +17,8 @@ add_library(client
         UI/CanvasLayer.cpp
         TweenManager.cpp
         ParticleSystem.cpp
-)
+        SoundManager.cpp)
+
 
 target_include_directories(client PUBLIC
         ../NCLCoreClasses
