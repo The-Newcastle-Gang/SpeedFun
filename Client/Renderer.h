@@ -118,8 +118,6 @@ namespace NCL {
             GLuint uiVAO;
             GLuint uiVBO;
 
-            GLuint quadVAO;
-            GLuint quadVBO;
             GLuint rayMarchFBO;
             GLuint rayMarchTexture;
 
@@ -136,8 +134,6 @@ namespace NCL {
             void RenderRayMap();
 
             void InitRayMarching();
-
-            void CreatePostProcessQuad();
 
             GLuint CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTexture);
 
