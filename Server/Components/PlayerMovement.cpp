@@ -192,9 +192,8 @@ bool PlayerMovement::GroundCheck() {
 
     if (world->Raycast(ray, closestCollision, true, gameObject)) {
         Vector3 dist = closestCollision.collidedAt - capBottom;
-        std::cout << closestCollision.collidedAt << "\n";
-        std::cout << closestCollision.collidedAt - capBottom << "\n";
-        std::cout << dist.Length() << "\n";
+        // TODO: Ideally, I would like the grounded check to be handled by another collision volume rather than a ray. It'll help better for slanted
+        // surfaces and give the player more time to jump when grounded.
         if (dist.Length() < groundDistanceCheck) {
             return true;
         }
