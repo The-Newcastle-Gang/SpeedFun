@@ -69,7 +69,6 @@ void ParticleSystem::CreateNewParticles(float dt) {
 
 	for (int i = 0; i < newParticles; i++) {
 		int particleIndex = FindUnusedParticle();
-		std::cout << "Last particle" + std::to_string(lastUsedParticle) << std::endl;
 		particles[particleIndex].life = 0.01f*(rand() % 20)+lifeSpan;
 		particles[particleIndex].position = startPos + 
 			Vector3(rngLower.x + rand()%(int)rngRange.x,

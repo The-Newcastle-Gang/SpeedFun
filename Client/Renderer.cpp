@@ -97,6 +97,7 @@ void NCL::CSC8503::GameTechRenderer::RenderParticles()
 {
     for (auto ps : particleSystems)
     {
+        std::cout << "drawing at: " << ps->GetParticle().position << std::endl;
         ps->DrawParticles();
     }
 }
