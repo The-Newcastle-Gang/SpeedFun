@@ -5,6 +5,7 @@
 
 namespace NCL {
 	namespace CSC8503 {
+
 		class PhysicsSystem	{
 		public:
 			PhysicsSystem(GameWorld& g);
@@ -79,6 +80,28 @@ namespace NCL {
 
 
       std::unordered_map<std::string, PhysicsMaterial*> physicsMaterials;
+
+      std::unordered_map<int, bool> layerMatrix =
+      { {DEFAULT_LAYER | DEFAULT_LAYER,true},
+          {DEFAULT_LAYER | PLAYER_LAYER,true},
+          {DEFAULT_LAYER | STATIC_LAYER,true},
+          {DEFAULT_LAYER | TRIGGER_LAYER,true},
+          {DEFAULT_LAYER | GRAPPLE_LAYER,true},
+
+          {PLAYER_LAYER | PLAYER_LAYER,true},
+          {PLAYER_LAYER | STATIC_LAYER,true},
+          {PLAYER_LAYER | TRIGGER_LAYER,true},
+          {PLAYER_LAYER | GRAPPLE_LAYER,true},
+
+          {STATIC_LAYER | STATIC_LAYER,false},
+          {STATIC_LAYER | TRIGGER_LAYER,false},
+          {STATIC_LAYER | GRAPPLE_LAYER,true},
+
+          {TRIGGER_LAYER | TRIGGER_LAYER,false},
+          {TRIGGER_LAYER | GRAPPLE_LAYER,false},
+
+          {GRAPPLE_LAYER | GRAPPLE_LAYER,false}
+      };
 
 		};
 	}

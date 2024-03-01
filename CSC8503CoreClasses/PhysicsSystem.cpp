@@ -17,7 +17,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
-	SetGravity(Vector3(0.0f, -9.8f, 0.0f));
+	SetGravity(Vector3(0.0f, -13.0f, 0.0f));
     SetupPhysicsMaterials();
 }
 
@@ -39,6 +39,11 @@ void PhysicsSystem::SetupPhysicsMaterials() {
     auto* playerPhysMat = new PhysicsMaterial();
     playerPhysMat->e = 0.0f;
     physicsMaterials["Player"] = playerPhysMat;
+
+    PhysicsMaterial* triggerPhysMat = new PhysicsMaterial();
+    triggerPhysMat->e = 0.0f;
+    triggerPhysMat->linearDampingHorizontal = 0.5f;
+    physicsMaterials["Trigger"] = triggerPhysMat;
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
@@ -169,16 +174,17 @@ void PhysicsSystem::UpdateCollisionList() {
 			i->b->OnCollisionBegin(i->a);
 		}
         CollisionDetection::CollisionInfo blank;
-        if(i->a->GetPhysicsObject()->GetIsTriggerVolume() || i->b->GetPhysicsObject()->GetIsTriggerVolume())
+        if(i->a->GetPhysicsObject()->GetIsTriggerVolume()   ||
+           i->b->GetPhysicsObject()->GetIsTriggerVolume()   ||
+           i->a->GetHasComponent() ||
+           i->b->GetHasComponent() )
         {
             in.framesLeft = 4;
 
-            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank))
-            {
+            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank)){
                 in.framesLeft = 0;
             }
         }
-
 
 		in.framesLeft--;
 
@@ -234,6 +240,8 @@ void PhysicsSystem::BasicCollisionDetection() {
                 continue;
             }
 
+            if (!layerMatrix[(*j)->GetPhysicsObject()->GetLayer() | (*i)->GetPhysicsObject()->GetLayer()])continue;
+
             CollisionDetection::CollisionInfo info;
 
             if(CollisionDetection::ObjectIntersection(*i,*j,info)){
@@ -256,12 +264,10 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
     if(a.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        a.DrawCollision();
         return;
     }
     if(b.GetPhysicsObject()->GetIsTriggerVolume())
     {
-        b.DrawCollision();
         return;
     }
 

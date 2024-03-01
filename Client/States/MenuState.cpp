@@ -2,140 +2,272 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas) : State()
+MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager) : State()
 {
+    soundManager = pSoundManager;
     renderer = pRenderer;
     world = pGameworld;
     menuFont = renderer->LoadFont("IndigoRegular.otf", 55);
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
+    curvyShader = renderer->LoadShader("defaultUI.vert", "curvyUi.frag");
+    activeText = -1;
+    textLimit = 15;
+
+}
+
+void MenuState::InitMenuSounds() {
+    soundManager->AddSoundToLoad("se_select00.wav");
+    soundManager->AddSoundToLoad("rainer menu.ogg");
+    soundManager->LoadSoundList();
+    soundManager->SM_PlaySound("rainer menu.ogg");
+}
+
+MenuState::~MenuState() {
+    delete curvyShader;
 }
 
 void MenuState::OptionHover(Element& element) {
 
-    canvas->GetElementById(selected).GetTextData().color = inactiveMenuText;
+    if (selected == element.GetIndex()) return;
+    soundManager->SM_PlaySound("se_select00.wav");
+    canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
+
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
-    auto& boxElement = canvas->GetElementById(hoverBox);
+    auto& boxElement = canvas->GetElementByIndex(hoverBox);
+    boxElement.GetAbsolutePosition().y = pos - 33;
 
     tweenManager->CreateTween(
-            TweenManager::EaseOutElastic,
-            boxElement.GetAbsolutePosition().y,
-            pos - 33,
-            &boxElement.GetAbsolutePosition().y,
-            0.5f);
+            TweenManager::EaseOutSine,
+            0,
+            415,
+            &boxElement.GetAbsoluteSize().x,
+            0.2f);
 
-    boxElement.AlignLeft(95);
     element.GetTextData().color = activeMenuText;
 }
 
-void MenuState::InitCanvas() {
-    // This is killing me inside we need to load this in somehow. D A T A D R I V E N
-    canvas->AddElement()
-            .SetColor({1.0f, 244.0f/255.0f, 1.0f, 0.8f})
-            .SetRelativeSize({0.0f, 1.0f})
-            .SetAbsoluteSize({415, 0})
-            .AlignLeft(115);
+void MenuState::MultiplayerOptionHover(Element& element) {
 
-    canvas->AddElement()
-           .SetColor({150.0f/255.0f, 0.0f, 210.0f/255.0f, 1.0f})
-           .SetAbsoluteSize({550, 220})
-           .AlignTop()
-           .AlignLeft(50);
+    if (selected == element.GetIndex()) return;
 
-    canvas->AddImageElement("Menu/TitleSpeed.png")
-            .SetAbsoluteSize({290, 97})
-            .SetAbsolutePosition({280, 0})
-            .AlignTop(25);
+    
+    canvas->GetElementByIndex(mSelected, "multiplayer").GetTextData().color = inactiveMenuText;
+    mSelected = element.GetIndex();
 
-    canvas->AddImageElement("Menu/TitleFun.png")
-            .SetAbsoluteSize({151, 77})
-            .SetAbsolutePosition({407, 0})
-            .AlignTop(122);
+    auto pos = element.GetAbsolutePosition().y;
+    auto& boxElement = canvas->GetElementByIndex(mHoverBox, "multiplayer");
+    boxElement.GetAbsolutePosition().y = pos - 33;
 
-    canvas->AddImageElement("Menu/Dashes.png")
-            .SetAbsoluteSize({109, 70})
-            .SetAbsolutePosition({285, 0})
-            .AlignTop(128);
+    tweenManager->CreateTween(
+            TweenManager::EaseOutSine,
+            0,
+            415,
+            &boxElement.GetAbsoluteSize().x,
+            0.2f);
 
-    hoverBox = canvas->AddElement()
-            .SetAbsoluteSize({460, 115})
-            .SetColor({160.0f/255.0f, 20.0f / 255.0f, 220.0f/255.0f, 1.0f})
-            .AlignTop(247)
-            .AlignLeft(95)
-            .GetIndex();
+    element.GetTextData().color = activeMenuText;
+}
 
-    // References are fun, change the order of the connections and it'll blow up.
-    // the extend upper bounds method below is a bit hacky, just lets the 'hitbox' of the text extend pass the image mesh.
-    // I don't even need this any more since I'm actually rendering text and can just make the absolute size bigger
-    // Owen I bet you're reviewing this don't delete my comments please.
-    // let my words ring throughout the future of github.
-    // let this be a reminder to all future generations
-    // kids
-    // don't drink and code.
-    // bad.
+void MenuState::InitLua() {
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    auto status = luaL_dofile(L, (Assets::DATADIR + "MainMenu.lua").c_str());
+
+    if (status) {
+        std::cerr << "LUA CRIES OUT IN PAIN: " << lua_tostring(L, -1);
+    }
+}
+
+void MenuState::BeginSingleplayer(Element& _) {
+    ConnectToGame("127.0.0.1");
+}
+
+void MenuState::ShowMultiplayerOptions(Element& _) {
+    canvas->PushActiveLayer("multiplayer");
+}
+
+void MenuState::JoinGame(Element& _) {
+    canvas->PushActiveLayer("joinGame");
+}
+
+void MenuState::UnsetActiveTextEntry(Element& element) {
+    if (element.GetIndex() == activeText) {
+        activeText = -1;
+    }
+
+    std::string textId = element.GetId() + "Text";
+    auto& textElement = canvas->GetElementById(textId, "joinGame");
+
+    if (textElement.GetTextData().text.empty()) {
+        textElement.GetTextData().text = textElement.GetTextData().defaultText;
+    }
+}
+
+void MenuState::SetActiveTextEntry(Element& element) {
+
+    std::string textId = element.GetId() + "Text";
+    auto& textElement = canvas->GetElementById(textId, "joinGame");
+    activeText = textElement.GetIndex();
+    auto& textElementData = textElement.GetTextData();
+
+    if (textElementData.text == textElementData.defaultText) {
+        textElementData.text = "";
+    }
+}
+
+void MenuState::ConnectWithIp(Element& element) {
+    auto& textElement = canvas->GetElementById("IpAddressText", "joinGame");
+    ConnectToGame(textElement.GetTextData().text);
+}
+
+void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
+
+
+    if (tags.find("option") != tags.end()) {
+        element.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    } if (tags.find("mOption") != tags.end()) {
+        element.OnMouseEnter.connect<&MenuState::MultiplayerOptionHover>(this);
+    } if (tags.find("textEntry") != tags.end()) {
+        element.OnFocusExit.connect<&MenuState::UnsetActiveTextEntry>(this);
+        element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
+    }
+
+
+    if (id == "Singleplayer") {
+        selected = element.GetIndex();
+        element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
+        canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
+        canvas->GetElementByIndex(hoverBox).AlignLeft(115);
+    } else if (id == "Multiplayer") {
+        element.OnMouseUp.connect<&MenuState::ShowMultiplayerOptions>(this);
+    } else if (id == "HoverBox") {
+        hoverBox = element.GetIndex();
+    } else if (id == "mHoverBox") {
+        mHoverBox = element.GetIndex();
+    } else if (id == "JoinGame") {
+        mSelected = element.GetIndex();
+        element.OnMouseUp.connect<&MenuState::JoinGame>(this);
+    } else if (id == "PlayerName") {
+        element.SetShader(curvyShader);
+    } else if (id == "Connect") {
+        element.OnMouseUp.connect<&MenuState::ConnectWithIp>(this);
+    }
+}
+
+void MenuState::AlignCanvasElement(Element& element) {
+    getTableField(L, "align");
+    lua_pushnil(L);
+
+    while (lua_next(L, -2)) {
+        auto direction = getStringField(L, "to");
+        auto padding = getIntField(L, "padding");
+        if (!strcmp(direction, "top")) {
+            element.AlignTop(padding);
+        } else if (!strcmp(direction, "middle")) {
+            element.AlignMiddle(padding);
+        } else if (!strcmp(direction, "bottom")) {
+            element.AlignBottom(padding);
+        } else if (!strcmp(direction, "left")) {
+            element.AlignLeft(padding);
+        } else if (!strcmp(direction, "center")) {
+            element.AlignCenter(padding);
+        } else if (!strcmp(direction, "right")) {
+            element.AlignRight(padding);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1); // align
+}
+
+void MenuState::AddCanvasElement(const std::string& layerName, bool blocking) {
+
+    if (layerName != "main" && !canvas->DoesLayerExist(layerName)) {
+        canvas->CreateNewLayer(layerName, blocking);
+    }
+
+    std::string image = getStringField(L, "image");
+
+    auto& element = image.empty() ? canvas->AddElement(layerName)
+            : canvas->AddImageElement(image, layerName);
+
+    element.SetAbsoluteSize(getVec2Field(L, "aSize"))
+        .SetRelativeSize(getVec2Field(L, "rSize"))
+        .SetAbsolutePosition(getVec2Field(L, "aPos"))
+        .SetRelativePosition(getVec2Field(L, "rPos"))
+        .SetColor(getVec4Field(L, "color"))
+        .SetZIndex(getIntField(L, "zIndex"));
+
+    AlignCanvasElement(element);
+
     TextData text;
+    getTableField(L, "text");
+
+    text.text = getStringField(L, "text");
+    text.defaultText = text.text;
+    text.color = getVec4Field(L, "color");
     text.SetFont(menuFont.get());
-    text.color = activeMenuText;
-    text.text = "Singleplayer";
+    text.fontSize = (float)getNumberField(L, "size");
 
-    auto& singleplayer = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({315, 54})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(280)
-            .SetText(text);
+    element.SetText(text);
+    lua_pop(L, 1); // text
 
-    selected = singleplayer.GetIndex();
+    std::unordered_set<std::string> tags;
+    getTableField(L, "tags");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        tags.insert(lua_tostring(L, -1));
+        lua_pop(L, 1);
+    }
 
-    text.color = inactiveMenuText;
-    text.text = "Multiplayer";
+    lua_pop(L, 1); // tags
 
-    singleplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    std::string id = getStringField(L, "id");
 
-    auto& multiplayer = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({290, 54})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(390)
-            .ExtendUpperBounds(20, 0)
-            .SetText(text);
+    element.AddTags(tags);
+    element.SetId(id);
 
-    text.text = "Exit";
+    AttachSignals(element, tags, id);
+}
 
-    multiplayer.OnMouseEnter.connect<&MenuState::OptionHover>(this);
-    auto& exit = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({97, 43})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(610)
-            .ExtendUpperBounds(215, 0)
-            .SetText(text);
+void MenuState::InitCanvas() {
+    InitLua();
 
-    exit.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    lua_getglobal(L, "canvas");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        auto layerName = lua_tostring(L, -2);
+        lua_pushnil(L);
+        while(lua_next(L, -2)) {
+            AddCanvasElement(layerName);
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+    }
 
-    text.text = "Options";
-
-    auto& options = canvas->AddElement()
-            .SetColor({0.0, 0.0, 0.0, 0.0})
-            .SetAbsoluteSize({201, 55})
-            .SetAbsolutePosition({160, 0})
-            .AlignTop(500)
-            .ExtendUpperBounds(115, 0)
-            .SetText(text);
-
-    options.OnMouseEnter.connect<&MenuState::OptionHover>(this);
+    lua_getglobal(L, "blockingCanvas");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        auto layerName = lua_tostring(L, -2);
+        lua_pushnil(L);
+        while (lua_next(L, -2)) {
+            AddCanvasElement(layerName, true);
+            lua_pop(L, 1);
+        }
+        lua_pop(L, 1);
+    }
 }
 
 void MenuState::OnEnter() {
     isGameStarted = false;
-    statusText = "Press L to connect to localhost";
-    connectState = 0;
 
     InitCanvas();
-
+    InitMenuSounds();
     RegisterPackets();
 }
 
@@ -148,34 +280,55 @@ bool MenuState::CheckConnected() const {
 }
 
 void MenuState::ConnectedToServer() {
-    statusText = "Connected! Press R to start";
-    connectState = 2;
+    StartGame();
 }
 
 void MenuState::ConnectToGame(const std::string& address) {
     baseClient->OnServerConnected.connect<&MenuState::ConnectedToServer>(this);
     baseClient->Connect(address, NetworkBase::GetDefaultPort());
-    statusText = "Attempting to connect to localhost";
-    connectState = 1;
 }
 
 void MenuState::StartGame() {
     baseClient->RemoteFunction(Replicated::StartGame, nullptr);
 }
 
+void MenuState::TextEntry() {
+    if (activeText == -1) return;
+
+
+    auto w = Window::GetKeyboard();
+    auto& textElement = canvas->GetElementByIndex(activeText, "joinGame");
+
+
+    if (w->KeyPressed(KeyboardKeys::BACK)) {
+        if (!textElement.GetTextData().text.empty()) {
+            textElement.GetTextData().text.pop_back();
+        }
+    }
+
+    if (textElement.GetTextData().text.size() >= textLimit) return;
+
+    for (auto keyValue = (int)KeyboardKeys::A; keyValue <= (int)KeyboardKeys::Z; keyValue++) {
+        if (w->KeyPressed((KeyboardKeys)keyValue)) {
+            textElement.GetTextData().text += w->KeyDown(KeyboardKeys::SHIFT) ? (char)keyValue : (char)(keyValue + 32);
+        }
+    }
+
+    for (auto keyValue = (int)KeyboardKeys::NUM0; keyValue <= (int)KeyboardKeys::NUM9; keyValue++) {
+        if (!w->KeyPressed((KeyboardKeys)keyValue)) continue;
+        textElement.GetTextData().text += (char)keyValue;
+    }
+
+    if (w->KeyPressed(KeyboardKeys::PERIOD)) {
+        textElement.GetTextData().text += ".";
+    }
+}
+
 void MenuState::Update(float dt) {
 
     baseClient->UpdateClient();
-
+    TextEntry();
     tweenManager->Update(dt);
-
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::L) && connectState == 0) {
-        ConnectToGame("127.0.0.1");
-    }
-
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::R) && connectState == 2) {
-        StartGame();
-    }
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
@@ -197,8 +350,6 @@ void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
     baseClient->ClearPacketHandlers();
     canvas->Reset();
-}
-
-MenuState::~MenuState() {
-
+    soundManager->UnloadSoundList();
+    lua_close(L);
 }

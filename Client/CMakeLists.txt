@@ -16,7 +16,8 @@ add_library(client
         UI/Element.cpp
         UI/CanvasLayer.cpp
         TweenManager.cpp
-)
+        SoundManager.cpp
+ "SoundManager.h" "SoundManager.cpp")
 
 target_include_directories(client PUBLIC
         ../NCLCoreClasses
@@ -29,6 +30,7 @@ target_include_directories(client PUBLIC
         ../enet/include
         ./UI
         ../raudio/src
+        ../NotLua
 )
 
 target_link_libraries(client PUBLIC

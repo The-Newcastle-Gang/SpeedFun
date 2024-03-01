@@ -36,5 +36,6 @@ target_link_libraries(SpeedFun PUBLIC
         enet
         client
         server
+        lua
 )
 

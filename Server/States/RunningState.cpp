@@ -9,6 +9,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
 
+    currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
@@ -22,6 +23,7 @@ void RunningState::OnEnter() {
     sceneSnapshotId = 0;
     CreateNetworkThread();
     LoadLevel();
+    world->StartWorld();
 
 }
 
@@ -88,6 +90,7 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("debuglvl");
+    AddTriggersToLevel();
     CreatePlayers();
 }
 
@@ -124,17 +127,68 @@ void RunningState::CreatePlayers() {
         replicated->CreatePlayer(player, *world);
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
-        player->GetPhysicsObject()->InitSphereInertia();
         player->GetPhysicsObject()->SetInverseMass(2.0f);
+        player->GetPhysicsObject()->InitSphereInertia();
+        player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
+        player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
+        player->SetTag(Tag::PLAYER);
 
         //TODO: clean up
-        player->GetTransform().SetPosition(Vector3(0,0,0));
+//        player->GetTransform().SetPosition(Vector3(0,0,0));
+        player->GetTransform().SetPosition(currentLevelStartPos);
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
         playerObjects[pair.first] = player;
     }
 }
 
+void RunningState::AddTriggersToLevel(){
+    for (auto& triggerVec : triggersVector){
+        auto trigger = new TriggerVolumeObject(triggerVec.first);
+
+        Vector4 colour = Vector4();
+        Vector3 tempSize = Vector3();
+        SortTriggerInfoByType(triggerVec.first, (Vector4&)colour, (Vector3&)tempSize);
+
+        replicated->AddTriggerVolumeToWorld(tempSize, trigger, *world);
+        trigger->SetPhysicsObject(new PhysicsObject(&trigger->GetTransform(),
+                                                    trigger->GetBoundingVolume(),
+                                                    physics->GetPhysMat("Default")));
+        trigger->GetPhysicsObject()->InitCubeInertia();
+        trigger->GetPhysicsObject()->SetInverseMass(0.0f);
+        trigger->GetTransform().SetPosition(triggerVec.second);
+        trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+        trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
+
+
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
+    }
+}
+
+void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {
+    switch (triggerType) {
+        case TriggerVolumeObject::TriggerType::Start:
+            colour = {1, 1, 1, 1};
+            dimensions = Vector3(10, 10, 10);
+            break;
+        case TriggerVolumeObject::TriggerType::End:
+            colour = {0, 1, 0, 1};
+            dimensions = Vector3(10, 10, 10);
+            break;
+        case TriggerVolumeObject::TriggerType::Death:
+            colour = {1, 0, 0, 1};
+            dimensions = Vector3(2000, 10, 2000);
+            break;
+        case TriggerVolumeObject::TriggerType::CheckPoint:
+            colour = {1, 0.4f, 1, 1};
+            dimensions = Vector3(10, 10, 10);
+            break;
+        default:
+            colour = {0, 0, 0, 1};
+            dimensions = Vector3(10, 10, 10);
+            break;
+    }
+}
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
 
@@ -148,6 +202,41 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         std::cerr << "Where tf player movement" << std::endl;
     }
 
+    if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.groundMovement);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_GroundedMove, &data)));
+        playerMovement->cameraAnimationCalls.groundMovement = 0.0f;
+    }
+
+    if (playerMovement->cameraAnimationCalls.jump) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(true);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Jump, &data)));
+        playerMovement->cameraAnimationCalls.jump = false;
+    }
+
+    if (playerMovement->cameraAnimationCalls.land > 0.0f) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.land);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Land, &data)));
+        playerMovement->cameraAnimationCalls.land = 0.0f;
+    }
+
+    if (abs(playerMovement->cameraAnimationCalls.strafeSpeed) > 0.5f) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
+    }
+    
 }
 
 void RunningState::ApplyPlayerMovement() {
@@ -164,6 +253,10 @@ void RunningState::BuildLevel(const std::string &levelName)
         return;
     }
     currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
+
+    SetTriggerTypePositions();
 
     auto plist = levelReader->GetPrimitiveList();
     for(auto x: plist){
@@ -171,5 +264,52 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
     }
+
+    //SetTestSprings();
+    SetTestFloor();
+
+}
+
+void RunningState::SetTriggerTypePositions(){
+    triggersVector = {
+            std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
+            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
+    };
+}
+
+void RunningState::SetTestSprings() {
+    for (int i = 0; i < 4; i++) {
+        auto g = new GameObject("Spring");
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->AddComponent((Component*)(new Spring(g, Vector3(500.0f * pow(i, 5), 1000, 0), false)));
+    }
+    for (int i = 0; i < 4; i++) {
+        auto g = new GameObject("Spring");
+        replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->AddComponent((Component*)(new Spring(g, Vector3(0.0f, 1000.0f, 0), true, 1.0f, Vector3(0.5f * pow(i, 4), 0, 0))));
+    }
+}
+
+void RunningState::SetTestFloor() {
+    auto g2 = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(0, -5, 0);
+    x->colliderExtents = Vector3(200, 2, 200);
+    x->dimensions = Vector3(200, 2, 200);
+
+    replicated->AddBlockToLevel(g2, *world, x);
+    g2->SetPhysicsObject(new PhysicsObject(&g2->GetTransform(), g2->GetBoundingVolume(), new PhysicsMaterial()));
+    g2->GetPhysicsObject()->SetInverseMass(0.0f);
+    AddTriggersToLevel();
 }

@@ -5,7 +5,13 @@
 #include "PhysicsObject.h"
 #include "ServerNetworkData.h"
 #include "ServerThread.h"
+#include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
+#include "Components/SwingingObject.h"
+#include "DamagingObstacle.h"
+
+#include "Spring.h"
+
 
 #include <iostream>
 #include <thread>
@@ -45,8 +51,11 @@ namespace NCL {
 
             std::unordered_map<int, PlayerInfo> playerInfo;
 
+            std::vector<std::pair<TriggerVolumeObject::TriggerType, Vector3>> triggersVector;
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
+            Vector3 currentLevelEndPos;
+            Vector3 currentLevelDeathPos;
 
             float packetTimer;
             int sceneSnapshotId;
@@ -65,6 +74,8 @@ namespace NCL {
 
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
+            void AddTriggersToLevel();
+            void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
             static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
@@ -76,6 +87,11 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void SetTestSprings();
+            void SetTestFloor();
+
+            void SetTriggerTypePositions();
         };
     }
 }

@@ -17,10 +17,11 @@ using namespace NCL;
 
 class Element {
 public:
-    Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update) {
+    Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         texture = nullptr;
+        shader = nullptr;
         hoverTimer = 0;
         mouseDownTimer = 0;
         textData = {};
@@ -29,6 +30,7 @@ public:
         extendLowerX = 0;
         extendLowerY = 0;
         extendUpperY = 0;
+        isFocused = false;
     }
 
     [[nodiscard]] UIDim GetDimensions() const {
@@ -39,7 +41,7 @@ public:
         return color;
     }
 
-    [[nodiscard]] Vector2Int GetAbsoluteSize() const {
+    [[nodiscard]] Vector2Int& GetAbsoluteSize() {
         return dimensions.absoluteSize;
     }
 
@@ -113,9 +115,9 @@ public:
         return *this;
     }
 
-    Element& AlignCenter() {
+    Element& AlignCenter(int padding = 0) {
         dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
-        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2;
+        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2 + padding;
         return *this;
     }
 
@@ -125,9 +127,9 @@ public:
         return *this;
     }
 
-    Element& AlignMiddle() {
+    Element& AlignMiddle(int padding = 0) {
         dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
-        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2;
+        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2 + padding;
         return *this;
     }
 
@@ -156,6 +158,35 @@ public:
         return texture;
     }
 
+    ShaderBase* GetShader() {
+        return shader;
+    }
+
+    Element& AddTags(const std::unordered_set<std::string>& pTags) {
+        for (auto& t: pTags) {
+            tags.insert(t);
+        }
+        return *this;
+    }
+
+    Element& SetId(const std::string& pId) {
+        id = pId;
+        return *this;
+    }
+
+    [[nodiscard]] std::string GetId() const {
+        return id;
+    }
+
+    Element& SetZIndex(int z) {
+        zIndex = z;
+        return *this;
+    }
+
+    [[nodiscard]] int GetZIndex() const{
+        return zIndex;
+    }
+
     void Update(float dt);
 
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHover;
@@ -165,6 +196,8 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnMouseDown;
     entt::sink<entt::sigh<void(Element&)>> OnMouseUp;
     entt::sink<entt::sigh<void(Element&, float)>> OnMouseHold;
+    entt::sink<entt::sigh<void(Element&)>> OnFocus;
+    entt::sink<entt::sigh<void(Element&)>> OnFocusExit;
 
     TextData textData;
 private:
@@ -172,6 +205,8 @@ private:
     Vector4 color;
     TextureBase* texture;
     ShaderBase* shader;
+    std::string id;
+    std::unordered_set<std::string> tags;
     int extendLowerX;
     int extendLowerY;
     int extendUpperX;
@@ -183,6 +218,10 @@ private:
     entt::sigh<void(Element&)> mouseUp;
     entt::sigh<void(Element&, float)> mouseHold;
     entt::sigh<void(Element&, float)> update;
+    entt::sigh<void(Element&)> focus;
+    entt::sigh<void(Element&)> focusExit;
+    int zIndex;
+    bool isFocused;
 
 
     int somethingElse = 0;

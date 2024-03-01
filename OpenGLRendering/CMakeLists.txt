@@ -90,5 +90,6 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
 )
 include_directories("../NCLCoreClasses/")
 include_directories("../OpenGLRendering/")
+include_directories("../Replicated/")
 
 target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
