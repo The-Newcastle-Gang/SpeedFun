@@ -32,7 +32,8 @@ namespace NCL
 		class ParticleSystem
 		{
 		public:
-			ParticleSystem(Vector3 startPos, Vector3 rngLower, Vector3 rngHigher, int particlesPerSecond, float particleSpeed, float lifeSpan, float particleSize, GLuint texture);
+			ParticleSystem(Vector3 startPos, Vector3 rngLower, Vector3 rngHigher, int particlesPerSecond,
+				float particleSpeed, float lifeSpan, float particleSize, float timeBetween, GLuint texture);
 			~ParticleSystem();
 
 			void SetShader(OGLShader* s) { shader = s; }
@@ -62,6 +63,8 @@ namespace NCL
 			float lifeSpan;
 			float particleSpeed;
 			float particleSize;
+
+			float timeBetween = 1.0f;
 
 			float particleTimer = 0;
 

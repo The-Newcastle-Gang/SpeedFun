@@ -2,7 +2,7 @@
 
 using namespace NCL::CSC8503;
 
-ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerSecond,float particleSpeed,float lifeSpan,float particleSize, GLuint texture) {
+ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerSecond,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenParticles, GLuint texture) {
 	lastUsedParticle = 0;
 	this->texture = texture;
 	this->particlesPerSecond = particlesPerSecond;
@@ -11,6 +11,7 @@ ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHig
 	this->particleSize = particleSize;
 	this->startPos = startPos;
 	this->rngLower = rngLower;
+	this->timeBetween = timeBetweenParticles;
 	this->rngRange = Vector3(rngHigher.x-rngLower.x, rngHigher.y - rngLower.y, rngHigher.z - rngLower.z) ;
 
 	//particles.resize(maxParticles);
@@ -33,6 +34,7 @@ ParticleSystem::~ParticleSystem(){
 
 void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 	particlesCount = 0;
+
 	for (int i = 0; i < MAX_PARTICLES; i++) {
 		Particle& p = particles[i];
 		if (p.life > 0.0f) {
@@ -61,7 +63,7 @@ void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 void ParticleSystem::CreateNewParticles(float dt) {
 	particleTimer += dt;
 	int newParticles = 0;
-	if (particleTimer >= 1)
+	if (particleTimer >= timeBetween)
 	{
 		particleTimer = 0;
 		newParticles = particlesPerSecond;
