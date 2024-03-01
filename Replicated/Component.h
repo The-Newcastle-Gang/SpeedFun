@@ -15,8 +15,8 @@ namespace NCL::CSC8503 {
 		//virtual void Update(float dt, GameObject* go,bool isTimeout) {};
 		virtual void PhysicsUpdate(float fixedTime) {};
 		virtual void Start() {};
-		bool OnCollisionEnter(GameObject* otherObject);
-		virtual void OnCollisionEnter(const GameObject* otherObject) {};
+		//bool OnCollisionEnter(GameObject* otherObject);
+		virtual void OnCollisionEnter(GameObject* otherObject) {};
 		virtual void OnCollisionStay(const GameObject* otherObject) {};
 		virtual void OnCollisionEnd(const GameObject* otherObject) {};
 

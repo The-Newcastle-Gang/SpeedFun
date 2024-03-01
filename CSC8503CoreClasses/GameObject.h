@@ -17,7 +17,7 @@ namespace NCL::CSC8503 {
 		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
 		virtual void Start() { StartAllComponents(); }
 
-		virtual void OnCollisionBegin(const GameObject* otherObject) {
+		virtual void OnCollisionBegin(GameObject* otherObject) {
 			for (Component* component : components)component->OnCollisionEnter(otherObject);
 		}
 
@@ -88,10 +88,9 @@ namespace NCL::CSC8503 {
             worldID = newID;
         }
     
-        virtual bool OnCollisionBegin(GameObject* otherObject) {
-            //std::cout << "OnCollisionBegin event occured!\n";
-            return true;
-        }
+        //virtual void OnCollisionBegin(GameObject* otherObject) {
+        //    //std::cout << "OnCollisionBegin event occured!\n";
+        //}
 
         virtual void OnCollisionEnd(GameObject* otherObject) {
             //std::cout << "OnCollisionEnd event occured!\n";
@@ -125,6 +124,7 @@ namespace NCL::CSC8503 {
 
         [[nodiscard]] bool GetIsPlayerBool() const { return isPlayer; }
         void SetIsPlayerBool(bool b) { isPlayer = b;  }
+
 
     protected:
 

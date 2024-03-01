@@ -87,7 +87,7 @@ namespace NCL {
 
             void AddTestTrapBlock();
 
-            bool blockStartFall = true;
+            bool blockStartFall = false;
         };
     }
 }

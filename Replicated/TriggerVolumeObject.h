@@ -17,16 +17,16 @@ public:
         Start = 1,
         End = 2,
         Death = 4,
+        Block = 5,
     };
 
     TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
 
-    virtual bool OnCollisionBegin(GameObject* otherObject);
+    virtual void OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
 private:
     TriggerType triggerType;
-    bool startfall;
 };
 
 

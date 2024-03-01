@@ -20,19 +20,17 @@ namespace NCL::CSC8503 {
 	{
 	public:
 
-		TestTrapBlock(GameObject* go, bool start) { gameObject = go; blockFall = start; }
+		TestTrapBlock(GameObject* go) { gameObject = go;}
 
 		void Update(float dt)override;
 
-		bool OnCollisionEnter(GameObject* otherObject);
+		void OnCollisionEnter(GameObject* otherObject)override;
 
 		void TrapBlockFall(float dt);
-		
-		//bool hasCollision(const GameObject* otherObject);
 
 	protected:
 		double warningTime = 0.0;
-		bool blockFall;
+		bool blockFall = false;
 		std::unordered_map<const GameObject*, float> pushableObject;
 	};
 }
