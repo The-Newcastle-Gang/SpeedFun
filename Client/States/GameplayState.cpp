@@ -177,32 +177,31 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
                 AssignPlayer(networkId);
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
                 currentGroundSpeed = intesnity;
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_Jump): {
                 jumpTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
                 landTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Strafe): {
                 float strfSpd = handler.Unpack<float>();
                 strafeSpeed = strfSpd;
-            }
-            break;
+            } break;
+            case(Replicated::EndReached): {
+                // Render something on screen please.
+                
+            } break;
         }
     }
 }
@@ -280,8 +279,6 @@ void GameplayState::InitialiseAssets() {
     InitCamera();
     InitWorld();
     FinishLoading();
-
-    
 }
 
 void GameplayState::FinishLoading() {
@@ -331,13 +328,10 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-
     }
 
-
     //SetTestSprings();
-
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();

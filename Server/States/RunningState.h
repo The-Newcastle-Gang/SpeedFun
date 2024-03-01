@@ -68,6 +68,8 @@ namespace NCL {
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 
+            void EndTriggerVolFunc(int id);
+
             void SendWorldToClient();
 
             Diagnostics dia{};

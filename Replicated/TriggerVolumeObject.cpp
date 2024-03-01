@@ -2,9 +2,10 @@
 
 using namespace NCL::CSC8503;
 
-TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum) : TriggerSink(triggerSignal) {
+TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum, std::function<int(GameObject*)> idGetter) : TriggerSink(triggerSignal),
+                                                                                         TriggerSinkEndVol(triggerSignalEndVol) {
     triggerType = triggerEnum;
-
+    GetPlayerId = idGetter;
 }
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
@@ -12,10 +13,11 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
         switch (triggerType) {
             case TriggerType::Start:
                 std::cout << "Start volume\n";
-                triggerSignal.publish();
+                triggerSignal.publish(GetPlayerId(otherObject));
                 break;
             case TriggerType::End:
                 std::cout << "End volume\n";
+                triggerSignalEndVol.publish(GetPlayerId(otherObject));
                 break;
             case TriggerType::Death:
                 otherObject->GetPhysicsObject()->ClearForces();

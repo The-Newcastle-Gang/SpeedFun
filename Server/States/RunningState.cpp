@@ -1,4 +1,5 @@
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -142,13 +143,15 @@ void RunningState::CreatePlayers() {
     }
 }
 
-void RunningState::beans(){
-    std::cout << "Trigger signal\n";
+void RunningState::EndTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
 }
 
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
-        auto trigger = new TriggerVolumeObject(triggerVec.first);
+        auto trigger = new TriggerVolumeObject(triggerVec.first, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
 
         Vector4 colour = Vector4();
         Vector3 tempSize = Vector3();
@@ -164,7 +167,7 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
         trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
 
-        trigger->TriggerSink.connect<&RunningState::beans>(this);
+        trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
@@ -243,7 +246,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
     }
-    
 }
 
 void RunningState::ApplyPlayerMovement() {
@@ -274,10 +276,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
     }
-
     //SetTestSprings();
-    SetTestFloor();
-
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){

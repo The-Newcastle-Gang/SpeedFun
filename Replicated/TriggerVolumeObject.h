@@ -13,7 +13,7 @@
 using namespace NCL;
 using namespace CSC8503;
 
-typedef entt::sigh<void()> TriggerSignal;
+typedef entt::sigh<void(int)> TriggerSignal;
 
 class TriggerVolumeObject : public GameObject {
 public:
@@ -24,16 +24,20 @@ public:
         CheckPoint = 8,
     };
 
-    TriggerVolumeObject(TriggerType triggerEnum);
+    TriggerVolumeObject(TriggerType triggerEnum, std::function<int(GameObject*)> idGetter);
 
     virtual void OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
     entt::sink<TriggerSignal> TriggerSink;
+    entt::sink<TriggerSignal> TriggerSinkEndVol;
 
 private:
     TriggerType triggerType;
     TriggerSignal triggerSignal;
+    TriggerSignal triggerSignalEndVol;
+
+    std::function<int(GameObject*)> GetPlayerId;
 };
 
 #endif //GITIGNORE_TRIGGERVOLUMEOBJECT_H
