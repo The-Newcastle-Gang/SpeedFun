@@ -343,13 +343,15 @@ void GameplayState::InitLevel() {
     //SetTestSprings();
 
     SetTestFloor();
-
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+
+    SetTestSprings();
+
 }
 
 void GameplayState::SetTestSprings() {

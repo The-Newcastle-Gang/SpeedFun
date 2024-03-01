@@ -268,7 +268,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 
     }
 
-    //SetTestSprings();
+    SetTestSprings();
     SetTestFloor();
 
 }
