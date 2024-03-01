@@ -121,8 +121,8 @@ namespace NCL {
 		static Vector3 Unproject(const Vector3& screenPos, const Camera& cam);
 
 		static Vector3		UnprojectScreenPosition(Vector3 position, float aspect, float fov, const Camera &c);
-		static Matrix4		GenerateInverseProjection(float aspect, float fov, float nearPlane, float farPlane);
-		static Matrix4		GenerateInverseView(const Camera &c);
+        static Matrix4		GenerateInverseProjection(float aspect, float fov, float nearPlane, float farPlane);
+        static Matrix4		GenerateInverseView(const Camera &c);
 		static Vector3*		CalculateEdgeNormals(const Transform& inTransform, const Transform& inBTransform);
 		static Vector3*		CalculateVerticesOBB(const OBBVolume& inVolume, const Transform& inTransform);
 

@@ -17,7 +17,7 @@ class Resources {
 public:
     Resources(GameTechRenderer* pRenderer) : renderer(pRenderer) {}
 
-    MeshGeometry *GetMesh(const string &name);
+    MeshGeometry *GetMesh(const string &name, const std::string &type = "mesh");
     ShaderBase *GetShader(const string &name);
     MeshAnimation *GetAnimation(const string &name);
     MeshMaterial *GetMeshMaterial(const string &name);

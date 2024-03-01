@@ -92,6 +92,7 @@ namespace NCL {
 
             void ReadNetworkPackets();
 
+            void CreateRock();
             void ResetCameraAnimation();
 
 
@@ -131,8 +132,6 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
-
-
         };
     }
 }

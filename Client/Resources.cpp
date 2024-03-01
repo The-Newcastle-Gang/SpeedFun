@@ -4,9 +4,14 @@
 
 #include "Resources.h"
 
-MeshGeometry *Resources::GetMesh(const std::string& name) {
+MeshGeometry *Resources::GetMesh(const std::string& name, const std::string& type) {
     if (meshes.find(name) == meshes.end()) {
-        auto mesh = std::unique_ptr<MeshGeometry>(renderer->LoadMesh(name));
+        std::unique_ptr<MeshGeometry> mesh;
+        if (name.substr(name.size() - 3) == "obj") {
+            mesh = std::unique_ptr<MeshGeometry>(renderer->LoadOBJMesh(name));
+        } else {
+            mesh = std::unique_ptr<MeshGeometry>(renderer->LoadMesh(name));
+        }
         meshes.insert(std::make_pair(name, std::move(mesh)));
         return meshes[name].get();
     }
