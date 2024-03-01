@@ -95,6 +95,8 @@ GameTechRenderer::~GameTechRenderer()	{
 
 void GameTechRenderer::RenderParticles()
 {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     BindShader(particleShader);
 
     float screenAspect = (float)windowWidth / (float)windowHeight;
@@ -114,6 +116,7 @@ void GameTechRenderer::RenderParticles()
     {
         ps->DrawParticles();
     }
+    glDisable(GL_BLEND);
 }
 
 void GameTechRenderer::InitUIQuad() {
