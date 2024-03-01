@@ -7,7 +7,6 @@ void TestTrapBlock::Update(float dt) {
 	if (blockFall) {
 		TrapBlockFall(dt);
 	}
-	
 }
 
 void TestTrapBlock::OnCollisionEnter(GameObject* otherObject) {
