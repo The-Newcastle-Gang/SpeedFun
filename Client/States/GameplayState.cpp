@@ -204,7 +204,7 @@ void GameplayState::SetTestSprings() {
 
         PointLightInfo light;
         light.lightColour = Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f);
-        light.lightPosition = Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -40.0f);
         light.lightRadius = 10.0f;
         world->AddPointLightToWorld(light);
     }
@@ -217,7 +217,7 @@ void GameplayState::SetTestSprings() {
 
         PointLightInfo light;
         light.lightColour = Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f);
-        light.lightPosition = Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -50.0f);
         light.lightRadius = 10.0f;
         world->AddPointLightToWorld(light);
     }

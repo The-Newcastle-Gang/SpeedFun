@@ -49,6 +49,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     GenerateScreenTexture(lightSpecularTex, false);
     GenerateScreenTexture(bufferDepthTex, true);
 
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
@@ -242,8 +245,7 @@ void GameTechRenderer::FillDiffuseBuffer() {
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
+
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -255,17 +257,19 @@ void GameTechRenderer::RenderDeferredLighting() {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     if (!doDeferred)return;
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_ONE, GL_ONE);
     glCullFace(GL_FRONT);
     glDepthFunc(GL_ALWAYS);
     
 
-    glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 0);
-    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 6);
+    glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
 
-    glUniform1i(glGetUniformLocation(shaderProg, "normTex"), 1);
-    glActiveTexture(GL_TEXTURE1);
+    glUniform1i(glGetUniformLocation(shaderProg, "normTex"), 7);
+    glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
 
     float* camPos = (float*)&gameWorld.GetMainCamera()->GetPosition().array[0];
@@ -288,7 +292,7 @@ void GameTechRenderer::RenderDeferredLighting() {
 
     }
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
