@@ -43,6 +43,8 @@ namespace NCL {
 
             MeshGeometry *LoadOBJMesh(const string &name);
 
+            void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
+
         protected:
             void NewRenderLines();
             void NewRenderText();
@@ -142,6 +144,7 @@ namespace NCL {
             GLuint CreateHDRTexture();
 
             float uTime;
+            int isSpeedLinesActive;
 
         };
     }

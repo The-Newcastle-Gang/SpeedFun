@@ -7,8 +7,11 @@ uniform mat4 invViewPersp;
 uniform vec3 lightPos;
 
 uniform float u_time;
+uniform bool SpeedLinesActive;
 
 #define M_PI 3.1415926535897932384626433832795
+#define OCTAVES 6
+#define LINECOUNT 20.0
 
 in Vertex {
     vec2 texCoord;
@@ -143,14 +146,77 @@ float correctDepthForThreshold(float x) {
     return min(1, 1 - cos(x*M_PI*2));
 }
 
-// =========== SPEEDLINES =========
+// =========== SPEEDLINES ========= //
+
+float random(in vec2 uv){
+  return fract(sin(dot(uv.xy, vec2(12.9898,78.233))) * 43758.5453123);
+}
+
+float noise (in vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
+    return mix(a, b, u.x) +
+            (c - a)* u.y * (1.0 - u.x) +
+            (d - b) * u.x * u.y;
+}
+
+float fbm (in vec2 st) {
+    float value = 0.0;
+    float amplitude = .5;
+    float frequency = 0.;
+    for (int i = 0; i < OCTAVES; i++) {
+        value += amplitude * noise(st);
+        st *= 2.;
+        amplitude *= .5;
+    }
+    return value;
+}
+
+vec2 toPolar(vec2 cartesian, float center, float RadialScale, float LengthScale){
+
+  float distance = length(cartesian);
+  // float angle = atan(cartesian.y, cartesian.x);
+
+  vec2 delta = cartesian -vec2(center);
+  float radius = length(delta) * 2.0* RadialScale;
+  float angle = atan(delta.x, delta.y) * 1.0/6.28 * LengthScale;
+  return  vec2(radius, angle);
+
+}
+
+float dist(vec2 uv, vec2 center){
+  return distance(uv, center);
+}
+
+vec3 inverseLerp(float a, float b, vec3 T){
+  return (T-a)/(b-a);
+}
+
+vec2 uRotate(vec2 uv, float amount, float center){
+    uv-=center;
+    amount *= M_PI/180.0;
+    float s = sin(amount);
+    float c = cos(amount);
+    mat2 rmat = mat2(c, -s, s, c);
+    rmat *= 0.5;
+    rmat += 0.5;
+    rmat = rmat * 2. -1.;
+    uv.xy = uv.xy *rmat;
+    uv+=center;
+    return uv;
+}
 
 
 
-
-
-
-
+// ============ MAIN =============
 
 void main() {
 
@@ -181,4 +247,41 @@ void main() {
 //    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a), raySphere.a + hdrColor.a);
 
     fragColor = vec4(hdrColor.rgb - border, step(0.99, border) + hdrColor.a);
+
+
+
+    //=========SPEEDLINES============
+
+    float speed     = 0.1;
+    float velocity  = u_time* speed;
+    float frames    = 30.0;
+    float frameRate = frames * fract(velocity);
+    vec2 xy = IN.texCoord;
+
+    vec2 uvPolar = toPolar(xy, 0.5, 0.07, LINECOUNT);
+    uvPolar = uRotate(uvPolar, frameRate, 0.5);
+    vec3 col = vec3(0.);
+    col += fbm(uvPolar * 30.0);
+
+    float dist4center = dist(xy, vec2(0.5));
+
+    float centerMaskSize = 0.06;
+    float centerMaskEdge = 0.6;
+    float added = centerMaskEdge + centerMaskSize;
+
+    vec3 mask = inverseLerp(centerMaskSize, added, vec3(dist4center));
+
+    float lineDensity = 0.444;
+    vec3 multipliedMask = mask *lineDensity;
+    vec3 invmask = 1.0 - multipliedMask;
+
+    float lineFalloff = 0.25;
+    vec3 invFalloff = invmask + lineFalloff;
+
+    vec3 fin = smoothstep(invmask, invFalloff, col);
+    vec4 fincol = vec4(fin, smoothstep(0.2, 0.5, length(fin)));
+    
+    if(SpeedLinesActive){
+        fragColor += fincol;
+    }
 }
