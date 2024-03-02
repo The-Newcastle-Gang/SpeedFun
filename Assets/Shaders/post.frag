@@ -258,6 +258,9 @@ void main() {
     float frameRate = frames * fract(velocity);
     vec2 xy = IN.texCoord;
 
+    //if(up){xy.y -= 1.0;} etc etc... directional
+    // set frames to twice for down or rotate 180
+
     vec2 uvPolar = toPolar(xy, 0.5, 0.07, LINECOUNT);
     uvPolar = uRotate(uvPolar, frameRate, 0.5);
     vec3 col = vec3(0.);
@@ -265,6 +268,7 @@ void main() {
 
     float dist4center = dist(xy, vec2(0.5));
 
+    //set these values to 0.2, 0.99 respectively for directional 
     float centerMaskSize = 0.06;
     float centerMaskEdge = 0.6;
     float added = centerMaskEdge + centerMaskSize;
