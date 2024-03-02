@@ -141,6 +141,8 @@ namespace NCL {
 
             GLuint CreateHDRTexture();
 
+            float uTime;
+
         };
     }
 }

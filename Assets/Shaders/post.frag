@@ -6,6 +6,8 @@ uniform sampler2D depthBuffer;
 uniform mat4 invViewPersp;
 uniform vec3 lightPos;
 
+uniform float u_time;
+
 #define M_PI 3.1415926535897932384626433832795
 
 in Vertex {
@@ -140,6 +142,15 @@ float sobelResult(vec2 uv, float thickness) {
 float correctDepthForThreshold(float x) {
     return min(1, 1 - cos(x*M_PI*2));
 }
+
+// =========== SPEEDLINES =========
+
+
+
+
+
+
+
 
 void main() {
 

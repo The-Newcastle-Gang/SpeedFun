@@ -92,6 +92,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     // move to own function.
     InitUIQuad();
     //InitRayMarching();
+    uTime = 0.0f;
 
 }
 
@@ -255,6 +256,8 @@ void GameTechRenderer::RenderFrame() {
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    uTime += 0.001f;
 }
 
 void GameTechRenderer::InitRayMarching() {
@@ -560,9 +563,12 @@ void GameTechRenderer::RenderCamera() {
     int invLocation = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
     int lightLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
     int depthLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    int timeLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
+
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&lightPosition);
     glUniform1i(depthLoc, 1);
+    glUniform1f(timeLoc, uTime);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
