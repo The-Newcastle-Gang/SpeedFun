@@ -9,10 +9,12 @@
 #include "Vector4.h"
 #include "Vector2.h"
 #include "Font.h"
+#include "Frustum.h"
 
 #include "Assets.h"
 #include "Element.h"
 #include "Canvas.h"
+#include "CollisionDetection.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,6 +23,8 @@ namespace NCL {
     namespace CSC8503 {
         class RenderObject;
 
+        using namespace NCL;
+        using namespace Maths;
         class GameTechRenderer : public OGLRenderer	{
         public:
             GameTechRenderer(GameWorld& world, Canvas& canvas);
@@ -36,6 +40,8 @@ namespace NCL {
             void CreatePostProcessQuad();
 
             OGLMesh* GetUIMesh() {return UIMesh;}
+
+            MeshGeometry *LoadOBJMesh(const string &name);
 
         protected:
             void NewRenderLines();
@@ -64,6 +70,7 @@ namespace NCL {
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
+            OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
 
@@ -111,7 +118,29 @@ namespace NCL {
             GLuint uiVAO;
             GLuint uiVBO;
 
+            GLuint rayMarchFBO;
+            GLuint rayMarchTexture;
+
+
+            GLuint sceneColorTexture;
+            GLuint sceneDepthTexture;
+
+            GLuint hdrFramebuffer;
+
+            Frustum frameFrustum;
+
             void InitUIQuad();
+
+            void RenderRayMap();
+
+            void InitRayMarching();
+
+            GLuint CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTexture);
+
+            GLuint CreateDepthTexture();
+
+            GLuint CreateHDRTexture();
+
         };
     }
 }

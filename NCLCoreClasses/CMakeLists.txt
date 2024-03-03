@@ -39,6 +39,8 @@ set(Maths
     "Vector3.h"
     "Vector4.cpp"
     "Vector4.h"
+    "Frustum.cpp"
+    "Frustum.h"
 )
 source_group("Maths" FILES ${Maths})
 
