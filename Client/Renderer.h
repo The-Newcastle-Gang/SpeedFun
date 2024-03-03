@@ -145,6 +145,7 @@ namespace NCL {
 
             float uTime;
             int isSpeedLinesActive;
+            int speedLineDir;
 
         };
     }

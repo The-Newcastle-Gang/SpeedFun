@@ -95,7 +95,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     // SpeedLines
     uTime = 0.0f;
-    isSpeedLinesActive = false;
+    isSpeedLinesActive = true;
+    speedLineDir = 0;
     
 }
 
@@ -568,12 +569,14 @@ void GameTechRenderer::RenderCamera() {
     int depthLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
     int timeLoc         = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
     int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
+    int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&lightPosition);
     glUniform1i(depthLoc, 1);
     glUniform1f(timeLoc, uTime);
     glUniform1i(speedBoolLoc, isSpeedLinesActive);
+    glUniform1i(speedLineDirLoc, speedLineDir);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

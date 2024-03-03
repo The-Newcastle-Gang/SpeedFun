@@ -8,6 +8,7 @@ uniform vec3 lightPos;
 
 uniform float u_time;
 uniform bool SpeedLinesActive;
+uniform int speedLineDir;
 
 #define M_PI 3.1415926535897932384626433832795
 #define OCTAVES 6
@@ -258,19 +259,35 @@ void main() {
     float frameRate = frames * fract(velocity);
     vec2 xy = IN.texCoord;
 
-    //if(up){xy.y -= 1.0;} etc etc... directional
-    // set frames to twice for down or rotate 180
+    if(speedLineDir ==1){
+        xy.y-=1.0;
+    } else if (speedLineDir == 2){
+        xy.y+=1.0;
+        frameRate *= 5.0;
+    } else if(speedLineDir == 3){
+        xy.x -=1.0;
+    } else if(speedLineDir == 4){
+        xy.x +=1.0;
+    } else { xy = xy; }
 
     vec2 uvPolar = toPolar(xy, 0.5, 0.07, LINECOUNT);
     uvPolar = uRotate(uvPolar, frameRate, 0.5);
+
+
     vec3 col = vec3(0.);
     col += fbm(uvPolar * 30.0);
 
     float dist4center = dist(xy, vec2(0.5));
 
-    //set these values to 0.2, 0.99 respectively for directional 
     float centerMaskSize = 0.06;
     float centerMaskEdge = 0.6;
+
+    //figure these values out 
+    if(speedLineDir != 0){
+        centerMaskSize = 0.06;
+        centerMaskEdge = 0.6;
+    }
+
     float added = centerMaskEdge + centerMaskSize;
 
     vec3 mask = inverseLerp(centerMaskSize, added, vec3(dist4center));
