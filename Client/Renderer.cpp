@@ -95,7 +95,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     // SpeedLines
     uTime = 0.0f;
-    isSpeedLinesActive = true;
+    isSpeedLinesActive = false;
     speedLineDir = 0;
     
 }
