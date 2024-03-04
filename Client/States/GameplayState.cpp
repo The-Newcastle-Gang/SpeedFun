@@ -16,7 +16,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
-
 }
 
 GameplayState::~GameplayState() {
@@ -29,6 +28,8 @@ void GameplayState::InitCanvas(){
     //since i wanna just use this as debug.
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
+
+    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
 
     InitCrossHeir();
     InitTimerBar();
@@ -166,7 +167,6 @@ void GameplayState::Update(float dt) {
 void GameplayState::ResetCameraToForwards() {
     world->GetMainCamera()->SetPitch(0.68f);
     world->GetMainCamera()->SetYaw(269.43f);
-
 }
 
 void GameplayState::ReadNetworkFunctions() {
@@ -201,10 +201,21 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::EndReached): {
                 std::cout << "End reached statement!\n";
                 Debug::Print("End Reached!", Vector2(50,50), Debug::RED);
+                /*auto crossHeirVert = canvas->AddElement()
+                        .SetColor({1.0,1.0,1.0,1.0})
+                        .SetAbsoluteSize({15,3})
+                        .AlignCenter()
+                        .AlignMiddle();*/
             } break;
             case(Replicated::Death_Event): {
                 // Play Anim
-                // Play sound effect
+                canvas->CreateNewLayer("DeathLayer");
+                canvas->PushActiveLayer("DeathLayer");
+                auto deathImage = canvas->AddImageElement("Solaire!.jpg", "DeathLayer")
+                        .SetColor({1.0,1.0,1.0,1.0})
+                        .SetAbsoluteSize({500,500})
+                        .AlignCenter()
+                        .AlignMiddle();
                 soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
             } break;
