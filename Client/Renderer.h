@@ -39,6 +39,8 @@ namespace NCL {
             void RenderUI();
             void CreatePostProcessQuad();
 
+            void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
+
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             MeshGeometry *LoadOBJMesh(const string &name);
