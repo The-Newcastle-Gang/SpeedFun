@@ -570,11 +570,13 @@ void GameTechRenderer::RenderCamera() {
     int timeLoc         = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
     int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
     int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
+    int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&lightPosition);
     glUniform1i(depthLoc, 1);
     glUniform1f(timeLoc, uTime);
+    glUniform1f(speedLineAmountLoc, speedLinePercent);
     glUniform1i(speedBoolLoc, isSpeedLinesActive);
     glUniform1i(speedLineDirLoc, speedLineDir);
 

@@ -204,6 +204,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         std::cerr << "Where tf player movement" << std::endl;
     }
 
+    {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(player->GetPhysicsObject()->GetLinearVelocity());
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Player_Velocity_Call, &data)));
+    }
     if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;

@@ -40,6 +40,7 @@ namespace NCL {
             void CreatePostProcessQuad();
 
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
+            void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
@@ -147,6 +148,7 @@ namespace NCL {
 
             float uTime;
             int isSpeedLinesActive;
+            float speedLinePercent = 0;
             int speedLineDir;
 
         };
