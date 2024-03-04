@@ -252,14 +252,11 @@ void RunningState::BuildLevel(const std::string &levelName)
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return;
     }
-    currentLevelStartPos = levelReader->GetStartPosition();
-    currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
 
     SetTriggerTypePositions();
 
     auto plist = levelReader->GetPrimitiveList();
-    for(auto x: plist){
+    for(auto& x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
@@ -267,21 +264,24 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
     }
-
     //SetTestSprings();
     SetTestFloor();
-
 }
 
 void RunningState::SetTriggerTypePositions(){
+    currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelCheckPointPositions = levelReader->GetCheckPointPositions();
+
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
             std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
     };
+    for (auto checkpoint : currentLevelCheckPointPositions) {
+        triggersVector.emplace_back(std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), checkpoint));
+    }
 }
 
 void RunningState::SetTestSprings() {
