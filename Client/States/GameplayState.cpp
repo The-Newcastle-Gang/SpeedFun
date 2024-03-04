@@ -3,7 +3,7 @@
 
 using namespace NCL;
 using namespace CSC8503;
-double timer = 0.0f;
+//double timer = 0.0f;
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -82,14 +82,14 @@ void GameplayState::Update(float dt) {
 
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
-    timer += dt;
+    //timer += dt;
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         RaycastEnemy(dt, firstPersonPosition);  
-        if (RaycastEnemy(dt, firstPersonPosition) && timer >= 5.0f) {
-            std::cout << "Player has been hurt" << std::endl;
-            timer = 0.0f;
-        }
+        //if (RaycastEnemy(dt, firstPersonPosition) && timer >= 5.0f) { // a simpler way to shoot the player
+        //    std::cout << "Player has been hurt" << std::endl;
+        //    timer = 0.0f;
+        //}
         //the firstpersonposition is important to my function "RaycastEnemy"  so I have to call the function here
         //any better ways to solve it can tell me 
     }
