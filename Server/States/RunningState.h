@@ -7,6 +7,7 @@
 #include "ServerThread.h"
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
+#include "RayEnemyShoot/RayEnemyShoot.h"
 
 #include <iostream>
 #include <thread>
@@ -81,6 +82,8 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void AddRayEnemyShoot();
         };
     }
 }

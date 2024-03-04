@@ -10,6 +10,8 @@ add_library(replicated STATIC Replicated.cpp
 "SafeQueue.cpp"
 "TriggerVolumeObject.cpp"
 "TriggerVolumeObject.h"
+"RayEnemyShoot/RayEnemyShoot.h"
+"RayEnemyShoot/RayEnemyShoot.cpp"
 )
 
 

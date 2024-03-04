@@ -14,9 +14,9 @@ namespace NCL::CSC8503 {
 		virtual void Update(float dt) {};
 		virtual void PhysicsUpdate(float fixedTime) {};
 		virtual void Start() {};
-		virtual void OnCollisionEnter(const GameObject* otherObject) {};
+		virtual void OnCollisionEnter(GameObject* otherObject) {};
 		virtual void OnCollisionStay(const GameObject* otherObject) {};
-		virtual void OnCollisionEnd(const GameObject* otherObject) {};
+		virtual void OnCollisionEnd(GameObject* otherObject) {};
 
 	protected:
 		GameObject* gameObject; //gameObject this component is attached to

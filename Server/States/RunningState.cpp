@@ -198,5 +198,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
     }
-    AddTriggersToLevel();
+    //AddTriggersToLevel();
+    AddRayEnemyShoot();
+}
+
+void RunningState::AddRayEnemyShoot() {
+    auto rayenemyShoot = new GameObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 10), rayenemyShoot, *world);
+    rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), new PhysicsMaterial()));
+    rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
+    rayenemyShoot->GetTransform().SetPosition(Vector3(-80, 6, -7));
+    rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
+    rayenemyShoot->AddComponent((Component*)(new RayEnemyShoot(rayenemyShoot)));
+    Debug::DrawAABBLines(Vector3(-80, 6, -7), Vector3(5, 5, 5), Debug::MAGENTA, 1000.0f);
 }
