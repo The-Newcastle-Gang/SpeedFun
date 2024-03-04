@@ -3,7 +3,8 @@
 using namespace NCL::CSC8503;
 
 TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum, std::function<int(GameObject*)> idGetter) : TriggerSink(triggerSignal),
-                                                                                         TriggerSinkEndVol(triggerSignalEndVol) {
+                                                                                         TriggerSinkEndVol(triggerSignalEndVol),
+                                                                                         TriggerSinkDeathVol(triggerSignalDeathVol) {
     triggerType = triggerEnum;
     GetPlayerId = idGetter;
 }
@@ -24,6 +25,7 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
                 //revert camera, function in gameplay state
+                triggerSignalDeathVol.publish(GetPlayerId(otherObject));
                 break;
             case TriggerType::CheckPoint:
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());

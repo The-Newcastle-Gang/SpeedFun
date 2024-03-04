@@ -148,6 +148,12 @@ void RunningState::EndTriggerVolFunc(int id){
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
 }
 
+void RunningState::DeathTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event, nullptr)));
+}
+
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
         auto trigger = new TriggerVolumeObject(triggerVec.first, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
@@ -167,6 +173,7 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
 
         trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }

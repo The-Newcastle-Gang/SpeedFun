@@ -70,6 +70,7 @@ namespace NCL {
             void CreatePlayers();
 
             void EndTriggerVolFunc(int id);
+            void DeathTriggerVolFunc(int id);
 
             void SendWorldToClient();
 

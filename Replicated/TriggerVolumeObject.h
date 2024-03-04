@@ -31,11 +31,13 @@ public:
 
     entt::sink<TriggerSignal> TriggerSink;
     entt::sink<TriggerSignal> TriggerSinkEndVol;
+    entt::sink<TriggerSignal> TriggerSinkDeathVol;
 
 private:
     TriggerType triggerType;
     TriggerSignal triggerSignal;
     TriggerSignal triggerSignalEndVol;
+    TriggerSignal triggerSignalDeathVol;
 
     std::function<int(GameObject*)> GetPlayerId;
 };

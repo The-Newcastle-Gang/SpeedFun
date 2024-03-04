@@ -199,8 +199,12 @@ void GameplayState::ReadNetworkFunctions() {
                 strafeSpeed = strfSpd;
             } break;
             case(Replicated::EndReached): {
-                // Render something on screen please.
+                std::cout << "End reached statement!\n";
                 
+            } break;
+            case(Replicated::Death_Event): {
+                std::cout << "Death event reached statement!\n";
+
             } break;
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();

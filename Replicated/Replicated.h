@@ -31,6 +31,7 @@ public:
         Camera_Strafe,
 	    EndReached,
         Grapple_Event,
+        Death_Event,
         };
 
     // In the situation where the server is the remote (Client to server)
