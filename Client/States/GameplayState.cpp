@@ -111,7 +111,7 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav", "Death_sound.wav" });
     soundManager->LoadSoundList();
     soundManager->SM_PlaySound("koppen.ogg");
 }
@@ -200,11 +200,12 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
             case(Replicated::EndReached): {
                 std::cout << "End reached statement!\n";
-                
+                Debug::Print("End Reached!", Vector2(50,50), Debug::RED);
             } break;
             case(Replicated::Death_Event): {
                 // Play Anim
                 // Play sound effect
+                soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
             } break;
             case(Replicated::Grapple_Event): {
