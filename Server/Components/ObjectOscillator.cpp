@@ -9,6 +9,8 @@ ObjectOscillator::ObjectOscillator(GameObject * go, float period, float distance
     this->normalisedDirection = direction;
     this->cooldown = cooldown;
     this->waitDelay = waitDelay;
+
+    phys = go->GetPhysicsObject();
 }
 
 void ObjectOscillator::Update(float dt) {
@@ -21,7 +23,7 @@ void ObjectOscillator::Update(float dt) {
             state = RUNNING;
             timer = 0.5f * 1/frequency + leftover;
             isReturning = true;
-            UpdateOscillation();
+            UpdateOscillation(dt);
         }
         break;
     }
@@ -31,13 +33,13 @@ void ObjectOscillator::Update(float dt) {
 
             state = RUNNING;
             timer = 0.0f + leftover;
-            UpdateOscillation();
+            UpdateOscillation(dt);
         }
         break;
     }
     running:
     case ObjectOscillator::RUNNING: {
-        UpdateOscillation();
+        UpdateOscillation(dt);
         break;
     }
 
@@ -46,7 +48,7 @@ void ObjectOscillator::Update(float dt) {
     }
 }
 
-void ObjectOscillator::UpdateOscillation() {
+void ObjectOscillator::UpdateOscillation(float dt) {
     if (timer * frequency >= 0.5f && !isReturning) {
         float leftover = timer - 0.5f * 1.0f/frequency;
         timer = leftover;
@@ -61,6 +63,11 @@ void ObjectOscillator::UpdateOscillation() {
         return;
     }
 
+    Vector3 lastPos = gameObject->GetTransform().GetPosition();
+
     float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value 
     gameObject->GetTransform().SetPosition(initPosition + normalisedDirection * cosTimer * distance);
+
+    Vector3 velocity = (gameObject->GetTransform().GetPosition() - lastPos) / dt;
+    phys->SetLinearVelocity(velocity); //do this so they can push things around!
 }

@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "GameObject.h"
+#include "PhysicsObject.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -15,7 +16,9 @@ public:
 
 private:
 
-    void UpdateOscillation();
+    void UpdateOscillation(float dt);
+
+    PhysicsObject* phys;
     Vector3 initPosition;
 
     Vector3 normalisedDirection; //should be normalised!

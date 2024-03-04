@@ -285,9 +285,9 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
-        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod * 10.0f,x->distance,x->direction,x->cooldown,x->waitDelay);
+        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
         g->AddComponent(oo);
     }
 
