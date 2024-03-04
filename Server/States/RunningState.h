@@ -11,6 +11,9 @@
 #include "DamagingObstacle.h"
 #include "LevelManager.h"
 
+#include "Spring.h"
+
+
 #include <iostream>
 #include <thread>
 
@@ -74,6 +77,7 @@ namespace NCL {
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
             void AddTriggersToLevel();
+            void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
             static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
@@ -85,6 +89,11 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void SetTestSprings();
+            void SetTestFloor();
+
+            void SetTriggerTypePositions();
         };
     }
 }

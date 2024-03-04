@@ -13,7 +13,7 @@ namespace NCL::CSC8503 {
 	{
 	public:
 
-		SwingingObject(GameObject* go) { gameObject = go; }
+		SwingingObject(GameObject* go) { gameObject = go; Start(); }
 		void Update(float dt)override;
 
 		void Start()override {
@@ -21,6 +21,10 @@ namespace NCL::CSC8503 {
 			timer = MAX_TIMER;
 			CheckTimerState();
 		}
+
+        void OnCollisionEnter(GameObject* otherObject) override;
+        void OnCollisionStay(GameObject* otherObject) override;
+        void OnCollisionEnd(GameObject* otherObject) override;
 
 		void PhysicsUpdate(float dt)override {}
 

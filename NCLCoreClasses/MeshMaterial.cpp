@@ -31,6 +31,7 @@ MeshMaterial::MeshMaterial(const std::string& filename) {
 	int meshCount;
 	file >> matCount;
 	file >> meshCount;
+    file.ignore();//Ignore endline after reading float!
 
 	materialLayers.resize(matCount);
 
