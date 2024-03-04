@@ -44,9 +44,6 @@ void main(void)	{
 	vec3  incident = normalize ( lightPos - IN.worldPos );
 	float lambert  = max (0.0 , dot ( incident , IN.normal )) * 0.9; 
 
-	//float toonLambert = smoothstep(0.0, 0.01, dot(normalize(lightPos - IN.worldPos), IN.normal));
-	//float toonSpecular = smoothstep(0.155, 0.16, sFactor);
-
 	
 	vec3 viewDir = normalize ( cameraPos - IN . worldPos );
 	vec3 halfDir = normalize ( incident + viewDir );
@@ -55,6 +52,9 @@ void main(void)	{
 	float sFactor = pow ( rFactor , 80.0 );
 	
 	vec4 albedo = IN.colour;
+
+	float toonLambert = smoothstep(0.0, 0.01, dot(normalize(lightPos - IN.worldPos), IN.normal));
+	float toonSpecular = smoothstep(0.155, 0.16, sFactor);
 	
 	if(hasTexture) {
 	 albedo *= texture(mainTex, IN.texCoord);
@@ -64,9 +64,9 @@ void main(void)	{
 	
 	fragColour[0].rgb = albedo.rgb * 0.05f; //ambient
 	
-	fragColour[0].rgb += albedo.rgb * lightColour.rgb * lambert * shadow; //diffuse light
+	fragColour[0].rgb += albedo.rgb * lightColour.rgb * toonLambert * shadow; //diffuse light
 	
-	fragColour[0].rgb += lightColour.rgb * sFactor * shadow; //specular light
+	fragColour[0].rgb += lightColour.rgb * toonSpecular * shadow; //specular light
 	
 	fragColour[0].rgb = pow(fragColour[0].rgb, vec3(1.0 / 2.2f));
 	

@@ -291,7 +291,7 @@ void GameTechRenderer::RenderFrame() {
     FillDiffuseBuffer();
     RenderDeferredLighting();
     CombineBuffers();
-    //ApplyPostProcessing();
+    ApplyPostProcessing();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -304,6 +304,7 @@ void GameTechRenderer::RenderFrame() {
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glDepthFunc(GL_LEQUAL);
+    glDepthMask(true);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
@@ -370,7 +371,9 @@ void GameTechRenderer::RenderDeferredLighting() {
 }
 
 void GameTechRenderer::CombineBuffers() {
-    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glDisable(GL_CULL_FACE);
 
     BindShader(combineShader);
@@ -605,9 +608,9 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
+    //glClearColor(0.0, 0.0, 0.0, 0.0);
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     //TODO - PUT IN FUNCTION
     glActiveTexture(GL_TEXTURE0+1);
@@ -719,7 +722,7 @@ void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sceneColorTexture);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, sceneDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
     glBindVertexArray(quadVAO);
 
     auto& camera = *gameWorld.GetMainCamera();
