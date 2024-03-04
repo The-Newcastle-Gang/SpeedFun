@@ -236,13 +236,12 @@ void GameplayState::JumpCamera(float dt) {
 }
 
 void GameplayState::HandleGrappleEvent(int event) {
+    //does nothing currently, use this to do visuals or sound or whatever
     switch (event) {
         case 1: {
-            strafeTiltAmount = strafeTiltAmountGrappling;
             break;
         }
         case 2: {
-            strafeTiltAmount = strafeTiltAmountGrounded;
            break;
         }
     }

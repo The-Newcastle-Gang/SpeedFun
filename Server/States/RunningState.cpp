@@ -2,6 +2,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
+#define GRAPPLE_SWAY_MULTIPLIER 15.0f
+
 RunningState::RunningState(GameServer* pBaseServer) : State() {
     // Don't use serverBase without talking to other members of the team.
     serverBase = pBaseServer;
@@ -233,17 +235,18 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
+        float speed = playerMovement->cameraAnimationCalls.strafeSpeed * (playerMovement->cameraAnimationCalls.isGrappling ? GRAPPLE_SWAY_MULTIPLIER:1.0f);
+        handler.Pack(speed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
     }
 
-    if ( int state = playerMovement->cameraAnimationCalls.grapplingState != 0) {
+    if ( int state = playerMovement->cameraAnimationCalls.grapplingEvent != 0) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(playerMovement->cameraAnimationCalls.grapplingState);
+        handler.Pack(playerMovement->cameraAnimationCalls.grapplingEvent);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
-        playerMovement->cameraAnimationCalls.grapplingState = 0;
+        playerMovement->cameraAnimationCalls.grapplingEvent = 0;
 
     }
     

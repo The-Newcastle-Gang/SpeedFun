@@ -56,11 +56,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
-    cameraAnimationCalls.grapplingState = 2;
+    cameraAnimationCalls.isGrappling = false;
+    cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
-    cameraAnimationCalls.grapplingState = 1;
+    cameraAnimationCalls.isGrappling = true;
+    cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
 }
 
