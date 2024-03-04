@@ -9,10 +9,12 @@
 #include "Vector4.h"
 #include "Vector2.h"
 #include "Font.h"
+#include "Frustum.h"
 
 #include "Assets.h"
 #include "Element.h"
 #include "Canvas.h"
+#include "CollisionDetection.h"
 
 #include "ParticleSystem.h"
 
@@ -23,6 +25,8 @@ namespace NCL {
     namespace CSC8503 {
         class RenderObject;
 
+        using namespace NCL;
+        using namespace Maths;
         class GameTechRenderer : public OGLRenderer	{
         public:
             GameTechRenderer(GameWorld& world, Canvas& canvas);
@@ -42,6 +46,9 @@ namespace NCL {
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             void PassParticleSystems(vector<ParticleSystem*> ps) { particleSystems = ps; }
+            MeshGeometry *LoadOBJMesh(const string &name);
+
+            void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
 
         protected:
             void NewRenderLines();
@@ -70,6 +77,7 @@ namespace NCL {
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
+            OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
 
@@ -122,13 +130,34 @@ namespace NCL {
             GLuint uiVAO;
             GLuint uiVBO;
 
+            GLuint rayMarchFBO;
+            GLuint rayMarchTexture;
+
+
+            GLuint sceneColorTexture;
+            GLuint sceneDepthTexture;
+
+            GLuint hdrFramebuffer;
+
+            Frustum frameFrustum;
+
             void InitUIQuad();
 
             OGLMesh*    LQuad;
             OGLShader*  LShader;
             float u_time;
 
+            void RenderRayMap();
 
+            void InitRayMarching();
+
+            GLuint CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTexture);
+            GLuint CreateDepthTexture();
+            GLuint CreateHDRTexture();
+
+            float uTime;
+            int isSpeedLinesActive;
+            int speedLineDir;
         };
     }
 }
