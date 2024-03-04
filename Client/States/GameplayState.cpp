@@ -214,8 +214,6 @@ void GameplayState::AssignPlayer(int netObject) {
 }
 
 bool GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
-    //Vector3 rayPos;
-    //Vector3 rayDir;
     Vector3 playerPos;
     Vector3 enemyPos;
     Vector3 enemyDir;
@@ -230,7 +228,6 @@ bool GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
          float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / PI;
          enemyOrientation = Quaternion::EulerAnglesToQuaternion(0.0f, transDegree, 0.0f);
          raycastEnemy->GetTransform().SetOrientation(enemyOrientation); //make the enemy will keep facing the player
-         //Debug::DrawLine(playerPos, enemyPos, Vector4(1, 0, 0, 1), 0.1);
          return true;
      }
     else { return false; }

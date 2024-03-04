@@ -205,7 +205,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 void RunningState::AddRayEnemyShoot() {
     auto rayenemyShoot = new GameObject();
     replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 10), rayenemyShoot, *world);
-    rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), new PhysicsMaterial()));
+    rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), physics->GetPhysMat("Default")));
     rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
     rayenemyShoot->GetTransform().SetPosition(Vector3(-80, 6, -7));
     rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
