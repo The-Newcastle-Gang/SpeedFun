@@ -202,17 +202,14 @@ void GameplayState::ReadNetworkFunctions() {
                 // Render something on screen please.
                 
             } break;
-            }
-            break;
-
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
-            }
-            break;
+            } break;
         }
     }
 }
+
 void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
