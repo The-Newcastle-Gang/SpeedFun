@@ -316,16 +316,19 @@ void GameplayState::InitLevel() {
     }
 
 
-    //SetTestSprings();
-
-//    SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
+
+    AddLava({-91,-20,13});
+    AddEndPortal({0,-5,0});
+    //SetTestSprings();
+
+    //SetTestFloor();
+
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
-    AddLava({-91,-20,13});
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
@@ -378,6 +381,19 @@ void GameplayState::AddLava(Vector3 position){
     auto tem = new GameObject();
     replicated->AddTestObjectToLevel(tem, *world, {1000,1000,10}, position);
     tem->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
-    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("lava")));
+//    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("lava")));
 //    tem->GetRenderObject()->SetColour({1,0,0,1});/
+}
+
+void GameplayState::AddEndPortal(Vector3 position){
+
+    auto endP    =  new GameObject();
+    auto endQuad =  new GameObject();
+    endQuad->GetTransform().SetOrientation(Quaternion (Matrix4::Rotation(90, {0,1,0})));
+    replicated->AddTestObjectToLevel(endP, * world, {1,1,1}, position);
+    replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position);
+
+    endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
+    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default"), resources->GetShader("scene")));
+
 }
