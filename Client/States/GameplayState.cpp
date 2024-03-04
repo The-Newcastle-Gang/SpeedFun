@@ -38,13 +38,13 @@ void GameplayState::InitCanvas(){
 void GameplayState::InitCrossHeir(){
     //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
@@ -345,7 +345,7 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-
+        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
     }
 
 
