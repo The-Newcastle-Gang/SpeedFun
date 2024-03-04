@@ -1,6 +1,4 @@
 #include "Renderer.h"
-#include "Renderer.h"
-#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
 
