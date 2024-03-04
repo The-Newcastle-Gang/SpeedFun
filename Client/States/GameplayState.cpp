@@ -357,13 +357,21 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("dbtest.json");
+    lr->HasReadLevel("newTest.json");
     auto plist  = lr->GetPrimitiveList();
+    auto opList  = lr->GetOscillatorPList();
     for(auto x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+    }
+
+    for (auto x : opList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 0.65f, 0.90f, 1.0f });
     }
 
 

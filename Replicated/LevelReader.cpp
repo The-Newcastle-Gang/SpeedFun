@@ -75,6 +75,8 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         temp->position = Vector3(posi["x"], posi["y"], posi["z"] * -1);
         temp->direction = Vector3(dir["x"], dir["y"], dir["z"]* -1);
 
+        temp->shouldNetwork = true;
+
         oscillatorPrimitives.emplace_back(temp);
     }
 

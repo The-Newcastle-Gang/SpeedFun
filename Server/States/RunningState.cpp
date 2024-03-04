@@ -91,7 +91,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("dbtest");
+    BuildLevel("newTest");
     AddTriggersToLevel();
     CreatePlayers();
 }
@@ -269,6 +269,8 @@ void RunningState::BuildLevel(const std::string &levelName)
     SetTriggerTypePositions();
 
     auto plist = levelReader->GetPrimitiveList();
+    auto opList = levelReader->GetOscillatorPList();
+
     for(auto& x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
@@ -277,6 +279,18 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
     }
+
+    for (auto x : opList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod * 10.0f,x->distance,x->direction,x->cooldown,x->waitDelay);
+        g->AddComponent(oo);
+    }
+
     //SetTestSprings();
     SetTestFloor();
 }
