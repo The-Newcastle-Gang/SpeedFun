@@ -79,7 +79,6 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
 
-    // move to own function.
     InitUIQuad();
     u_time = 0.0f;
 
@@ -109,10 +108,7 @@ void GameTechRenderer::RenderParticles()
     glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
     glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-
-
-
-    for (auto ps : particleSystems)
+    for (auto& ps : particleSystems)
     {
         ps->DrawParticles();
     }
