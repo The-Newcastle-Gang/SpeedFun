@@ -203,8 +203,9 @@ void GameplayState::ReadNetworkFunctions() {
                 
             } break;
             case(Replicated::Death_Event): {
-                std::cout << "Death event reached statement!\n";
-
+                // Play Anim
+                // Play sound effect
+                ResetCameraToForwards();
             } break;
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
