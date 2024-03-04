@@ -344,8 +344,8 @@ void GameplayState::InitLevel() {
     for(auto x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
-        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh("platform.msh"), nullptr, resources->GetShader("scene")));
+        temp->GetRenderObject()->SetColour({1.0,0.0,0.0, 0.5});
     }
 
 

@@ -24,6 +24,7 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     g->GetTransform()
         .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position);
+    g->GetTransform().SetScale(Vector3(g->GetTransform().GetScale().x, 1.0f, g->GetTransform().GetScale().z));
 }
 
 
