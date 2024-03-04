@@ -19,6 +19,7 @@ public:
 
     MeshGeometry *GetMesh(const string &name, const std::string &type = "mesh");
     ShaderBase *GetShader(const string &name);
+    TextureBase *GetTexture(const string &name);
     MeshAnimation *GetAnimation(const string &name);
     MeshMaterial *GetMeshMaterial(const string &name);
 
@@ -28,6 +29,7 @@ private:
     std::unordered_map<std::string, std::unique_ptr<ShaderBase>> shaders;
     std::unordered_map<std::string, std::unique_ptr<MeshAnimation>> animations;
     std::unordered_map<std::string, std::unique_ptr<MeshMaterial>> meshMaterials;
+    std::unordered_map<std::string, std::unique_ptr<TextureBase>> textures;
 };
 
 

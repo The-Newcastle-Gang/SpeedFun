@@ -38,13 +38,13 @@ void GameplayState::InitCanvas(){
 void GameplayState::InitCrossHeir(){
     //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
@@ -202,6 +202,14 @@ void GameplayState::ReadNetworkFunctions() {
                 // Render something on screen please.
                 
             } break;
+            }
+            break;
+
+            case(Replicated::Grapple_Event): {
+                int eventType = handler.Unpack<int>();
+                HandleGrappleEvent(eventType);
+            }
+            break;
         }
     }
 }
@@ -225,6 +233,18 @@ void GameplayState::WalkCamera(float dt) {
 void GameplayState::JumpCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
     jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::HandleGrappleEvent(int event) {
+    //does nothing currently, use this to do visuals or sound or whatever
+    switch (event) {
+        case 1: {
+            break;
+        }
+        case 2: {
+           break;
+        }
+    }
 }
 
 void GameplayState::LandCamera(float dt) {
@@ -335,12 +355,14 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("debuglvl.json");
+    lr->HasReadLevel("dbtest.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+
     }
 
     //SetTestSprings();

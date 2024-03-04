@@ -29,8 +29,9 @@ public:
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
-	EndReached,
-    };
+	    EndReached,
+        Grapple_Event,
+        };
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
@@ -72,6 +73,5 @@ struct Diagnostics {
         delete gameTimer;
     }
 };
-
 
 #endif //CSC8503_REPLICATED_H

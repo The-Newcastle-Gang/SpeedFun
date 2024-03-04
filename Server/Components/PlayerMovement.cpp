@@ -56,10 +56,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
-
+    cameraAnimationCalls.isGrappling = false;
+    cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
+    cameraAnimationCalls.isGrappling = true;
+    cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
 }
 
@@ -178,6 +181,7 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
 bool PlayerMovement::GroundCheck() {
 
     constexpr static float groundOffset = 0.1;
+    constexpr static float groundDistanceCheck = 0.2;
 
     auto physicsObject = gameObject->GetPhysicsObject();
     auto position = gameObject->GetTransform().GetPosition();
@@ -191,7 +195,7 @@ bool PlayerMovement::GroundCheck() {
 
     if (world->Raycast(ray, closestCollision, true, gameObject)) {
         Vector3 dist = closestCollision.collidedAt - capBottom;
-        if (dist.Length() < groundOffset) {
+        if (dist.Length() < groundDistanceCheck) {
             return true;
         }
     }
@@ -259,6 +263,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
 }
 
 void PlayerMovement::FireGrapple() {
+    
     SwitchToState(&grapple);
 //    float gravity = -9.8;
 //
