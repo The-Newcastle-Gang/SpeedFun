@@ -44,7 +44,7 @@ namespace NCL {
             void InitCanvas();
 
            
-            void RaycastEnemy(float dt, Transform* playerPosition);
+            bool RaycastEnemy(float dt, Transform* playerPosition);
             GameObject* raycastEnemy = new GameObject();
 
 #ifdef USEVULKAN

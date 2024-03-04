@@ -3,7 +3,7 @@
 
 using namespace NCL;
 using namespace CSC8503;
-
+double timer = 0.0f;
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -82,10 +82,14 @@ void GameplayState::Update(float dt) {
 
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
-
+    timer += dt;
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         RaycastEnemy(dt, firstPersonPosition);  
+        if (RaycastEnemy(dt, firstPersonPosition) && timer >= 5.0f) {
+            std::cout << "Player has been hurt" << std::endl;
+            timer = 0.0f;
+        }
         //the firstpersonposition is important to my function "RaycastEnemy"  so I have to call the function here
         //any better ways to solve it can tell me 
     }
@@ -209,7 +213,7 @@ void GameplayState::AssignPlayer(int netObject) {
 
 }
 
-void GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
+bool GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
     //Vector3 rayPos;
     //Vector3 rayDir;
     Vector3 playerPos;
@@ -225,8 +229,9 @@ void GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
          enemyDir = (enemyPos - playerPos).Normalised();
          float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / PI;
          enemyOrientation = Quaternion::EulerAnglesToQuaternion(0.0f, transDegree, 0.0f);
-         raycastEnemy->GetTransform().SetOrientation(enemyOrientation);  //make the enemy will keep facing the player
+         raycastEnemy->GetTransform().SetOrientation(enemyOrientation); //make the enemy will keep facing the player
          //Debug::DrawLine(playerPos, enemyPos, Vector4(1, 0, 0, 1), 0.1);
+         return true;
      }
+    else { return false; }
  }
-
