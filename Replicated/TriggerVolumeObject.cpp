@@ -10,6 +10,8 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 break;
             case TriggerType::End:
                 std::cout << "End volume\n";
+                
+                
                 break;
             case TriggerType::Death:
                 otherObject->GetPhysicsObject()->ClearForces();
