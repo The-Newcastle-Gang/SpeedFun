@@ -56,10 +56,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
-
+    cameraAnimationCalls.isGrappling = false;
+    cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
+    cameraAnimationCalls.isGrappling = true;
+    cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
 }
 
@@ -260,6 +263,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
 }
 
 void PlayerMovement::FireGrapple() {
+    
     SwitchToState(&grapple);
 //    float gravity = -9.8;
 //
