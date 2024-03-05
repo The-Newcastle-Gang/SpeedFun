@@ -298,11 +298,14 @@ void GameplayState::SendInputData() {
 
 
     input.playerDirection = InputListener::GetPlayerInput();
-    if (input.playerDirection.Length() > 0.0f) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("Run");
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::R)) {
+        //debugPlayer->GetAnimatorObject()->SetAnimation("Run");
+        debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.3f);
+
     }
-    else {
-        debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
+    else if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {
+        //debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
+        debugPlayer->GetAnimatorObject()->TransitionAnimation("Idle", 0.3f);
     }
 
     

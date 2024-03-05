@@ -22,15 +22,65 @@ void AnimatorObject::SetAnimation(std::string animationName) {
 }
 
 void AnimatorObject::UpdateAnimation(float dt) {
-    animationInfo.frameTimer += dt * animationInfo.animationSpeed;
-    if (animationInfo.frameTimer >currentAnimation->GetFrameTimeDelta()) {
-        animationInfo.frameTimer -= currentAnimation->GetFrameTimeDelta();
-        animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
+    switch (isTransitioning) {
+        case false: {
+            animationInfo.frameTimer += dt * animationInfo.animationSpeed;
+            if (animationInfo.frameTimer > currentAnimation->GetFrameTimeDelta()) {
+                animationInfo.frameTimer -= currentAnimation->GetFrameTimeDelta();
+                animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
+            }
+            animationInfo.framePercent = std::clamp(animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta(),0.0f,1.0f);
+            break;
+        }
+        case true: {
+            transitionTimer += dt;
+            animationInfo.framePercent = transitionTimer;
+            if (transitionTimer >= transitionTime)SetAnimation(queuedAnimation);
+            break;
+        }
+
     }
-    //std::cout << animationInfo.currentFrame << "\n";
-    animationInfo.framePercent = animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta();
+
 }
 
 void AnimatorObject::ResetAnimValues() {
     animationInfo.Reset();
+}
+
+void AnimatorObject::TransitionAnimation(std::string animationName, float time) {
+    if (animations->find(animationName) == animations->end())return;
+    MeshAnimation* transitionAnim = (*animations)[animationName];
+    transitionTime = time;
+    transitionTimer = 0.0f;
+    isTransitioning = true;
+    animationInfo.framePercent = 0.0f;
+    queuedAnimation = transitionAnim;
+}
+
+const Matrix4* AnimatorObject::GetCurrentFrameData() {
+    switch (isTransitioning)
+    {
+        case false: {
+            return currentAnimation->GetJointData(GetCurrentFrame());
+            break;
+        }
+        case true:{
+            return currentAnimation->GetJointData(GetCurrentFrame());
+            break;
+        }
+    }
+}
+
+const Matrix4* AnimatorObject::GetNextFrameData() {
+    switch (isTransitioning)
+    {
+        case false: {
+            return currentAnimation->GetJointData(GetNextFrame());
+            break;
+        }
+        case true: {
+            return queuedAnimation->GetJointData(0);
+            break;
+        }
+    }
 }

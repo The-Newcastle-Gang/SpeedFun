@@ -178,8 +178,8 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
 {
     const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
     const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
-    const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
-    const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
+    const Matrix4* frameData = boundAnimation->GetCurrentFrameData();
+    const Matrix4* nextFrameData = boundAnimation->GetNextFrameData();
     const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
     SubMeshPoses pose;
 
