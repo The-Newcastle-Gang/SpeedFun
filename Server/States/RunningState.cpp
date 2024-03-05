@@ -247,7 +247,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(playerMovement->cameraAnimationCalls.grapplingEvent);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
-
     }
     
 }
@@ -270,6 +269,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 
     auto plist = levelReader->GetPrimitiveList();
     auto opList = levelReader->GetOscillatorPList();
+    auto harmOpList = levelReader->GetHarmfulOscillatorPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -277,7 +277,6 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
-
     }
 
     for (auto x : opList) {
@@ -289,6 +288,19 @@ void RunningState::BuildLevel(const std::string &levelName)
 
         ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
         g->AddComponent(oo);
+    }
+
+    for (auto x : harmOpList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+
+        ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
+        DamagingObstacle* dO = new DamagingObstacle(g);
+        g->AddComponent(oo);
+        g->AddComponent(dO);
     }
 
     //SetTestSprings();
