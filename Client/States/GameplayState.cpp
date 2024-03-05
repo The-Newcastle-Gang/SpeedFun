@@ -230,8 +230,8 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
-            }
-            break;
+
+            } break;
 
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
@@ -400,6 +400,7 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
     }
+
     for (auto &x : opList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
@@ -413,6 +414,7 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
+
     //SetTestSprings();
     //SetTestFloor();
 
