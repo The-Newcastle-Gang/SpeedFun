@@ -300,12 +300,12 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::R)) {
         //debugPlayer->GetAnimatorObject()->SetAnimation("Run");
-        debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.3f);
+        debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.1f);
 
     }
     else if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {
         //debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
-        debugPlayer->GetAnimatorObject()->TransitionAnimation("Idle", 0.3f);
+        debugPlayer->GetAnimatorObject()->TransitionAnimation("Idle", 0.1f);
     }
 
     

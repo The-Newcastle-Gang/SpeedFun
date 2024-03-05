@@ -14,6 +14,7 @@ public:
     ~AnimatorObject() {};
     void SetAnimation(MeshAnimation* newAnimation);
     void SetAnimation(std::string animationName);
+    void FinishTransition();
     void UpdateAnimation(float dt);
 
     void TransitionAnimation(std::string animationName, float time);
@@ -32,6 +33,14 @@ public:
         return (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
     }
 
+    int GetQueuedCurrentFrame() {
+        return queuedAnimationInfo.currentFrame;
+    }
+
+    int GetQueuedNextFrame() {
+        return (queuedAnimationInfo.currentFrame + 1) % queuedAnimation->GetFrameCount();
+    }
+
     const Matrix4* GetCurrentFrameData();
 
     const Matrix4* GetNextFrameData();
@@ -42,12 +51,13 @@ public:
                 return animationInfo.framePercent;
             }
             case true: {
-                return std::clamp(transitionTime / transitionTimer,0.0f,1.0f);
+                return std::clamp(transitionTimer / transitionTime,0.0f,1.0f);
             }
         }
     }
 private:
     MeshAnimationInfo animationInfo;
+    MeshAnimationInfo queuedAnimationInfo;
     MeshAnimation* currentAnimation;
     MeshAnimation* queuedAnimation;
     std::map<std::string, MeshAnimation*>* animations;

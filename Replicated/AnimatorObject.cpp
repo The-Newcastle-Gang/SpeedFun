@@ -11,6 +11,17 @@ void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
     currentAnimation = newAnimation;
 }
 
+void AnimatorObject::FinishTransition() {
+
+    isTransitioning = false;
+    animationInfo = queuedAnimationInfo;
+    queuedAnimationInfo.Reset();
+
+    currentAnimation = queuedAnimation;
+    queuedAnimation = nullptr;
+
+}
+
 void AnimatorObject::SetAnimation(std::string animationName) {
     if (animations->find(animationName) == animations->end())return;
     MeshAnimation* newAnim = (*animations)[animationName];
@@ -22,23 +33,24 @@ void AnimatorObject::SetAnimation(std::string animationName) {
 }
 
 void AnimatorObject::UpdateAnimation(float dt) {
-    switch (isTransitioning) {
-        case false: {
-            animationInfo.frameTimer += dt * animationInfo.animationSpeed;
-            if (animationInfo.frameTimer > currentAnimation->GetFrameTimeDelta()) {
-                animationInfo.frameTimer -= currentAnimation->GetFrameTimeDelta();
-                animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
-            }
-            animationInfo.framePercent = std::clamp(animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta(),0.0f,1.0f);
-            break;
-        }
-        case true: {
-            transitionTimer += dt;
-            animationInfo.framePercent = transitionTimer;
-            if (transitionTimer >= transitionTime)SetAnimation(queuedAnimation);
-            break;
-        }
+    animationInfo.frameTimer += dt * animationInfo.animationSpeed;
+    if (animationInfo.frameTimer > currentAnimation->GetFrameTimeDelta()) {
+        animationInfo.frameTimer -= currentAnimation->GetFrameTimeDelta();
+        animationInfo.currentFrame = (animationInfo.currentFrame + 1) % currentAnimation->GetFrameCount();
+    }
+    animationInfo.framePercent = std::clamp(animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta(),0.0f,1.0f);
 
+    if (isTransitioning) {
+        queuedAnimationInfo.frameTimer += dt * queuedAnimationInfo.animationSpeed;
+        if (queuedAnimationInfo.frameTimer > queuedAnimation->GetFrameTimeDelta()) {
+            queuedAnimationInfo.frameTimer -= queuedAnimation->GetFrameTimeDelta();
+            queuedAnimationInfo.currentFrame = (queuedAnimationInfo.currentFrame + 1) % queuedAnimation->GetFrameCount();
+        }
+        queuedAnimationInfo.framePercent = std::clamp(queuedAnimationInfo.frameTimer / queuedAnimation->GetFrameTimeDelta(), 0.0f, 1.0f);
+
+        transitionTimer += dt;
+        animationInfo.framePercent = transitionTimer;
+        if (transitionTimer >= transitionTime)FinishTransition();
     }
 
 }
@@ -79,7 +91,7 @@ const Matrix4* AnimatorObject::GetNextFrameData() {
             break;
         }
         case true: {
-            return queuedAnimation->GetJointData(0);
+            return queuedAnimation->GetJointData(GetQueuedNextFrame());
             break;
         }
     }
