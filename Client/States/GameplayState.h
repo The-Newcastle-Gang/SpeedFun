@@ -24,6 +24,13 @@
 
 namespace NCL {
     namespace CSC8503 {
+
+        enum LoadingStates {
+            NOT_LOADED,
+            LOADED,
+            READY
+        };
+
         class GameplayState : public State
         {
         public:
@@ -84,7 +91,14 @@ namespace NCL {
             void SendInputData();
             void CreatePlayers();
 
+            void ManageLoading(float dt);
             void FinishLoading();
+            std::thread* loadWorldThread;
+            std::thread* loadSoundThread;
+            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            float loadingTime = 0.0f;
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
 

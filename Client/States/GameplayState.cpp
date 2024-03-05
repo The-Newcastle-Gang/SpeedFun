@@ -103,17 +103,28 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
-    InitSounds();
+    
+
 
 }
-
+void GameplayState::InitialiseAssets() {
+    loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
+    loadSoundThread->detach();
+    InitWorld();
+    InitCamera();
+    FinishLoading();
+}
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
+    std::cout << "Loading Sounds!";
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "skeleton.ogg", "footsteps.wav", "weird.wav" , "warning.wav" });
     soundManager->LoadSoundList();
-    soundManager->SM_PlaySound("koppen.ogg");
+
+    soundHasLoaded = LoadingStates::LOADED;
+    
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -134,7 +145,29 @@ void GameplayState::OnExit() {
     delete networkThread;
 }
 
+void GameplayState::ManageLoading(float dt) {
+
+    if (loadingTime > 0.1f) {
+        std::cout << ".\n";
+        loadingTime = 0.0f;
+    }
+    loadingTime += dt;
+
+    if (soundHasLoaded == LoadingStates::LOADED) {
+        std::cout << "Sounds Have Loaded!";
+        soundManager->SM_PlaySound("skeleton.ogg");
+        soundHasLoaded = LoadingStates::READY;
+    }
+
+    if (soundHasLoaded == LoadingStates::READY) {
+        finishedLoading = LoadingStates::READY;
+    }
+}
 void GameplayState::Update(float dt) {
+    if (finishedLoading != LoadingStates::READY) {
+        ManageLoading(dt);
+        return;
+    }
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
@@ -213,10 +246,12 @@ void GameplayState::ReadNetworkFunctions() {
 
     }
 }
+
 void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
 }
+
 void GameplayState::WalkCamera(float dt) {
     
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
@@ -295,13 +330,7 @@ void GameplayState::SendInputData() {
 }
 
 
-void GameplayState::InitialiseAssets() {
-    InitCamera();
-    InitWorld();
-    FinishLoading();
 
-    
-}
 
 void GameplayState::FinishLoading() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
@@ -319,6 +348,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
+    worldHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateRock() {
