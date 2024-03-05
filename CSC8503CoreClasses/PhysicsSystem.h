@@ -61,7 +61,7 @@ namespace NCL {
 			void DrawAllObjectCollision();
 
 
-			bool isDebugDrawingCollision = false;
+			bool isDebugDrawingCollision = true;
 
 			GameWorld& gameWorld;
 
