@@ -13,7 +13,23 @@ ObjectOscillator::ObjectOscillator(GameObject * go, float period, float distance
     phys = go->GetPhysicsObject();
 }
 
-void ObjectOscillator::Update(float dt) {
+void ObjectOscillator::OnCollisionEnter(GameObject* other) {
+    if (other->GetTag() == PLAYER) {
+        if(other->GetTransform().GetPosition().y > gameObject->GetTransform().GetPosition().y)
+        objectsOnPlatform[other] = true;
+        std::cout << "PLAYER ON PLATFORM\n";
+    }
+}
+
+void ObjectOscillator::OnCollisionEnd(GameObject* other) {
+    if (other->GetTag() == PLAYER) {
+        objectsOnPlatform[other] = false;
+        std::cout << "PLAYER LEFT PLATFORM\n";
+        other->GetPhysicsObject()->ApplyLinearImpulse(lastVelocity);
+    }
+}
+
+void ObjectOscillator::PhysicsUpdate(float dt) {
     timer += dt;
     switch (state)
     {
@@ -68,6 +84,16 @@ void ObjectOscillator::UpdateOscillation(float dt) {
     float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value 
     gameObject->GetTransform().SetPosition(initPosition + normalisedDirection * cosTimer * distance);
 
-    Vector3 velocity = (gameObject->GetTransform().GetPosition() - lastPos) / dt;
-    phys->SetLinearVelocity(velocity); //do this so they can push things around!
+
+    Vector3 changeInPosition = (gameObject->GetTransform().GetPosition() - lastPos);
+    lastVelocity = changeInPosition / dt;
+    phys->SetLinearVelocity(lastVelocity); //do this so they can push things around!
+
+    for (std::pair<GameObject*, bool> pair : objectsOnPlatform) {
+        if (pair.second) {
+            Transform* t = pair.first->GetTransformPointer();
+            t->SetPosition(t->GetPosition() + changeInPosition); //subtract the velocity we added last update (cancel it out)
+        }
+    }
+
 }

@@ -1,6 +1,7 @@
 #include "Component.h"
 #include "GameObject.h"
 #include "PhysicsObject.h"
+#include <unordered_map>
 
 using namespace NCL;
 using namespace CSC8503;
@@ -12,7 +13,10 @@ class ObjectOscillator : public Component {
 
 public:
     ObjectOscillator(GameObject* go,float period,float distance,Vector3 direction, float cooldown = 0.0f, float waitDelay = 0.0f);
-    void Update(float dt)override;
+    //void Update(float dt)override;
+    void OnCollisionEnter(GameObject* other)override;
+    void OnCollisionEnd(GameObject* other)override;
+    void PhysicsUpdate(float dt)override;
 
 private:
 
@@ -20,6 +24,7 @@ private:
 
     PhysicsObject* phys;
     Vector3 initPosition;
+    Vector3 lastVelocity;
 
     Vector3 normalisedDirection; //should be normalised!
     float distance = 1.0f;
@@ -36,4 +41,5 @@ private:
 
     State state = RUNNING;
 
+    std::unordered_map<GameObject*,bool> objectsOnPlatform; //means we only add to the map once per player.
 };
