@@ -17,7 +17,6 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
             case TriggerType::Start:
                 std::cout << "Start volume\n";
                 triggerSignal.publish(GetPlayerId(otherObject));
-                triggerSignalStartVol.publish(GetPlayerId(otherObject));
                 break;
 
             case TriggerType::End:
@@ -50,6 +49,7 @@ void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
             case TriggerType::Start:
                 if(otherObject->GetCurrentCheckPointPos() != Vector3()) { return; }
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
+                triggerSignalStartVol.publish(GetPlayerId(otherObject));
                 break;
             case TriggerType::End:
                 break;
