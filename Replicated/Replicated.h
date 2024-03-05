@@ -28,7 +28,9 @@ public:
         Camera_GroundedMove,
         Camera_Jump,
         Camera_Land,
-        Camera_Strafe
+        Camera_Strafe,
+        Grapple_Event,
+        Player_Velocity_Call
     };
 
     // In the situation where the server is the remote (Client to server)

@@ -91,8 +91,10 @@ namespace NCL {
 
             void ReadNetworkFunctions();
 
+
             void ReadNetworkPackets();
 
+            void CreateRock();
             void ResetCameraAnimation();
 
 
@@ -105,7 +107,10 @@ namespace NCL {
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
 
+            Vector3 playerVelocity;
+
             bool isGrounded = false;
+            bool isGrappling = false;
 
             void JumpCamera(float dt);
             float jumpTimer = 0.0f;
@@ -123,7 +128,9 @@ namespace NCL {
             float strafeSpeed = 0.0f;
             float strafeAmount = 0.0f;
             const float strafeSpeedMax = 12.0f;
-            const float strafeTiltAmount = 1.0f;
+            float strafeTiltAmount = 1.0f;
+
+            void HandleGrappleEvent(int event);
 
             float levelLen;
             Vector3 startPos;
@@ -138,8 +145,6 @@ namespace NCL {
             void UpdateParticleSystems(float dt);
 
             void UpdatePlayerBlip(Element &element, float dt);
-
-
         };
     }
 }

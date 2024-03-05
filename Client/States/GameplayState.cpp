@@ -41,13 +41,13 @@ void GameplayState::InitCanvas(){
 void GameplayState::InitCrossHeir(){
     //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
@@ -127,8 +127,6 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
-    Window::GetWindow()->LockMouseToWindow(true);
-    Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
     InitSounds();
 
@@ -164,7 +162,7 @@ void GameplayState::Update(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -230,6 +228,20 @@ void GameplayState::ReadNetworkFunctions() {
                 strafeSpeed = strfSpd;
             }
             break;
+
+            case(Replicated::Grapple_Event): {
+                int eventType = handler.Unpack<int>();
+                HandleGrappleEvent(eventType);
+            }
+            break;
+
+            case(Replicated::Player_Velocity_Call): {
+                Vector3 velocity = handler.Unpack<Vector3>();
+                playerVelocity = velocity;
+                float speed = std::max(0.0f, velocity.Length() - 8.0f);
+                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
+            }
+            break;
         }
 
     }
@@ -255,6 +267,20 @@ void GameplayState::WalkCamera(float dt) {
 void GameplayState::JumpCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
     jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::HandleGrappleEvent(int event) {
+    switch (event) {
+        case 1: {
+            //renderer->SetSpeedActive(true);
+            break;
+        }
+        case 2: {
+            //renderer->SetSpeedActive(false);
+
+           break;
+        }
+    }
 }
 
 void GameplayState::LandCamera(float dt) {
@@ -310,7 +336,6 @@ void GameplayState::InitialiseAssets() {
     InitWorld();
     FinishLoading();
 
-    
 }
 
 void GameplayState::FinishLoading() {
@@ -331,6 +356,19 @@ void GameplayState::InitWorld() {
     CreatePlayers();
 }
 
+void GameplayState::CreateRock() {
+    auto rock = new GameObject("Rock");
+    world->AddGameObject(rock, true);
+    auto volume = new AABBVolume(Vector3(1.0, 1.0, 1.0));
+    rock->SetBoundingVolume((CollisionVolume*)volume);
+
+    rock->GetTransform()
+            .SetScale(Vector3(1.0, 1.0, 1.0))
+            .SetPosition(Vector3(0, 20, 0));
+
+    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("stone_tallA.obj"), nullptr, nullptr));
+}
+
 void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
@@ -341,12 +379,30 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("debuglvl.json");
+    lr->HasReadLevel("newTest.json");
     auto plist  = lr->GetPrimitiveList();
-    for(auto x : plist){
+    auto opList  = lr->GetOscillatorPList();
+    auto harmOpList  = lr->GetHarmfulOscillatorPList();
+
+    for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+    }
+
+    for (auto &x : opList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
+    }
+
+    for (auto &x : harmOpList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
 
