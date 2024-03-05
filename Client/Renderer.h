@@ -39,6 +39,9 @@ namespace NCL {
             void RenderUI();
             void CreatePostProcessQuad();
 
+            void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
+            void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
+
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             MeshGeometry *LoadOBJMesh(const string &name);
@@ -145,6 +148,7 @@ namespace NCL {
 
             float uTime;
             int isSpeedLinesActive;
+            float speedLinePercent = 0;
             int speedLineDir;
 
         };

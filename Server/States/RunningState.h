@@ -10,10 +10,9 @@
 #include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
 #include "Levels/LevelManager.h"
-
-
+#include "ObjectOscillator.h"
+#include "DamagingObstacle.h"
 #include "Spring.h"
-
 
 #include <iostream>
 #include <thread>

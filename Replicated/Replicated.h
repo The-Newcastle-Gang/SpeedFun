@@ -1,7 +1,3 @@
-//
-// Created by c3042750 on 30/01/2024.
-//
-
 #ifndef CSC8503_REPLICATED_H
 #define CSC8503_REPLICATED_H
 
@@ -34,7 +30,10 @@ public:
         Death_Event,
         Death_Event_End,
         Stage_Start,
-        };
+        Grapple_Event,
+        Player_Velocity_Call
+    };
+
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
