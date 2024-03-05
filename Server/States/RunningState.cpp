@@ -279,7 +279,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
     }
 
-    for (auto x : opList) {
+    for (auto& x : opList) {
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
@@ -290,7 +290,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
     }
 
-    for (auto x : harmOpList) {
+    for (auto& x : harmOpList) {
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));

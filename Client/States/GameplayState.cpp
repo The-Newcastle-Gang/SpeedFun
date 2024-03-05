@@ -362,21 +362,21 @@ void GameplayState::InitLevel() {
     auto opList  = lr->GetOscillatorPList();
     auto harmOpList  = lr->GetHarmfulOscillatorPList();
 
-    for(auto x : plist){
+    for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
     }
 
-    for (auto x : opList) {
+    for (auto &x : opList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
     }
 
-    for (auto x : harmOpList) {
+    for (auto &x : harmOpList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
