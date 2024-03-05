@@ -199,6 +199,10 @@ void GameplayState::ReadNetworkFunctions() {
                 strafeSpeed = strfSpd;
             } break;
 
+            case(Replicated::Stage_Start): {
+                //why?
+            } break;
+
             case(Replicated::EndReached): {
                 std::cout << "End reached statement!\n";
                 int networkId = handler.Unpack<int>();
@@ -209,6 +213,7 @@ void GameplayState::ReadNetworkFunctions() {
                         .SetAbsoluteSize({500,500})
                         .AlignCenter()
                         .AlignMiddle();
+
 /*                auto player = world->GetObjectByNetworkId(networkId);
                 if(player) { std::cout << "Player Found!\n"; }*/
             } break;

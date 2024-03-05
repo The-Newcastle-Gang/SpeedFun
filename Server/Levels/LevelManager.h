@@ -18,8 +18,7 @@ public:
     void StartStageTimer();
     void EndStageTimer();
 
-
-    std::vector<PrimitiveGameObject*> GetCurrentPrimitiveList() const ;
+    std::vector<PrimitiveGameObject*> GetCurrentPrimitiveList() const;
 
 protected:
 
@@ -28,7 +27,6 @@ protected:
     int currentTimer;
 
     struct {
-
         Vector3 currentStartPos;
         Vector3 currentEndPos;
         Vector3 currentDeathPos;

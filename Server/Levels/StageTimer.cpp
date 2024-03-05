@@ -6,8 +6,10 @@
 
 StageTimer::StageTimer() {
     std::cout << "Timer initialized" << std::endl;
-    currentState = StageTimer::Running;
+    currentState = StageTimer::Paused;
+    currentMedal = Medal::Default;
     elapsedTime = 0.0f;
+    finalTime = 0.0f;
 }
 
 void StageTimer::Update(float dt) {
@@ -20,13 +22,13 @@ void StageTimer::Update(float dt) {
             break;
         }
     }
-    std::cout << elapsedTime << "\n";
 }
 
 
 void StageTimer::EndTimer() {
+    if(currentState != StageTimer::Paused) { currentState = StageTimer::Paused; }
     CalculateMedal();
-    CalculateScore();
+//    CalculateScore();
 //    ResetTimer();
 }
 
@@ -37,9 +39,29 @@ void StageTimer::ResetTimer() {
 }
 
 void StageTimer::CalculateMedal() {
-    std::cout << "calcing medal";
+    finalTime = elapsedTime;
+    if (finalTime < 0 ) { std::cerr << "FinalTime is less than 0!\n"; return;}
+
+    if( finalTime > 0 && finalTime < 4.0f )
+    {
+        currentMedal = Medal::Platinum;
+    }
+    else if(finalTime > 4.0f && finalTime < 10.0f)
+    {
+        currentMedal = Medal::Gold;
+    }
+    else if(finalTime > 10.0f && finalTime < 20.0f)
+    {
+        currentMedal = Medal::Silver;
+    }
+    else if(finalTime > 20.0f && finalTime < 30.0f)
+    {
+        currentMedal = Medal::Bronze;
+    }
+
+    std::cout << "calcing medal: " << currentMedal << std::endl;
 }
 
 void StageTimer::CalculateScore() {
-    std::cout << "calcing score";
+    std::cout << "calcing score: ";
 }

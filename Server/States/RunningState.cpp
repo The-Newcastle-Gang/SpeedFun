@@ -145,11 +145,20 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::StartTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Stage_Start, nullptr)));
+    levelManager->StartStageTimer();
+}
+
 void RunningState::EndTriggerVolFunc(int id){
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
+    levelManager->EndStageTimer();
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
@@ -187,11 +196,11 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
+        trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
-
 
 
 void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {

@@ -30,12 +30,14 @@ public:
     virtual void OnCollisionEnd(GameObject* otherObject);
 
     entt::sink<TriggerSignal> TriggerSink;
+    entt::sink<TriggerSignal> TriggerSinkStartVol;
     entt::sink<TriggerSignal> TriggerSinkEndVol;
     entt::sink<TriggerSignal> TriggerSinkDeathVol;
     entt::sink<TriggerSignal> TriggerSinkDeathVolEnd;
 
 private:
     TriggerType triggerType;
+    TriggerSignal triggerSignalStartVol;
     TriggerSignal triggerSignal;
     TriggerSignal triggerSignalEndVol;
     TriggerSignal triggerSignalDeathVol;

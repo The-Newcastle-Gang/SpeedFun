@@ -15,18 +15,12 @@ void LevelManager::UpdateTimer(float dt) {
 }
 
 void LevelManager::StartStageTimer() {
-
     stageTimer->ResetTimer();
     stageTimer->ResumeTimer();
-
 }
 
 void LevelManager::EndStageTimer() {
-
     stageTimer->EndTimer();
-    std::cout << stageTimer->GetCurrentMedal();
-    std::cout <<stageTimer->GetFinalTime();
-
 }
 
 bool LevelManager::TryReadLevel(std::string levelSource) {
@@ -37,9 +31,6 @@ bool LevelManager::TryReadLevel(std::string levelSource) {
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return false;
     }
-
-
-
     return true;
 }
 
