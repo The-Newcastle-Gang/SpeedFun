@@ -17,16 +17,19 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 std::cout << "Start volume\n";
                 triggerSignal.publish(GetPlayerId(otherObject));
                 break;
+
             case TriggerType::End:
                 std::cout << "End volume\n";
                 triggerSignalEndVol.publish(GetPlayerId(otherObject));
                 break;
+
             case TriggerType::Death:
                 otherObject->GetPhysicsObject()->ClearForces();
                 otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
                 triggerSignalDeathVol.publish(GetPlayerId(otherObject));
                 break;
+
             case TriggerType::CheckPoint:
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;

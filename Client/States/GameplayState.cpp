@@ -198,34 +198,32 @@ void GameplayState::ReadNetworkFunctions() {
                 float strfSpd = handler.Unpack<float>();
                 strafeSpeed = strfSpd;
             } break;
+
             case(Replicated::EndReached): {
                 std::cout << "End reached statement!\n";
                 int networkId = handler.Unpack<int>();
-                Debug::Print("End Reached!", Vector2(50,50), Debug::RED);
-                /*auto crossHeirVert = canvas->AddElement()
-                        .SetColor({1.0,1.0,1.0,1.0})
-                        .SetAbsoluteSize({15,3})
-                        .AlignCenter()
-                        .AlignMiddle();*/
-                auto player = world->GetObjectByNetworkId(networkId);
-                if(player) { std::cout << "Player Found!\n"; }
-            } break;
-            case(Replicated::Death_Event): {
-                // Play Anim
-                canvas->CreateNewLayer("DeathLayer");
-                canvas->PushActiveLayer("DeathLayer");
-                auto deathImage = canvas->AddImageElement("Solaire!.jpg", "DeathLayer")
+                canvas->CreateNewLayer("FinishedLevelLayer");
+                canvas->PushActiveLayer("FinishedLevelLayer");
+                auto deathImage = canvas->AddImageElement("Solaire!.jpg", "FinishedLevelLayer")
                         .SetColor({1.0,1.0,1.0,1.0})
                         .SetAbsoluteSize({500,500})
                         .AlignCenter()
                         .AlignMiddle();
+/*                auto player = world->GetObjectByNetworkId(networkId);
+                if(player) { std::cout << "Player Found!\n"; }*/
+            } break;
+
+            case(Replicated::Death_Event): {
+                // Play Anim
                 soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
             } break;
-            case(Replicated::Death_Event_End): {
 
-                canvas->PopActiveLayer();
+            case(Replicated::Death_Event_End): {
+                // Function set up for later use.
+                    //canvas->PopActiveLayer();
             } break;
+
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
