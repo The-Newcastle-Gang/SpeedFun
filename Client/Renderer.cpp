@@ -112,7 +112,7 @@ void GameTechRenderer::RenderParticles()
 
 
 
-    for (auto ps : particleSystems)
+    for (auto &ps : particleSystems)
     {
         ps->DrawParticles();
     }
