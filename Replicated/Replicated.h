@@ -32,6 +32,7 @@ public:
 	    EndReached,
         Grapple_Event,
         Death_Event,
+        Death_Event_End,
         };
 
     // In the situation where the server is the remote (Client to server)

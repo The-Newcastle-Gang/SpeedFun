@@ -93,8 +93,8 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("dbtest");
-    AddTriggersToLevel();
     CreatePlayers();
+    AddTriggersToLevel();
 }
 
 void RunningState::Tick(float dt) {
@@ -145,13 +145,22 @@ void RunningState::CreatePlayers() {
 void RunningState::EndTriggerVolFunc(int id){
     FunctionData data;
     DataHandler handler(&data);
+    handler.Pack(id);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
     FunctionData data;
     DataHandler handler(&data);
+    handler.Pack(id);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event, nullptr)));
+}
+
+void RunningState::DeathTriggerVolEndFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event_End, nullptr)));
 }
 
 void RunningState::AddTriggersToLevel(){
@@ -174,6 +183,7 @@ void RunningState::AddTriggersToLevel(){
 
         trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }

@@ -71,6 +71,7 @@ namespace NCL {
 
             void EndTriggerVolFunc(int id);
             void DeathTriggerVolFunc(int id);
+            void DeathTriggerVolEndFunc(int id);
 
             void SendWorldToClient();
 
@@ -96,7 +97,7 @@ namespace NCL {
             void SetTestFloor();
 
             void SetTriggerTypePositions();
-            void beans();
+
         };
     }
 }

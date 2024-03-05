@@ -200,12 +200,15 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
             case(Replicated::EndReached): {
                 std::cout << "End reached statement!\n";
+                int networkId = handler.Unpack<int>();
                 Debug::Print("End Reached!", Vector2(50,50), Debug::RED);
                 /*auto crossHeirVert = canvas->AddElement()
                         .SetColor({1.0,1.0,1.0,1.0})
                         .SetAbsoluteSize({15,3})
                         .AlignCenter()
                         .AlignMiddle();*/
+                auto player = world->GetObjectByNetworkId(networkId);
+                if(player) { std::cout << "Player Found!\n"; }
             } break;
             case(Replicated::Death_Event): {
                 // Play Anim
@@ -218,6 +221,10 @@ void GameplayState::ReadNetworkFunctions() {
                         .AlignMiddle();
                 soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
+            } break;
+            case(Replicated::Death_Event_End): {
+
+                canvas->PopActiveLayer();
             } break;
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();

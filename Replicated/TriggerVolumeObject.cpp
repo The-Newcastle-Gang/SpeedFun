@@ -4,9 +4,10 @@ using namespace NCL::CSC8503;
 
 TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum, std::function<int(GameObject*)> idGetter) : TriggerSink(triggerSignal),
                                                                                          TriggerSinkEndVol(triggerSignalEndVol),
-                                                                                         TriggerSinkDeathVol(triggerSignalDeathVol) {
+                                                                                         TriggerSinkDeathVol(triggerSignalDeathVol),
+                                                                                         TriggerSinkDeathVolEnd(triggerSignalDeathVolEnd){
     triggerType = triggerEnum;
-    GetPlayerId = idGetter;
+    GetPlayerId = std::move(idGetter);
 }
 
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
@@ -24,7 +25,6 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 otherObject->GetPhysicsObject()->ClearForces();
                 otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
-                //revert camera, function in gameplay state
                 triggerSignalDeathVol.publish(GetPlayerId(otherObject));
                 break;
             case TriggerType::CheckPoint:
@@ -49,6 +49,9 @@ void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
             case TriggerType::End:
                 break;
             case TriggerType::Death:
+                // Call signal to push main canvas pack or pop current one off the stack
+                triggerSignalDeathVolEnd.publish(GetPlayerId(otherObject));
+
                 break;
             case TriggerType::CheckPoint:
                 break;

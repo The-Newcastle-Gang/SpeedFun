@@ -32,12 +32,14 @@ public:
     entt::sink<TriggerSignal> TriggerSink;
     entt::sink<TriggerSignal> TriggerSinkEndVol;
     entt::sink<TriggerSignal> TriggerSinkDeathVol;
+    entt::sink<TriggerSignal> TriggerSinkDeathVolEnd;
 
 private:
     TriggerType triggerType;
     TriggerSignal triggerSignal;
     TriggerSignal triggerSignalEndVol;
     TriggerSignal triggerSignalDeathVol;
+    TriggerSignal triggerSignalDeathVolEnd;
 
     std::function<int(GameObject*)> GetPlayerId;
 };
