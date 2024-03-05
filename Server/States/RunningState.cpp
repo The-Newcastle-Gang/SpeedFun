@@ -277,7 +277,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
     }
-    //SetTestSprings();
+    SetTestSprings();
     SetTestFloor();
 }
 
