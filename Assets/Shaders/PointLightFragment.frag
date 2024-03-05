@@ -35,7 +35,11 @@ void main(void)	{
 	float specFactor = clamp(dot(halfDir,normal),0.0,1.0);
 	specFactor = pow(specFactor,60.0);
 
-	vec3 attenuated = lightColour.xyz * atten;
+	float toonAtten = smoothstep(0.4f,0.43f,atten);
+
+	vec3 attenuated = lightColour.xyz * toonAtten;
+
+
 
 	diffuseOutput = vec4(attenuated,1.0) ; //supposed to be * lambert but looks funny
 	specularOutput = vec4(attenuated * specFactor * 0.33,1.0);
