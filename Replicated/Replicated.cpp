@@ -27,8 +27,7 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     g->GetTransform()
         .SetPosition(currentPrimitive->position)
         .SetScale(currentPrimitive->dimensions)
-        .SetOrientation(Quaternion::EulerAnglesToQuaternion(tempFix.x, tempFix.y, tempFix.z))
-        ;
+        .SetOrientation(Quaternion::EulerAnglesToQuaternion(tempFix.x, tempFix.y, tempFix.z));
  
 }
 
