@@ -211,8 +211,8 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
-                float speed = std::max(0.0f, velocity.Length() - 8.0f); //ewwwww magic numbers icckkkkky
-                renderer->SetSpeedLineAmount(std::min( speed , 40.0f)/40.0f);
+                float speed = std::max(0.0f, velocity.Length() - 8.0f);
+                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
             }
             break;
         }
@@ -308,7 +308,6 @@ void GameplayState::InitialiseAssets() {
     InitWorld();
     FinishLoading();
 
-    
 }
 
 void GameplayState::FinishLoading() {
