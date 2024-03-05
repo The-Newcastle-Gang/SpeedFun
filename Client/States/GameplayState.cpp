@@ -211,8 +211,10 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
-                float speed = std::max(0.0f, velocity.Length() - 8.0f);
-                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
+                float speed = std::max(0.0f, velocity.Length() - 10.0f);
+                float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
         }
