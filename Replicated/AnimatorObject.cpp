@@ -2,9 +2,23 @@
 #include <iostream>
 
 void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
-    currentAnimation = newAnimation;
+    
     queuedAnimation = nullptr;
     isTransitioning = false;
+    if (currentAnimation != newAnimation) { 
+        ResetAnimValues(); 
+    }
+    currentAnimation = newAnimation;
+}
+
+void AnimatorObject::SetAnimation(std::string animationName) {
+    if (animations->find(animationName) == animations->end())return;
+    MeshAnimation* newAnim = (*animations)[animationName];
+    
+    if (currentAnimation != newAnim) {
+        ResetAnimValues();
+    }
+    currentAnimation = newAnim;
 }
 
 void AnimatorObject::UpdateAnimation(float dt) {
@@ -15,4 +29,8 @@ void AnimatorObject::UpdateAnimation(float dt) {
     }
     //std::cout << animationInfo.currentFrame << "\n";
     animationInfo.framePercent = animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta();
+}
+
+void AnimatorObject::ResetAnimValues() {
+    animationInfo.Reset();
 }

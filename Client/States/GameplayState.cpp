@@ -298,6 +298,14 @@ void GameplayState::SendInputData() {
 
 
     input.playerDirection = InputListener::GetPlayerInput();
+    if (input.playerDirection.Length() > 0.0f) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("Run");
+    }
+    else {
+        debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
+    }
+
+    
 
     networkData->outgoingInput.Push(input);
 }
@@ -344,21 +352,20 @@ void GameplayState::CreateRock() {
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
-    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
+        debugPlayer = player;
       
-        playerMesh->AddAnimationToMesh("Run", testAnimation);
+        playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Max_Run.anm"));
+        playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Max_Idle.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
-        AnimatorObject* newAnimator = new AnimatorObject();
-        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
-
-        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
@@ -397,10 +404,6 @@ void GameplayState::InitLevel() {
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
-    // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
@@ -437,7 +440,8 @@ bool GameplayState::IsDisconnected() {
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
-    player->SetRenderObject(nullptr);
+    debugPlayer = player;
+    //player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
