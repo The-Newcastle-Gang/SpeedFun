@@ -1,4 +1,5 @@
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -94,9 +95,9 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("debuglvl");
-    AddTriggersToLevel();
+    BuildLevel("dbtest");
     CreatePlayers();
+    AddTriggersToLevel();
 }
 
 void RunningState::Tick(float dt) {
@@ -137,9 +138,6 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
         player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
-
-        //TODO: clean up
-//        player->GetTransform().SetPosition(Vector3(0,0,0));
         player->GetTransform().SetPosition(currentLevelStartPos);
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
@@ -147,9 +145,30 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::EndTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
+}
+
+void RunningState::DeathTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event, nullptr)));
+}
+
+void RunningState::DeathTriggerVolEndFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event_End, nullptr)));
+}
+
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
-        auto trigger = new TriggerVolumeObject(triggerVec.first);
+        auto trigger = new TriggerVolumeObject(triggerVec.first, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
 
         Vector4 colour = Vector4();
         Vector3 tempSize = Vector3();
@@ -165,10 +184,15 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
         trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
 
+        trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
+
+
 
 void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {
     switch (triggerType) {
@@ -242,7 +266,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(speed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
     }
-
     if ( int state = playerMovement->cameraAnimationCalls.grapplingEvent != 0) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -252,7 +275,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
 
     }
-    
 }
 
 void RunningState::ApplyPlayerMovement() {
@@ -270,12 +292,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return;
     }
-    currentLevelStartPos = levelReader->GetStartPosition();
-    currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
 
     SetTriggerTypePositions();
-
     auto plist = levelManager->GetCurrentPrimitiveList();
     for(auto x: plist){
         auto g = new GameObject();
@@ -285,21 +303,24 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
     }
-
     //SetTestSprings();
-    SetTestFloor();
-
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
+    currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelCheckPointPositions = levelReader->GetCheckPointPositions();
+
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
             std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
     };
+    for (auto checkpoint : currentLevelCheckPointPositions) {
+        triggersVector.emplace_back(std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), checkpoint));
+    }
 }
 
 void RunningState::SetTestSprings() {

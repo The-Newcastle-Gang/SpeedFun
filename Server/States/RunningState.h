@@ -59,6 +59,7 @@ namespace NCL {
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;
             Vector3 currentLevelDeathPos;
+            std::vector<Vector3> currentLevelCheckPointPositions;
 
             float packetTimer;
             int sceneSnapshotId;
@@ -70,6 +71,10 @@ namespace NCL {
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
+
+            void EndTriggerVolFunc(int id);
+            void DeathTriggerVolFunc(int id);
+            void DeathTriggerVolEndFunc(int id);
 
             void SendWorldToClient();
 
@@ -95,6 +100,7 @@ namespace NCL {
             void SetTestFloor();
 
             void SetTriggerTypePositions();
+
         };
     }
 }

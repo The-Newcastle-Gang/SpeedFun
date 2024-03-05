@@ -16,7 +16,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
-
 }
 
 GameplayState::~GameplayState() {
@@ -29,6 +28,8 @@ void GameplayState::InitCanvas(){
     //since i wanna just use this as debug.
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
+
+    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
 
     InitCrossHeir();
     InitTimerBar();
@@ -111,7 +112,7 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
+    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav", "Death_sound.wav" });
     soundManager->LoadSoundList();
     soundManager->SM_PlaySound("koppen.ogg");
 }
@@ -166,7 +167,6 @@ void GameplayState::Update(float dt) {
 void GameplayState::ResetCameraToForwards() {
     world->GetMainCamera()->SetPitch(0.68f);
     world->GetMainCamera()->SetYaw(269.43f);
-
 }
 
 void GameplayState::ReadNetworkFunctions() {
@@ -177,42 +177,61 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
                 AssignPlayer(networkId);
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
                 currentGroundSpeed = intesnity;
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_Jump): {
                 jumpTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
                 landTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Strafe): {
                 float strfSpd = handler.Unpack<float>();
                 strafeSpeed = strfSpd;
-            }
-            break;
+            } break;
+
+            case(Replicated::EndReached): {
+                std::cout << "End reached statement!\n";
+                int networkId = handler.Unpack<int>();
+                canvas->CreateNewLayer("FinishedLevelLayer");
+                canvas->PushActiveLayer("FinishedLevelLayer");
+                auto deathImage = canvas->AddImageElement("Solaire!.jpg", "FinishedLevelLayer")
+                        .SetColor({1.0,1.0,1.0,1.0})
+                        .SetAbsoluteSize({500,500})
+                        .AlignCenter()
+                        .AlignMiddle();
+/*                auto player = world->GetObjectByNetworkId(networkId);
+                if(player) { std::cout << "Player Found!\n"; }*/
+            } break;
+
+            case(Replicated::Death_Event): {
+                // Play Anim
+                soundManager->SM_PlaySound("Death_sound.wav");
+                ResetCameraToForwards();
+            } break;
+
+            case(Replicated::Death_Event_End): {
+                // Function set up for later use.
+                    //canvas->PopActiveLayer();
+            } break;
 
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
-            }
-            break;
+            } break;
         }
-
     }
 }
+
 void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
@@ -299,8 +318,6 @@ void GameplayState::InitialiseAssets() {
     InitCamera();
     InitWorld();
     FinishLoading();
-
-    
 }
 
 void GameplayState::FinishLoading() {
@@ -357,19 +374,18 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("debuglvl.json");
+    lr->HasReadLevel("dbtest.json");
     auto plist  = lr->GetPrimitiveList();
     for(auto x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+
     }
 
-
     //SetTestSprings();
-
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();

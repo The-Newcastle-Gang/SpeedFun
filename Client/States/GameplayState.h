@@ -78,7 +78,7 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
-            
+            TextureBase* deathImageTex;
 
             void SendInputData();
             void CreatePlayers();
@@ -86,15 +86,11 @@ namespace NCL {
             void FinishLoading();
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
-
             void ReadNetworkFunctions();
-
-
             void ReadNetworkPackets();
 
             void CreateRock();
             void ResetCameraAnimation();
-
 
             void WalkCamera(float dt);
             float groundedMovementSpeed = 0.0f;

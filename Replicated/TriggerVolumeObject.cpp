@@ -2,23 +2,35 @@
 
 using namespace NCL::CSC8503;
 
+TriggerVolumeObject::TriggerVolumeObject(TriggerVolumeObject::TriggerType triggerEnum, std::function<int(GameObject*)> idGetter) : TriggerSink(triggerSignal),
+                                                                                         TriggerSinkEndVol(triggerSignalEndVol),
+                                                                                         TriggerSinkDeathVol(triggerSignalDeathVol),
+                                                                                         TriggerSinkDeathVolEnd(triggerSignalDeathVolEnd){
+    triggerType = triggerEnum;
+    GetPlayerId = std::move(idGetter);
+}
+
 void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
     if(otherObject->GetTag() == Tag::PLAYER){
         switch (triggerType) {
             case TriggerType::Start:
                 std::cout << "Start volume\n";
+                triggerSignal.publish(GetPlayerId(otherObject));
                 break;
+
             case TriggerType::End:
                 std::cout << "End volume\n";
-                
-                
+                triggerSignalEndVol.publish(GetPlayerId(otherObject));
+
                 break;
+
             case TriggerType::Death:
                 otherObject->GetPhysicsObject()->ClearForces();
                 otherObject->GetPhysicsObject()->ClearVelocity();
                 otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
-                //revert camera, function in gameplay state
+                triggerSignalDeathVol.publish(GetPlayerId(otherObject));
                 break;
+
             case TriggerType::CheckPoint:
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;
@@ -35,11 +47,15 @@ void TriggerVolumeObject::OnCollisionEnd(GameObject *otherObject) {
         std::cout << "Collision with player has ended\n";
         switch (triggerType) {
             case TriggerType::Start:
+                if(otherObject->GetCurrentCheckPointPos() != Vector3()) { return; }
                 otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
                 break;
             case TriggerType::End:
                 break;
             case TriggerType::Death:
+                // Call signal to push main canvas pack or pop current one off the stack
+                triggerSignalDeathVolEnd.publish(GetPlayerId(otherObject));
+
                 break;
             case TriggerType::CheckPoint:
                 break;
