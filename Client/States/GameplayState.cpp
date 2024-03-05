@@ -103,8 +103,6 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
-    Window::GetWindow()->LockMouseToWindow(true);
-    Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
     InitSounds();
 
@@ -140,7 +138,7 @@ void GameplayState::Update(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -209,6 +207,14 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             }
             break;
+
+            case(Replicated::Player_Velocity_Call): {
+                Vector3 velocity = handler.Unpack<Vector3>();
+                playerVelocity = velocity;
+                float speed = std::max(0.0f, velocity.Length() - 8.0f);
+                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
+            }
+            break;
         }
 
     }
@@ -236,12 +242,14 @@ void GameplayState::JumpCamera(float dt) {
 }
 
 void GameplayState::HandleGrappleEvent(int event) {
-    //does nothing currently, use this to do visuals or sound or whatever
     switch (event) {
         case 1: {
+            //renderer->SetSpeedActive(true);
             break;
         }
         case 2: {
+            //renderer->SetSpeedActive(false);
+
            break;
         }
     }
@@ -300,7 +308,6 @@ void GameplayState::InitialiseAssets() {
     InitWorld();
     FinishLoading();
 
-    
 }
 
 void GameplayState::FinishLoading() {
