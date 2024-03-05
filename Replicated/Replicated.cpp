@@ -20,16 +20,18 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new OBBVolume(currentPrimitive->colliderExtents * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
-
+    std::cout << currentPrimitive->colliderExtents << "\n";
     Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
     std::cout << tempFix;
     tempFix.x = -tempFix.x;
     tempFix.y = -tempFix.y;
     tempFix.z = tempFix.z;
     g->GetTransform()
-        .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position)
-        .SetOrientation(Quaternion::EulerAnglesToQuaternion(tempFix.x, tempFix.y, tempFix.z));
+        .SetScale(currentPrimitive->dimensions)
+        .SetOrientation(Quaternion::EulerAnglesToQuaternion(tempFix.x, tempFix.y, tempFix.z))
+        ;
+ 
 }
 
 
