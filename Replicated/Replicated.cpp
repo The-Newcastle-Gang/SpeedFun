@@ -22,7 +22,7 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     g->SetBoundingVolume((CollisionVolume*)volume);
     std::cout << currentPrimitive->colliderExtents << "\n";
     Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
-    std::cout << tempFix;
+
     tempFix.x = -tempFix.x;
     tempFix.y = -tempFix.y;
     tempFix.z = tempFix.z;
