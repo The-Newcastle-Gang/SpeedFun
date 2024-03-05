@@ -22,7 +22,6 @@ public:
     TextureBase *GetTexture(const string &name);
     MeshAnimation *GetAnimation(const string &name);
     MeshMaterial *GetMeshMaterial(const string &name);
-    TextureBase *GetTexture(const string &name);
 
 private:
     GameTechRenderer* renderer;

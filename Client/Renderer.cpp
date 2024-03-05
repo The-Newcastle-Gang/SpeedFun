@@ -227,28 +227,6 @@ void GameTechRenderer::CreatePostProcessQuad() {
     glBindVertexArray(0);
 }
 
-void GameTechRenderer::InitUIQuad() {
-    glGenVertexArrays(1, &uiVAO);
-    glGenBuffers(1, &uiVBO);
-    glBindVertexArray(uiVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
-
-    float vertices[6][4] = {
-            { 0,  1,0.0f,0.0f },
-            { 0,  0,0.0f,1.0f },
-            { 1 , 0,1.0f,1.0f },
-
-            { 0, 1,0.0f,0.0f },
-            { 1, 0,1.0f,1.0f },
-            { 1, 1,1.0f,0.0f }
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
 
 void GameTechRenderer::LoadSkybox() {
     // THE TEMP SKYBOX IS FROM HERE: https://assetstore.unity.com/packages/2d/textures-materials/sky/8k-skybox-pack-free-150926
@@ -298,12 +276,13 @@ void GameTechRenderer::RenderFrame() {
 
 	glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	BuildObjectList();
 	SortObjectList();
 	RenderShadowMap();
 	RenderSkybox();
-	RenderCamera();
     RenderParticles();
+	RenderCamera();
     // Render the particles
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_BLEND);
@@ -477,8 +456,8 @@ void GameTechRenderer::RenderSkybox() {
     glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
     glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-    glUniform1i(texLocation, 0);
-    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(texLocation, 5);
+    glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
     BindMesh(skyboxMesh);
