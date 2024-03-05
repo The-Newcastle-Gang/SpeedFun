@@ -91,7 +91,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("woahcool");
+    BuildLevel("dbtest");
     AddTriggersToLevel();
     CreatePlayers();
 }
