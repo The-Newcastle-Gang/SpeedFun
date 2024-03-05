@@ -101,6 +101,8 @@ namespace NCL {
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
 
+            Vector3 playerVelocity;
+
             bool isGrounded = false;
             bool isGrappling = false;
 

@@ -8,6 +8,7 @@ uniform vec3 lightPos;
 
 uniform float u_time;
 uniform bool SpeedLinesActive;
+uniform float speedLineAmount;
 uniform int speedLineDir;
 
 #define M_PI 3.1415926535897932384626433832795
@@ -255,7 +256,7 @@ void main() {
 
     float speed     = 0.1;
     float velocity  = u_time* speed;
-    float frames    = 30.0;
+    float frames    = 30.0 + (speedLineAmount * 30);
     float frameRate = frames * fract(velocity);
     vec2 xy = IN.texCoord;
 
@@ -301,6 +302,7 @@ void main() {
 
     vec3 fin = smoothstep(invmask, invFalloff, col);
     vec4 fincol = vec4(fin, smoothstep(0.2, 0.5, length(fin)));
+    fincol *= speedLineAmount;
     
     if(SpeedLinesActive){
         fragColor += fincol;

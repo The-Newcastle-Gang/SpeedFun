@@ -31,11 +31,8 @@ public:
 	Vector3 dims;
 };
 
-struct OscillatorPrimitive {
+struct OscillatorPrimitive : public PrimitiveGameObject {
 public:
-    std::string     meshName;
-    Vector3         dimensions;
-    Vector3         position;
     float           timePeriod;
     float           distance;
     Vector3         direction;
@@ -55,6 +52,7 @@ public:
 
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetPrimitiveList() const { return primGOList; }
     [[nodiscard]] std::vector<OscillatorPrimitive*> GetOscillatorPList() const { return oscillatorPrimitives; }
+    [[nodiscard]] std::vector<OscillatorPrimitive*> GetHarmfulOscillatorPList() const { return harmfulOscillatorPrimitives; }
 
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
     [[nodiscard]] std::vector<Vector3> GetCheckPointPositions() const { return checkPointPositions; }
@@ -69,6 +67,7 @@ protected:
     std::vector<Vector3> checkPointPositions;
     std::vector<PrimitiveGameObject*> primGOList;
     std::vector<OscillatorPrimitive*> oscillatorPrimitives;
+    std::vector<OscillatorPrimitive*> harmfulOscillatorPrimitives;
 
     std::vector<GroundCubePrimitive*> groundCubes;
 
