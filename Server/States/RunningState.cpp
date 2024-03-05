@@ -95,7 +95,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("dbtest");
+    BuildLevel("newTest");
     CreatePlayers();
     AddTriggersToLevel();
 }
@@ -302,16 +302,11 @@ void RunningState::BuildLevel(const std::string &levelName)
     std::cout << "Level: " << levelName << " being built\n";
     levelManager->TryReadLevel(levelName);
     levelReader = new LevelReader();
-    if (!levelReader->HasReadLevel(levelName + ".json"))
-    {
-        std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
-        return;
-    }
 
     SetTriggerTypePositions();
 
-    //auto plist = levelManager->GetCurrentPrimitiveList();
-    auto plist = levelReader->GetPrimitiveList();
+    auto plist = levelManager->GetCurrentPrimitiveList();
+    //auto plist = levelReader->GetPrimitiveList();
     auto opList = levelReader->GetOscillatorPList();
     auto harmOpList = levelReader->GetHarmfulOscillatorPList();
 
@@ -323,29 +318,29 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
     }
 
-    for (auto& x : opList) {
-        auto g = new GameObject();
-        replicated->AddBlockToLevel(g, *world, x);
-        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
-        g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+//    for (auto& x : opList) {
+//        auto g = new GameObject();
+//        replicated->AddBlockToLevel(g, *world, x);
+//        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+//        g->GetPhysicsObject()->SetInverseMass(0.0f);
+//        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+//
+//        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
+//        g->AddComponent(oo);
+//    }
 
-        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
-        g->AddComponent(oo);
-    }
-
-    for (auto& x : harmOpList) {
-        auto g = new GameObject();
-        replicated->AddBlockToLevel(g, *world, x);
-        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
-        g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
-
-        ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
-        DamagingObstacle* dO = new DamagingObstacle(g);
-        g->AddComponent(oo);
-        g->AddComponent(dO);
-    }
+//    for (auto& x : harmOpList) {
+//        auto g = new GameObject();
+//        replicated->AddBlockToLevel(g, *world, x);
+//        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+//        g->GetPhysicsObject()->SetInverseMass(0.0f);
+//        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+//
+//        ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
+//        DamagingObstacle* dO = new DamagingObstacle(g);
+//        g->AddComponent(oo);
+//        g->AddComponent(dO);
+//    }
 
     //SetTestSprings();
     //SetTestFloor();

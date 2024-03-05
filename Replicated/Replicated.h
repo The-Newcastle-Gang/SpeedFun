@@ -30,8 +30,7 @@ public:
         Death_Event,
         Death_Event_End,
         Stage_Start,
-        Grapple_Event,
-        Player_Velocity_Call
+        Player_Velocity_Call,
     };
 
 

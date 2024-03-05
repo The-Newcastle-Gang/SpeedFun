@@ -26,11 +26,11 @@ void LevelManager::EndStageTimer() {
 bool LevelManager::TryReadLevel(std::string levelSource) {
     std::cout << "Reading level" + levelSource + "\n";
 
-    if (!levelReader->HasReadLevel(levelSource + ".json"))
+/*    if (!levelReader->HasReadLevel(levelSource + ".json"))
     {
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return false;
-    }
+    }*/
     return true;
 }
 
