@@ -122,8 +122,11 @@ void GameplayState::InitialiseAssets() {
 }
 void GameplayState::InitSounds() {
     std::cout << "\n\nLoading Sounds!\n\n";
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "skeleton.ogg", "footsteps.wav", "weird.wav" , "warning.wav" });
-    soundManager->LoadSoundList();
+
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    std::string songToPlay = soundManager->SM_SelectRandomSong();
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_LoadSoundList();
 
     soundHasLoaded = LoadingStates::LOADED;
     
@@ -143,7 +146,7 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
-    soundManager->UnloadSoundList();
+    soundManager->SM_UnloadSoundList();
     
     delete networkThread;
 }
@@ -158,7 +161,7 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
-        soundManager->SM_PlaySound("skeleton.ogg");
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
