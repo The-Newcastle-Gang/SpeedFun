@@ -10,9 +10,7 @@ void TestTrapBlock::Update(float dt) {
 }
 
 void TestTrapBlock::OnCollisionEnter(GameObject* otherObject) {
-	if (pushableObject.find(otherObject) == pushableObject.end()) {
-		blockFall = true;
-	}
+	blockFall = true;
 }
 
 void TestTrapBlock::TrapBlockFall(float dt) {
@@ -21,7 +19,4 @@ void TestTrapBlock::TrapBlockFall(float dt) {
 		gameObject->GetTransform().SetPosition(Vector3(-107, -5 - 5 * warningTime, -15));
 		warningTime = 0.0;
 	}
-	//else {
-	//	gameObject->GetTransform().SetPosition(Vector3(-107, 5, -15));
-	//}
 }
