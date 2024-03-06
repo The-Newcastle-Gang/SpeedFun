@@ -11,6 +11,8 @@
 #include "DamagingObstacle.h"
 #include "ObjectOscillator.h"
 #include "DamagingObstacle.h"
+#include "RayEnemyShoot.h"
+#include "RayEnemyFollow.h"
 
 #include "Spring.h"
 
@@ -95,6 +97,9 @@ namespace NCL {
             void SetTestFloor();
 
             void SetTriggerTypePositions();
+
+            void SetRayEnemyShoot();
+            void SetRayEnemyFollow();
         };
     }
 }

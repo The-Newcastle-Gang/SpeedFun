@@ -56,6 +56,7 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
+            void SetRaycastEnemy();
 
 
 #ifdef USEVULKAN

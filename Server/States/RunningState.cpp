@@ -204,13 +204,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         std::cerr << "Where tf player movement" << std::endl;
     }
 
-    {
-        auto id = GetIdFromPlayerObject(player);
-        FunctionData data;
-        DataHandler handler(&data);
-        handler.Pack(player->GetPhysicsObject()->GetLinearVelocity());
-        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Player_Velocity_Call, &data)));
-    }
     if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -286,7 +279,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
     }
 
-    for (auto& x : opList) {
+    for (auto x : opList) {
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
@@ -297,7 +290,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
     }
 
-    for (auto& x : harmOpList) {
+    for (auto x : harmOpList) {
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
@@ -312,6 +305,8 @@ void RunningState::BuildLevel(const std::string &levelName)
 
     //SetTestSprings();
     SetTestFloor();
+    //SetRayEnemyShoot();
+    //SetRayEnemyFollow();
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -358,4 +353,23 @@ void RunningState::SetTestFloor() {
     g2->SetPhysicsObject(new PhysicsObject(&g2->GetTransform(), g2->GetBoundingVolume(), new PhysicsMaterial()));
     g2->GetPhysicsObject()->SetInverseMass(0.0f);
     AddTriggersToLevel();
+}
+
+void RunningState::SetRayEnemyShoot() {
+    auto rayenemyShoot = new GameObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 10), rayenemyShoot, *world);
+    rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), physics->GetPhysMat("Default")));
+    rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
+    rayenemyShoot->GetTransform().SetPosition(Vector3(-80, 6, -7));
+    rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
+    rayenemyShoot->AddComponent((Component*)(new RayEnemyShoot(rayenemyShoot)));
+    Debug::DrawAABBLines(Vector3(-80, 6, -7), Vector3(5, 5, 5), Debug::MAGENTA, 1000.0f);
+}
+
+void RunningState::SetRayEnemyFollow() {
+    auto rayenemyFollow = new GameObject();
+    replicated->AddRaycastEnemy(rayenemyFollow, *world, Vector3(-80, 6, -7));
+    rayenemyFollow->SetPhysicsObject(new PhysicsObject(&rayenemyFollow->GetTransform(), rayenemyFollow->GetBoundingVolume(), new PhysicsMaterial()));
+    rayenemyFollow->GetPhysicsObject()->SetInverseMass(0.0f);
+    rayenemyFollow->AddComponent((Component*)(new RayEnemyFollow(rayenemyFollow)));
 }

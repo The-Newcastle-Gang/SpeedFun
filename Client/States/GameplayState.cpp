@@ -393,7 +393,7 @@ void GameplayState::InitLevel() {
 
 
     //SetTestSprings();
-
+    //SetRaycastEnemy();
     SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
@@ -402,6 +402,8 @@ void GameplayState::InitLevel() {
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+
+    SetRaycastEnemy();
 }
 
 void GameplayState::SetTestSprings() {
@@ -447,4 +449,10 @@ void GameplayState::AssignPlayer(int netObject) {
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     auto progress = playerCurPos - startPos;
     return progress.Length()/levelLen;
+}
+
+void GameplayState::SetRaycastEnemy() {
+    auto raycastEnemy = new GameObject();
+    replicated->AddRaycastEnemy(raycastEnemy, *world, Vector3(-80, 6, -7));
+    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
 }
