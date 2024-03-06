@@ -58,12 +58,12 @@ void main(void)
   float n = noise(p) * noise(q) ;
 
   col = vec3(n) * 6.9 ;
-  col *= vec3(1.0, 0.2824, 0.0);
   // col.x = pow(col.x, 1.5);
   
   // col.x = pow(col.x, 2.0);
 
   // col = vec3(0.6353, 0.6353, 0.6353) + diff;
 
-  fragColor = vec4(col, 1.0);
+  // fragColor = vec4(col, 1.0);
+  fragColor = texture(mainTex, IN.texCoord) + vec4(col, 1.0);
 }

@@ -315,12 +315,9 @@ void GameplayState::InitLevel() {
 
     }
 
-
-
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
 
-    AddLava({-91,-20,13});
     AddEndPortal({0,-5,0});
     //SetTestSprings();
 
@@ -378,11 +375,10 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
 }
 
 void GameplayState::AddLava(Vector3 position){
-    auto tem = new GameObject();
-    replicated->AddTestObjectToLevel(tem, *world, {1000,1000,10}, position);
-    tem->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
-//    tem->SetRenderObject(new RenderObject(&tem->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("lava")));
-//    tem->GetRenderObject()->SetColour({1,0,0,1});/
+    auto LavaQuad = new GameObject();
+    LavaQuad->GetTransform().SetOrientation(Quaternion (Matrix4::Rotation(90, {1,0,0})));
+    replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position);
+    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("Default.png"), resources->GetShader("lava")));
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
@@ -395,5 +391,5 @@ void GameplayState::AddEndPortal(Vector3 position){
 
     endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
     endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default"), resources->GetShader("scene")));
-
+    AddLava(position);
 }
