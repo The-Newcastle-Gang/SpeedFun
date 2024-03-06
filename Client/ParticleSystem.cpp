@@ -2,16 +2,16 @@
 
 using namespace NCL::CSC8503;
 
-ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerSecond,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenParticles, TextureBase* texture) {
+ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerBurst,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenBursts, TextureBase* texture) {
 	lastUsedParticle = 0;
 	this->texture = texture;
-	this->particlesPerSecond = particlesPerSecond;
+	this->particlesPerSecond = particlesPerBurst;
 	this->particleSpeed = particleSpeed;
 	this->lifeSpan = lifeSpan;
 	this->particleSize = particleSize;
 	this->startPos = startPos;
 	this->rngLower = rngLower;
-	this->timeBetween = timeBetweenParticles;
+	this->timeBetween = timeBetweenBursts;
 	this->rngRange = Vector3(rngHigher.x-rngLower.x, rngHigher.y - rngLower.y, rngHigher.z - rngLower.z) ;
 
 	//particles.resize(maxParticles);

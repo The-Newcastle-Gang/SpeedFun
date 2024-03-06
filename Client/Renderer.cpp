@@ -282,7 +282,6 @@ void GameTechRenderer::RenderFrame() {
 	SortObjectList();
 	RenderShadowMap();
 	RenderSkybox();
-    RenderParticles();
 	RenderCamera();
     // Render the particles
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
@@ -584,6 +583,8 @@ void GameTechRenderer::RenderCamera() {
             }
         }
     }
+
+    RenderParticles();
 
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
