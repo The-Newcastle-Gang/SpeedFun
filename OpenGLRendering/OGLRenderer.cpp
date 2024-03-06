@@ -196,7 +196,7 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
         vector<Matrix4> frameMatrices;
         vector<Matrix4> nextFrameMatrices;
         for (unsigned int i = 0; i < pose.count; ++i) {
-            int jointID = bindPoseIndices[pose.start + i];
+            int jointID = jointID = bindPoseIndices[pose.start + i];
 
             Matrix4 mat = frameData[jointID] * invBindPose[pose.start + i];
             Matrix4 nextMat = nextFrameData[jointID] * invBindPose[pose.start + i];
@@ -212,7 +212,6 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
         OGLTexture* layerTex = (OGLTexture*)boundMeshMaterial->GetMaterialForLayer(l)->GetEntry("Diffuse");
         
         BindTextureToShader(layerTex, "mainTex", 0);
-
         DrawBoundMesh(l);
     }
 }

@@ -64,6 +64,7 @@ namespace NCL {
 			return frameRate;
 		}
 
+
         float GetFrameTimeDelta() const {
             return frameTimeDelta;
         }

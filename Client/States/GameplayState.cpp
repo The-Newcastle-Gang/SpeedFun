@@ -298,16 +298,30 @@ void GameplayState::SendInputData() {
 
 
     input.playerDirection = InputListener::GetPlayerInput();
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::R)) {
-        //debugPlayer->GetAnimatorObject()->SetAnimation("Run");
-        debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.1f);
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("Run");
+        //debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.1f);
 
     }
-    else if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) {
-        //debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
-        debugPlayer->GetAnimatorObject()->TransitionAnimation("Idle", 0.1f);
+    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("RunBack");
+        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RunBack", 0.1f);
     }
-
+    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("LeftStrafe");
+        //debugPlayer->GetAnimatorObject()->TransitionAnimation("LeftStrafe", 0.1f);
+    }
+    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("RightStrafe");
+        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
+    }
+    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+        debugPlayer->GetAnimatorObject()->SetAnimation("Fall");
+        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
+    }
+    else {
+        debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
+    }
     
 
     networkData->outgoingInput.Push(input);
@@ -354,21 +368,25 @@ void GameplayState::CreateRock() {
 
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
-    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
+    MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
         debugPlayer = player;
-      
-        playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Max_Run.anm"));
-        playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Max_Idle.anm"));
+
+        playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
+        playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
+        playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_RightStrafe.anm"));
+        playerMesh->AddAnimationToMesh("RunBack", resources->GetAnimation("Player_RunBack.anm"));
+        playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Player_Idle.anm"));
+        playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
-        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
+        newAnimator->SetAnimation(playerMesh->GetAnimation("LeftStrafe"));
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
     }
 }
 
