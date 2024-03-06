@@ -8,7 +8,7 @@
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
 
-#include "Components/TrapObject.h"
+#include "TrapObject/TrapObject.h"
 
 #include <iostream>
 #include <thread>

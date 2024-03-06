@@ -26,6 +26,7 @@ namespace NCL::CSC8503 {
 
 		void OnCollisionEnter(GameObject* otherObject)override;
 
+
 		void TrapBlockFall(float dt);
 
 	protected:
