@@ -129,6 +129,8 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
+            float defaultFOV = 40.0f;
+
             void HandleGrappleEvent(int event);
 
             float levelLen;
