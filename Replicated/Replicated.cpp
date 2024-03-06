@@ -22,7 +22,7 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
-        .SetOrientation(Quaternion::EulerAnglesToQuaternion(0.0f, 0, 0))
+        .SetOrientation(currentPrimitive->rotation)
         .SetScale(currentPrimitive->dimensions)
         .SetPosition(currentPrimitive->position);
 }
