@@ -104,13 +104,7 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
-    
-    Window::GetWindow()->LockMouseToWindow(true);
-    Window::GetWindow()->ShowOSPointer(false);
     InitCanvas();
-    
-
-
 }
 void GameplayState::InitialiseAssets() {
     
@@ -180,7 +174,7 @@ void GameplayState::Update(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -249,6 +243,16 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             }
             break;
+
+            case(Replicated::Player_Velocity_Call): {
+                Vector3 velocity = handler.Unpack<Vector3>();
+                playerVelocity = velocity;
+                float speed = std::max(0.0f, velocity.Length() - 10.0f);
+                float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+            }
+            break;
         }
 
     }
@@ -278,12 +282,13 @@ void GameplayState::JumpCamera(float dt) {
 }
 
 void GameplayState::HandleGrappleEvent(int event) {
-    //does nothing currently, use this to do visuals or sound or whatever
     switch (event) {
         case 1: {
+            isGrappling = true;
             break;
         }
         case 2: {
+            isGrappling = false;
            break;
         }
     }
@@ -335,9 +340,6 @@ void GameplayState::SendInputData() {
 
     networkData->outgoingInput.Push(input);
 }
-
-
-
 
 void GameplayState::FinishLoading() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
@@ -394,13 +396,30 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("dbtest.json");
+    lr->HasReadLevel("newTest.json");
     auto plist  = lr->GetPrimitiveList();
-    for(auto x : plist){
+    auto opList  = lr->GetOscillatorPList();
+    auto harmOpList  = lr->GetHarmfulOscillatorPList();
+
+    for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+    }
+
+    for (auto &x : opList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
+    }
+
+    for (auto &x : harmOpList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
 

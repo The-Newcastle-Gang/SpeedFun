@@ -120,6 +120,8 @@ namespace NCL {
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
 
+            Vector3 playerVelocity;
+
             bool isGrounded = false;
             bool isGrappling = false;
 
@@ -140,6 +142,8 @@ namespace NCL {
             float strafeAmount = 0.0f;
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
+
+            float defaultFOV = 40.0f;
 
             void HandleGrappleEvent(int event);
 
