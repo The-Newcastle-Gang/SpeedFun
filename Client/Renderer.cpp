@@ -128,9 +128,6 @@ void GameTechRenderer::RenderParticles()
     glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
     glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-
-
-
     for (auto &ps : particleSystems)
     {
         BindTextureToShader(ps->GetTexture(), "particleTex", 0);
@@ -504,7 +501,7 @@ void GameTechRenderer::RenderCamera() {
 
         Vector3 scale = i->GetTransform()->GetScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
-        if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
+        //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
         OGLShader *shader = (OGLShader *) (*i).GetShader();
         if (!shader) {
@@ -585,6 +582,7 @@ void GameTechRenderer::RenderCamera() {
     }
 
     RenderParticles();
+
 
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
