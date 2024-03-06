@@ -66,7 +66,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    testParticles = new ParticleSystem({ 0, 0, 0 }, { -100, 0, -30 }, { 200, 1, 5 }, 25, 10.0f, 10, 3, 0.25f, resources->GetTexture("Default.png"));
+    testParticles = new ParticleSystem({ 0, 0, 0 }, { -100, 0, -30 }, { 200, 1, 5 }, 25, 10.0f, 10, 1, 0.25f, resources->GetTexture("Default.png"));
     particleSystems.push_back(testParticles);
 
     
