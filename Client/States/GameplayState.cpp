@@ -215,10 +215,47 @@ void GameplayState::ReadNetworkFunctions() {
                 renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
             }
             break;
+
+            case(Replicated::Player_Animation_Call): {
+                Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
+                UpdatePlayerAnimation(data.networkID, data.state);
+            }
         }
 
     }
 }
+
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
+    switch (state) {
+        case Replicated::IDLE: {
+            playerAnimator->TransitionAnimation("Idle", 0.1f);
+            break;
+        }
+        case Replicated::FALLING: {
+            playerAnimator->TransitionAnimation("Fall", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_FORWARD: {
+            playerAnimator->TransitionAnimation("Run", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_BACK: {
+            playerAnimator->TransitionAnimation("RunBack", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_LEFT: {
+            playerAnimator->TransitionAnimation("LeftStrafe", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_RIGHT: {
+            playerAnimator->TransitionAnimation("RightStrafe", 0.1f);
+            break;
+        }
+    }
+}
+
 void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
@@ -298,30 +335,30 @@ void GameplayState::SendInputData() {
 
 
     input.playerDirection = InputListener::GetPlayerInput();
-    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("Run");
-        //debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.1f);
+    //if (Window::GetKeyboard()->KeyDown(KeyboardKeys::W)) {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("Run");
+    //    //debugPlayer->GetAnimatorObject()->TransitionAnimation("Run", 0.1f);
 
-    }
-    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("RunBack");
-        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RunBack", 0.1f);
-    }
-    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("LeftStrafe");
-        //debugPlayer->GetAnimatorObject()->TransitionAnimation("LeftStrafe", 0.1f);
-    }
-    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("RightStrafe");
-        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
-    }
-    else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
-        debugPlayer->GetAnimatorObject()->SetAnimation("Fall");
-        //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
-    }
-    else {
-        debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
-    }
+    //}
+    //else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::S)) {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("RunBack");
+    //    //debugPlayer->GetAnimatorObject()->TransitionAnimation("RunBack", 0.1f);
+    //}
+    //else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::A)) {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("LeftStrafe");
+    //    //debugPlayer->GetAnimatorObject()->TransitionAnimation("LeftStrafe", 0.1f);
+    //}
+    //else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::D)) {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("RightStrafe");
+    //    //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
+    //}
+    //else if (Window::GetKeyboard()->KeyDown(KeyboardKeys::SPACE)) {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("Fall");
+    //    //debugPlayer->GetAnimatorObject()->TransitionAnimation("RightStrafe", 0.1f);
+    //}
+    //else {
+    //    debugPlayer->GetAnimatorObject()->SetAnimation("Idle");
+    //}
     
 
     networkData->outgoingInput.Push(input);

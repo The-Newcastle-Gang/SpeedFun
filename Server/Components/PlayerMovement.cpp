@@ -47,6 +47,15 @@ void PlayerMovement::UpdateInputs(Vector3 pRightAxis, Vector2 pInputDirection, Q
     rightAxis = pRightAxis;
     inputDirection = pInputDirection;
     playerRotation = pPlayerRotation;
+    UpdateAnimDataFromInput();
+}
+
+void PlayerMovement::UpdateAnimDataFromInput() {
+    if (inputDirection.Length() == 0.0f)playerAnimationCallData.hasInput = false;
+    else playerAnimationCallData.hasInput = true;
+
+    playerAnimationCallData.strafe = (int)inputDirection.x;
+    playerAnimationCallData.backwards = inputDirection.y < 0;
 }
 
 void PlayerMovement::SwitchToState(MovementState* state) {
@@ -89,6 +98,9 @@ void PlayerMovement::StartInAir() {
     static float airDragFactor = 0.5f;
     static float airMaxHorizontalVelocity = 20.0f;
 
+    playerAnimationCallData.inAir = true;
+
+
     runSpeed = airRunSpeed;
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
@@ -122,6 +134,8 @@ void PlayerMovement::StartGround() {
     static float groundJumpVelocity = 7.0f;
     static float groundDragFactor = 8.5f;
     static float groundMaxHorizontalVelocity = 20.0f;
+
+    playerAnimationCallData.inAir = false;
 
     runSpeed = groundRunSpeed;
     jumpVelocity = groundJumpVelocity;

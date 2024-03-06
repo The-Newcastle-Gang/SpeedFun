@@ -43,6 +43,15 @@ public:
 
     CameraAnimationCallData cameraAnimationCalls;
 
+    struct PlayerAnimationCallData {
+        bool inAir = false;
+        int strafe = 0;
+        bool backwards = false;
+        bool hasInput = false;
+    };
+
+    PlayerAnimationCallData playerAnimationCallData;
+
 private:
     GameWorld* world;
 
@@ -98,6 +107,7 @@ private:
     void UpdateInAir(float dt);
     void LeaveInAir();
     void StartGround();
+    void UpdateAnimDataFromInput();
     void UpdateOnGround(float dt);
     void LeaveGround();
     void SwitchToState(MovementState *state);

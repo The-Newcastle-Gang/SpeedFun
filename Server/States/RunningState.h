@@ -52,6 +52,7 @@ namespace NCL {
             std::thread* networkThread;
 
             std::unordered_map<int, PlayerInfo> playerInfo;
+            std::unordered_map<int, Replicated::PlayerAnimationStates> playerAnimationInfo;
 
             std::vector<std::pair<TriggerVolumeObject::TriggerType, Vector3>> triggersVector;
             LevelReader* levelReader;
@@ -90,6 +91,12 @@ namespace NCL {
             void ReadNetworkPackets();
 
             void ApplyPlayerMovement();
+
+            void UpdatePlayerAnimations();
+
+            void SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object);
+
+            void SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object);
 
             void SetTestSprings();
             void SetTestFloor();

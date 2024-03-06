@@ -30,8 +30,11 @@ public:
         Camera_Land,
         Camera_Strafe,
         Grapple_Event,
-        Player_Velocity_Call
+        Player_Velocity_Call,
+        Player_Animation_Call
     };
+
+
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
@@ -39,6 +42,21 @@ public:
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
+    };
+
+    enum PlayerAnimationStates {
+        RUNNING_FORWARD,
+        RUNNING_BACK,
+        RUNNING_LEFT,
+        RUNNING_RIGHT,
+        FALLING,
+        IDLE
+    };
+
+    struct RemoteAnimationData
+    {
+        int networkID = 0;
+        PlayerAnimationStates state = IDLE;
     };
 
     Replicated();

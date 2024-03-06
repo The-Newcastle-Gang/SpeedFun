@@ -17,6 +17,7 @@
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
 #include "SoundManager.h"
+#include "AnimatorObject.h"
 
 
 #include <thread>
@@ -83,6 +84,8 @@ namespace NCL {
 
             void SendInputData();
             void CreatePlayers();
+
+            void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
             void FinishLoading();
 
