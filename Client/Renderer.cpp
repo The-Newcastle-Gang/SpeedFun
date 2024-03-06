@@ -133,6 +133,7 @@ void GameTechRenderer::RenderParticles()
 
     for (auto &ps : particleSystems)
     {
+        BindTextureToShader(ps->GetTexture(), "particleTex", 0);
         ps->DrawParticles();
     }
     glDisable(GL_BLEND);

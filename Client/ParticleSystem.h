@@ -33,19 +33,19 @@ namespace NCL
 		{
 		public:
 			ParticleSystem(Vector3 startPos, Vector3 rngLower, Vector3 rngHigher, int particlesPerSecond,
-				float particleSpeed, float lifeSpan, float particleSize, float timeBetween, GLuint texture);
+				float particleSpeed, float lifeSpan, float particleSize, float timeBetween, TextureBase* texture);
 			~ParticleSystem();
 
 			void SetShader(OGLShader* s) { shader = s; }
 			void UpdateParticles(float dt, Vector3 cameraPos);
 			void DrawParticles();
 			void CreateNewParticles(float dt);
-			GLuint GetTexture() { return texture; }
+			TextureBase* GetTexture() { return texture; }
 			int GetParticleCount() { return particlesCount; }
 			Particle GetParticle() { return particles[0];}
 			
 		protected:
-			GLuint texture;
+			TextureBase* texture;
 			GLuint positionBuffer;
 			GLuint vertexBuffer; //Used to send vertex positions of a square to shader
 			GLfloat* positionData;

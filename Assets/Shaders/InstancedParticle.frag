@@ -3,6 +3,8 @@
 uniform sampler2D 	mainTex;
 uniform vec3	cameraPos;
 
+uniform sampler2D particleTex;
+
 in Vertex
 {
 	vec2 texCoord;
@@ -21,7 +23,8 @@ float vignette(float value, vec2 uv)
 
 void main(void)
 {
-	vec2 uv = IN.texCoord;
-	vec3 col = vec3(1.0, 0.0, 0.8314);
-	fragColor = vec4(col, 1.0 * vignette(0.999, uv));
+	//vec2 uv = IN.texCoord;
+	//vec3 col = vec3(1.0, 0.0, 0.8314);
+	//fragColor = vec4(col, 1.0 * vignette(0.999, uv));
+	fragColor = texture(particleTex, IN.texCoord);
 }

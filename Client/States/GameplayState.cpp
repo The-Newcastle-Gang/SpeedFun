@@ -66,8 +66,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    GLuint testTex = ((OGLTexture*)resources->GetTexture("Default.png"))->GetObjectID();
-    testParticles = new ParticleSystem({ 0, 0, 0 }, { -100, 0, -30 }, { 200, 1, 5 }, 25, 10.0f, 10, 0.3f, 0.25f, testTex);
+    testParticles = new ParticleSystem({ 0, 0, 0 }, { -100, 0, -30 }, { 200, 1, 5 }, 25, 10.0f, 10, 3, 0.25f, resources->GetTexture("Default.png"));
     particleSystems.push_back(testParticles);
 
     

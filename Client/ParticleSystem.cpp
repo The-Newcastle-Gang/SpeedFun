@@ -2,7 +2,7 @@
 
 using namespace NCL::CSC8503;
 
-ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerSecond,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenParticles, GLuint texture) {
+ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerSecond,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenParticles, TextureBase* texture) {
 	lastUsedParticle = 0;
 	this->texture = texture;
 	this->particlesPerSecond = particlesPerSecond;
@@ -30,6 +30,7 @@ ParticleSystem::~ParticleSystem(){
 	delete[] positionData;
 	glDeleteBuffers(1,&vertexBuffer);
 	glDeleteBuffers(1,&positionBuffer);
+	delete texture;
 }
 
 void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {

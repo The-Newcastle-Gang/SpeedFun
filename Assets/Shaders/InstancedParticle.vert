@@ -42,5 +42,6 @@ void main()
 
 	// UV of the vertex. No special space for this one.
 	OUT.texCoord = squareVertices.xy + vec2(0.5, 0.5);
+	OUT.texCoord.y *= -1;
 	OUT.colour = vec4(1,1,1,1);
 }
