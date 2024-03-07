@@ -186,7 +186,6 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Camera_Jump): {
                 jumpTimer = PI;
-                canvas->PopActiveLayer();
             } break;
 
             case(Replicated::Camera_Land): {
@@ -216,8 +215,6 @@ void GameplayState::ReadNetworkFunctions() {
                         .SetAbsoluteSize({500,500})
                         .AlignCenter()
                         .AlignMiddle();
-
-
             } break;
 
             case(Replicated::Death_Event): {
@@ -236,7 +233,7 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             } break;
 
-            
+
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
@@ -283,7 +280,6 @@ void GameplayState::HandleGrappleEvent(int event) {
         }
         case 2: {
             //renderer->SetSpeedActive(false);
-
            break;
         }
     }
@@ -329,7 +325,6 @@ void GameplayState::SendInputData() {
 
     Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
     input.rightAxis = Vector3(camWorld.GetColumn(0));
-
 
     input.playerDirection = InputListener::GetPlayerInput();
 
@@ -390,7 +385,6 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
-
         //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
@@ -472,7 +466,6 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetRenderObject(nullptr);
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
-
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
