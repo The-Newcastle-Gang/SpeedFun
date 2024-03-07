@@ -240,7 +240,6 @@ void PlayerMovement::Grapple() {
 
 void PlayerMovement::Dash()
 {
-    std::cout << "dashing" << std::endl;
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 
@@ -294,7 +293,6 @@ void PlayerMovement::FireGrapple() {
 
 
 void PlayerMovement::Jump() {
-    std::cout << "Jumping" << std::endl;
     hasCoyoteExpired = false;
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 
