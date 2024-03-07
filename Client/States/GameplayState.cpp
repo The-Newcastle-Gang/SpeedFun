@@ -236,6 +236,7 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             } break;
 
+            
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
