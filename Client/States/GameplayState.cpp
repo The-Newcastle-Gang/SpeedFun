@@ -173,6 +173,7 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    totalDTElapsed += dt;
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
@@ -195,7 +196,20 @@ void GameplayState::Update(float dt) {
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
     if (displayDebugger) debugger->UpdateDebugMode(dt);
-
+    if (debugMovementEnabled) {
+        // idk i got bored
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!", 
+                Vector2(2.0f + 0.5f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.5f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::RAINBOW_ARRAY[i]);
+        }
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!",
+                Vector2(2.0f + 0.25f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.25f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::BLACK);
+        }
+        Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
+    }
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
@@ -335,6 +349,7 @@ void GameplayState::SendInputData() {
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerDebug, nullptr));
+        debugMovementEnabled = !debugMovementEnabled;
     }
 
     Camera* mainCamera = world->GetMainCamera();
