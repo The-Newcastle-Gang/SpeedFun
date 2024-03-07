@@ -80,6 +80,8 @@ Element& Canvas::GetElementById(const std::string& id, const std::string& layerN
             return e;
         }
     }
+
+    exit(1);
 }
 
 void Canvas::PushActiveLayer(const std::string& layerName) {

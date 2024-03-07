@@ -11,14 +11,14 @@
 #include "TweenManager.h"
 #include "lua.hpp"
 #include "utils.h"
-#include "raudio.h"
+#include "SoundManager.h"
 
 namespace NCL {
     namespace CSC8503 {
         class MenuState : public State, PacketReceiver
         {
         public:
-            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas);
+            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas, SoundManager* pSoundManager);
             ~MenuState();
             void Update(float dt) override;
 
@@ -34,6 +34,7 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+            SoundManager* soundManager;
             PhysicsSystem* physics;
             GameWorld* world;
             GameClient* baseClient;
@@ -77,6 +78,8 @@ namespace NCL {
             void UnsetActiveTextEntry(Element& element);
             void TextEntry();
             void ConnectWithIp(Element& element);
+
+            void InitMenuSounds();
         };
     }
 }

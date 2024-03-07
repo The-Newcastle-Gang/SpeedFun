@@ -25,7 +25,7 @@
 #include "ClientNetworkData.h"
 #include "Canvas.h"
 #include "Resources.h"
-
+#include "SoundManager.h"
 #include <iostream>
 #include <memory>
 #include <array>
@@ -49,6 +49,7 @@ private:
     std::unique_ptr<GameClient> baseClient;
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
+    std::unique_ptr<SoundManager> soundManager;
     void InitStateManager();
 };
 

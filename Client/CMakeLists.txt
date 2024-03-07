@@ -16,7 +16,8 @@ add_library(client
         UI/Element.cpp
         UI/CanvasLayer.cpp
         TweenManager.cpp
-)
+        DebugMode.cpp
+        SoundManager.cpp)
 
 target_include_directories(client PUBLIC
         ../NCLCoreClasses

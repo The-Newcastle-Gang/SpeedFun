@@ -2,6 +2,8 @@
 using namespace NCL;
 using namespace CSC8503;
 
+#define GRAPPLE_SWAY_MULTIPLIER 15.0f
+
 RunningState::RunningState(GameServer* pBaseServer) : State() {
     // Don't use serverBase without talking to other members of the team.
     serverBase = pBaseServer;
@@ -56,11 +58,19 @@ void RunningState::ReadNetworkFunctions() {
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Jump();
             }
-        } else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
+        }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
             auto player = GetPlayerObjectFromId(data.first);
             PlayerMovement* playerMovement;
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Grapple();
+            }
+        }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerDebug) {
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->ToggleDebug();
             }
         }
     }
@@ -89,7 +99,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("debuglvl");
+    BuildLevel("newTest");
     AddTriggersToLevel();
     CreatePlayers();
 }
@@ -202,6 +212,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         std::cerr << "Where tf player movement" << std::endl;
     }
 
+    {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(player->GetPhysicsObject()->GetLinearVelocity());
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Player_Velocity_Call, &data)));
+    }
     if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -233,8 +250,18 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
         DataHandler handler(&data);
-        handler.Pack(playerMovement->cameraAnimationCalls.strafeSpeed);
+        float speed = playerMovement->cameraAnimationCalls.strafeSpeed * (playerMovement->cameraAnimationCalls.isGrappling ? GRAPPLE_SWAY_MULTIPLIER:1.0f);
+        handler.Pack(speed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
+    }
+
+    if ( int state = playerMovement->cameraAnimationCalls.grapplingEvent != 0) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->cameraAnimationCalls.grapplingEvent);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
+        playerMovement->cameraAnimationCalls.grapplingEvent = 0;
     }
     
 }
@@ -252,36 +279,63 @@ void RunningState::BuildLevel(const std::string &levelName)
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return;
     }
-    currentLevelStartPos = levelReader->GetStartPosition();
-    currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0, 50, 0);
 
     SetTriggerTypePositions();
 
     auto plist = levelReader->GetPrimitiveList();
-    for(auto x: plist){
+    auto opList = levelReader->GetOscillatorPList();
+    auto harmOpList = levelReader->GetHarmfulOscillatorPList();
+
+    for(auto& x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+    }
 
+    for (auto& x : opList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+
+        ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
+        g->AddComponent(oo);
+    }
+
+    for (auto& x : harmOpList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+
+        ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
+        DamagingObstacle* dO = new DamagingObstacle(g);
+        g->AddComponent(oo);
+        g->AddComponent(dO);
     }
 
     //SetTestSprings();
     SetTestFloor();
-
 }
 
 void RunningState::SetTriggerTypePositions(){
+    currentLevelStartPos = levelReader->GetStartPosition();
+    currentLevelEndPos = levelReader->GetEndPosition();
+    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelCheckPointPositions = levelReader->GetCheckPointPositions();
+
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),
             std::make_pair((TriggerVolumeObject::TriggerType::End), currentLevelEndPos),
             std::make_pair((TriggerVolumeObject::TriggerType::Death), currentLevelDeathPos),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(-62.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(53.0f,7.0f,-15.0f)),
-            std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), Vector3(122.0f,7.0f,-15.0f)),
     };
+    for (auto checkpoint : currentLevelCheckPointPositions) {
+        triggersVector.emplace_back(std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), checkpoint));
+    }
 }
 
 void RunningState::SetTestSprings() {

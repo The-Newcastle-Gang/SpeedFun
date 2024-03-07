@@ -2,8 +2,9 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas) : State()
+MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager) : State()
 {
+    soundManager = pSoundManager;
     renderer = pRenderer;
     world = pGameworld;
     menuFont = renderer->LoadFont("IndigoRegular.otf", 55);
@@ -16,6 +17,13 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 
 }
 
+void MenuState::InitMenuSounds() {
+    soundManager->SM_AddSoundToLoad("se_select00.wav");
+    soundManager->SM_AddSoundToLoad("rainer menu.ogg");
+    soundManager->SM_LoadSoundList();
+    soundManager->SM_PlaySound("rainer menu.ogg");
+}
+
 MenuState::~MenuState() {
     delete curvyShader;
 }
@@ -23,7 +31,7 @@ MenuState::~MenuState() {
 void MenuState::OptionHover(Element& element) {
 
     if (selected == element.GetIndex()) return;
-
+    soundManager->SM_PlaySound("se_select00.wav");
     canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
 
     selected = element.GetIndex();
@@ -259,7 +267,7 @@ void MenuState::OnEnter() {
     isGameStarted = false;
 
     InitCanvas();
-
+    InitMenuSounds();
     RegisterPackets();
 }
 
@@ -342,5 +350,6 @@ void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
     baseClient->ClearPacketHandlers();
     canvas->Reset();
+    soundManager->SM_UnloadSoundList();
     lua_close(L);
 }
