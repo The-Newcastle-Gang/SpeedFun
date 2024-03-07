@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "GameObject.h"
+#pragma once
 
 using namespace NCL;
 using namespace CSC8503;

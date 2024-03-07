@@ -29,7 +29,7 @@ namespace NCL {
 			yaw			= 0.0f;
 			roll		= 0.0f;
 
-			fov			= 45.0f;
+			fov			= 55.0f;
 			nearPlane	= 1.0f;
 			farPlane	= 100.0f;
 
@@ -42,7 +42,7 @@ namespace NCL {
 			this->position	= position;
 			this->roll = 0.0f;
 
-			this->fov		= 45.0f;
+			this->fov		= 55.0f;
 			this->nearPlane = 1.0f;
 			this->farPlane	= 100.0f;
 

@@ -9,6 +9,8 @@
 #include "PlayerMovement.h"
 #include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
+#include "ObjectOscillator.h"
+#include "DamagingObstacle.h"
 
 #include "Spring.h"
 
@@ -56,6 +58,7 @@ namespace NCL {
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;
             Vector3 currentLevelDeathPos;
+            std::vector<Vector3> currentLevelCheckPointPositions;
 
             float packetTimer;
             int sceneSnapshotId;

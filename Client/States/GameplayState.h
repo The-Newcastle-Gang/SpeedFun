@@ -17,6 +17,8 @@
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
 #include "DebugMode.h"
+#include "SoundManager.h"
+
 
 #include <thread>
 #include <iostream>
@@ -25,10 +27,17 @@
 namespace NCL {
     namespace CSC8503 {
         class DebugMode;
+
+        enum LoadingStates {
+            NOT_LOADED,
+            LOADED,
+            READY
+        };
+
         class GameplayState : public State
         {
         public:
-            GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas);
+            GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas, SoundManager* pSoundManager);
             ~GameplayState();
             void Update(float dt) override;
 
@@ -41,6 +50,7 @@ namespace NCL {
             void InitialiseAssets();
             void InitCamera();
             void InitWorld();
+            void InitSounds();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
@@ -63,6 +73,7 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+            SoundManager* soundManager;
             GameWorld* world;
             // DO NOT USE THIS POINTER or suffer a null pointer exception.
             GameClient* baseClient;
@@ -83,14 +94,23 @@ namespace NCL {
             void SendInputData();
             void CreatePlayers();
 
+            void ManageLoading(float dt);
             void FinishLoading();
+            std::thread* loadWorldThread;
+            std::thread* loadSoundThread;
+            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            float loadingTime = 0.0f;
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
 
             void ReadNetworkFunctions();
 
+
             void ReadNetworkPackets();
 
+            void CreateRock();
             void ResetCameraAnimation();
 
 
@@ -101,8 +121,12 @@ namespace NCL {
             float maxMoveSpeed = 15.0f;
             const float bobAmount = 0.1f;
             const float bobFloor = -0.015f;
+            float walkSoundTimer = 0.0f;
+
+            Vector3 playerVelocity;
 
             bool isGrounded = false;
+            bool isGrappling = false;
 
             void JumpCamera(float dt);
             float jumpTimer = 0.0f;
@@ -120,7 +144,11 @@ namespace NCL {
             float strafeSpeed = 0.0f;
             float strafeAmount = 0.0f;
             const float strafeSpeedMax = 12.0f;
-            const float strafeTiltAmount = 1.0f;
+            float strafeTiltAmount = 1.0f;
+
+            float defaultFOV = 40.0f;
+
+            void HandleGrappleEvent(int event);
 
             float levelLen;
             Vector3 startPos;
