@@ -228,6 +228,8 @@ void GameplayState::ReadNetworkFunctions() {
 void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
     GameObject* playerObject = world->GetObjectByNetworkId(networkID);
     AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
+
     switch (state) {
         case Replicated::IDLE: {
             playerAnimator->TransitionAnimation("Idle", 0.1f);
@@ -480,7 +482,13 @@ bool GameplayState::IsDisconnected() {
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
     debugPlayer = player;
-    //player->SetRenderObject(nullptr);
+
+    delete player->GetRenderObject();
+    player->SetRenderObject(nullptr);
+
+    delete player->GetAnimatorObject();
+    player->SetAnimatorObject(nullptr);
+
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
