@@ -214,6 +214,10 @@ void RunningState::UpdatePlayerAnimations() {
         PlayerMovement* playerMovement;
         if (playerObject.second->TryGetComponent<PlayerMovement>(playerMovement)) {
             PlayerMovement::PlayerAnimationCallData data = playerMovement->playerAnimationCallData;
+            if (data.isGrappling || (data.inAir && !data.isFalling)) {
+                SetPlayerAnimation(Replicated::JUMP, playerObject.second);
+                continue;
+            }
             if (data.inAir) {
                 SetPlayerAnimation(Replicated::FALLING, playerObject.second);
                 continue;
@@ -244,8 +248,11 @@ void RunningState::UpdatePlayerAnimations() {
 
 
 void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
-
-    player->GetTransform().SetOrientation(inputInfo.playerRotation);
+    Vector3 lookDir = inputInfo.playerRotation.ToEuler();
+    lookDir.x = 0;
+    lookDir.z = 0;
+    player->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(lookDir.x,lookDir.y,lookDir.z));
+    //player->GetTransform().SetOrientation(inputInfo.playerRotation); //just in case we need it in the future
     auto rightAxis = inputInfo.rightAxis;
 
     PlayerMovement* playerMovement;

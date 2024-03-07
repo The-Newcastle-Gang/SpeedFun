@@ -44,10 +44,12 @@ public:
     CameraAnimationCallData cameraAnimationCalls;
 
     struct PlayerAnimationCallData {
+        bool isGrappling = false;
         bool inAir = false;
         int strafe = 0;
         bool backwards = false;
         bool hasInput = false;
+        bool isFalling = false;
     };
 
     PlayerAnimationCallData playerAnimationCallData;

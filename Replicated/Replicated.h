@@ -50,6 +50,7 @@ public:
         RUNNING_LEFT,
         RUNNING_RIGHT,
         FALLING,
+        JUMP,
         IDLE
     };
 

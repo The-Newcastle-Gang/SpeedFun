@@ -65,11 +65,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
+    playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
+    playerAnimationCallData.isGrappling = true;
     cameraAnimationCalls.isGrappling = true;
     cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
@@ -118,8 +120,16 @@ void PlayerMovement::UpdateInAir(float dt) {
             isFalling = true;
         }
         cameraAnimationCalls.fallDistance = fallApex - gameObject->GetTransform().GetPosition().y;
+
+        if (gameObject->GetPhysicsObject()->GetLinearVelocity().y < -10.0f) {
+            playerAnimationCallData.isFalling = true;
+        }
+        else {
+            playerAnimationCallData.isFalling = false;
+        }
         return;
     }
+
     
 }
 
@@ -127,6 +137,7 @@ void PlayerMovement::LeaveInAir() {
     cameraAnimationCalls.land = cameraAnimationCalls.fallDistance;
     cameraAnimationCalls.isGrounded = true;
     isFalling = false;
+    playerAnimationCallData.isFalling = false;
 }
 
 void PlayerMovement::StartGround() {

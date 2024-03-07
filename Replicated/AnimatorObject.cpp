@@ -4,7 +4,7 @@
 void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
     
     queuedAnimation = nullptr;
-    isTransitioning = false;
+    state = NONE;
     if (currentAnimation != newAnimation) { 
         ResetAnimValues(); 
     }
@@ -13,7 +13,7 @@ void AnimatorObject::SetAnimation(MeshAnimation* newAnimation) {
 
 void AnimatorObject::FinishTransition() {
 
-    isTransitioning = false;
+    state = NONE;
     animationInfo = queuedAnimationInfo;
     queuedAnimationInfo.Reset();
 
@@ -25,11 +25,17 @@ void AnimatorObject::FinishTransition() {
 void AnimatorObject::SetAnimation(std::string animationName) {
     if (animations->find(animationName) == animations->end())return;
     MeshAnimation* newAnim = (*animations)[animationName];
-    
+    state = NONE;
     if (currentAnimation != newAnim) {
         ResetAnimValues();
     }
     currentAnimation = newAnim;
+}
+
+void AnimatorObject::SetMidPose(std::string animationName) {
+    if (animations->find(animationName) == animations->end())return;
+    MeshAnimation* newAnim = (*animations)[animationName];
+    midPoseAnimation = newAnim;
 }
 
 void AnimatorObject::UpdateAnimation(float dt) {
@@ -40,7 +46,7 @@ void AnimatorObject::UpdateAnimation(float dt) {
     }
     animationInfo.framePercent = std::clamp(animationInfo.frameTimer / currentAnimation->GetFrameTimeDelta(),0.0f,1.0f);
 
-    if (isTransitioning) {
+    if (state == TRANSITIONING || state == POST_MID_TRANSITION) {
         queuedAnimationInfo.frameTimer += dt * queuedAnimationInfo.animationSpeed;
         if (queuedAnimationInfo.frameTimer > queuedAnimation->GetFrameTimeDelta()) {
             queuedAnimationInfo.frameTimer -= queuedAnimation->GetFrameTimeDelta();
@@ -51,6 +57,11 @@ void AnimatorObject::UpdateAnimation(float dt) {
         transitionTimer += dt;
         animationInfo.framePercent = transitionTimer;
         if (transitionTimer >= transitionTime)FinishTransition();
+    }
+
+    else if (state == PRE_MID_TRANSITION) {
+        transitionTimer += dt;
+        if (transitionTimer >= transitionTime * 0.5f)state = POST_MID_TRANSITION;
     }
 
 }
@@ -64,19 +75,42 @@ void AnimatorObject::TransitionAnimation(std::string animationName, float time) 
     MeshAnimation* transitionAnim = (*animations)[animationName];
     transitionTime = time;
     transitionTimer = 0.0f;
-    isTransitioning = true;
+    state = TRANSITIONING;
+    animationInfo.framePercent = 0.0f;
+    queuedAnimation = transitionAnim;
+}
+
+void AnimatorObject::TransitionAnimationWithMidPose(std::string animationName, float time) {
+    if (currentAnimation == midPoseAnimation) { //we dont need to use the mid pose if we are already idle!
+        TransitionAnimation(animationName, time);
+        return;
+    }
+
+    if (animations->find(animationName) == animations->end())return;
+    MeshAnimation* transitionAnim = (*animations)[animationName];
+    transitionTime = time;
+    transitionTimer = 0.0f;
+    state = PRE_MID_TRANSITION;
     animationInfo.framePercent = 0.0f;
     queuedAnimation = transitionAnim;
 }
 
 const Matrix4* AnimatorObject::GetCurrentFrameData() {
-    switch (isTransitioning)
+    switch (state)
     {
-        case false: {
+        case NONE: {
             return currentAnimation->GetJointData(GetCurrentFrame());
             break;
         }
-        case true:{
+        case TRANSITIONING:{
+            return currentAnimation->GetJointData(GetCurrentFrame());
+            break;
+        }
+        case POST_MID_TRANSITION: {
+            return midPoseAnimation->GetJointData(0);
+            break;
+        }
+        case PRE_MID_TRANSITION: {
             return currentAnimation->GetJointData(GetCurrentFrame());
             break;
         }
@@ -84,14 +118,22 @@ const Matrix4* AnimatorObject::GetCurrentFrameData() {
 }
 
 const Matrix4* AnimatorObject::GetNextFrameData() {
-    switch (isTransitioning)
+    switch (state)
     {
-        case false: {
+        case NONE: {
             return currentAnimation->GetJointData(GetNextFrame());
             break;
         }
-        case true: {
+        case TRANSITIONING: {
             return queuedAnimation->GetJointData(GetQueuedNextFrame());
+            break;
+        }
+        case POST_MID_TRANSITION: {
+            return queuedAnimation->GetJointData(GetQueuedNextFrame());
+            break;
+        }
+        case PRE_MID_TRANSITION: {
+            return midPoseAnimation->GetJointData(0);
             break;
         }
     }
