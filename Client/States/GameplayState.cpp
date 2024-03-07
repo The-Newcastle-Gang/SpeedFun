@@ -79,6 +79,7 @@ void GameplayState::UpdateDashTimer(float dt)
         dashTimer -= dt;
         if (dashTimer <= 0)
         {
+            std::cout << "dash ready" << std::endl;
             dashActive = true;
             dashTimer = 10.0f;
         }

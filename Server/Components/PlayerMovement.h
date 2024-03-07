@@ -59,7 +59,7 @@ private:
     float coyoteTimeTimer;
     float runSpeed;
     float jumpVelocity;
-    float dashVelocity = 25.0f;
+    float dashForce = 3500;
     float dragFactor;
     float maxHorizontalVelocity;
     int jumpQueued;

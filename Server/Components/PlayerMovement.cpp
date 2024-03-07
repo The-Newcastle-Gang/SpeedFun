@@ -244,7 +244,7 @@ void PlayerMovement::Dash()
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 
     Vector3 currentVelocity = physOb->GetLinearVelocity();
-    physOb->SetLinearVelocity(currentVelocity + lookDirection * dashVelocity);
+    physOb->AddForce(currentVelocity + lookDirection * dashForce);
 }
 
 void PlayerMovement::UpdateGrapple(float dt) {
