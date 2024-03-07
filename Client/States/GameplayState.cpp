@@ -16,6 +16,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
+    levelManager = std::make_unique<LevelManager>();
 }
 
 GameplayState::~GameplayState() {
@@ -386,11 +387,11 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    auto lr= new LevelReader();
-    lr->HasReadLevel("newTest.json");
-    auto plist  = lr->GetPrimitiveList();
-    auto opList  = lr->GetOscillatorPList();
-    auto harmOpList  = lr->GetHarmfulOscillatorPList();
+    levelManager->TryReadLevel("newTest");
+
+    auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
+    auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
+    auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -417,8 +418,8 @@ void GameplayState::InitLevel() {
     //SetTestSprings();
     //SetTestFloor();
 
-    levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
-    startPos = lr->GetStartPosition();
+    levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
+    startPos = levelManager->GetLevelReader()->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);

@@ -24,7 +24,7 @@ void LevelManager::EndStageTimer() {
 }
 
 bool LevelManager::TryReadLevel(std::string levelSource) {
-    std::cout << "Reading level" + levelSource + "\n";
+    //std::cout << "Reading level" + levelSource + "\n";
 
     if (!levelReader->HasReadLevel(levelSource + ".json"))
     {
@@ -32,8 +32,4 @@ bool LevelManager::TryReadLevel(std::string levelSource) {
         return false;
     }
     return true;
-}
-
-std::vector<PrimitiveGameObject *> LevelManager::GetCurrentPrimitiveList() const {
-    return levelReader->GetPrimitiveList();
 }

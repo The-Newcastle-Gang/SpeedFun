@@ -18,11 +18,11 @@ public:
     void StartStageTimer();
     void EndStageTimer();
 
-    std::vector<PrimitiveGameObject*> GetCurrentPrimitiveList() const;
+    std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
 
 protected:
 
-    std::unique_ptr<LevelReader> levelReader;
+    std::shared_ptr<LevelReader> levelReader;
     std::unique_ptr<StageTimer> stageTimer;
     int currentTimer;
 

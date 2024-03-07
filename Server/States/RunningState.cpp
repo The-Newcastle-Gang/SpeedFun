@@ -301,18 +301,12 @@ void RunningState::BuildLevel(const std::string &levelName)
     //TODO: REDO THIS FUNCTION WITH LEVELMANAGER
     std::cout << "Level: " << levelName << " being built\n";
     levelManager->TryReadLevel(levelName);
-    levelReader = new LevelReader();
-    if (!levelReader->HasReadLevel(levelName + ".json"))
-    {
-        std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
-        return;
-    }
 
     SetTriggerTypePositions();
 
-    auto plist = levelReader->GetPrimitiveList();
-    auto opList = levelReader->GetOscillatorPList();
-    auto harmOpList = levelReader->GetHarmfulOscillatorPList();
+    auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
+    auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
+    auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -351,10 +345,10 @@ void RunningState::BuildLevel(const std::string &levelName)
 }
 
 void RunningState::SetTriggerTypePositions(){
-    currentLevelStartPos = levelReader->GetStartPosition();
-    currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
-    currentLevelCheckPointPositions = levelReader->GetCheckPointPositions();
+    currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
+    currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),

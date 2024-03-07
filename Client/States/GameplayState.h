@@ -16,7 +16,7 @@
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
 #include "SoundManager.h"
-
+#include "LevelManager.h"
 
 #include <thread>
 #include <iostream>
@@ -56,6 +56,7 @@ namespace NCL {
             void SetTestSprings();
             void SetTestFloor();
 
+            std::unique_ptr<LevelManager> levelManager;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
