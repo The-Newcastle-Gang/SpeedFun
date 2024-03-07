@@ -428,7 +428,6 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        debugPlayer = player;
 
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
@@ -519,7 +518,6 @@ bool GameplayState::IsDisconnected() {
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
-    debugPlayer = player;
 
     delete player->GetRenderObject();
     player->SetRenderObject(nullptr);
