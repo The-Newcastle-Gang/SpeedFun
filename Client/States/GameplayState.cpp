@@ -430,9 +430,10 @@ void GameplayState::InitLevel() {
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    //auto swingingTemp = new GameObject();
+    //replicated->AddSwingingBlock(swingingTemp, *world);
+    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    SpeedUpBlockTest();
 }
 
 void GameplayState::SetTestSprings() {
@@ -478,4 +479,10 @@ void GameplayState::AssignPlayer(int netObject) {
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     auto progress = playerCurPos - startPos;
     return progress.Length()/levelLen;
+}
+
+void GameplayState::SpeedUpBlockTest() {
+    auto speedUpBlock = new GameObject();
+    replicated->AddSpeedUpBlockToLevel(speedUpBlock, *world);
+    speedUpBlock->SetRenderObject(new RenderObject(&speedUpBlock->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 }

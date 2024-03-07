@@ -309,7 +309,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
-
+    AddTestSpeedUpBlock();
     //SetTestSprings();
     SetTestFloor();
 }
@@ -358,4 +358,12 @@ void RunningState::SetTestFloor() {
     g2->SetPhysicsObject(new PhysicsObject(&g2->GetTransform(), g2->GetBoundingVolume(), new PhysicsMaterial()));
     g2->GetPhysicsObject()->SetInverseMass(0.0f);
     AddTriggersToLevel();
+}
+
+void RunningState::AddTestSpeedUpBlock() {
+    auto testSpeedUpBlock = new GameObject();
+    replicated->AddSpeedUpBlockToLevel(testSpeedUpBlock, *world);
+    testSpeedUpBlock->SetPhysicsObject(new PhysicsObject(&testSpeedUpBlock->GetTransform(), testSpeedUpBlock->GetBoundingVolume(), new PhysicsMaterial()));
+    testSpeedUpBlock->GetPhysicsObject()->SetInverseMass(0.0f);
+    testSpeedUpBlock->AddComponent((Component*)(new TestSpeedUpBlock(testSpeedUpBlock)));
 }

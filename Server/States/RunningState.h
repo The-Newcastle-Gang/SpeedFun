@@ -11,6 +11,7 @@
 #include "DamagingObstacle.h"
 #include "ObjectOscillator.h"
 #include "DamagingObstacle.h"
+#include "Components/SpeedUpBlock.h"
 
 #include "Spring.h"
 
@@ -93,7 +94,7 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
-
+            void AddTestSpeedUpBlock();
             void SetTriggerTypePositions();
         };
     }

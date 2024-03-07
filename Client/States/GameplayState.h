@@ -63,7 +63,7 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
-
+            void SpeedUpBlockTest();
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;

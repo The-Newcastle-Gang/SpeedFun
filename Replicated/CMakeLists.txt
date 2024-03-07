@@ -14,7 +14,9 @@ add_library(replicated STATIC Replicated.cpp
 "AnimatorObject.cpp"
 "AnimatorObject.h"
 "Components/SwingingObject.h"
-"Components/SwingingObject.cpp")
+"Components/SwingingObject.cpp"
+"Components/SpeedUpBlock.h"
+"Components/SpeedUpBlock.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ../CSC8503CoreClasses ../OpenGLRendering ./)
 target_link_libraries(${PROJECT_NAME} PUBLIC NCLCoreClasses CSC8503CoreClasses OpenGLRendering)
