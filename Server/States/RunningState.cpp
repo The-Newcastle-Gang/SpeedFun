@@ -154,11 +154,13 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
+    levelManager->EndStageTimer();
+    int medal = levelManager->GetCurrentMedal();
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
-    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, nullptr)));
-    levelManager->EndStageTimer();
+    handler.Pack(medal);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, &data)));
 }
 
 void RunningState::DeathTriggerVolFunc(int id){

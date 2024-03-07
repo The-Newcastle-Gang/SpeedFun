@@ -42,24 +42,23 @@ void StageTimer::CalculateMedal() {
     finalTime = elapsedTime;
     if (finalTime < 0 ) { std::cerr << "FinalTime is less than 0!\n"; return;}
 
-    if( finalTime > 0 && finalTime < 4.0f )
+    if( finalTime > 0 && finalTime < 15.0f )
     {
         currentMedal = Medal::Platinum;
     }
-    else if(finalTime > 4.0f && finalTime < 10.0f)
+    else if(finalTime > 15.0f && finalTime < 20.0f)
     {
         currentMedal = Medal::Gold;
     }
-    else if(finalTime > 10.0f && finalTime < 20.0f)
+    else if(finalTime > 20.0f && finalTime < 25.0f)
     {
         currentMedal = Medal::Silver;
     }
-    else if(finalTime > 20.0f && finalTime < 30.0f)
+    else if(finalTime > 25.0f)
     {
         currentMedal = Medal::Bronze;
     }
-
-    std::cout << "calcing medal: " << currentMedal << std::endl;
+    std::cout << "Medal: " << currentMedal << std::endl;
 }
 
 void StageTimer::CalculateScore() {

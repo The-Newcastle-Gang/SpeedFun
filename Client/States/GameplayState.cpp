@@ -17,6 +17,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
+    medalImages = {};
 }
 
 GameplayState::~GameplayState() {
@@ -185,6 +186,7 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Camera_Jump): {
                 jumpTimer = PI;
+                canvas->PopActiveLayer();
             } break;
 
             case(Replicated::Camera_Land): {
@@ -199,22 +201,23 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::Stage_Start): {
-                //why?
+
             } break;
 
             case(Replicated::EndReached): {
-                std::cout << "End reached statement!\n";
                 int networkId = handler.Unpack<int>();
+                int medal = handler.Unpack<int>();
+
                 canvas->CreateNewLayer("FinishedLevelLayer");
                 canvas->PushActiveLayer("FinishedLevelLayer");
-                auto deathImage = canvas->AddImageElement("Solaire!.jpg", "FinishedLevelLayer")
+
+                canvas->AddImageElement(GetMedalImage(medal), "FinishedLevelLayer")
                         .SetColor({1.0,1.0,1.0,1.0})
                         .SetAbsoluteSize({500,500})
                         .AlignCenter()
                         .AlignMiddle();
 
-/*                auto player = world->GetObjectByNetworkId(networkId);
-                if(player) { std::cout << "Player Found!\n"; }*/
+
             } break;
 
             case(Replicated::Death_Event): {
@@ -242,6 +245,11 @@ void GameplayState::ReadNetworkFunctions() {
             break;
         }
     }
+}
+
+std::string GameplayState::GetMedalImage(int medal){
+    if((medalImages.size() == 0) || medal > medalImages.size()) return "Solaire.jpg";
+    return medalImages[medal];
 }
 
 void GameplayState::ResetCameraAnimation() {

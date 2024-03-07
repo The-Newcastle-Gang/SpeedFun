@@ -17,6 +17,7 @@ public:
 
     void StartStageTimer();
     void EndStageTimer();
+    int GetCurrentMedal() const;
 
     std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
 
@@ -34,6 +35,9 @@ protected:
     } currentLevelDetails;
 
     std::vector<PrimitiveGameObject*> pList;
+
+    int currentMedal;
+
 };
 
 

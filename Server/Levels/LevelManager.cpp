@@ -8,6 +8,7 @@ LevelManager::LevelManager() {
     levelReader = std::make_unique<LevelReader>();
     stageTimer = std::make_unique<StageTimer>();
     std::cout <<" level and stagetimer inits" <<std::endl;
+    currentMedal = 0;
 }
 
 void LevelManager::UpdateTimer(float dt) {
@@ -32,4 +33,8 @@ bool LevelManager::TryReadLevel(std::string levelSource) {
         return false;
     }
     return true;
+}
+
+int LevelManager::GetCurrentMedal() const {
+    return stageTimer->GetCurrentMedal();
 }
