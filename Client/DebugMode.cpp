@@ -26,12 +26,12 @@ void DebugMode::DisplayMemoryUsage()
 	Debug::Print("Percentage of memory used: " + std::to_string(memoryStatus.dwMemoryLoad) + "%", Vector2(3, 5), Debug::GREEN);
 
 	DWORDLONG virtaulMemoryUsed = (memoryStatus.ullTotalVirtual - memoryStatus.ullAvailVirtual) / 1024;
-	Debug::Print("Virtual memory used: " + std::to_string(virtaulMemoryUsed) + " KB", Vector2(3, 10), Debug::RED);
-	Debug::Print("Virtual memory free: " + std::to_string(memoryStatus.ullAvailVirtual / 1024) + " KB", Vector2(3, 15), Debug::GREEN);
+	Debug::Print("Virtual memory used: " + std::to_string(virtaulMemoryUsed) + " KB (" + std::to_string(virtaulMemoryUsed/(1024 * 1024)) + " GB)", Vector2(3, 10), Debug::RED);
+	Debug::Print("Virtual memory free: " + std::to_string(memoryStatus.ullAvailVirtual / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailVirtual / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 15), Debug::GREEN);
 
 	DWORDLONG physMemoryUsed = (memoryStatus.ullTotalPhys - memoryStatus.ullAvailPhys) / 1024;
-	Debug::Print("Physical memory used: " + std::to_string(physMemoryUsed) + " KB", Vector2(3, 20), Debug::RED);
-	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB", Vector2(3, 25), Debug::GREEN);
+	Debug::Print("Physical memory used: " + std::to_string(physMemoryUsed) + " KB (" + std::to_string(physMemoryUsed / (1024 * 1024)) + " GB)", Vector2(3, 20), Debug::RED);
+	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailPhys / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 25), Debug::GREEN);
 
 }
 
