@@ -8,13 +8,13 @@ SoundManager::SoundManager() {
 	InitAudioDevice();
 }
 
-void SoundManager::AddSoundToLoad(std::string fileName) {
+void SoundManager::SM_AddSoundToLoad(std::string fileName) {
 	soundFileNames.push_back(fileName);
 }
 
-void SoundManager::AddSoundsToLoad(std::vector<std::string> fileNames) {
+void SoundManager::SM_AddSoundsToLoad(std::vector<std::string> fileNames) {
 	for (std::string fn : fileNames) {
-		AddSoundToLoad(fn);
+		SM_AddSoundToLoad(fn);
 	}
 }
 
@@ -38,7 +38,26 @@ void SoundManager::SM_LoopIfEnd(std::string soundName) {
 	if (!SM_IsSoundPlaying(soundName)) SM_PlaySound(soundName);
 }
 
-bool SoundManager::LoadSoundList() {
+void SoundManager::SM_AddSongToLoad(std::string fileName) {
+	songFileNames.push_back(fileName);
+}
+
+void SoundManager::SM_AddSongsToLoad(std::vector<std::string> fileNames) {
+	for (std::string fn : fileNames) {
+		SM_AddSongToLoad(fn);
+	}
+}
+
+std::string SoundManager::SM_SelectRandomSong() {
+	int totalSongs = songFileNames.size();
+	if (totalSongs == 0) return "";
+	srand(time(NULL));
+	int randomSong = (rand() % totalSongs);
+	currentSong = songFileNames[randomSong];
+	return currentSong;
+}
+
+bool SoundManager::SM_LoadSoundList() {
 
 	for (std::string fn : soundFileNames) {
 		std::string path = Assets::SOUNDSDIR + fn;
@@ -50,7 +69,7 @@ bool SoundManager::LoadSoundList() {
 	return true;
 }
 
-void SoundManager::UnloadSoundList() {
+void SoundManager::SM_UnloadSoundList() {
 
 	for (std::string fn : soundFileNames) {
 		UnloadSound(*sounds[fn]);
