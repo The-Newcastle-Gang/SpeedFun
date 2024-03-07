@@ -333,6 +333,10 @@ void GameplayState::SendInputData() {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerDebug, nullptr));
+    }
+
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
     float cameraYaw = mainCamera->GetYaw();

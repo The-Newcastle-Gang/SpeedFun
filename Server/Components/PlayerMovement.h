@@ -43,6 +43,8 @@ public:
 
     CameraAnimationCallData cameraAnimationCalls;
 
+    void ToggleDebug() { debugEnabled = !debugEnabled; }
+
 private:
     GameWorld* world;
 
@@ -51,6 +53,8 @@ private:
         std::function<void(float)> UpdateState;
         std::function<void()> OnExit;
     };
+
+    bool debugEnabled = false;
 
     bool hasCoyoteExpired;
 
