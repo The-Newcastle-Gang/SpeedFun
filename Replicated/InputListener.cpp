@@ -8,6 +8,7 @@ Vector2 InputListener::PlayerInput;
 float InputListener::JumpInput;
 float InputListener::GrappleInput;
 bool  InputListener::DashInput;
+bool  InputListener::DebugInput;
 
 using namespace NCL;
 
@@ -50,6 +51,13 @@ void InputListener::InputUpdate() {
         DashInput = true;
     } else{
         DashInput = false;
+    };
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
+        DebugInput = true;
+    }
+    else {
+        DebugInput = false;
     };
 
 //DEBUG CODE

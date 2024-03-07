@@ -27,6 +27,7 @@ protected:
     static float JumpInput;
     static float GrappleInput;
     static bool DashInput;
+    static bool DebugInput;
 
 };
 

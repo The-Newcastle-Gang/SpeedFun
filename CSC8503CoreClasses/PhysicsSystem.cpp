@@ -424,6 +424,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		}
 
 		float inverseMass = object->GetInverseMass();       //getting inverse mass
+        if (inverseMass == 0.0f)continue;
 
 		Vector3 linearVel = object->GetLinearVelocity();
 		Vector3 force = object->GetForce();
@@ -471,6 +472,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		if (object == nullptr) {
 			continue;
 		}
+        if (object->GetInverseMass() == 0.0f)continue;
 
 		Transform& transform = (*i)->GetTransform();
 
