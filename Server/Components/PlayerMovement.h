@@ -28,6 +28,7 @@ public:
 
     void Jump();
     void Grapple();
+    void Dash();
 
     struct CameraAnimationCallData {
         bool jump = false;
@@ -58,6 +59,7 @@ private:
     float coyoteTimeTimer;
     float runSpeed;
     float jumpVelocity;
+    float dashVelocity = 25.0f;
     float dragFactor;
     float maxHorizontalVelocity;
     int jumpQueued;

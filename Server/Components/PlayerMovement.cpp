@@ -1,3 +1,4 @@
+#include "PlayerMovement.h"
 //
 // Created by jdhyd on 2/19/2024.
 //
@@ -237,6 +238,16 @@ void PlayerMovement::Grapple() {
     grappleProjectileInfo.SetActive(true);
 }
 
+void PlayerMovement::Dash()
+{
+    std::cout << "dashing" << std::endl;
+    Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
+    PhysicsObject* physOb = gameObject->GetPhysicsObject();
+
+    Vector3 currentVelocity = physOb->GetLinearVelocity();
+    physOb->SetLinearVelocity(currentVelocity + lookDirection * dashVelocity);
+}
+
 void PlayerMovement::UpdateGrapple(float dt) {
     if (!grappleProjectileInfo.GetActive()) return;
 
@@ -283,6 +294,7 @@ void PlayerMovement::FireGrapple() {
 
 
 void PlayerMovement::Jump() {
+    std::cout << "Jumping" << std::endl;
     hasCoyoteExpired = false;
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 

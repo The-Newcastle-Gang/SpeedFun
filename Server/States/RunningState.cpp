@@ -64,6 +64,13 @@ void RunningState::ReadNetworkFunctions() {
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Grapple();
             }
+        } 
+        else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerDash) {
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->Dash();
+            }
         }
     }
 }
@@ -196,6 +203,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 
     player->GetTransform().SetOrientation(inputInfo.playerRotation);
     auto rightAxis = inputInfo.rightAxis;
+
 
     PlayerMovement* playerMovement;
     if (player->TryGetComponent(playerMovement)) {
