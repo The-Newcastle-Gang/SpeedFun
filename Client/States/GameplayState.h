@@ -103,6 +103,9 @@ namespace NCL {
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
             float loadingTime = 0.0f;
 
+            float totalDTElapsed = 0.0f;
+            bool debugMovementEnabled = false;
+
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
 
             void ReadNetworkFunctions();
