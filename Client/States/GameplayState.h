@@ -16,14 +16,17 @@
 #include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "DebugMode.h"
 #include "SoundManager.h"
 
 
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
 
         enum LoadingStates {
             NOT_LOADED,
@@ -154,6 +157,10 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            DebugMode* debugger;
+            bool displayDebugger = false;
+
         };
     }
 }

@@ -20,6 +20,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete debugger;
     delete loadSoundThread;
 }
 
@@ -104,6 +105,9 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
+    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 }
 void GameplayState::InitialiseAssets() {
@@ -188,6 +192,9 @@ void GameplayState::Update(float dt) {
     world->UpdateWorld(dt);
 
     ReadNetworkPackets();
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (displayDebugger) debugger->UpdateDebugMode(dt);
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
@@ -425,7 +432,7 @@ void GameplayState::InitLevel() {
 
     //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
