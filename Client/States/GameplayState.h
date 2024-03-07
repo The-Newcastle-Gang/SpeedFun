@@ -154,6 +154,10 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            float dashTimer = 10.0f;
+            bool dashActive = true;
+            void UpdateDashTimer(float dt);
         };
     }
 }

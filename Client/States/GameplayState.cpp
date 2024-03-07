@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -69,6 +70,19 @@ void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     tVal = tVal * 300 - 150;
 
     element.AlignMiddle((int)tVal);
+}
+
+void GameplayState::UpdateDashTimer(float dt)
+{
+    if (!dashActive)
+    {
+        dashTimer -= dt;
+        if (dashTimer <= 0)
+        {
+            dashActive = true;
+            dashTimer = 10.0f;
+        }
+    }
 }
 
 void GameplayState::InitLevelMap(){
@@ -169,6 +183,7 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    UpdateDashTimer(dt);
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
@@ -326,7 +341,8 @@ void GameplayState::SendInputData() {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::Q)) {
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::Q) && dashActive) {
+        dashActive = false;
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerDash, nullptr));
     }
 
