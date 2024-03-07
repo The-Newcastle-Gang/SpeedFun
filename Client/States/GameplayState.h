@@ -16,6 +16,7 @@
 #include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "DebugMode.h"
 #include "SoundManager.h"
 #include "AnimatorObject.h"
 
@@ -23,8 +24,17 @@
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
+
+        enum LoadingStates {
+            NOT_LOADED,
+            LOADED,
+            READY
+        };
+
         class GameplayState : public State
         {
         public:
@@ -87,7 +97,14 @@ namespace NCL {
 
             void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
+            void ManageLoading(float dt);
             void FinishLoading();
+            std::thread* loadWorldThread;
+            std::thread* loadSoundThread;
+            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            float loadingTime = 0.0f;
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
 
@@ -132,6 +149,8 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
+            float defaultFOV = 40.0f;
+
             void HandleGrappleEvent(int event);
 
             float levelLen;
@@ -142,7 +161,8 @@ namespace NCL {
 
             void UpdatePlayerBlip(Element &element, float dt);
 
-            GameObject* debugPlayer;
+            DebugMode* debugger;
+            bool displayDebugger = false;
         };
     }
 }

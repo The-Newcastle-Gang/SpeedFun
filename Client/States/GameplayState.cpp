@@ -20,6 +20,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete debugger;
+    delete loadSoundThread;
 }
 
 
@@ -103,15 +105,29 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
+    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
-    InitSounds();
-
 }
-
+void GameplayState::InitialiseAssets() {
+    
+    InitWorld();
+    InitCamera();
+    loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
+    loadSoundThread->detach();
+    FinishLoading();
+}
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
-    soundManager->LoadSoundList();
-    soundManager->SM_PlaySound("koppen.ogg");
+    std::cout << "\n\nLoading Sounds!\n\n";
+
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    std::string songToPlay = soundManager->SM_SelectRandomSong();
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_LoadSoundList();
+
+    soundHasLoaded = LoadingStates::LOADED;
+    
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -128,11 +144,35 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
-    soundManager->UnloadSoundList();
+    soundManager->SM_UnloadSoundList();
+    
     delete networkThread;
 }
 
+void GameplayState::ManageLoading(float dt) {
+
+    if (loadingTime > 0.1f) {
+        std::cout << ".\n";
+        loadingTime = 0.0f;
+    }
+    loadingTime += dt;
+
+    if (soundHasLoaded == LoadingStates::LOADED) {
+        std::cout << "\n\nSounds Have Loaded!\n\n";
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        soundHasLoaded = LoadingStates::READY;
+    }
+
+    if (soundHasLoaded == LoadingStates::READY) {
+        delete loadSoundThread;
+        finishedLoading = LoadingStates::READY;
+    }
+}
 void GameplayState::Update(float dt) {
+    if (finishedLoading != LoadingStates::READY) {
+        ManageLoading(dt);
+        return;
+    }
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
@@ -152,6 +192,9 @@ void GameplayState::Update(float dt) {
     world->UpdateWorld(dt);
 
     ReadNetworkPackets();
+
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (displayDebugger) debugger->UpdateDebugMode(dt);
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
@@ -211,8 +254,10 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
-                float speed = std::max(0.0f, velocity.Length() - 8.0f);
-                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
+                float speed = std::max(0.0f, velocity.Length() - 10.0f);
+                float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
 
@@ -266,6 +311,7 @@ void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
 }
+
 void GameplayState::WalkCamera(float dt) {
     
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
@@ -287,12 +333,11 @@ void GameplayState::JumpCamera(float dt) {
 void GameplayState::HandleGrappleEvent(int event) {
     switch (event) {
         case 1: {
-            //renderer->SetSpeedActive(true);
+            isGrappling = true;
             break;
         }
         case 2: {
-            //renderer->SetSpeedActive(false);
-
+            isGrappling = false;
            break;
         }
     }
@@ -345,14 +390,6 @@ void GameplayState::SendInputData() {
     networkData->outgoingInput.Push(input);
 }
 
-
-void GameplayState::InitialiseAssets() {
-    InitCamera();
-    InitWorld();
-    FinishLoading();
-
-}
-
 void GameplayState::FinishLoading() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
     world->StartWorld();
@@ -369,6 +406,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
+    worldHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateRock() {
@@ -441,7 +479,7 @@ void GameplayState::InitLevel() {
 
     //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
