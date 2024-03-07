@@ -390,6 +390,6 @@ void GameplayState::AddEndPortal(Vector3 position){
     replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position);
 
     endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
-    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default"), resources->GetShader("scene")));
+    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default"), resources->GetShader("Default")));
     AddLava(position);
 }
