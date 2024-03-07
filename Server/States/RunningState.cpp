@@ -305,8 +305,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 
     //SetTestSprings();
     SetTestFloor();
-    //SetRayEnemyShoot();
-    //SetRayEnemyFollow();
+    SetRayEnemy();
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -355,21 +354,30 @@ void RunningState::SetTestFloor() {
     AddTriggersToLevel();
 }
 
-void RunningState::SetRayEnemyShoot() {
+void RunningState::SetRayEnemy() {
+
+    auto rayenemyFollow = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-80, 6, -7);
+    x->colliderExtents = Vector3(1, 1, 1);
+    x->dimensions = Vector3(1, 1, 1);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(rayenemyFollow, *world, x);
+
+    rayenemyFollow->SetPhysicsObject(new PhysicsObject(&rayenemyFollow->GetTransform(), rayenemyFollow->GetBoundingVolume(), new PhysicsMaterial()));
+    rayenemyFollow->GetPhysicsObject()->SetInverseMass(0.0f);
+    RayEnemyFollow* followComp = new RayEnemyFollow(rayenemyFollow);
+    rayenemyFollow->AddComponent(followComp);
+
     auto rayenemyShoot = new GameObject();
     replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 10), rayenemyShoot, *world);
     rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), physics->GetPhysMat("Default")));
     rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
     rayenemyShoot->GetTransform().SetPosition(Vector3(-80, 6, -7));
     rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
-    rayenemyShoot->AddComponent((Component*)(new RayEnemyShoot(rayenemyShoot)));
+    RayEnemyShoot* shootComp = new RayEnemyShoot(rayenemyShoot);
+    rayenemyShoot->AddComponent(shootComp);
     Debug::DrawAABBLines(Vector3(-80, 6, -7), Vector3(5, 5, 5), Debug::MAGENTA, 1000.0f);
-}
 
-void RunningState::SetRayEnemyFollow() {
-    auto rayenemyFollow = new GameObject();
-    replicated->AddRaycastEnemy(rayenemyFollow, *world, Vector3(-80, 6, -7));
-    rayenemyFollow->SetPhysicsObject(new PhysicsObject(&rayenemyFollow->GetTransform(), rayenemyFollow->GetBoundingVolume(), new PhysicsMaterial()));
-    rayenemyFollow->GetPhysicsObject()->SetInverseMass(0.0f);
-    rayenemyFollow->AddComponent((Component*)(new RayEnemyFollow(rayenemyFollow)));
+    shootComp->SetFollowComponent(followComp);
 }

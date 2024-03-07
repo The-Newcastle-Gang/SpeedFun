@@ -19,6 +19,7 @@ void RayEnemyShoot::EnemyShoot(float dt) {
 
 void RayEnemyShoot::OnCollisionEnter(GameObject* otherObject) {
 	if (otherObject->GetTag() == Tag::PLAYER) {
+		followComponent->OnPlayerEnter(otherObject);
 		std::cout << "Enter the warning area!!!" << std::endl;
 		goShoot = true;
 	}

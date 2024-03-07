@@ -399,9 +399,9 @@ void GameplayState::InitLevel() {
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    //auto swingingTemp = new GameObject();
+    //replicated->AddSwingingBlock(swingingTemp, *world);
+    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 
     SetRaycastEnemy();
 }
@@ -453,6 +453,11 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
 
 void GameplayState::SetRaycastEnemy() {
     auto raycastEnemy = new GameObject();
-    replicated->AddRaycastEnemy(raycastEnemy, *world, Vector3(-80, 6, -7));
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-80, 6, -7);
+    x->colliderExtents = Vector3(1, 1, 1);
+    x->dimensions = Vector3(1, 1, 1);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(raycastEnemy, *world, x);
     raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
 }

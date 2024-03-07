@@ -98,8 +98,8 @@ namespace NCL {
 
             void SetTriggerTypePositions();
 
-            void SetRayEnemyShoot();
-            void SetRayEnemyFollow();
+            void SetRayEnemy();
+
         };
     }
 }
