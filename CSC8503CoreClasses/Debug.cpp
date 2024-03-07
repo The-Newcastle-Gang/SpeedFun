@@ -16,7 +16,7 @@ const Vector4 Debug::WHITE		= Vector4(1, 1, 1, 1);
 const Vector4 Debug::YELLOW		= Vector4(1, 1, 0, 1);
 const Vector4 Debug::MAGENTA	= Vector4(1, 0, 1, 1);
 const Vector4 Debug::CYAN		= Vector4(0, 1, 1, 1);
-
+const Vector4 Debug::RAINBOW_ARRAY[6] = {Debug::RED, Debug::YELLOW, Debug::GREEN, Debug::CYAN, Debug:: BLUE, Debug::MAGENTA};
 void Debug::Print(const std::string& text, const Vector2& pos, const Vector4& colour) {
 	DebugStringEntry newEntry;
 

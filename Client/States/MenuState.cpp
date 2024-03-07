@@ -18,9 +18,9 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 }
 
 void MenuState::InitMenuSounds() {
-    soundManager->AddSoundToLoad("se_select00.wav");
-    soundManager->AddSoundToLoad("rainer menu.ogg");
-    soundManager->LoadSoundList();
+    soundManager->SM_AddSoundToLoad("se_select00.wav");
+    soundManager->SM_AddSoundToLoad("rainer menu.ogg");
+    soundManager->SM_LoadSoundList();
     soundManager->SM_PlaySound("rainer menu.ogg");
 }
 
@@ -350,6 +350,6 @@ void MenuState::OnExit() {
     baseClient->OnServerConnected.disconnect(this);
     baseClient->ClearPacketHandlers();
     canvas->Reset();
-    soundManager->UnloadSoundList();
+    soundManager->SM_UnloadSoundList();
     lua_close(L);
 }

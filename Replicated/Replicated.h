@@ -43,6 +43,7 @@ public:
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
+        PlayerDebug
     };
 
     Replicated();

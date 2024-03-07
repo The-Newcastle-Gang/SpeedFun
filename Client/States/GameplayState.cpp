@@ -21,6 +21,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete debugger;
+    delete loadSoundThread;
 }
 
 
@@ -106,15 +108,26 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
+    Window::GetWindow()->LockMouseToWindow(true);
+    Window::GetWindow()->ShowOSPointer(false);
+    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
-    InitSounds();
-
 }
-
+void GameplayState::InitialiseAssets() {
+    
+    InitWorld();
+    InitCamera();
+    loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
+    loadSoundThread->detach();
+    FinishLoading();
+}
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav", "Death_sound.wav" });
-    soundManager->LoadSoundList();
-    soundManager->SM_PlaySound("koppen.ogg");
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "Death_sound.wav" });
+    std::string songToPlay = soundManager->SM_SelectRandomSong();
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_LoadSoundList();
+
+    soundHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -131,11 +144,37 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
-    soundManager->UnloadSoundList();
+    soundManager->SM_UnloadSoundList();
+    
     delete networkThread;
 }
 
+void GameplayState::ManageLoading(float dt) {
+
+    if (loadingTime > 0.1f) {
+        std::cout << ".\n";
+        loadingTime = 0.0f;
+    }
+    loadingTime += dt;
+
+    if (soundHasLoaded == LoadingStates::LOADED) {
+        std::cout << "\n\nSounds Have Loaded!\n\n";
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        soundHasLoaded = LoadingStates::READY;
+    }
+
+    if (soundHasLoaded == LoadingStates::READY) {
+        delete loadSoundThread;
+        finishedLoading = LoadingStates::READY;
+    }
+}
+
 void GameplayState::Update(float dt) {
+    if (finishedLoading != LoadingStates::READY) {
+        ManageLoading(dt);
+        return;
+    }
+    totalDTElapsed += dt;
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
@@ -156,6 +195,22 @@ void GameplayState::Update(float dt) {
 
     ReadNetworkPackets();
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (debugMovementEnabled) {
+        // idk i got bored
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!", 
+                Vector2(2.0f + 0.5f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.5f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::RAINBOW_ARRAY[i]);
+        }
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!",
+                Vector2(2.0f + 0.25f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.25f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::BLACK);
+        }
+        Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
+    }
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
@@ -237,8 +292,10 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
-                float speed = std::max(0.0f, velocity.Length() - 8.0f);
-                renderer->SetSpeedLineAmount(std::min(speed, 40.0f)/40.0f);
+                float speed = std::max(0.0f, velocity.Length() - 10.0f);
+                float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
         }
@@ -254,6 +311,7 @@ void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
 }
+
 void GameplayState::WalkCamera(float dt) {
     
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
@@ -275,11 +333,11 @@ void GameplayState::JumpCamera(float dt) {
 void GameplayState::HandleGrappleEvent(int event) {
     switch (event) {
         case 1: {
-            //renderer->SetSpeedActive(true);
+            isGrappling = true;
             break;
         }
         case 2: {
-            //renderer->SetSpeedActive(false);
+            isGrappling = false;
            break;
         }
     }
@@ -317,6 +375,11 @@ void GameplayState::SendInputData() {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerDebug, nullptr));
+        debugMovementEnabled = !debugMovementEnabled;
+    }
+
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
     float cameraYaw = mainCamera->GetYaw();
@@ -329,13 +392,6 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
-}
-
-
-void GameplayState::InitialiseAssets() {
-    InitCamera();
-    InitWorld();
-    FinishLoading();
 }
 
 void GameplayState::FinishLoading() {
@@ -354,6 +410,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
+    worldHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateRock() {
@@ -423,6 +480,7 @@ void GameplayState::InitLevel() {
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
+
     // TEST SWINGING OBJECT ON THE CLIENT
     auto swingingTemp = new GameObject();
     replicated->AddSwingingBlock(swingingTemp, *world);
@@ -459,7 +517,6 @@ void GameplayState::SetTestFloor() {
 bool GameplayState::IsDisconnected() {
     return false;
 }
-
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
