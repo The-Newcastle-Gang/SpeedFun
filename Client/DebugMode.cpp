@@ -5,19 +5,19 @@ using namespace NCL;
 using namespace CSC8503;
 
 
-void NCL::CSC8503::DebugMode::DisplayDebug(float dt)
+void DebugMode::UpdateDebugMode(float dt)
 {
-	GetFPSCount(dt);
-	GetMemoryUsage();
-	GetCameraInfo();
+	DisplayFPSCount(dt);
+	DisplayMemoryUsage();
+	DisplayCameraInfo();
 }
 
-void DebugMode::GetFPSCount(float dt)
+void DebugMode::DisplayFPSCount(float dt)
 {
 	Debug::Print("FPS: " + std::to_string(1 / dt), Vector2(3, 50), Debug::MAGENTA);
 }
 
-void DebugMode::GetMemoryUsage()
+void DebugMode::DisplayMemoryUsage()
 {
 	MEMORYSTATUSEX memoryStatus;
 	memoryStatus.dwLength = sizeof(memoryStatus);
@@ -35,13 +35,13 @@ void DebugMode::GetMemoryUsage()
 
 }
 
-void DebugMode::GetCameraInfo()
+void DebugMode::DisplayCameraInfo()
 {
-	Debug::Print("Camera info:", Vector2(75, 35), Debug::BLACK);
-	Debug::Print("X: " + std::to_string(currentCam->GetPosition().x), Vector2(75, 30), Debug::BLACK);
-	Debug::Print("Y: " + std::to_string(currentCam->GetPosition().y), Vector2(75, 25), Debug::BLACK);
-	Debug::Print("Z: " + std::to_string(currentCam->GetPosition().z), Vector2(75, 20), Debug::BLACK);
-	Debug::Print("Roll: " + std::to_string(currentCam->GetRoll()), Vector2(75, 15), Debug::BLACK);
-	Debug::Print("Pitch: " + std::to_string(currentCam->GetPitch()), Vector2(75, 10), Debug::BLACK);
-	Debug::Print("Yaw: " + std::to_string(currentCam->GetYaw()), Vector2(75, 5), Debug::BLACK);
+	Debug::Print("Camera info:", Vector2(75, 35), Debug::WHITE);
+	Debug::Print("X: " + std::to_string(currentCam->GetPosition().x), Vector2(75, 30), Debug::WHITE);
+	Debug::Print("Y: " + std::to_string(currentCam->GetPosition().y), Vector2(75, 25), Debug::WHITE);
+	Debug::Print("Z: " + std::to_string(currentCam->GetPosition().z), Vector2(75, 20), Debug::WHITE);
+	Debug::Print("Roll: " + std::to_string(currentCam->GetRoll()), Vector2(75, 15), Debug::WHITE);
+	Debug::Print("Pitch: " + std::to_string(currentCam->GetPitch()), Vector2(75, 10), Debug::WHITE);
+	Debug::Print("Yaw: " + std::to_string(currentCam->GetYaw()), Vector2(75, 5), Debug::WHITE);
 }

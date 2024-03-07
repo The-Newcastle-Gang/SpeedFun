@@ -194,7 +194,7 @@ void GameplayState::Update(float dt) {
     ReadNetworkPackets();
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->DisplayDebug(dt);
+    if (displayDebugger) debugger->UpdateDebugMode(dt);
 
     renderer->Render();
     Debug::UpdateRenderables(dt);

@@ -8,7 +8,6 @@ namespace NCL {
 	namespace CSC8503 {
 		class DebugMode
 		{
-
 		public:
 
 			DebugMode(Camera* cam)
@@ -16,13 +15,13 @@ namespace NCL {
 				currentCam = cam;
 			}
 
-			void DisplayDebug(float dt);
+			void UpdateDebugMode(float dt);
 		protected:
-			void GetFPSCount(float dt);
-			void GetCollisionInfo();
-			void GetMemoryUsage();
-			void GetFeatureCosts();
-			void GetCameraInfo();
+			void DisplayFPSCount(float dt);
+			void DisplayCollisionInfo();
+			void DisplayMemoryUsage();
+			void DisplayFeatureCosts();
+			void DisplayCameraInfo();
 
 			Camera* currentCam;
 		};
