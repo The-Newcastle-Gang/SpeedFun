@@ -37,7 +37,7 @@ using namespace CSC8503;
 
 class Client{
 public:
-    Client(std::function<void()> sererStarter);
+    Client(std::atomic<bool> &shouldStart);
     void Update(float dt);
 
 private:
@@ -50,7 +50,7 @@ private:
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
     std::unique_ptr<SoundManager> soundManager;
-    std::function<void()> serverStarter;
+    std::atomic<bool> &serverStart;
     void InitStateManager();
 };
 

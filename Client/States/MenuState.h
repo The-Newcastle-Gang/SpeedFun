@@ -18,7 +18,7 @@ namespace NCL {
         class MenuState : public State, PacketReceiver
         {
         public:
-            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas, SoundManager* pSoundManager);
+            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas, SoundManager* pSoundManager, std::atomic<bool> &serverStartFlag);
             ~MenuState();
             void Update(float dt) override;
 
@@ -48,6 +48,8 @@ namespace NCL {
             int mHoverBox;
             int selected;
             int mSelected;
+
+            std::atomic<bool> &shouldServerStart;
 
             std::array<std::string, 4> lobbyInfo;
 

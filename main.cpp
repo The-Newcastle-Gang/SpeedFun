@@ -10,10 +10,19 @@ using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
 
+
+std::atomic<bool> SHOULDSERVERSTART = false;
+
 void ServerThreadFunction() {
     auto server = new Server();
     auto timer = GameTimer();
     timer.Tick();
+
+    while (!SHOULDSERVERSTART) {
+        std::this_thread::yield();
+    }
+
+    server->InitStateMachine();
 
     while (true) {
         std::this_thread::yield();
@@ -37,10 +46,9 @@ int main() {
         return -1;
     }
 
-    // Clear timer so there's no large dt. Get time delta doesn't work.
-    w->UpdateWindow();
 
-    auto client = new Client();
+
+    auto client = new Client(SHOULDSERVERSTART);
 
 
     Window::GetWindow()->LockMouseToWindow(false);
@@ -48,6 +56,9 @@ int main() {
 
     std::thread t1(ServerThreadFunction);
     t1.detach();
+
+    // Clear timer so there's no large dt. Get time delta doesn't work.
+    w->UpdateWindow();
 
 
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {

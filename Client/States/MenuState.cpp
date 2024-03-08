@@ -2,7 +2,7 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager) : State()
+MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager, std::atomic<bool> &serverStartFlag) : State(), shouldServerStart(serverStartFlag)
 {
     soundManager = pSoundManager;
     renderer = pRenderer;
@@ -93,6 +93,7 @@ void MenuState::StartSingleplayer() {
 }
 
 void MenuState::BeginSingleplayer(Element& _) {
+    shouldServerStart.store(true);
     baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
     baseClient->Connect("127.0.0.1", NetworkBase::GetDefaultPort());
 }
@@ -131,6 +132,7 @@ void MenuState::SetActiveTextEntry(Element& element) {
 }
 
 void MenuState::CreateLobby(Element& element) {
+    shouldServerStart.store(true);
     canvas->PushActiveLayer("lobby");
     ConnectToGame("127.0.0.1");
 }

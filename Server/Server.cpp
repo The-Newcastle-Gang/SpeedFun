@@ -9,7 +9,8 @@ Server::Server() {
     NetworkBase::Initialise();
     stateManager = std::make_unique<StateMachine>();
     serverBase = std::make_unique<GameServer>(NetworkBase::GetDefaultPort(), 32);
-    InitStateMachine();
+    // Handling this from the main.cpp now.
+    //InitStateMachine();
 }
 
 Server::~Server() {
