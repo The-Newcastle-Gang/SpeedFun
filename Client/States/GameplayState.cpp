@@ -434,6 +434,7 @@ void GameplayState::InitLevel() {
     //replicated->AddSwingingBlock(swingingTemp, *world);
     //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
     SpeedUpBlockTest();
+    SetBridgeTest();
 }
 
 void GameplayState::SetTestSprings() {
@@ -485,4 +486,15 @@ void GameplayState::SpeedUpBlockTest() {
     auto speedUpBlock = new GameObject();
     replicated->AddSpeedUpBlockToLevel(speedUpBlock, *world);
     speedUpBlock->SetRenderObject(new RenderObject(&speedUpBlock->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+}
+
+void GameplayState::SetBridgeTest() {
+    auto testBridge = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-90, 5, 5);
+    x->colliderExtents = Vector3(10, 20, 2);
+    x->dimensions = Vector3(10, 20, 2);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(testBridge, *world, x);
+    testBridge->SetRenderObject(new RenderObject(&testBridge->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 }

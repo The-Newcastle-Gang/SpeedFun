@@ -11,6 +11,7 @@ add_library(server
         Components/Spring.cpp
         Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
+        Components/TestBridge.cpp
 )
 
 target_include_directories(server PUBLIC

@@ -154,6 +154,8 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            void SetBridgeTest();
         };
     }
 }

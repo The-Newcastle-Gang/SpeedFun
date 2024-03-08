@@ -312,6 +312,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     AddTestSpeedUpBlock();
     //SetTestSprings();
     SetTestFloor();
+    SetTestBridge();
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -366,4 +367,18 @@ void RunningState::AddTestSpeedUpBlock() {
     testSpeedUpBlock->SetPhysicsObject(new PhysicsObject(&testSpeedUpBlock->GetTransform(), testSpeedUpBlock->GetBoundingVolume(), new PhysicsMaterial()));
     testSpeedUpBlock->GetPhysicsObject()->SetInverseMass(0.0f);
     testSpeedUpBlock->AddComponent((Component*)(new TestSpeedUpBlock(testSpeedUpBlock)));
+}
+
+void RunningState::SetTestBridge() {
+    auto testBridge = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-90, 5, 5);
+    x->colliderExtents = Vector3(10, 20, 2);
+    x->dimensions = Vector3(10, 20, 2);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(testBridge, *world, x);
+    testBridge->SetPhysicsObject(new PhysicsObject(&testBridge->GetTransform(), testBridge->GetBoundingVolume(), new PhysicsMaterial()));
+    testBridge->GetPhysicsObject()->SetInverseMass(0.0);
+    testBridge->AddComponent((Component*)(new TestBridge(testBridge)));
+
 }
