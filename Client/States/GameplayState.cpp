@@ -255,6 +255,7 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::Stage_Start): {
+                // Enable player controls
 
             } break;
 
@@ -270,9 +271,15 @@ void GameplayState::ReadNetworkFunctions() {
                         .SetAbsoluteSize({500,500})
                         .AlignCenter()
                         .AlignMiddle();
+                // Disable player controls
+                // Clear the world
+                // Loading screen
+                // Load the next level
+
             } break;
 
             case(Replicated::Death_Event): {
+                //
                 // Play Anim
                 soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
