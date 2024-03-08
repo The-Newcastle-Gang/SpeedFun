@@ -20,6 +20,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete debugger;
+    delete loadSoundThread;
 }
 
 
@@ -38,13 +40,13 @@ void GameplayState::InitCanvas(){
 void GameplayState::InitCrossHeir(){
     //crossheir
     auto crossHeirVert = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
     auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({0.0,0.0,0.0,1.0})
+            .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
             .AlignMiddle();
@@ -105,15 +107,27 @@ void GameplayState::OnEnter() {
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
+    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
-    InitSounds();
-
 }
-
+void GameplayState::InitialiseAssets() {
+    
+    InitWorld();
+    InitCamera();
+    loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
+    loadSoundThread->detach();
+    FinishLoading();
+}
 void GameplayState::InitSounds() {
-    soundManager->AddSoundsToLoad({ "koppen.ogg" , "footsteps.wav" });
-    soundManager->LoadSoundList();
-    soundManager->SM_PlaySound("koppen.ogg");
+    std::cout << "\n\nLoading Sounds!\n\n";
+
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    std::string songToPlay = soundManager->SM_SelectRandomSong();
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_LoadSoundList();
+
+    soundHasLoaded = LoadingStates::LOADED;
+    
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -130,17 +144,42 @@ void GameplayState::OnExit() {
     Window::GetWindow()->ShowOSPointer(true);
     world->ClearAndErase();
     renderer->Render();
-    soundManager->UnloadSoundList();
+    soundManager->SM_UnloadSoundList();
+    
     delete networkThread;
 }
 
+void GameplayState::ManageLoading(float dt) {
+
+    if (loadingTime > 0.1f) {
+        std::cout << ".\n";
+        loadingTime = 0.0f;
+    }
+    loadingTime += dt;
+
+    if (soundHasLoaded == LoadingStates::LOADED) {
+        std::cout << "\n\nSounds Have Loaded!\n\n";
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        soundHasLoaded = LoadingStates::READY;
+    }
+
+    if (soundHasLoaded == LoadingStates::READY) {
+        delete loadSoundThread;
+        finishedLoading = LoadingStates::READY;
+    }
+}
 void GameplayState::Update(float dt) {
+    if (finishedLoading != LoadingStates::READY) {
+        ManageLoading(dt);
+        return;
+    }
+    totalDTElapsed += dt;
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
-    Window::GetWindow()->LockMouseToWindow(true);
+    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -155,6 +194,22 @@ void GameplayState::Update(float dt) {
 
     ReadNetworkPackets();
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (debugMovementEnabled) {
+        // idk i got bored
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!", 
+                Vector2(2.0f + 0.5f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.5f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::RAINBOW_ARRAY[i]);
+        }
+        for (int i = 0; i < 6; i++) {
+            Debug::Print("Debug Movement!",
+                Vector2(2.0f + 0.25f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.25f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
+                Debug::BLACK);
+        }
+        Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
+    }
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
@@ -203,14 +258,32 @@ void GameplayState::ReadNetworkFunctions() {
                 strafeSpeed = strfSpd;
             }
             break;
+
+            case(Replicated::Grapple_Event): {
+                int eventType = handler.Unpack<int>();
+                HandleGrappleEvent(eventType);
+            }
+            break;
+
+            case(Replicated::Player_Velocity_Call): {
+                Vector3 velocity = handler.Unpack<Vector3>();
+                playerVelocity = velocity;
+                float speed = std::max(0.0f, velocity.Length() - 10.0f);
+                float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+            }
+            break;
         }
 
     }
 }
+
 void GameplayState::ResetCameraAnimation() {
     currentGroundSpeed = 0.0f;
     strafeSpeed = 0.0f;
 }
+
 void GameplayState::WalkCamera(float dt) {
     
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
@@ -227,6 +300,19 @@ void GameplayState::WalkCamera(float dt) {
 void GameplayState::JumpCamera(float dt) {
     world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + Vector3(0, -jumpBobAmount * sin(PI - jumpTimer), 0));
     jumpTimer = std::clamp(jumpTimer - dt * jumpAnimationSpeed, 0.0f, PI);
+}
+
+void GameplayState::HandleGrappleEvent(int event) {
+    switch (event) {
+        case 1: {
+            isGrappling = true;
+            break;
+        }
+        case 2: {
+            isGrappling = false;
+           break;
+        }
+    }
 }
 
 void GameplayState::LandCamera(float dt) {
@@ -261,6 +347,11 @@ void GameplayState::SendInputData() {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::O)) {
+        (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerDebug, nullptr));
+        debugMovementEnabled = !debugMovementEnabled;
+    }
+
     Camera* mainCamera = world->GetMainCamera();
     float cameraPitch = mainCamera->GetPitch();
     float cameraYaw = mainCamera->GetYaw();
@@ -274,15 +365,6 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
-}
-
-
-void GameplayState::InitialiseAssets() {
-    InitCamera();
-    InitWorld();
-    FinishLoading();
-
-    
 }
 
 void GameplayState::FinishLoading() {
@@ -301,6 +383,20 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
+    worldHasLoaded = LoadingStates::LOADED;
+}
+
+void GameplayState::CreateRock() {
+    auto rock = new GameObject("Rock");
+    world->AddGameObject(rock, true);
+    auto volume = new AABBVolume(Vector3(1.0, 1.0, 1.0));
+    rock->SetBoundingVolume((CollisionVolume*)volume);
+
+    rock->GetTransform()
+            .SetScale(Vector3(1.0, 1.0, 1.0))
+            .SetPosition(Vector3(0, 20, 0));
+
+    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("stone_tallA.obj"), nullptr, nullptr));
 }
 
 void GameplayState::CreatePlayers() {
@@ -326,19 +422,36 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("debuglvl.json");
+    lr->HasReadLevel("newTest.json");
     auto plist  = lr->GetPrimitiveList();
-    for(auto x : plist){
+    auto opList  = lr->GetOscillatorPList();
+    auto harmOpList  = lr->GetHarmfulOscillatorPList();
+
+    for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+    }
 
+    for (auto &x : opList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
+    }
+
+    for (auto &x : harmOpList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
 
     //SetTestSprings();
 
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();

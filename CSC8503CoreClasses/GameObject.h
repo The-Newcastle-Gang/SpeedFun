@@ -57,6 +57,10 @@ namespace NCL::CSC8503 {
             return transform;
         }
 
+        Transform* GetTransformPointer() {
+            return &transform;
+        }
+
         RenderObject* GetRenderObject() const {
             return renderObject;
         }

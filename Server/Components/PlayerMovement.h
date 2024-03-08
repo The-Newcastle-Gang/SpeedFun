@@ -37,9 +37,13 @@ public:
         float groundMovement = 0.0f;
         float strafeSpeed = 0.0f;
         float shakeIntensity = 0.0f;
+        int grapplingEvent = 0; //0 is nothing has happened, 1 is start grapple, 2 is end grapple.
+        bool isGrappling = false;
     };
 
     CameraAnimationCallData cameraAnimationCalls;
+
+    void ToggleDebug() { debugEnabled = !debugEnabled; }
 
 private:
     GameWorld* world;
@@ -49,6 +53,8 @@ private:
         std::function<void(float)> UpdateState;
         std::function<void()> OnExit;
     };
+
+    bool debugEnabled = false;
 
     bool hasCoyoteExpired;
 
