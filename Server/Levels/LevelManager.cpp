@@ -38,3 +38,6 @@ bool LevelManager::TryReadLevel(std::string levelSource) {
 int LevelManager::GetCurrentMedal() const {
     return stageTimer->GetCurrentMedal();
 }
+Vector4 LevelManager::GetCurrentMedalColour() const {
+    return stageTimer->GetCurrentMedalColour();
+}

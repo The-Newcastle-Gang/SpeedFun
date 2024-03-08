@@ -45,20 +45,23 @@ void StageTimer::CalculateMedal() {
     if( finalTime > 0 && finalTime < 15.0f )
     {
         currentMedal = Medal::Platinum;
+        currentMedalColour = { 0.90f, 0.894f, 0.886f, 1.0f };
     }
     else if(finalTime > 15.0f && finalTime < 20.0f)
     {
         currentMedal = Medal::Gold;
+        currentMedalColour = { 0.788f, 0.69f, 0.216f, 1.0f};
     }
     else if(finalTime > 20.0f && finalTime < 25.0f)
     {
         currentMedal = Medal::Silver;
+        currentMedalColour = { 0.843f, 0.843f, 0.843f, 1.0f};
     }
     else if(finalTime > 25.0f)
     {
         currentMedal = Medal::Bronze;
+        currentMedalColour = { 0.416f, 0.22f, 0.02f, 1.0f};
     }
-    std::cout << "Medal: " << currentMedal << std::endl;
 }
 
 void StageTimer::CalculateScore() {

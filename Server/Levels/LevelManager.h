@@ -18,6 +18,7 @@ public:
     void StartStageTimer();
     void EndStageTimer();
     int GetCurrentMedal() const;
+    Vector4 GetCurrentMedalColour() const;
 
     std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
 

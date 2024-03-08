@@ -68,7 +68,7 @@ namespace NCL {
 
             std::unique_ptr<LevelManager> levelManager;
 
-            std::vector<std::string> medalImages;
+            std::string medalImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -159,7 +159,7 @@ namespace NCL {
 
             void UpdatePlayerBlip(Element &element, float dt);
 
-            string GetMedalImage(int medal);
+            std::string GetMedalImage();
 
             DebugMode* debugger;
             bool displayDebugger = false;

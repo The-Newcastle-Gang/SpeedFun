@@ -164,10 +164,12 @@ void RunningState::StartTriggerVolFunc(int id){
 void RunningState::EndTriggerVolFunc(int id){
     levelManager->EndStageTimer();
     int medal = levelManager->GetCurrentMedal();
+    Vector4 medalColour = levelManager->GetCurrentMedalColour();
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
     handler.Pack(medal);
+    handler.Pack(medalColour);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, &data)));
 }
 

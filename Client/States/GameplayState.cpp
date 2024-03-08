@@ -17,7 +17,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
-    medalImages = {};
+    medalImage = "medal.png";
 }
 
 GameplayState::~GameplayState() {
@@ -57,7 +57,6 @@ void GameplayState::InitCrossHeir(){
 }
 
 void GameplayState::InitTimerBar(){
-
     //timer Bar
     timeBar = &canvas->AddElement()
             .SetColor({0,1,0,1})
@@ -122,9 +121,9 @@ void GameplayState::InitialiseAssets() {
     FinishLoading();
 }
 void GameplayState::InitSounds() {
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "Death_sound.wav" });
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
     std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
     soundHasLoaded = LoadingStates::LOADED;
@@ -262,15 +261,16 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::EndReached): {
                 int networkId = handler.Unpack<int>();
                 int medal = handler.Unpack<int>();
+                Vector4 medalColour = handler.Unpack<Maths::Vector4>();
 
                 canvas->CreateNewLayer("FinishedLevelLayer");
                 canvas->PushActiveLayer("FinishedLevelLayer");
 
-                canvas->AddImageElement(GetMedalImage(medal), "FinishedLevelLayer")
-                        .SetColor({1.0,1.0,1.0,1.0})
-                        .SetAbsoluteSize({500,500})
+                canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+                        .SetColor(medalColour)
+                        .SetAbsoluteSize({60,60})
                         .AlignCenter()
-                        .AlignMiddle();
+                        .AlignLeft();
                 // Disable player controls
                 // Clear the world
                 // Loading screen
@@ -283,6 +283,7 @@ void GameplayState::ReadNetworkFunctions() {
                 // Play Anim
                 soundManager->SM_PlaySound("Death_sound.wav");
                 ResetCameraToForwards();
+
             } break;
 
             case(Replicated::Death_Event_End): {
@@ -309,9 +310,8 @@ void GameplayState::ReadNetworkFunctions() {
     }
 }
 
-std::string GameplayState::GetMedalImage(int medal){
-    if((medalImages.size() == 0) || medal > medalImages.size()) return "Solaire.jpg";
-    return medalImages[medal];
+std::string GameplayState::GetMedalImage(){
+    return medalImage;
 }
 
 void GameplayState::ResetCameraAnimation() {
