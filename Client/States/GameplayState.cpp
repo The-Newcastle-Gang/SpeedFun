@@ -415,11 +415,13 @@ void GameplayState::FinishLoading() {
 }
 
 void GameplayState::InitCamera() {
-    world->GetMainCamera()->SetNearPlane(0.1f);
-    world->GetMainCamera()->SetFarPlane(500.0f);
-    world->GetMainCamera()->SetPitch(-15.0f);
-    world->GetMainCamera()->SetYaw(315.0f);
-    world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+    Camera* cam = world->GetMainCamera();
+    cam->SetNearPlane(0.1f);
+    cam->SetFarPlane(500.0f);
+    cam->SetPitch(-15.0f);
+    cam->SetYaw(315.0f);
+    cam->SetPosition(Vector3(-60, 40, 60));
+    cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
 }
 
 void GameplayState::InitWorld() {
@@ -456,6 +458,8 @@ void GameplayState::CreatePlayers() {
         playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
