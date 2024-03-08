@@ -21,6 +21,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    noiseTexture = (OGLTexture*)LoadTexture("noise.png");
     postProcessBase = new OGLShader("post.vert", "post.frag");
 
 	lineCount = 0;
@@ -291,8 +292,20 @@ void GameTechRenderer::RenderRayMap() {
 void GameTechRenderer::RenderUI() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     auto& layers = canvas.GetActiveLayers();
-    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+
+    int blockingLayer = layers.size() - 1;
+
+    for (int i=blockingLayer; i >= 0; i--) {
+        if (layers[blockingLayer]->CheckBlocking()) {
+            break;
+        }
+
+        blockingLayer = i;
+    }
+
+    for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
             auto activeShader = defaultUIShader;
@@ -331,6 +344,12 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
 
 
             glBindVertexArray(uiVAO);
@@ -343,9 +362,6 @@ void GameTechRenderer::RenderUI() {
                 RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
             }
 
-        }
-        if ((*i)->CheckBlocking()) {
-            break;
         }
     }
 }

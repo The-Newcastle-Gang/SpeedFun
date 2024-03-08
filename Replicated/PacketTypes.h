@@ -6,6 +6,7 @@
 #define CSC8503_PACKETTYPES_H
 
 #define MAXFUNCTIONDATA 128
+#define MAXPLAYERNAME (24 * 4)
 
 #include "Quaternion.h"
 #include "Vector2.h"
@@ -16,6 +17,11 @@ using namespace Maths;
 
 struct FunctionData {
     unsigned char data[MAXFUNCTIONDATA];
+};
+
+// For now lets just 4 players keep it simple I'm super tired I want to sleep
+struct LobbyData {
+    char names[MAXPLAYERNAME];
 };
 
 class DataHandler {
@@ -60,6 +66,12 @@ struct InputPacket : public GamePacket {
     InputPacket() {
         type = Received_State;
         size = sizeof(InputPacket) - sizeof(GamePacket);
+    }
+};
+
+struct LobbyInfo : public GamePacket {
+    LobbyData data;
+    LobbyInfo(const std::vector<std::string> &playerNames) {
     }
 };
 
