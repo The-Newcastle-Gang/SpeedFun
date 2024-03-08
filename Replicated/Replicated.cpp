@@ -15,20 +15,38 @@ int Replicated::GetCurrentLevelLen(){
 }
 
 
-void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
+void Replicated::AddBlockToLevel(GameObject* g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
+    Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
+    if (tempFix == Vector3(0.0f, 0.0f, 0.0f)) {
+        AddStraightBlockToLevel(g, world, currentPrimitive);
+        return;
+    }
+    AddTiltedBlockToLevel(g, world, currentPrimitive);
+}
+
+void Replicated::AddStraightBlockToLevel(GameObject* g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
+
+    world.AddGameObject(g, currentPrimitive->shouldNetwork);
+    auto volume = new AABBVolume(currentPrimitive->colliderExtents * 0.5f);
+    g->SetBoundingVolume((CollisionVolume*)volume);
+    g->GetTransform()
+        .SetPosition(currentPrimitive->position)
+        .SetScale(currentPrimitive->dimensions);
+}
+
+void Replicated::AddTiltedBlockToLevel(GameObject* g, GameWorld& world, PrimitiveGameObject* currentPrimitive) {
 
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new OBBVolume(currentPrimitive->colliderExtents * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
-    std::cout << currentPrimitive->colliderExtents << "\n";
     Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
-    tempFix *= Vector3(-1,-1,1);
+    tempFix *= Vector3(-1, -1, 1);
 
     g->GetTransform()
         .SetPosition(currentPrimitive->position)
         .SetScale(currentPrimitive->dimensions)
         .SetOrientation(Quaternion::EulerAnglesToQuaternion(tempFix.x, tempFix.y, tempFix.z));
- 
+
 }
 
 
