@@ -17,6 +17,7 @@
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
 #include "DebugMode.h"
+#include "ParticleSystem.h"
 #include "SoundManager.h"
 
 
@@ -156,8 +157,14 @@ namespace NCL {
             float levelLen;
             Vector3 startPos;
             float CalculateCompletion(Vector3 cp);
+            void AddLava( Vector3 pos );
             Element* timeBar;
             int PlayerBlip;
+
+            ParticleSystem* testParticles;
+            vector<ParticleSystem*> particleSystems;
+            void LoadParticleSystems();
+            void UpdateParticleSystems(float dt);
 
             void UpdatePlayerBlip(Element &element, float dt);
 
