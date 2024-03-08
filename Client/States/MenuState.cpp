@@ -13,6 +13,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     canvas = pCanvas;
     hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    menuParticleShader = renderer->LoadShader("defaultUI.vert", "particleUI.frag");
     activeText = -1;
     textLimit = 15;
 
@@ -162,7 +163,9 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
     } if (tags.find("fireEffect") != tags.end()) {
         element.SetShader(titleShader);
-    }
+    } if (tags.find("particleEffect") != tags.end()) {
+        element.SetShader(menuParticleShader);
+}
 
     if (id == "Singleplayer") {
         selected = element.GetIndex();
