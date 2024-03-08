@@ -5,8 +5,7 @@
 #include "Client.h"
 #include "../CSC8503CoreClasses/Debug.h"
 
-
-Client::Client() {
+Client::Client(std::atomic<bool> &shouldStart) : serverStart(shouldStart) {
     NetworkBase::Initialise();
     soundManager = std::make_unique<SoundManager>();
 
@@ -22,7 +21,7 @@ Client::Client() {
 
 void Client::InitStateManager() {
 
-    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get(), soundManager.get());
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get(), soundManager.get(), serverStart);
     auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get(), soundManager.get());
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {

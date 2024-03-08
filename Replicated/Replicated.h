@@ -42,6 +42,7 @@ public:
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
+        PlayerDebug
     };
 
     enum PlayerAnimationStates {

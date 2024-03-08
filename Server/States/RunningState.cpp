@@ -58,11 +58,19 @@ void RunningState::ReadNetworkFunctions() {
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Jump();
             }
-        } else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
+        }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerGrapple) {
             auto player = GetPlayerObjectFromId(data.first);
             PlayerMovement* playerMovement;
             if (player->TryGetComponent(playerMovement)) {
                 playerMovement->Grapple();
+            }
+        }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::PlayerDebug) {
+            auto player = GetPlayerObjectFromId(data.first);
+            PlayerMovement* playerMovement;
+            if (player->TryGetComponent(playerMovement)) {
+                playerMovement->ToggleDebug();
             }
         }
     }

@@ -239,6 +239,7 @@ void PlayerMovement::Update(float dt) {
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
     
 
+
     Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
     float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
     cameraAnimationCalls.strafeSpeed = strafeSpeed;
@@ -308,12 +309,17 @@ void PlayerMovement::FireGrapple() {
 
 
 void PlayerMovement::Jump() {
+
+    float jumpVelocityValue = jumpVelocity;
+    if (debugEnabled) {
+        jumpVelocityValue = 7.0f;
+    }
     hasCoyoteExpired = false;
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 
     Vector3 currentVelocity = physOb->GetLinearVelocity();
-    gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
-    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } * jumpVelocity);
+    gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocityValue *0.01f,0}); //hacky way to allow us to directly set velocity
+    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocityValue);
     if(activeState!=&air) cameraAnimationCalls.jump = true;
     SwitchToState(&air);
     
