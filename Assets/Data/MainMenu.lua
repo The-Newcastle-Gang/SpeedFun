@@ -1,4 +1,4 @@
-Vector4 = {}
+local Vector4 = {}
 
 function Vector4:new(x,y,z,w)
     local v = {}
@@ -23,7 +23,7 @@ Vector4.__mul = function(vec, scale)
 end
 
 
-Vector3 = {}
+local Vector3 = {}
 
 function Vector3:new(x, y, z)
     local v = {}
@@ -47,7 +47,7 @@ Vector3.__add = function(vec1, vec2)
     return Vector3:new(vec1.x + vec2.x, vec1.y + vec2.y, vec1.z + vec2.z)
 end
 
-Vector2 = {}
+local Vector2 = {}
 
 function Vector2:new(x,y)
     local v = {}
@@ -229,60 +229,234 @@ canvas = {
             id = "HoverBox",
         },
     },
-    multiplayer = {
+    lobby = {
         {
-            color = COLORS.translucent,
-            rSize = Vector2:new(0, 1),
-            aSize = Vector2:new(415, 0),
+          rSize = Vector2:new(1,1),
+          color = Vector4:new(COLORS.menuBackground.x, COLORS.menuBackground.y, COLORS.menuBackground.z, 0.8),
+          aPos = Vector2:new(0,0),
+        },
+        {
+            aSize = Vector2:new(530, 450),
+            color = COLORS.menuBackground,
             align = {
-                AlignTo("left", 115 + 415)
+                AlignTo("right", 615 - 530),
+                AlignTo("top", 117),
             },
         },
         {
-            color = COLORS.main,
-            aSize = Vector2:new(415, 115),
+            color = COLORS.white,
+            image = "hellMain/Players.png",
+            aSize = Vector2:new(91, 25),
             align = {
-                AlignTo("top", 180 + 33 - 40),
-                AlignTo("left", 115 + 415)
+              AlignTo("top", 157),
+              AlignTo("right", 1280 - 886 - 91)
             },
-            id = "mHoverBox",
         },
         {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160 + 415, 0),
+            color = COLORS.white,
+            image = "hellMain/Start.png",
+            aSize = Vector2:new(62, 19),
             align = {
-                AlignTo("top", 180)
+                AlignTo("top", 520),
+                AlignTo("right", 1280 - 792 - 62)
             },
-            text = {
-                text = "Join Game",
-                color = COLORS.active,
-                size = 1.0
-            },
-            tags = {
-                "mOption"
-            },
-            id = "JoinGame",
+            tags = { "uiTextHover" },
+            id = "StartLobby",
         },
         {
-            aSize = Vector2:new(315, 80),
-            aPos = Vector2:new(160 + 415, 0),
+            color = COLORS.white,
+            image = "hellMain/Disconnect.png",
+            aSize = Vector2:new(138, 20),
             align = {
-                AlignTo("top", 290)
+                AlignTo("top", 520),
+                AlignTo("right", 1280 - 943 - 138)
             },
-            text = {
-                text = "Create Game",
-                color = COLORS.inactive,
-                size = 1.0
-            },
-            tags = {
-                "mOption"
-            },
-            id = "CreateGame",
+            tags = { "uiTextHover" },
+            id = "DisconnectLobby"
         },
     }
 }
 
 blockingCanvas = {
+    multiplayer = {
+        {
+            color = COLORS.menuBackground,
+            rSize = Vector2:new(1, 1),
+
+        },
+        {
+            image = "hellMain/Hell.png",
+            color = COLORS.main,
+            aSize = Vector2:new(309, 68),
+            align = {
+                AlignTo("left", 174),
+                AlignTo("top", 76),
+            },
+            tags = {
+                "fireEffect",
+            }
+        },
+        {
+            image = "hellMain/Runners.png",
+            color = COLORS.lightgray,
+            aSize = Vector2:new(453, 68),
+            align = {
+                AlignTo("left", 102),
+                AlignTo("top", 155),
+            }
+        },
+        {
+            image = "hellMain/Trident.png",
+            color = COLORS.main,
+            aSize = Vector2:new(353, 65),
+            align = {
+                AlignTo("left", 98),
+                AlignTo("top", 161),
+            }
+        },
+        {
+          image = "hellMain/CreateGame.png",
+          aSize = Vector2:new(161, 19),
+          color = COLORS.inactive,
+          align = {
+              AlignTo("top", 371),
+              AlignTo("left", 249),
+          },
+          tags = { "mOption" },
+          id = "CreateGame",
+        },
+        {
+            image = "hellMain/Back.png",
+            aSize = Vector2:new(59, 21),
+            color = COLORS.inactive,
+            align = {
+                AlignTo("top", 448),
+                AlignTo("left", 300)
+            },
+            tags = { "mOption" },
+            id = "Back",
+        },
+        {
+            aSize = Vector2:new(540, 460),
+            color = COLORS.white,
+            align = {
+                AlignTo("right", 620 - 540),
+                AlignTo("top", 112),
+            },
+        },
+        {
+            aSize = Vector2:new(530, 450),
+            color = COLORS.menuBackground,
+            align = {
+                AlignTo("right", 615 - 530),
+                AlignTo("top", 117),
+            },
+        },
+        {
+            image = "hellMain/JoinGame.png",
+            aSize = Vector2:new(137, 20),
+            color = COLORS.inactive,
+            align = {
+                AlignTo("top", 407),
+                AlignTo("right", 420 - 137),
+            },
+            id = "JoinGame",
+        },
+        {
+            aSize = Vector2:new(240, 60),
+            color = COLORS.lightgray,
+            align = {
+                AlignTo("top", 240),
+                AlignTo("right", 467 - 240)
+            },
+            id = "PlayerName",
+            tags = { "textEntry" }
+        },
+        {
+            text = {
+                text = "Player Name",
+                color = COLORS.inactive,
+                size = 0.45,
+            },
+            align = {
+                AlignTo("top", 378 - 99), AlignTo("right", 305 + 155)
+            },
+            id = "PlayerNameText"
+        },
+
+        {
+            aSize = Vector2:new(240, 60),
+            color = COLORS.lightgray,
+            align = {
+                AlignTo("top", 240 + 77),
+                AlignTo("right", 467 - 240)
+            },
+            id = "IpAddress",
+            tags = { "textEntry" }
+        },
+        {
+            text = {
+                text = "IP Address",
+                color = COLORS.inactive,
+                size = 0.45,
+            },
+            align = {
+                AlignTo("top", 378 - 99 + 77), AlignTo("right", 305 + 155)
+            },
+            id = "IpAddressText"
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/HoverBar.png",
+            aSize = Vector2:new(170, 34),
+            align = {
+                AlignTo("top", 371 + 23),
+                AlignTo("left", 249 - 5)
+            },
+            id = "mHoverBox",
+        },
+        --{
+        --    color = COLORS.main,
+        --    aSize = Vector2:new(415, 115),
+        --    align = {
+        --        AlignTo("top", 180 + 33 - 40),
+        --        AlignTo("left", 115 + 415)
+        --    },
+        --    id = "mHoverBox",
+        --},
+        --{
+        --    aSize = Vector2:new(315, 80),
+        --    aPos = Vector2:new(160 + 415, 0),
+        --    align = {
+        --        AlignTo("top", 180)
+        --    },
+        --    text = {
+        --        text = "Join Game",
+        --        color = COLORS.active,
+        --        size = 1.0
+        --    },
+        --    tags = {
+        --        "mOption"
+        --    },
+        --    id = "JoinGame",
+        --},
+        --{
+        --    aSize = Vector2:new(315, 80),
+        --    aPos = Vector2:new(160 + 415, 0),
+        --    align = {
+        --        AlignTo("top", 290)
+        --    },
+        --    text = {
+        --        text = "Create Game",
+        --        color = COLORS.inactive,
+        --        size = 1.0
+        --    },
+        --    tags = {
+        --        "mOption"
+        --    },
+        --    id = "CreateGame",
+        --},
+    },
     joinGame = {
         {
             aSize = Vector2:new(350, 325),
@@ -337,17 +511,6 @@ blockingCanvas = {
             },
             id = "IpAddress",
             tags = { "textEntry" }
-        },
-        {
-            text = {
-                text = "Player Name",
-                color = COLORS.lightgray,
-                size = 0.45,
-            },
-            align = {
-                AlignTo("middle", 50), AlignTo("center", -110)
-            },
-            id = "PlayerNameText"
         },
         {
             text = {

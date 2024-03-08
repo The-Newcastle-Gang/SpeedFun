@@ -208,8 +208,20 @@ void GameTechRenderer::RenderFrame() {
 void GameTechRenderer::RenderUI() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     auto& layers = canvas.GetActiveLayers();
-    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+
+    int blockingLayer = layers.size() - 1;
+
+    for (int i=blockingLayer; i >= 0; i--) {
+        if (layers[blockingLayer]->CheckBlocking()) {
+            break;
+        }
+
+        blockingLayer = i;
+    }
+
+    for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
             auto activeShader = defaultUIShader;
@@ -266,9 +278,6 @@ void GameTechRenderer::RenderUI() {
                 RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
             }
 
-        }
-        if ((*i)->CheckBlocking()) {
-            break;
         }
     }
 }

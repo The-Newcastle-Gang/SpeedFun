@@ -5,8 +5,7 @@
 #include "Client.h"
 #include "../CSC8503CoreClasses/Debug.h"
 
-
-Client::Client() {
+Client::Client(std::function<void()> serverStarter) {
     NetworkBase::Initialise();
     soundManager = std::make_unique<SoundManager>();
 

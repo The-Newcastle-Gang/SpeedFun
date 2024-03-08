@@ -49,6 +49,8 @@ namespace NCL {
             int selected;
             int mSelected;
 
+            std::array<std::string, 4> lobbyInfo;
+
             int activeText;
             int textLimit;
 
@@ -64,7 +66,7 @@ namespace NCL {
             void ConnectToGame(const string &address);
             void RegisterPackets();
             void ConnectedToServer();
-            void StartGame();
+            void StartGame(Element& _);
             void InitCanvas();
             void OptionHover(Element &element);
             void InitLua();
@@ -81,6 +83,14 @@ namespace NCL {
             void ConnectWithIp(Element& element);
 
             void InitMenuSounds();
+
+            void GoBack(Element &element);
+            void JoinLobby();
+            void CreateLobby(Element &element);
+
+            void LeaveLobby(Element &element);
+
+            void StartSingleplayer();
         };
     }
 }
