@@ -510,7 +510,7 @@ void GameTechRenderer::RenderCamera() {
             glUniformMatrix4fv(projLocation, 1, false, (float *) &projMatrix);
             glUniformMatrix4fv(viewLocation, 1, false, (float *) &viewMatrix);
 
-            glUniform1f(uTimeLocation, u_time);
+            glUniform1f(uTimeLocation, uTime);
 
             glUniform3fv(lightPosLocation, 1, (float *) &lightPosition);
             glUniform4fv(lightColourLocation, 1, (float *) &lightColour);
@@ -577,13 +577,13 @@ void GameTechRenderer::RenderCamera() {
     auto& camera = *gameWorld.GetMainCamera();
 
     Matrix4 invVP = CollisionDetection::GenerateInverseView(camera) * CollisionDetection::GenerateInverseProjection(screenAspect, camera.GetFieldOfVision(), camera.GetNearPlane(), camera.GetFarPlane());
-    int invLocation     = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
-    int lightLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
-    int depthLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
-    int timeLoc         = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
-    int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
-    int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
-    int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
+    int invLocation         = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
+    int lightLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
+    int depthLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    int timeLoc             = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
+    int speedBoolLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
+    int speedLineDirLoc     = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
+    int speedLineAmountLoc  = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&lightPosition);
