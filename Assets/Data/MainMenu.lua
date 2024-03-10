@@ -136,8 +136,8 @@ canvas = {
             rSize = Vector2:new(1, 1),
 
         },
-                        {
-            image = "Default.png",
+        {
+            image = "Noise.png",
             color = COLORS.main,
             aSize = Vector2:new(1300, 700),
             align = {
