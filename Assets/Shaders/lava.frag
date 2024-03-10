@@ -28,27 +28,48 @@ float random(in vec2 uv){
   return fract(sin(dot(uv.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
-float noise(in vec2 st){
+float noise (in vec2 st) {
     vec2 i = floor(st);
     vec2 f = fract(st);
 
+    // Four corners in 2D of a tile
     float a = random(i);
     float b = random(i + vec2(1.0, 0.0));
     float c = random(i + vec2(0.0, 1.0));
     float d = random(i + vec2(1.0, 1.0));
-    vec2 u = f*f*(3.0-2.0*f);
+
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
     return mix(a, b, u.x) +
             (c - a)* u.y * (1.0 - u.x) +
             (d - b) * u.x * u.y;
 }
 
+#define OCTAVES 6
+float fbm (in vec2 st) {
+    // Initial values
+    float value = 0.0;
+    float amplitude = .5;
+    float frequency = 0.;
+    //
+    // Loop of octaves
+    for (int i = 0; i < OCTAVES; i++) {
+        value += amplitude * noise(st);
+        st *= 2.;
+        amplitude *= .5;
+    }
+    return value;
+}
+
+
 void main(void)
 {
 	vec2 uv = IN.texCoord;
 	vec2 uvOriginal = uv;
+  uv *=100;
 
-	uv += u_time *0.1;
-  vec3 col = vec3(1.0, 0.0, 0.0);
+	// uv += u_time *0.1;
+  vec3 col = vec3(.0, .0, .0);
 
   // uv.x += sin(uv.y * 9.0 + u_time * 0.5)/10.0;
   // uv.y += cos(uv.x * 5.0 + u_time *0.02)/7.0;
@@ -64,6 +85,9 @@ void main(void)
 
   // col = vec3(0.6353, 0.6353, 0.6353) + diff;
 
+  // col += fbm(uv * 100 + u_time) * fbm(uv);
+  col = vec3(sin(u_time), 0.0, 0.0);
   fragColor = vec4(col, 1.0);
-  // fragColor = texture(mainTex, IN.texCoord) + vec4(col, 1.0);
+  
+  // fragColor = texture(mainTex, uv);
 }
