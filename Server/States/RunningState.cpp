@@ -400,7 +400,26 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
+
+
         ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
+        const CollisionVolume* vol = g->GetBoundingVolume();
+        switch (vol->type) {
+            case VolumeType::AABB: {
+                oo->SetHalfHeight( ((AABBVolume*)vol)->GetHalfDimensions().y);
+                break;
+            }
+            case VolumeType::OBB: {
+                oo->SetHalfHeight(((OBBVolume*)vol)->GetHalfDimensions().y);
+                break;
+            }
+            case VolumeType::Sphere: {
+                oo->SetHalfHeight(((SphereVolume*)vol)->GetRadius());
+                break;
+            }
+        }
+
+
         g->AddComponent(oo);
     }
 

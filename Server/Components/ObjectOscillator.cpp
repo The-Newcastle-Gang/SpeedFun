@@ -1,4 +1,5 @@
 #include "ObjectOscillator.h"
+#include "CapsuleVolume.h"
 #define TAU 6.283185
 
 ObjectOscillator::ObjectOscillator(GameObject * go, float period, float distance, Vector3 direction, float cooldown, float waitDelay) {
@@ -15,16 +16,25 @@ ObjectOscillator::ObjectOscillator(GameObject * go, float period, float distance
 
 void ObjectOscillator::OnCollisionEnter(GameObject* other) {
     if (other->GetTag() == PLAYER) {
-        if(other->GetTransform().GetPosition().y > gameObject->GetTransform().GetPosition().y)
-        objectsOnPlatform[other] = true;
-        std::cout << "PLAYER ON PLATFORM\n";
+
+        float topOfOscillator = gameObject->GetTransform().GetPosition().y + halfHeight;
+        CapsuleVolume* capVolume = ((CapsuleVolume*)other->GetBoundingVolume());
+        float playerFeet = other->GetTransform().GetPosition().y - capVolume->GetHalfHeight();
+        std::cout << topOfOscillator << " PLATFORM POS\n";
+        std::cout << capVolume->GetHalfHeight()<< "  <HEIGHT " << capVolume->GetRadius() << " <RAD\n";
+        std::cout << playerFeet << " PLAYER POS\n";
+        if (playerFeet >= topOfOscillator)
+        {
+            std::cout << "PLAYER ON PLAYFORM!!\n";
+            objectsOnPlatform[other] = true;
+
+        }
     }
 }
 
 void ObjectOscillator::OnCollisionEnd(GameObject* other) {
     if (other->GetTag() == PLAYER) {
         objectsOnPlatform[other] = false;
-        std::cout << "PLAYER LEFT PLATFORM\n";
         other->GetPhysicsObject()->ApplyLinearImpulse(lastVelocity);
     }
 }

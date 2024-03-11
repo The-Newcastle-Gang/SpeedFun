@@ -560,9 +560,9 @@ void GameplayState::InitLevel() {
     startPos = levelManager->GetLevelReader()->GetStartPosition();
 
     // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    //auto swingingTemp = new GameObject();
+    //replicated->AddSwingingBlock(swingingTemp, *world);
+    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
