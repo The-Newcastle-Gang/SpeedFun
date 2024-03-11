@@ -155,6 +155,8 @@ namespace NCL {
 
             float levelLen;
             Vector3 startPos;
+            Vector3 endPos;
+            Vector3 deathPos;
             float CalculateCompletion(Vector3 cp);
             void AddLava( Vector3 pos );
             void AddEndPortal ( Vector3 pos );
@@ -165,6 +167,7 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
+            void ObjectsToRender();
 
         };
     }
