@@ -18,6 +18,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
+
 }
 
 GameplayState::~GameplayState() {
@@ -279,15 +280,8 @@ void GameplayState::ReadNetworkFunctions() {
                 int networkId = handler.Unpack<int>();
                 int medal = handler.Unpack<int>();
                 Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+                ShowLevelFinish(medalColour);
 
-                canvas->CreateNewLayer("FinishedLevelLayer");
-                canvas->PushActiveLayer("FinishedLevelLayer");
-
-                canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-                        .SetColor(medalColour)
-                        .SetAbsoluteSize({60,60})
-                        .AlignCenter()
-                        .AlignLeft();
                 // Disable player controls
                 // Clear the world
                 // Loading screen
@@ -331,6 +325,45 @@ void GameplayState::ReadNetworkFunctions() {
         }
     }
 }
+
+
+void GameplayState::UpdateLevelFinish(Element &e, float dt){
+    static float totalTime = 0.0f;
+    totalTime += dt;
+    e.SetColor({sin(totalTime), 0.2, 0.5, 1.0});
+}
+
+
+
+
+void GameplayState::ShowLevelFinish(Vector4 color){
+
+    canvas->CreateNewLayer("FinishedLevelLayer");
+    canvas->PushActiveLayer("FinishedLevelLayer");
+
+    Vector3 posi = {0.5, 0.5, 0.5};
+    auto& quad = canvas->AddElement("FinishedLevelLayer")
+            .SetColor({0.5,0.5,0.5,1.0})
+            .SetRelativeSize({0.5, 0.5})
+            .AlignCenter()
+            .AlignMiddle();
+//            .SetShader();
+
+
+    quad.OnUpdate.connect<&GameplayState::UpdateLevelFinish>(this);
+
+
+    canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+            .SetColor(color)
+            .SetAbsoluteSize({60,60})
+            .AlignCenter()
+            .AlignLeft();
+
+
+
+}
+
+
 
 void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
     GameObject *playerObject = world->GetObjectByNetworkId(networkID);

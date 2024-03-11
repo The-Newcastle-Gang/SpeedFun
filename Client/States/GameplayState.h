@@ -99,6 +99,7 @@ namespace NCL {
             void SendInputData();
             void CreatePlayers();
 
+            void  ShowLevelFinish(Vector4 color);
             void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
             void ManageLoading(float dt);
@@ -168,6 +169,8 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
+
+            void UpdateLevelFinish(Element &e, float dt);
         };
     }
 }
