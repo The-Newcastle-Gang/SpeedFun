@@ -449,6 +449,11 @@ void GameTechRenderer::RenderSkybox() {
     glEnable(GL_DEPTH_TEST);
 }
 
+void GameTechRenderer::UpdateRayObjects(int index, const std::pair<Vector3, Vector3>& points) {
+    beginRopes[index] = points.first;
+    endRopes[index] = points.second;
+}
+
 void GameTechRenderer::RenderCamera() {
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
@@ -587,6 +592,9 @@ void GameTechRenderer::RenderCamera() {
     int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
     int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
     int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
+    int ropesBeginLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "ropesBegin");
+    int ropesEndLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "ropesEnd");
+
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&lightPosition);
@@ -595,6 +603,8 @@ void GameTechRenderer::RenderCamera() {
     glUniform1f(speedLineAmountLoc, speedLinePercent);
     glUniform1i(speedBoolLoc, isSpeedLinesActive);
     glUniform1i(speedLineDirLoc, speedLineDir);
+    glUniform3fv(ropesBeginLoc, Replicated::PLAYERCOUNT, (float*)beginRopes);
+    glUniform3fv(ropesEndLoc, Replicated::PLAYERCOUNT, (float*)endRopes);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);

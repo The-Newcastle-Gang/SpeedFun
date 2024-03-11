@@ -1,5 +1,10 @@
 #version 330
 
+#define M_PI 3.1415926535897932384626433832795
+#define OCTAVES 6
+#define LINECOUNT 20.0
+#define PLAYERCOUNT 2
+
 out vec4 fragColor;
 uniform sampler2D hdrBuffer;
 uniform sampler2D depthBuffer;
@@ -10,10 +15,8 @@ uniform float u_time;
 uniform bool SpeedLinesActive;
 uniform float speedLineAmount;
 uniform int speedLineDir;
-
-#define M_PI 3.1415926535897932384626433832795
-#define OCTAVES 6
-#define LINECOUNT 20.0
+uniform vec3 ropesBegin[PLAYERCOUNT];
+uniform vec3 ropesEnd[PLAYERCOUNT];
 
 in Vertex {
     vec2 texCoord;
@@ -32,11 +35,25 @@ float smoothMin(float a, float b, float k) {
     return -smoothMax(-a, -b, k);
 }
 
+float sdCapsule( vec3 p, vec3 a, vec3 b, float r )
+{
+    vec3 pa = p - a, ba = b - a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h ) - r;
+}
+
 float map_the_world(in vec3 p)
 {
-    float sphere_0 = distance_from_sphere(p, vec3(0.0, 0.0, 3.0), 1.0);
+//    float total = 1.0f;
+//    for (int i=0;i<PLAYERCOUNT;i++) {
+//        total = min(total, distance_from_sphere(p, ropesBegin[i], 1.0));
+//    }
 
-    return sphere_0;
+    float total = sdCapsule(p, ropesBegin[0], ropesEnd[0], 1);
+
+
+
+    return total;
 }
 
 float linearDepth(float depth) {
@@ -230,13 +247,13 @@ void main() {
     float strength = 1.0;
     float depthThreshold = 0.8;
 
-//    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
+    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
 
     vec4 hdrColor = texture(hdrBuffer, IN.texCoord).rgba;
     float worldDepth = linearDepth(texture(depthBuffer, IN.texCoord).r) * far;
-//    vec3 rayOrigin = unproject(vec3(uv.x, uv.y, -1.0f));
-//    vec3 rayDirection = normalize(unproject(vec3(uv.x, uv.y, 1.0f)) - rayOrigin);
-//    vec4 raySphere = ray_march(rayOrigin, rayDirection);
+    vec3 rayOrigin = unproject(vec3(uv.x, uv.y, -1.0f));
+    vec3 rayDirection = normalize(unproject(vec3(uv.x, uv.y, 1.0f)) - rayOrigin);
+    vec4 raySphere = ray_march(rayOrigin, rayDirection);
 
     threshold += correctDepthForThreshold(worldDepth) * depthThreshold;
 
@@ -245,10 +262,7 @@ void main() {
     border = pow(border, tighten);
     border *= strength;
 
-//
-//    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a), raySphere.a + hdrColor.a);
-
-    fragColor = vec4(hdrColor.rgb - border, step(0.99, border) + hdrColor.a);
+    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a) - border, step(0.99, border) + hdrColor.a + raySphere.a);
 
 
 

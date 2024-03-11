@@ -168,6 +168,12 @@ void GameplayState::ManageLoading(float dt) {
     }
 }
 
+void GameplayState::UpdateGrappleLine() {
+    for (int i=0; i < Replicated::PLAYERCOUNT; i++) {
+        renderer->UpdateRayObjects(i, std::make_pair(Vector3(i*5, 0, 0), Vector3(i*5 + 2, 0, 0)));
+    }
+}
+
 void GameplayState::Update(float dt) {
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
@@ -177,6 +183,7 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
+    UpdateGrappleLine();
 
     Window::GetWindow()->ShowOSPointer(false);
     //Window::GetWindow()->LockMouseToWindow(true);
@@ -507,6 +514,7 @@ void GameplayState::CreateGrapples() {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+        grapples[i] = g;
     }
 }
 

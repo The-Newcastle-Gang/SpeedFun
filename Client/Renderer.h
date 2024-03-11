@@ -15,6 +15,7 @@
 #include "Element.h"
 #include "Canvas.h"
 #include "CollisionDetection.h"
+#include "Replicated.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -47,6 +48,7 @@ namespace NCL {
             MeshGeometry *LoadOBJMesh(const string &name);
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
+            void UpdateRayObjects(int index, const std::pair<Vector3, Vector3>& grapplePoints);
 
         protected:
             void NewRenderLines();
@@ -78,6 +80,9 @@ namespace NCL {
             OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
+
+            Vector3 beginRopes[Replicated::PLAYERCOUNT];
+            Vector3 endRopes[Replicated::PLAYERCOUNT];
 
             OGLTexture* noiseTexture;
 
@@ -152,6 +157,7 @@ namespace NCL {
             int isSpeedLinesActive;
             float speedLinePercent = 0;
             int speedLineDir;
+
 
         };
     }
