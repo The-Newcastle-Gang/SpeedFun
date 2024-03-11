@@ -7,7 +7,7 @@
 #include "Ray.h"
 
 
-PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
+PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) : GrappleStart(onGrappleStart), GrappleEnd(onGrappleEnd), GrappleUpdate(onGrappleUpdate) {
     world = w;
     gameObject = g;
 
@@ -56,6 +56,7 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
+    onGrappleEnd.publish(gameObject);
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
 }
@@ -69,7 +70,7 @@ void PlayerMovement::OnGrappleStart() {
 void PlayerMovement::OnGrappleUpdate(float dt) {
     static float grappleSpeed = 5000.0f;
 
-    Debug::DrawLine(gameObject->GetTransform().GetPosition(), grapplePoint);
+    onGrappleUpdate.publish(gameObject, grapplePoint);
 
     Vector3 delta = grapplePoint - gameObject->GetTransform().GetPosition();
 
@@ -212,8 +213,6 @@ void PlayerMovement::Update(float dt) {
     auto fwdAxis = Vector3::Cross(Vector3(0,1,0), rightAxis);
     gameObject->GetPhysicsObject()->AddForce(fwdAxis * inputDirection.y * runSpeed * dt);
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
-    
-
 
     Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
     float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
@@ -236,6 +235,7 @@ void PlayerMovement::Grapple() {
     grappleProjectileInfo.travelDistance = 0;
 
     grappleProjectileInfo.SetActive(true);
+    onGrappleStart.publish(gameObject, lookDirection);
 }
 
 void PlayerMovement::UpdateGrapple(float dt) {
@@ -256,10 +256,12 @@ void PlayerMovement::UpdateGrapple(float dt) {
 
     auto dir = grappleProjectileInfo.grappleRay.GetDirection().Normalised() * grappleProjectileInfo.travelDistance;
 
-    Debug::DrawLine(grappleProjectileInfo.grappleRay.GetPosition(), grappleProjectileInfo.grappleRay.GetPosition() + dir);
 
+    onGrappleUpdate.publish(gameObject, grappleProjectileInfo.grappleRay.GetPosition() + dir);
     if (grappleProjectileInfo.travelDistance >= grappleProjectileInfo.maxDistance) {
         grappleProjectileInfo.SetActive(false);
+        // This is terrible why did I code the grapple projectile like this.
+        onGrappleEnd.publish(gameObject);
     }
 }
 

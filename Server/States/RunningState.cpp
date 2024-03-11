@@ -105,6 +105,7 @@ void RunningState::Update(float dt) {
 void RunningState::LoadLevel() {
     BuildLevel("newTest");
     CreatePlayers();
+    CreateGrapples();
     AddTriggersToLevel();
 }
 
@@ -127,6 +128,15 @@ void RunningState::SendWorldToClient() {
     sceneSnapshotId++;
 }
 
+void RunningState::CreateGrapples() {
+    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
+        auto g = new GameObject();
+        replicated->AddGrapplesToWorld(g, *world, i);
+        SetNetworkActive(g, false);
+        grapples[i] = g;
+    }
+}
+
 void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
@@ -134,9 +144,29 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
+void RunningState::GrappleStart(GameObject* player, Vector3 direction) {
+    int playerId = GetIdFromPlayerObject(player);
+    const Vector3 &pos = player->GetTransform().GetPosition();
+    grapples[playerId]->GetTransform().SetPosition(pos);
+    SetNetworkActive(grapples[playerId], true);
+    auto lookDirection = Quaternion(Matrix4::BuildViewMatrix(pos, pos + direction, Vector3(0, 1, 0)).Inverse());
+    auto flatRotation = Matrix3::Rotation(-90, Vector3(1,0,0));
+    grapples[playerId]->GetTransform().SetOrientation(Quaternion(Matrix3(lookDirection) * flatRotation).Normalised());
+}
+
+void RunningState::GrappleUpdate(GameObject* player, Vector3 position) {
+    int playerId = GetIdFromPlayerObject(player);
+    grapples[playerId]->GetTransform().SetPosition(position);
+}
+
+void RunningState::GrappleEnd(GameObject* player) {
+    int playerId = GetIdFromPlayerObject(player);
+    SetNetworkActive(grapples[playerId], false);
+}
+
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    for (auto& pair : playerInfo) {
+    for (auto index = 0; index < Replicated::PLAYERCOUNT; index++) {
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
 
@@ -147,9 +177,13 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
         player->GetTransform().SetPosition(currentLevelStartPos);
-        player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
+        auto playerComponent = new PlayerMovement(player, world.get());
+        playerComponent->GrappleStart.connect<&RunningState::GrappleStart>(this);
+        playerComponent->GrappleEnd.connect<&RunningState::GrappleEnd>(this);
+        playerComponent->GrappleUpdate.connect<&RunningState::GrappleUpdate>(this);
+        player->AddComponent((Component*)playerComponent);
 
-        playerObjects[pair.first] = player;
+        playerObjects[index] = player;
     }
 }
 
@@ -400,4 +434,18 @@ void RunningState::SetTestFloor() {
     g2->SetPhysicsObject(new PhysicsObject(&g2->GetTransform(), g2->GetBoundingVolume(), new PhysicsMaterial()));
     g2->GetPhysicsObject()->SetInverseMass(0.0f);
     AddTriggersToLevel();
+}
+
+void RunningState::SetNetworkActive(GameObject *g, bool isActive) {
+    g->SetActive(isActive);
+    FunctionData data;
+    DataHandler handler(&data);
+    if (!g->GetNetworkObject()) {
+        std::cerr << "Can't set network active without network object" << std::endl;
+        exit(666);
+    }
+    handler.Pack(g->GetNetworkObject()->GetNetworkId());
+    handler.Pack(isActive);
+
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SetNetworkActive, &data));
 }

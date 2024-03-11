@@ -74,9 +74,9 @@ Quaternion::Quaternion(const Matrix3& m) {
 	float qrFour = 4.0f * w;
 	float qrFourRecip = 1.0f / qrFour;
 
-	x = (m.array[5] - m.array[7]) * qrFourRecip;
-	y = (m.array[6] - m.array[2]) * qrFourRecip;
-	z = (m.array[1] - m.array[3]) * qrFourRecip;
+	x = (m.array[1][2] - m.array[2][1]) * qrFourRecip;
+	y = (m.array[2][0] - m.array[0][2]) * qrFourRecip;
+	z = (m.array[0][1] - m.array[1][0]) * qrFourRecip;
 }
 
 float Quaternion::Dot(const Quaternion &a,const Quaternion &b){
@@ -214,6 +214,16 @@ Quaternion Quaternion::AxisAngleToQuaterion(const Vector3& vector, float degrees
 	float result	= (float)sin(theta / 2.0f);
 
 	return Quaternion((float)(vector.x * result), (float)(vector.y * result), (float)(vector.z * result), (float)cos(theta / 2.0f));
+}
+
+Quaternion Quaternion::LookAlong(const Vector3& vector) {
+    Quaternion q;
+    Vector3 a = Vector3::Cross(vector.Normalised(), Vector3(0, 1, 0));
+    q.x = a.x;
+    q.y = a.y;
+    q.z = a.z;
+    q.w = sqrt( (powf(vector.Length(), 2))) + Vector3::Dot(vector, Vector3(0, 1, 0));
+    return q.Normalised();
 }
 
 

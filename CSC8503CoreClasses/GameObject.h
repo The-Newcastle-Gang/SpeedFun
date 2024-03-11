@@ -10,7 +10,8 @@ namespace NCL::CSC8503 {
     class PhysicsObject;
 
     enum Tag {
-        PLAYER
+        PLAYER,
+        GRAPPLE,
     };
 
     class GameObject {
@@ -43,6 +44,10 @@ namespace NCL::CSC8503 {
 
         void SetBoundingVolume(CollisionVolume* vol) {
             boundingVolume = vol;
+        }
+
+        void SetActive(bool pIsActive) {
+            isActive = pIsActive;
         }
 
         const CollisionVolume* GetBoundingVolume() const {

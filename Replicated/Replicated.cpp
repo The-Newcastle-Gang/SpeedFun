@@ -91,6 +91,8 @@ void Replicated::AddGrapplesToWorld(GameObject *g, GameWorld &world, int index) 
         .SetScale(Vector3(meshSize, meshSize, meshSize))
         .SetPosition(Vector3(index * 10, 10, 10));
 
+    g->SetTag(Tag::GRAPPLE);
+
 }
 
 void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world){

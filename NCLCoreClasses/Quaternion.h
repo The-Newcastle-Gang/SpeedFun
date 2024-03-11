@@ -118,7 +118,9 @@ namespace NCL::Maths {
 
 		inline friend std::ostream& operator <<(std::ostream& o, const Quaternion& q);
 		inline friend std::istream& operator >>(std::istream& i, Quaternion &v);
-	};
+
+        static Quaternion LookAlong(const Vector3 &vector);
+    };
 
 	std::ostream& operator<<(std::ostream& o, const Quaternion& q) {
 		o	<< "Quaternion("

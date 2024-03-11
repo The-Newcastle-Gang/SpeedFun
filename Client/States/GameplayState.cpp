@@ -306,6 +306,13 @@ void GameplayState::ReadNetworkFunctions() {
                 world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
+
+            case(Replicated::SetNetworkActive): {
+                int networkObjectId = handler.Unpack<int>();
+                bool isActive = handler.Unpack<bool>();
+                auto targetObject = world->GetObjectByNetworkId(networkObjectId);
+                targetObject->SetActive(isActive);
+            } break;
         }
     }
 }
@@ -417,6 +424,7 @@ void GameplayState::InitCamera() {
 void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
+    CreateGrapples();
     worldHasLoaded = LoadingStates::LOADED;
 }
 
@@ -489,16 +497,16 @@ void GameplayState::InitLevel() {
     startPos = levelManager->GetLevelReader()->GetStartPosition();
 
     // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+//    auto swingingTemp = new GameObject();
+//    replicated->AddSwingingBlock(swingingTemp, *world);
+//    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
-        g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("Color")))
+        g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
     }
 }
 

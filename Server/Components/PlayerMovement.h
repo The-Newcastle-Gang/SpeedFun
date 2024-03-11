@@ -10,6 +10,7 @@
 #include "GameObject.h"
 #include "PhysicsObject.h"
 #include "GameWorld.h"
+#include "Replicated.h"
 
 #include <functional>
 
@@ -44,6 +45,11 @@ public:
     CameraAnimationCallData cameraAnimationCalls;
 
     void ToggleDebug() { debugEnabled = !debugEnabled; }
+
+    entt::sink<entt::sigh<void(GameObject*, Vector3)>> GrappleStart;
+    entt::sink<entt::sigh<void(GameObject*)>> GrappleEnd;
+    entt::sink<entt::sigh<void(GameObject*, Vector3 position)>> GrappleUpdate;
+
 
 private:
     GameWorld* world;
@@ -96,6 +102,10 @@ private:
     Vector3 rightAxis;
     Vector2 inputDirection;
     Quaternion playerRotation;
+
+    entt::sigh<void(GameObject*, Vector3)> onGrappleStart;
+    entt::sigh<void(GameObject*)> onGrappleEnd;
+    entt::sigh<void(GameObject*, Vector3 position)> onGrappleUpdate;
 
     bool GroundCheck();
     void StartInAir();
