@@ -28,7 +28,6 @@ public:
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
 
-    void LoadLevelMap();
     std::map<int, std::string> GetLevelMap() { return levelMap; }
 
     std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
