@@ -428,9 +428,9 @@ void GameplayState::CreateRock() {
 
     rock->GetTransform()
             .SetScale(Vector3(1.0, 1.0, 1.0))
-            .SetPosition(Vector3(0, 20, 0));
+            .SetPosition(Vector3(-50, 5, 0));
 
-    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("stone_tallA.obj"), nullptr, nullptr));
+    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
 void GameplayState::CreatePlayers() {

@@ -635,26 +635,55 @@ MeshGeometry* GameTechRenderer::LoadOBJMesh(const string& name) {
     const std::vector<int>& material_ids = shapes[0].mesh.material_ids;
 
     std::vector<Vector3> vertexPositions;
-    vertexPositions.reserve(attrib.vertices.size() / 3);
+    std::vector<Vector2> vertexTexcoords;
+    std::vector<Vector4> vertexColors;
+    std::vector<GLuint> vertexIndices;
 
-    // Must be better way of this, it's literally the same in memory
-    for (int i = 0; i < attrib.vertices.size(); i += 3) {
-        vertexPositions.emplace_back(attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2]);
+    for (size_t index = 0; index < material_ids.size(); index++) {
+        Vector3 original[] = {
+                Vector3(attrib.vertices[indices[3 * index].vertex_index * 3],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 1].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 2].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 2])
+        };
+
+        vertexPositions.push_back(original[0]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[1]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[2]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
     }
 
     mesh->SetVertexPositions(vertexPositions);
-
-    std::vector<GLuint> vertexIndicies;
-
-    for (int i = 0; i < indices.size(); i++) {
-        vertexIndicies.push_back(indices[i].vertex_index);
-    }
-
-    mesh->SetVertexIndices(vertexIndicies);
-
-//    std::vector<Vector2> vertexTexcoords;
-//    vertexTexcoords.resize(attrib.vertices.size() / 3);
-//    std::fill(vertexTexcoords.begin(), vertexTexcoords.end(), Vector2(0,0));
+    mesh->SetVertexTextureCoords(vertexTexcoords);
+    mesh->SetVertexColours(vertexColors);
+    mesh->SetVertexIndices(vertexIndices);
 
     mesh->RecalculateNormals();
     mesh->UploadToGPU();
