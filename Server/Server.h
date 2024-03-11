@@ -31,6 +31,7 @@ public:
     ~Server();
 //    void ServerInit();
     void UpdateServer(float dt);
+    void InitStateMachine();
 
 private:
     std::unique_ptr<StateMachine> stateManager;
@@ -41,7 +42,7 @@ private:
 
     float packetTimer;
     int sceneSnapshotId;
-    void InitStateMachine();
+
 };
 
 

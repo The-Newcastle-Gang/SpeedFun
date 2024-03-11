@@ -13,17 +13,26 @@
 #include "Resources.h"
 #include "ClientNetworkData.h"
 #include "ClientThread.h"
-#include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "DebugMode.h"
 #include "SoundManager.h"
-
+#include "LevelManager.h"
 
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
+
+        enum LoadingStates {
+            NOT_LOADED,
+            LOADED,
+            READY
+        };
+
         class GameplayState : public State
         {
         public:
@@ -57,6 +66,9 @@ namespace NCL {
             void SetTestSprings();
             void SetTestFloor();
 
+            std::unique_ptr<LevelManager> levelManager;
+
+            std::string medalImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -79,23 +91,29 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
-            
+            TextureBase* deathImageTex;
 
             void SendInputData();
             void CreatePlayers();
 
+            void ManageLoading(float dt);
             void FinishLoading();
+            std::thread* loadWorldThread;
+            std::thread* loadSoundThread;
+            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            float loadingTime = 0.0f;
+
+            float totalDTElapsed = 0.0f;
+            bool debugMovementEnabled = false;
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
-
             void ReadNetworkFunctions();
-
-
             void ReadNetworkPackets();
 
             void CreateRock();
             void ResetCameraAnimation();
-
 
             void WalkCamera(float dt);
             float groundedMovementSpeed = 0.0f;
@@ -105,6 +123,8 @@ namespace NCL {
             const float bobAmount = 0.1f;
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
+
+            Vector3 playerVelocity;
 
             bool isGrounded = false;
             bool isGrappling = false;
@@ -127,6 +147,8 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
+            float defaultFOV = 40.0f;
+
             void HandleGrappleEvent(int event);
 
             float levelLen;
@@ -136,6 +158,11 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            std::string GetMedalImage();
+
+            DebugMode* debugger;
+            bool displayDebugger = false;
         };
     }
 }

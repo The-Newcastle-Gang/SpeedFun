@@ -43,6 +43,9 @@ namespace NCL {
             void CreatePostProcessQuad();
             void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }
 
+            void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
+            void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
+
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             MeshGeometry *LoadOBJMesh(const string &name);
@@ -99,6 +102,8 @@ namespace NCL {
             OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
+
+            OGLTexture* noiseTexture;
 
             //shadow mapping things
             OGLShader*	shadowShader;
@@ -171,6 +176,7 @@ namespace NCL {
 
             float uTime;
             int isSpeedLinesActive;
+            float speedLinePercent = 0;
             int speedLineDir;
 
         };

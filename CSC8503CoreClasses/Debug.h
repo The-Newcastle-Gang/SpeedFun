@@ -53,6 +53,8 @@ namespace NCL {
 		static const Vector4 MAGENTA;
 		static const Vector4 CYAN;
 
+		static const Vector4 RAINBOW_ARRAY[6];
+
 	protected:
 		Debug() {}
 		~Debug() {}
