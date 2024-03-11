@@ -82,6 +82,7 @@ void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
+        UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
     }
 }
 
@@ -304,6 +305,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     }
 }
 
+void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(levelManager->GetElapsedTime());
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
+}
 void RunningState::ApplyPlayerMovement() {
 
 }

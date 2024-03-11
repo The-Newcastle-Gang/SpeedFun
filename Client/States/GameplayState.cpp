@@ -306,6 +306,12 @@ void GameplayState::ReadNetworkFunctions() {
                 world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
+
+            case(Replicated::GameInfo_Timer): {
+                float recievedTime = handler.Unpack<float>();
+                
+            }
+            break;
         }
     }
 }

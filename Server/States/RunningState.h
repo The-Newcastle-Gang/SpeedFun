@@ -85,6 +85,7 @@ namespace NCL {
             void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
+            void UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo);
             static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
 
             void CreateNetworkThread();

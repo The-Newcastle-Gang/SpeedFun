@@ -34,10 +34,16 @@ public:
     void ResumeTimer(){ currentState = StageTimer::Running; }
     void PauseTimer() { currentState = StageTimer::Paused;  }
 
+    float GetElapsedTime() { return elapsedTime; }
 protected:
 
     void CalculateMedal();
     void CalculateScore();
+
+    float platinumTime = 15.0f;
+    float goldTime = 20.0f;
+    float silverTime = 25.0f;
+
 
     Medal                   currentMedal;
     NCL::Maths::Vector4     currentMedalColour;

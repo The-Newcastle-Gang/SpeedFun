@@ -35,6 +35,7 @@ public:
         Death_Event_End,
         Stage_Start,
         Player_Velocity_Call,
+        GameInfo_Timer
         };
 
     // In the situation where the server is the remote (Client to server)

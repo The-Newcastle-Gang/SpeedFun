@@ -154,6 +154,7 @@ namespace NCL {
             float levelLen;
             Vector3 startPos;
             float CalculateCompletion(Vector3 cp);
+            float timeElapsed;
             Element* timeBar;
             int PlayerBlip;
 

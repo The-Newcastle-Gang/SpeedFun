@@ -17,6 +17,7 @@ public:
 
     void StartStageTimer();
     void EndStageTimer();
+    float GetElapsedTime() { return stageTimer->GetElapsedTime(); }
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
 
