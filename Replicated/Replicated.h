@@ -29,10 +29,10 @@ public:
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
-	      EndReached,
+        EndReached,
         Grapple_Event,
         Player_Velocity_Call,
-        Player_Animation_Call
+        Player_Animation_Call,
         Death_Event,
         Death_Event_End,
         Stage_Start,
