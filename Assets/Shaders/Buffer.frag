@@ -62,11 +62,11 @@ void main(void)	{
 	
 	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	
-	fragColour[0].rgb = albedo.rgb * 0.05f; //ambient
+	fragColour[0].rgb = albedo.rgb * 0.05f; //ambientw
 	
 	fragColour[0].rgb += albedo.rgb * lightColour.rgb * toonLambert * shadow; //diffuse light
 	
-	fragColour[0].rgb += lightColour.rgb * toonSpecular * shadow; //specular light
+	//fragColour[0].rgb += lightColour.rgb * toonSpecular * shadow; //specular light
 	
 	fragColour[0].rgb = pow(fragColour[0].rgb, vec3(1.0 / 2.2f));
 	

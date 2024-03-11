@@ -22,25 +22,22 @@ void main(void)	{
 	vec3 worldPos = invClipPos.xyz/invClipPos.w;
 
 	float dist = length(lightPos - worldPos);
-	float atten = 1.0 - (clamp(dist/lightRadius,0.0,1.0));
+	float atten = 1 - step(0.0, dist - lightRadius);
 
 	if(atten==0.0)discard;
 
-	vec3 normal = normalize(texture(normTex,texCoord.xy).xyz*2.0-1.0);
+	vec3 normal = texture(normTex,texCoord.xy).xyz;
 	vec3 incident = normalize(lightPos - worldPos);
 	vec3 viewDir = normalize(cameraPos - worldPos);
 	vec3 halfDir = normalize(incident + viewDir);
 
-	float lambert = clamp(dot(incident, normal), 0.0f,1.0);
-	float specFactor = clamp(dot(halfDir,normal),0.0,1.0);
-	specFactor = pow(specFactor,60.0);
+	float lambert = dot(incident, normal);
+//	float specFactor = clamp(dot(halfDir,normal),0.0,1.0);
+//	specFactor = pow(specFactor,60.0);
 
-	float toonAtten = smoothstep(0.4f,0.43f,atten);
-
-	vec3 attenuated = lightColour.xyz * toonAtten;
-
+	vec3 attenuated = lightColour.xyz * atten;
 
 
 	diffuseOutput = vec4(attenuated,1.0) ; //supposed to be * lambert but looks funny
-	specularOutput = vec4(attenuated * specFactor * 0.33,1.0);
+	specularOutput = vec4(vec3(0.0),1.0);
 }
