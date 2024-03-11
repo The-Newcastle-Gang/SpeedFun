@@ -51,7 +51,7 @@ protected:
 
     const std::map<int, std::string> levelMap = {
         { TEST_LEVEL, "newTest" },
-        { LEVEL_1, "level1" }
+        { LEVEL_1, "dbtest" }
     };
 
 };
