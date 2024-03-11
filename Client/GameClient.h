@@ -34,6 +34,8 @@ namespace NCL {
             Diagnostics packetsSent{};
             Diagnostics updateCalled{};
 
+            void PlayLoadingScreen();
+
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;

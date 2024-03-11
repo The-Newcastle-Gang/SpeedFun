@@ -44,6 +44,10 @@ void GameClient::Disconnect() {
     enet_peer_disconnect_now(netPeer, 0);
 }
 
+//void GameClient::PlayLoadingScreen(float dt) {
+//    // use timeDelta for playing loading screen anim
+//}
+
 
 void GameClient::UpdateClient() {
 
