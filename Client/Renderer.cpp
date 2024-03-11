@@ -312,7 +312,6 @@ void GameTechRenderer::FillDiffuseBuffer() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
-
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
@@ -333,7 +332,6 @@ void GameTechRenderer::RenderDeferredLighting() {
     glBlendFunc(GL_ONE, GL_ONE);
     glCullFace(GL_FRONT);
     glDepthFunc(GL_ALWAYS);
-    
 
     glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 6);
     glActiveTexture(GL_TEXTURE6);
@@ -360,7 +358,6 @@ void GameTechRenderer::RenderDeferredLighting() {
         glUniform4fv(glGetUniformLocation(shaderProg, "lightColour"), 1, (float*)&l.lightColour);
         glUniform1f(glGetUniformLocation(shaderProg, "lightRadius"), l.lightRadius);
         DrawBoundMesh();
-
     }
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -729,10 +726,6 @@ void GameTechRenderer::RenderCamera() {
             }
         }
     }
-
-    
-
-
 }
 
 void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
