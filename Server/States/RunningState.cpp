@@ -373,12 +373,24 @@ void RunningState::SetTestBridge() {
     auto testBridge = new GameObject();
     auto x = new PrimitiveGameObject();
     x->position = Vector3(-90, 5, 5);
-    x->colliderExtents = Vector3(10, 20, 2);
-    x->dimensions = Vector3(10, 20, 2);
+    x->colliderExtents = Vector3(10, 20, 0.5);
+    x->dimensions = Vector3(10, 20, 0.5);
     x->shouldNetwork = true;
     replicated->AddBlockToLevel(testBridge, *world, x);
     testBridge->SetPhysicsObject(new PhysicsObject(&testBridge->GetTransform(), testBridge->GetBoundingVolume(), new PhysicsMaterial()));
     testBridge->GetPhysicsObject()->SetInverseMass(0.0);
-    testBridge->AddComponent((Component*)(new TestBridge(testBridge)));
+    TestBridge* bridgeComp = new TestBridge(testBridge);
+    testBridge->AddComponent(bridgeComp);
+
+    auto bridgeTrigger = new GameObject();
+    replicated->AddTriggerVolumeToWorld(Vector3(1, 1, 1), bridgeTrigger, *world);
+    bridgeTrigger->SetPhysicsObject(new PhysicsObject(&bridgeTrigger->GetTransform(), bridgeTrigger->GetBoundingVolume(), physics->GetPhysMat("Default")));
+    bridgeTrigger->GetPhysicsObject()->SetInverseMass(0.0f);
+    bridgeTrigger->GetTransform().SetPosition(Vector3(-80, 6, -7));
+    bridgeTrigger->GetPhysicsObject()->SetIsTriggerVolume(true);
+    BridgeTrigger* briTriggerComp = new BridgeTrigger(bridgeTrigger);
+    bridgeTrigger->AddComponent(briTriggerComp);
+    Debug::DrawAABBLines(Vector3(-80, 6, -7), Vector3(1, 1, 1), Debug::MAGENTA, 1000.0f);
+    briTriggerComp->SetBridgeTrigger(bridgeComp);
 
 }

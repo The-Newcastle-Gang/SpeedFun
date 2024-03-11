@@ -9,22 +9,20 @@ void TestBridge::Update(float dt) {
 	}
 }
 
-void TestBridge::OnCollisionEnter(GameObject* otherObject) {
-	if (otherObject->GetTag() == Tag::PLAYER) {
-		bridgeFall = true;
-	}
-}
-
 void TestBridge::BridgeFall(float dt) {
 	fallTime += dt;
-	if (fallTime <= 1) {
+	if (fallTime <= 7.168) {
 		currentOrientation = gameObject->GetTransform().GetOrientation();
-		newOrientation = currentOrientation * Quaternion::EulerAnglesToQuaternion(90.0*(fallTime/11000), 0.0, 0.0);
-		gameObject->GetTransform().SetOrientation(newOrientation);
+		fallOrientation = currentOrientation * Quaternion::EulerAnglesToQuaternion(4*sin(dt*PI), 0.0, 0.0);
+		gameObject->GetTransform().SetOrientation(fallOrientation);
 	}
 	else {
 		bridgeFall = false;
+		fallTime = 0;
 	}
-	
+}
+
+void TestBridge::TriggerOn() {
+	bridgeFall = true;
 }
 

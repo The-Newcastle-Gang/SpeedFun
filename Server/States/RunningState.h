@@ -13,6 +13,7 @@
 #include "DamagingObstacle.h"
 #include "Components/SpeedUpBlock.h"
 #include "TestBridge.h"
+#include "BridgeTrigger.h"
 
 #include "Spring.h"
 

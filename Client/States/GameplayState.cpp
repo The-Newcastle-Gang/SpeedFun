@@ -492,8 +492,8 @@ void GameplayState::SetBridgeTest() {
     auto testBridge = new GameObject();
     auto x = new PrimitiveGameObject();
     x->position = Vector3(-90, 5, 5);
-    x->colliderExtents = Vector3(10, 20, 2);
-    x->dimensions = Vector3(10, 20, 2);
+    x->colliderExtents = Vector3(10, 20, 0.5);
+    x->dimensions = Vector3(10, 20, 0.5);
     x->shouldNetwork = true;
     replicated->AddBlockToLevel(testBridge, *world, x);
     testBridge->SetRenderObject(new RenderObject(&testBridge->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));

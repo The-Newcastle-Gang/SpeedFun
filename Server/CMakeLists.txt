@@ -12,6 +12,7 @@ add_library(server
         Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
         Components/TestBridge.cpp
+        Components/BridgeTrigger.cpp
 )
 
 target_include_directories(server PUBLIC
