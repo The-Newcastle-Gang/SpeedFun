@@ -16,7 +16,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
-
+    levelManager = std::make_unique<LevelManager>();
+    medalImage = "medal.png";
 }
 
 GameplayState::~GameplayState() {
@@ -31,6 +32,8 @@ void GameplayState::InitCanvas(){
     //since i wanna just use this as debug.
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
+
+    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
 
     InitCrossHeir();
     InitTimerBar();
@@ -54,7 +57,6 @@ void GameplayState::InitCrossHeir(){
 }
 
 void GameplayState::InitTimerBar(){
-
     //timer Bar
     timeBar = &canvas->AddElement()
             .SetColor({0,1,0,1})
@@ -119,15 +121,12 @@ void GameplayState::InitialiseAssets() {
     FinishLoading();
 }
 void GameplayState::InitSounds() {
-    std::cout << "\n\nLoading Sounds!\n\n";
-
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
     std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
     soundHasLoaded = LoadingStates::LOADED;
-    
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -168,6 +167,7 @@ void GameplayState::ManageLoading(float dt) {
         finishedLoading = LoadingStates::READY;
     }
 }
+
 void GameplayState::Update(float dt) {
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
@@ -221,7 +221,6 @@ void GameplayState::Update(float dt) {
 void GameplayState::ResetCameraToForwards() {
     world->GetMainCamera()->SetPitch(0.68f);
     world->GetMainCamera()->SetYaw(269.43f);
-
 }
 
 void GameplayState::ReadNetworkFunctions() {
@@ -232,38 +231,71 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
                 AssignPlayer(networkId);
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_GroundedMove): {
                 float intesnity = handler.Unpack<float>();
                 currentGroundSpeed = intesnity;
-            }
-            break;
+            } break;
 
             case(Replicated::Camera_Jump): {
                 jumpTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
                 landTimer = PI;
-            }
-            break;
-            
+            } break;
+
             case(Replicated::Camera_Strafe): {
                 float strfSpd = handler.Unpack<float>();
                 strafeSpeed = strfSpd;
-            }
-            break;
+            } break;
+
+            case(Replicated::Stage_Start): {
+                // Enable player controls
+
+            } break;
+
+            case(Replicated::EndReached): {
+                int networkId = handler.Unpack<int>();
+                int medal = handler.Unpack<int>();
+                Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+
+                canvas->CreateNewLayer("FinishedLevelLayer");
+                canvas->PushActiveLayer("FinishedLevelLayer");
+
+                canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+                        .SetColor(medalColour)
+                        .SetAbsoluteSize({60,60})
+                        .AlignCenter()
+                        .AlignLeft();
+                // Disable player controls
+                // Clear the world
+                // Loading screen
+                // Load the next level
+
+            } break;
+
+            case(Replicated::Death_Event): {
+                //
+                // Play Anim
+                soundManager->SM_PlaySound("Death_sound.wav");
+                ResetCameraToForwards();
+
+            } break;
+
+            case(Replicated::Death_Event_End): {
+                // Function set up for later use.
+                    //canvas->PopActiveLayer();
+            } break;
 
             case(Replicated::Grapple_Event): {
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
-            }
-            break;
+            } break;
+
 
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
@@ -274,9 +306,55 @@ void GameplayState::ReadNetworkFunctions() {
                 world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
             }
             break;
-        }
 
+            case(Replicated::Player_Animation_Call): {
+                Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
+                UpdatePlayerAnimation(data.networkID, data.state);
+            }
+        }
     }
+}
+
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
+
+    switch (state) {
+        case Replicated::IDLE: {
+            playerAnimator->TransitionAnimation("Idle", 0.1f);
+            break;
+        }
+        case Replicated::JUMP: {
+            playerAnimator->TransitionAnimation("Jump", 0.1f);
+            break;
+        }
+        case Replicated::FALLING: {
+            playerAnimator->TransitionAnimation("Fall", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_FORWARD: {
+            playerAnimator->TransitionAnimation("Run", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_BACK: {
+            playerAnimator->TransitionAnimation("RunBack", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_LEFT: {
+            playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
+            break;
+        }
+        case Replicated::RUNNING_RIGHT: {
+            playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
+            break;
+        }
+    }
+}
+
+std::string GameplayState::GetMedalImage(){
+    return medalImage;
+
 }
 
 void GameplayState::ResetCameraAnimation() {
@@ -361,7 +439,6 @@ void GameplayState::SendInputData() {
     Matrix4 camWorld = mainCamera->BuildViewMatrix().Inverse();
     input.rightAxis = Vector3(camWorld.GetColumn(0));
 
-
     input.playerDirection = InputListener::GetPlayerInput();
 
     networkData->outgoingInput.Push(input);
@@ -373,11 +450,13 @@ void GameplayState::FinishLoading() {
 }
 
 void GameplayState::InitCamera() {
-    world->GetMainCamera()->SetNearPlane(0.1f);
-    world->GetMainCamera()->SetFarPlane(500.0f);
-    world->GetMainCamera()->SetPitch(-15.0f);
-    world->GetMainCamera()->SetYaw(315.0f);
-    world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+    Camera* cam = world->GetMainCamera();
+    cam->SetNearPlane(0.1f);
+    cam->SetFarPlane(500.0f);
+    cam->SetPitch(-15.0f);
+    cam->SetYaw(315.0f);
+    cam->SetPosition(Vector3(-60, 40, 60));
+    cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
 }
 
 void GameplayState::InitWorld() {
@@ -386,6 +465,7 @@ void GameplayState::InitWorld() {
     worldHasLoaded = LoadingStates::LOADED;
 }
 
+[[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
     world->AddGameObject(rock, true);
@@ -394,44 +474,52 @@ void GameplayState::CreateRock() {
 
     rock->GetTransform()
             .SetScale(Vector3(1.0, 1.0, 1.0))
-            .SetPosition(Vector3(0, 20, 0));
+            .SetPosition(Vector3(-50, 5, 0));
 
-    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("stone_tallA.obj"), nullptr, nullptr));
+    rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
-    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
-    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
+    MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-      
-        playerMesh->AddAnimationToMesh("Run", testAnimation);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
-        AnimatorObject* newAnimator = new AnimatorObject();
-        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
+        playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
+        playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
+        playerMesh->AddAnimationToMesh("RunBack", resources->GetAnimation("Player_RunBack.anm"));
+        playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Player_Idle.anm"));
+        playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
+        playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
+
+        AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
+        newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
 
-        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
     }
 }
 
 void GameplayState::InitLevel() {
-    auto lr= new LevelReader();
-    lr->HasReadLevel("newTest.json");
-    auto plist  = lr->GetPrimitiveList();
-    auto opList  = lr->GetOscillatorPList();
-    auto harmOpList  = lr->GetHarmfulOscillatorPList();
+    levelManager->TryReadLevel("newTest");
+
+    auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
+    auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
+    auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+
     }
 
     for (auto &x : opList) {
@@ -449,24 +537,17 @@ void GameplayState::InitLevel() {
     }
 
     //SetTestSprings();
-
-    //SetTestFloor();
-
-    levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
-    startPos = lr->GetStartPosition();
-/*    endPos = lr->GetEndPosition();
-    deathPos = lr->GetDeathPosition();*/
-
-    ObjectsToRender();
-
-    //SetTestSprings();
-
     //SetTestFloor();
 
 //    // TEST SWINGING OBJECT ON THE CLIENT
 //    auto swingingTemp = new GameObject();
 //    replicated->AddSwingingBlock(swingingTemp, *world);
 //    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
+    startPos = levelManager->GetLevelReader()->GetStartPosition();
+    
+    ObjectsToRender();
+
 }
 
 void GameplayState::SetTestSprings() {
@@ -500,13 +581,17 @@ bool GameplayState::IsDisconnected() {
     return false;
 }
 
-
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
+
+    delete player->GetRenderObject();
     player->SetRenderObject(nullptr);
+
+    delete player->GetAnimatorObject();
+    player->SetAnimatorObject(nullptr);
+
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
-
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){

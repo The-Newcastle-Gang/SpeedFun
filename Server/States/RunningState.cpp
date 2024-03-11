@@ -1,4 +1,5 @@
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -10,6 +11,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     replicated = std::make_unique<Replicated>();
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
+    levelManager = std::make_unique<LevelManager>();
 
     currentLevelDeathPos = {0,0,0};
 }
@@ -93,15 +95,18 @@ void RunningState::OnExit() {
 void RunningState::Update(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
+    UpdatePlayerAnimations();
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
+
+    levelManager->UpdateTimer(dt);
 }
 
 void RunningState::LoadLevel() {
     BuildLevel("newTest");
-    AddTriggersToLevel();
     CreatePlayers();
+    AddTriggersToLevel();
 }
 
 void RunningState::Tick(float dt) {
@@ -130,9 +135,25 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
+void RunningState::SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object) {
+    int id = object->GetNetworkObject()->GetNetworkId();
+    if (playerAnimationInfo[id] == state)return;
+    playerAnimationInfo[id] = state;
+    SendPlayerAnimationCall(state, object);
+}
+
+void RunningState::SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object) {
+    FunctionData data{};
+    DataHandler handler(&data);
+    Replicated::RemoteAnimationData animData(object->GetNetworkObject()->GetNetworkId(), state);
+    handler.Pack(animData);
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::Player_Animation_Call, &data));
+}
+
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
     for (auto& pair : playerInfo) {
+        playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
 
@@ -142,9 +163,6 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
         player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
-
-        //TODO: clean up
-//        player->GetTransform().SetPosition(Vector3(0,0,0));
         player->GetTransform().SetPosition(currentLevelStartPos);
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
@@ -152,9 +170,43 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void RunningState::StartTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Stage_Start, nullptr)));
+    levelManager->StartStageTimer();
+}
+
+void RunningState::EndTriggerVolFunc(int id){
+    levelManager->EndStageTimer();
+    int medal = levelManager->GetCurrentMedal();
+    Vector4 medalColour = levelManager->GetCurrentMedalColour();
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    handler.Pack(medal);
+    handler.Pack(medalColour);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, &data)));
+}
+
+void RunningState::DeathTriggerVolFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event, nullptr)));
+}
+
+void RunningState::DeathTriggerVolEndFunc(int id){
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(id);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Death_Event_End, nullptr)));
+}
+
 void RunningState::AddTriggersToLevel(){
     for (auto& triggerVec : triggersVector){
-        auto trigger = new TriggerVolumeObject(triggerVec.first);
+        auto trigger = new TriggerVolumeObject(triggerVec.first, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
 
         Vector4 colour = Vector4();
         Vector3 tempSize = Vector3();
@@ -170,10 +222,15 @@ void RunningState::AddTriggersToLevel(){
         trigger->GetPhysicsObject()->SetIsTriggerVolume(true);
         trigger->GetPhysicsObject()->SetLayer(TRIGGER_LAYER);
 
+        trigger->TriggerSinkEndVol.connect<&RunningState::EndTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
+        trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
+        trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
 
         Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
+
 
 void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions) {
     switch (triggerType) {
@@ -200,9 +257,50 @@ void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &trigg
     }
 }
 
-void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
+void RunningState::UpdatePlayerAnimations() {
+    for (std::pair<int,GameObject*> playerObject : playerObjects){
+        PlayerMovement* playerMovement;
+        if (playerObject.second->TryGetComponent<PlayerMovement>(playerMovement)) {
+            PlayerMovement::PlayerAnimationCallData data = playerMovement->playerAnimationCallData;
+            if (data.isGrappling || (data.inAir && !data.isFalling)) {
+                SetPlayerAnimation(Replicated::JUMP, playerObject.second);
+                continue;
+            }
+            if (data.inAir) {
+                SetPlayerAnimation(Replicated::FALLING, playerObject.second);
+                continue;
+            }
+            if (!data.hasInput) {
+                SetPlayerAnimation(Replicated::IDLE, playerObject.second);
+                continue;
+            }
+            if (data.backwards) {
+                SetPlayerAnimation(Replicated::RUNNING_BACK, playerObject.second);
+                continue;
+            }
+            if (data.strafe ==0) {
+                SetPlayerAnimation(Replicated::RUNNING_FORWARD, playerObject.second);
+                continue;
+            }
+            if (data.strafe > 0) {
+                SetPlayerAnimation(Replicated::RUNNING_RIGHT, playerObject.second);
+                continue;
+            }
+            else {
+                SetPlayerAnimation(Replicated::RUNNING_LEFT, playerObject.second);
+                continue;
+            }
+        }
+    }
+}
 
-    player->GetTransform().SetOrientation(inputInfo.playerRotation);
+
+void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
+    Vector3 lookDir = inputInfo.playerRotation.ToEuler();
+    lookDir.x = 0;
+    lookDir.z = 0;
+    player->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(lookDir.x,lookDir.y,lookDir.z));
+    //player->GetTransform().SetOrientation(inputInfo.playerRotation); //just in case we need it in the future
     auto rightAxis = inputInfo.rightAxis;
 
     PlayerMovement* playerMovement;
@@ -219,6 +317,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(player->GetPhysicsObject()->GetLinearVelocity());
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Player_Velocity_Call, &data)));
     }
+
     if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -254,7 +353,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(speed);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Camera_Strafe, &data)));
     }
-
     if ( int state = playerMovement->cameraAnimationCalls.grapplingEvent != 0) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;
@@ -263,7 +361,6 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
     }
-    
 }
 
 void RunningState::ApplyPlayerMovement() {
@@ -272,19 +369,15 @@ void RunningState::ApplyPlayerMovement() {
 
 void RunningState::BuildLevel(const std::string &levelName)
 {
+    //TODO: REDO THIS FUNCTION WITH LEVELMANAGER
     std::cout << "Level: " << levelName << " being built\n";
-    levelReader = new LevelReader();
-    if (!levelReader->HasReadLevel(levelName + ".json"))
-    {
-        std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
-        return;
-    }
+    levelManager->TryReadLevel(levelName);
 
     SetTriggerTypePositions();
 
-    auto plist = levelReader->GetPrimitiveList();
-    auto opList = levelReader->GetOscillatorPList();
-    auto harmOpList = levelReader->GetHarmfulOscillatorPList();
+    auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
+    auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
+    auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -319,14 +412,14 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
 
     //SetTestSprings();
-    SetTestFloor();
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
-    currentLevelStartPos = levelReader->GetStartPosition();
-    currentLevelEndPos = levelReader->GetEndPosition();
-    currentLevelDeathPos = levelReader->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
-    currentLevelCheckPointPositions = levelReader->GetCheckPointPositions();
+    currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
+    currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {
             std::make_pair((TriggerVolumeObject::TriggerType::Start), currentLevelStartPos),

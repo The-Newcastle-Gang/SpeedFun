@@ -13,7 +13,7 @@ namespace NCL {
     namespace CSC8503 {
         class GameObject;
         class GameClient : public NetworkBase{
-            typedef entt::sigh<void()> ConnectionH;;
+            typedef entt::sigh<void()> ConnectionH;
         public:
             GameClient();
             ~GameClient();

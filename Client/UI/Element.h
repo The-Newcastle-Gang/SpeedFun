@@ -30,6 +30,8 @@ public:
         extendLowerX = 0;
         extendLowerY = 0;
         extendUpperY = 0;
+        tweenValue1 = 1;
+        tweenValue2 = 1;
         isFocused = false;
     }
 
@@ -200,6 +202,8 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnFocusExit;
 
     TextData textData;
+    float tweenValue1;
+    float tweenValue2;
 private:
     UIDim dimensions;
     Vector4 color;

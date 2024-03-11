@@ -81,6 +81,8 @@ namespace NCL {
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
 
+            OGLTexture* noiseTexture;
+
             //shadow mapping things
             OGLShader*	shadowShader;
             GLuint		shadowTex;
