@@ -13,7 +13,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     canvas = pCanvas;
     hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
-    menuParticleShader = renderer->LoadShader("defaultUI.vert", "particleUI.frag");
+    menuParticleShader = renderer->LoadShader("defaultUI.vert", "particleUILava.frag");
     activeText = -1;
     textLimit = 15;
 

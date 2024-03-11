@@ -13,17 +13,12 @@ uniform float uTime;
 
 
 void main() {
-    vec4 outgoingColor = vec4(0.3882, 0.0, 0.0, 1.0);
+    vec4 outgoingColor = vec4(0.4118, 0.0, 0.0, 0.712);
 
-    if (hasTexture == 1) {
-        outgoingColor *= texture(tex, TexCoords);
-    }
-
-    vec2 adjustedUV = vec2(TexCoords.x, TexCoords.y * 12.5 + uTime * 0.01);
+    vec2 adjustedUV = vec2(TexCoords.x * 0.5, TexCoords.y * 12.2 + uTime * 0.015);
     float noiseVal = texture(noiseTexture, adjustedUV).x;
-    float gradientVal = TexCoords.y - 0.2;
+    float gradientVal = TexCoords.y - 0.5;
     float combined = step(noiseVal, gradientVal);
-
 
     fragColor = vec4(outgoingColor.rgb * combined, outgoingColor.a);
 }
