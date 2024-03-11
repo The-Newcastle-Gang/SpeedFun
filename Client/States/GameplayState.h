@@ -98,7 +98,7 @@ namespace NCL {
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
-            std::vector<std::string> soundsToLoad = { songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" };
+            std::vector<std::string> soundsToLoad = { "footsteps.wav", "weird.wav" , "warning.wav" };
 
             int totalThingsToLoad = 0;
             int totalThingsLoaded = 0;
