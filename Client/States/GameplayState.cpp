@@ -316,8 +316,8 @@ void GameplayState::ReadNetworkFunctions() {
 }
 
 void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
-    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
-    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
+    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
     if (!playerAnimator)return;
 
     switch (state) {
@@ -350,6 +350,7 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
             break;
         }
     }
+}
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
