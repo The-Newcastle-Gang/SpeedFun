@@ -58,11 +58,12 @@ void GameplayState::InitCrossHeir(){
 
 void GameplayState::InitTimerBar(){
     //timer Bar
-    int outlineSize = 3;
-
+    int outlineSize = timerBarOutline;
+    Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
     for (int i = 0; i < 3; i++) {
+
         timerNubs[i] = &canvas->AddElement()
-            .SetColor({ 1,1,1,1 })
+            .SetColor(colours[i])
             .SetAbsoluteSize({ 4, timerBarHeight + 22 })
             .AlignTop(timerTopOffset-11)
             .SetId("nub_" + std::to_string(i));
@@ -70,6 +71,12 @@ void GameplayState::InitTimerBar(){
         medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f}});
         timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
     }
+
+    auto platNub = canvas->AddElement()
+        .SetColor(Replicated::PLATINUM)
+        .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+        .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
+        .AlignTop(timerTopOffset - 11);
 
     auto backTimer = canvas->AddElement()
         .SetColor({ 0,0,0,1 })
@@ -86,8 +93,8 @@ void GameplayState::InitTimerBar(){
     timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
 
     timeBarTimerBox = &canvas->AddElement()
-        .SetColor({ 0,0,0,1 })
-        .SetAbsoluteSize({ 96, timerBarHeight })
+        .SetColor({ 0.05,0,0,1 })
+        .SetAbsoluteSize({ timerBoxWidth, timerBarHeight })
         .AlignCenter(400)
         .AlignTop(timerTopOffset);
     timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
@@ -354,7 +361,13 @@ void GameplayState::ReadNetworkFunctions() {
                     medalTimes[i] = recievedTime;
                 }
                 timerRatio = 1 - std::clamp(timeElapsed, 0.0f, medalTimes[2]) / medalTimes[2];
-          
+                
+                int recievedMedal = handler.Unpack<int>();
+                if (currentMedal != recievedMedal) {
+                    timerMedalShakeTimer = 1.0f;
+                    currentMedal = recievedMedal;
+                }
+                
             }
             break;
         }
@@ -377,8 +390,13 @@ void GameplayState::UpdateTimerText(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
     element.textData.text = std::format("{:.2f}", timeElapsed);
     element.textData.fontSize = 0.5f;
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio - 96/2 + 8));
-    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8);
+
+    int randomX = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
+    int randomY = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio - 96/2 + 8 + randomX));
+    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
+
+    timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
 }
 
 void GameplayState::UpdateTimerNub(Element& element, float dt) {
@@ -386,7 +404,7 @@ void GameplayState::UpdateTimerNub(Element& element, float dt) {
     int medalID = medalTimeRatios[element.GetId()].first;
     if (medalTimeRatios[element.GetId()].second < 0.0f) {
         medalTimeRatios[element.GetId()].second = 1 - std::clamp(medalTimes[medalID], 0.0f, medalTimes[2]) / medalTimes[2];
-        element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * medalTimeRatios[element.GetId()].second));
+        element.AlignCenter((int)round(-400 + (800 - timerBoxWidth) * medalTimeRatios[element.GetId()].second + timerBarOutline - 1));
     }
     
 }

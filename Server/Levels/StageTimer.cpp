@@ -42,28 +42,53 @@ void StageTimer::CalculateMedal() {
     finalTime = elapsedTime;
     if (finalTime < 0 ) { std::cerr << "FinalTime is less than 0!\n"; return;}
 
-    if( finalTime > 0 && finalTime < platinumTime )
+    switch (GetCurrentMedal(finalTime))
     {
-        currentMedal = Medal::Platinum;
-        currentMedalColour = { 0.90f, 0.894f, 0.886f, 1.0f };
-    }
-    else if(finalTime > platinumTime && finalTime < goldTime)
-    {
-        currentMedal = Medal::Gold;
-        currentMedalColour = { 0.788f, 0.69f, 0.216f, 1.0f};
-    }
-    else if(finalTime > goldTime && finalTime < silverTime)
-    {
-        currentMedal = Medal::Silver;
-        currentMedalColour = { 0.843f, 0.843f, 0.843f, 1.0f};
-    }
-    else if(finalTime > silverTime)
-    {
-        currentMedal = Medal::Bronze;
-        currentMedalColour = { 0.416f, 0.22f, 0.02f, 1.0f};
+        case(Medal::Platinum):
+        
+            currentMedal = Medal::Platinum;
+            currentMedalColour = { 0.90f, 0.894f, 0.886f, 1.0f };
+            break;
+        
+        case(Medal::Gold):
+        
+            currentMedal = Medal::Gold;
+            currentMedalColour = { 0.788f, 0.69f, 0.216f, 1.0f };
+            break;
+        
+        case(Medal::Silver):
+        
+            currentMedal = Medal::Silver;
+            currentMedalColour = { 0.843f, 0.843f, 0.843f, 1.0f };
+            break;
+        
+        case(Medal::Bronze):
+        
+            currentMedal = Medal::Bronze;
+            currentMedalColour = { 0.416f, 0.22f, 0.02f, 1.0f };
+            break;
+        
     }
 }
 
+Medal StageTimer::GetCurrentMedal(float timeValue) {
+    if (timeValue >= 0 && timeValue < platinumTime)
+    {
+        return Medal::Platinum;
+    }
+    if (timeValue > platinumTime && timeValue < goldTime)
+    {
+        return Medal::Gold;
+    }
+    if (timeValue > goldTime && timeValue < silverTime)
+    {
+        return Medal::Silver;
+    }
+    if (timeValue > silverTime)
+    {
+        return Medal::Bronze;
+    }
+}
 void StageTimer::CalculateScore() {
     std::cout << "calcing score: ";
 }

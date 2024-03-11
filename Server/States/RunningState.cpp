@@ -314,6 +314,10 @@ void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& i
     handler.Pack(levelManager->GetGoldTime());
     handler.Pack(levelManager->GetSilverTime());
 
+    int medalID = (int)levelManager->GetCurrentMedal();
+    handler.Pack(medalID);
+
+
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
 }
 void RunningState::ApplyPlayerMovement() {
