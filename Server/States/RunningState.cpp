@@ -411,8 +411,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(dO);
     }
 
-    SetTestSprings();
-    SetTestFloor();
+    //SetTestSprings();
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
