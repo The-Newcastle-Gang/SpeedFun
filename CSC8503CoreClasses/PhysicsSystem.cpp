@@ -343,6 +343,7 @@ void PhysicsSystem::InitialiseSortAndSweepStructs() {
     for (GameObject* gameObject : staticObjects) {
         gameObject->UpdateBroadphaseXBounds();
     }
+    UpdateObjectSortSweepBounds();
 
     for (GameObject* gameObject : staticObjects) {
         SetupBounds(gameObject);
@@ -368,7 +369,7 @@ void PhysicsSystem::SortAndSweep() {
         GameObject* currentBoundObject = currentBound.gameObject;
         if (!currentBound.isUpper) {
             for (GameObject* other : currentValidObjects) {
-                if (layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
+                if (!layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
 
                 CollisionDetection::CollisionInfo info;
                 info.a = Tmin(currentBoundObject, other);
