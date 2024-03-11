@@ -51,8 +51,6 @@ void Replicated::AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos) 
 void Replicated::AddTestObjectToLevel(GameObject* g, GameWorld& world, Vector3 size, Vector3 position){
 
     world.AddGameObject(g, true);
-    auto volume = new AABBVolume(size * 0.5f);
-    g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
         .SetScale(size)
