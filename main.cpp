@@ -47,7 +47,7 @@ int main() {
     }
 
 
-
+    NetworkBase::Initialise();
     auto client = new Client(SHOULDSERVERSTART);
 
 

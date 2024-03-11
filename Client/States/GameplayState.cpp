@@ -21,6 +21,13 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+
+    shouldShutDown.store(true);
+    networkThread->join();
+
+    delete networkThread;
+    networkThread = nullptr;
+
     delete debugger;
     delete loadSoundThread;
 }
@@ -91,6 +98,7 @@ void GameplayState::InitLevelMap(){
             .SetColor({0.0,0.0,0.,1})
             .SetAbsoluteSize({20,20})
             .AlignRight(20)
+            .AlignMiddle(-150)
             .AlignMiddle(-150);
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
@@ -100,10 +108,9 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
     auto threadClient = ClientThread(client, networkData);
 
-    while (client) {
+    while (!shouldShutDown) {
         threadClient.Update();
     }
-
 }
 
 void GameplayState::OnEnter() {
@@ -132,31 +139,41 @@ void GameplayState::InitialiseAssets() {
     FinishLoading();
 }
 void GameplayState::InitSounds() {
+    // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
+    // guards on the PlaySound method.
 
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
+
+    // Probably should be made atomic though probably doesn't matter.
     soundHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateNetworkThread() {
+    shouldShutDown.store(false);
     GameClient* client = baseClient;
-    baseClient = nullptr;
     networkData = std::make_unique<ClientNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
+
     world->ClearAndErase();
     renderer->Render();
     soundManager->SM_UnloadSoundList();
+    baseClient->ClearPacketHandlers();
+
+    shouldShutDown.store(true);
+    networkThread->join();
     
     delete networkThread;
+    networkThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
