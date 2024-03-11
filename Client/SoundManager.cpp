@@ -54,7 +54,7 @@ void SoundManager::SM_AddSongsToLoad(std::vector<std::string> fileNames) {
 }
 
 bool SoundManager::SM_IsSoundReady(std::string soundName) {
-	return sounds.find(soundName) != sounds.end();
+	return sounds.contains(soundName);
 }
 
 std::string SoundManager::SM_SelectRandomSong() {
