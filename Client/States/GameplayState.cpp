@@ -121,8 +121,7 @@ void GameplayState::InitialiseAssets() {
     FinishLoading();
 }
 void GameplayState::InitSounds() {
-//    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
-    soundManager->SM_AddSongsToLoad({ "peakGO.ogg" });
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
