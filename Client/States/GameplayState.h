@@ -155,9 +155,24 @@ namespace NCL {
             Vector3 startPos;
             float CalculateCompletion(Vector3 cp);
             float timeElapsed;
+            float medalTimes[3] = { -1.0f, -1.0f, -1.0f };
+            std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
+
+            Element* timerNubs[3];
             Element* timeBar;
+            Element* timeBarTimerBox;
+            Element* timerText;
+
+            const int timerTopOffset = 32;
+            const int timerBarHeight = 28;
+            float timerRatio = 0.0f;
             int PlayerBlip;
 
+            void InitialiseMedalNubs();
+            void UpdateTimerUI(Element& element, float dt);
+            void UpdateTimerBox(Element& element, float dt);
+            void UpdateTimerText(Element& element, float dt);
+            void UpdateTimerNub(Element& element, float dt);
             void UpdatePlayerBlip(Element &element, float dt);
 
             std::string GetMedalImage();

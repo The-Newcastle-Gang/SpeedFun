@@ -35,6 +35,9 @@ public:
     void PauseTimer() { currentState = StageTimer::Paused;  }
 
     float GetElapsedTime() { return elapsedTime; }
+    float GetPlatinumTime() { return platinumTime; }
+    float GetGoldTime() { return goldTime; }
+    float GetSilverTime() { return silverTime; }
 protected:
 
     void CalculateMedal();

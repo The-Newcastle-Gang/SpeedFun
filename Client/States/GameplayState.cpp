@@ -58,11 +58,48 @@ void GameplayState::InitCrossHeir(){
 
 void GameplayState::InitTimerBar(){
     //timer Bar
+    int outlineSize = 3;
+
+    for (int i = 0; i < 3; i++) {
+        timerNubs[i] = &canvas->AddElement()
+            .SetColor({ 1,1,1,1 })
+            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+            .AlignTop(timerTopOffset-11)
+            .SetId("nub_" + std::to_string(i));
+
+        medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f}});
+        timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
+    }
+
+    auto backTimer = canvas->AddElement()
+        .SetColor({ 0,0,0,1 })
+        .SetAbsoluteSize({ 800 + outlineSize*2, timerBarHeight + outlineSize*2 })
+        .AlignCenter()
+        .AlignTop(timerTopOffset - outlineSize);
+
+
     timeBar = &canvas->AddElement()
-            .SetColor({0,1,0,1})
-            .SetAbsoluteSize({800, 30})
+            .SetColor({0.5,0,0,1})
+            .SetAbsoluteSize({800, timerBarHeight })
             .AlignCenter()
-            .AlignTop(30);
+            .AlignTop(timerTopOffset);
+    timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
+
+    timeBarTimerBox = &canvas->AddElement()
+        .SetColor({ 0,0,0,1 })
+        .SetAbsoluteSize({ 96, timerBarHeight + 16 })
+        .AlignCenter(400)
+        .AlignTop(timerTopOffset - 8);
+    timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
+
+
+    timerText = &canvas->AddElement()
+        .SetColor({ 0,0,0,1 })
+        .AlignCenter(400)
+        .AlignTop(timerTopOffset - 8)
+        .SetText(TextData());
+    timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
+
 }
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
@@ -112,6 +149,7 @@ void GameplayState::OnEnter() {
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 }
+
 void GameplayState::InitialiseAssets() {
     
     InitWorld();
@@ -120,6 +158,7 @@ void GameplayState::InitialiseAssets() {
     loadSoundThread->detach();
     FinishLoading();
 }
+
 void GameplayState::InitSounds() {
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
     std::string songToPlay = soundManager->SM_SelectRandomSong();
@@ -136,7 +175,6 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(ThreadUpdate, client, networkData.get());
     networkThread->detach();
 }
-
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
@@ -309,11 +347,48 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::GameInfo_Timer): {
                 float recievedTime = handler.Unpack<float>();
-                
+                timeElapsed = recievedTime;
+
+                for (int i = 0; i < 3; i++) {
+                    recievedTime = handler.Unpack<float>();
+                    medalTimes[i] = recievedTime;
+                }
+                timerRatio = 1 - std::clamp(timeElapsed, 0.0f, medalTimes[2]) / medalTimes[2];
+          
             }
             break;
         }
     }
+}
+
+void GameplayState::UpdateTimerUI(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+
+    element.SetAbsoluteSize({ (int)round((800 - 96) * timerRatio), timerBarHeight });
+}
+
+void GameplayState::UpdateTimerBox(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio));
+}
+
+void GameplayState::UpdateTimerText(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+    element.textData.text = std::format("{:.2f}", timeElapsed);
+    element.textData.fontSize = 0.5f;
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio - 96/2 + 8));
+    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8);
+}
+
+void GameplayState::UpdateTimerNub(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+    int medalID = medalTimeRatios[element.GetId()].first;
+    if (medalTimeRatios[element.GetId()].second < 0.0f) {
+        medalTimeRatios[element.GetId()].second = 1 - std::clamp(medalTimes[medalID], 0.0f, medalTimes[2]) / medalTimes[2];
+        element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * medalTimeRatios[element.GetId()].second));
+    }
+    
 }
 
 std::string GameplayState::GetMedalImage(){
