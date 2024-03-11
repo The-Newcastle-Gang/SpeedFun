@@ -143,7 +143,6 @@ void GameplayState::InitSounds() {
 void GameplayState::CreateNetworkThread() {
     shouldShutDown.store(false);
     GameClient* client = baseClient;
-    baseClient = nullptr;
     networkData = std::make_unique<ClientNetworkData>();
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
