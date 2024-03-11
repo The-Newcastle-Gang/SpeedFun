@@ -113,6 +113,8 @@ namespace NCL {
             return nullptr;
         }
 
+        std::map<std::string, MeshAnimation*>* GetAnimationMap() { return &animations; }
+
         void AddAnimationToMesh(std::string name, MeshAnimation* anim) {
             animations[name] = anim;
         }

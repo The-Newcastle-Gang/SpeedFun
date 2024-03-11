@@ -36,6 +36,12 @@ namespace NCL {
 				return transform;
 			}
 
+            void SetMeshScale(Vector3 scale) { meshScale = scale; }
+            Vector3 GetMeshScale() const { return meshScale; }
+
+            void SetMeshOffset(Vector3 Offset) { meshOffset = Offset; }
+            Vector3 GetMeshOffset() const { return meshOffset; }
+
             void SetMeshMaterial(MeshMaterial* m) {
                 meshMaterial = m;
             }
@@ -72,6 +78,8 @@ namespace NCL {
 			Transform*		transform;
             AnimatorObject* animatorObject;
 			Vector4			colour;
+            Vector3         meshScale;
+            Vector3         meshOffset;
 		};
 	}
 }

@@ -482,7 +482,7 @@ void GameTechRenderer::RenderCamera() {
 
     for (const RenderObject* i : activeObjects) {
 
-        Vector3 scale = i->GetTransform()->GetScale();
+        Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
@@ -527,8 +527,14 @@ void GameTechRenderer::RenderCamera() {
 
             activeShader = shader;
         }
-
+        Vector3 originalScale = (*i).GetTransform()->GetScale();
+        Vector3 originalPosition = (*i).GetTransform()->GetPosition();
+        (*i).GetTransform()->SetScale(scale); //multiply scale before we get the matrix
+        (*i).GetTransform()->SetPosition(originalPosition + (*i).GetMeshOffset()); //add offset before we get the matrix
         Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
+        (*i).GetTransform()->SetScale(originalScale); //set it back to normal
+        (*i).GetTransform()->SetPosition(originalPosition); //set it back to normal
+
         glUniformMatrix4fv(modelLocation, 1, false, (float *) &modelMatrix);
 
         Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
