@@ -307,7 +307,7 @@ void GameplayState::ReadNetworkFunctions() {
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
                 float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
                 renderer->SetSpeedLineAmount(speedVisualModifier);
-                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 30.0f);
             }
             break;
 
