@@ -2,16 +2,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager) : State()
+MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Canvas* pCanvas, SoundManager* pSoundManager, std::atomic<bool> &serverStartFlag) : State(), shouldServerStart(serverStartFlag)
 {
     soundManager = pSoundManager;
     renderer = pRenderer;
     world = pGameworld;
-    menuFont = renderer->LoadFont("IndigoRegular.otf", 55);
+    menuFont = renderer->LoadFont("Ubuntu-Bold.ttf", 55);
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
-    curvyShader = renderer->LoadShader("defaultUI.vert", "curvyUi.frag");
+    hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
+    titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
     activeText = -1;
     textLimit = 15;
 
@@ -25,51 +26,55 @@ void MenuState::InitMenuSounds() {
 }
 
 MenuState::~MenuState() {
-    delete curvyShader;
+    delete hoverShader;
 }
 
 void MenuState::OptionHover(Element& element) {
 
     if (selected == element.GetIndex()) return;
     soundManager->SM_PlaySound("se_select00.wav");
-    canvas->GetElementByIndex(selected).GetTextData().color = inactiveMenuText;
+    canvas->GetElementByIndex(selected).SetColor(inactiveMenuText);
 
     selected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(hoverBox);
-    boxElement.GetAbsolutePosition().y = pos - 33;
+    boxElement.GetAbsolutePosition().y = pos - 35 - boxElement.GetAbsoluteSize().y + element.GetAbsoluteSize().y;
 
     tweenManager->CreateTween(
             TweenManager::EaseOutSine,
-            0,
-            415,
-            &boxElement.GetAbsoluteSize().x,
-            0.2f);
+            0.0f,
+            1.0f,
+            &boxElement.tweenValue1,
+            0.5f);
 
-    element.GetTextData().color = activeMenuText;
+    element.SetColor(activeMenuText);
 }
 
 void MenuState::MultiplayerOptionHover(Element& element) {
 
-    if (selected == element.GetIndex()) return;
+    if (mSelected == element.GetIndex()) return;
+    soundManager->SM_PlaySound("se_select00.wav");
+    canvas->GetElementByIndex(mSelected, "multiplayer").SetColor(inactiveMenuText);
 
-    
-    canvas->GetElementByIndex(mSelected, "multiplayer").GetTextData().color = inactiveMenuText;
     mSelected = element.GetIndex();
 
     auto pos = element.GetAbsolutePosition().y;
     auto& boxElement = canvas->GetElementByIndex(mHoverBox, "multiplayer");
-    boxElement.GetAbsolutePosition().y = pos - 33;
+    boxElement.GetAbsolutePosition().y = pos - 35 - boxElement.GetAbsoluteSize().y + element.GetAbsoluteSize().y;
 
     tweenManager->CreateTween(
             TweenManager::EaseOutSine,
-            0,
-            415,
-            &boxElement.GetAbsoluteSize().x,
-            0.2f);
+            0.0f,
+            1.0f,
+            &boxElement.tweenValue1,
+            0.5f);
 
-    element.GetTextData().color = activeMenuText;
+    element.SetColor(activeMenuText);
+}
+
+void MenuState::GoBack(Element& element) {
+    canvas->PopActiveLayer();
 }
 
 void MenuState::InitLua() {
@@ -83,9 +88,17 @@ void MenuState::InitLua() {
     }
 }
 
+void MenuState::StartSingleplayer() {
+    baseClient->RemoteFunction(Replicated::StartGame, nullptr);
+}
+
 void MenuState::BeginSingleplayer(Element& _) {
+
     LoadingScreen();
-    ConnectToGame("127.0.0.1");
+    shouldServerStart.store(true);
+    baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
+    baseClient->Connect("127.0.0.1", NetworkBase::GetDefaultPort());
+
 }
 
 void MenuState::LoadingScreen() {
@@ -111,7 +124,7 @@ void MenuState::UnsetActiveTextEntry(Element& element) {
     }
 
     std::string textId = element.GetId() + "Text";
-    auto& textElement = canvas->GetElementById(textId, "joinGame");
+    auto& textElement = canvas->GetElementById(textId, "multiplayer");
 
     if (textElement.GetTextData().text.empty()) {
         textElement.GetTextData().text = textElement.GetTextData().defaultText;
@@ -121,7 +134,7 @@ void MenuState::UnsetActiveTextEntry(Element& element) {
 void MenuState::SetActiveTextEntry(Element& element) {
 
     std::string textId = element.GetId() + "Text";
-    auto& textElement = canvas->GetElementById(textId, "joinGame");
+    auto& textElement = canvas->GetElementById(textId, "multiplayer");
     activeText = textElement.GetIndex();
     auto& textElementData = textElement.GetTextData();
 
@@ -130,8 +143,22 @@ void MenuState::SetActiveTextEntry(Element& element) {
     }
 }
 
+void MenuState::CreateLobby(Element& element) {
+    shouldServerStart.store(true);
+    canvas->PushActiveLayer("lobby");
+    ConnectToGame("127.0.0.1");
+}
+
+void MenuState::JoinLobby() {
+    canvas->PushActiveLayer("lobby");
+}
+
+void MenuState::LeaveLobby(Element& element) {
+    canvas->PopActiveLayer();
+}
+
 void MenuState::ConnectWithIp(Element& element) {
-    auto& textElement = canvas->GetElementById("IpAddressText", "joinGame");
+    auto& textElement = canvas->GetElementById("IpAddressText", "multiplayer");
     ConnectToGame(textElement.GetTextData().text);
     LoadingScreen();
 }
@@ -146,27 +173,32 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
     } if (tags.find("textEntry") != tags.end()) {
         element.OnFocusExit.connect<&MenuState::UnsetActiveTextEntry>(this);
         element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
+    } if (tags.find("fireEffect") != tags.end()) {
+        element.SetShader(titleShader);
     }
-
 
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
-        canvas->GetElementByIndex(hoverBox).SetAbsolutePosition({0, element.GetAbsolutePosition().y - 33});
-        canvas->GetElementByIndex(hoverBox).AlignLeft(115);
     } else if (id == "Multiplayer") {
         element.OnMouseUp.connect<&MenuState::ShowMultiplayerOptions>(this);
     } else if (id == "HoverBox") {
         hoverBox = element.GetIndex();
+        element.SetShader(hoverShader);
     } else if (id == "mHoverBox") {
         mHoverBox = element.GetIndex();
+        element.SetShader(hoverShader);
     } else if (id == "JoinGame") {
-        mSelected = element.GetIndex();
-        element.OnMouseUp.connect<&MenuState::JoinGame>(this);
-    } else if (id == "PlayerName") {
-        element.SetShader(curvyShader);
-    } else if (id == "Connect") {
         element.OnMouseUp.connect<&MenuState::ConnectWithIp>(this);
+    } else if (id == "CreateGame") {
+        element.OnMouseUp.connect<&MenuState::CreateLobby>(this);
+        mSelected = element.GetIndex();
+    } else if (id == "Back") {
+        element.OnMouseUp.connect<&MenuState::GoBack>(this);
+    } else if (id == "Disconnect") {
+        element.OnMouseUp.connect<&MenuState::LeaveLobby>(this);
+    } else if (id == "StartLobby") {
+        element.OnMouseUp.connect<&MenuState::StartGame>(this);
     }
 }
 
@@ -291,7 +323,8 @@ bool MenuState::CheckConnected() const {
 }
 
 void MenuState::ConnectedToServer() {
-    StartGame();
+    std::cout << "Connected to server" << std::endl;
+    JoinLobby();
 }
 
 void MenuState::ConnectToGame(const std::string& address) {
@@ -299,7 +332,7 @@ void MenuState::ConnectToGame(const std::string& address) {
     baseClient->Connect(address, NetworkBase::GetDefaultPort());
 }
 
-void MenuState::StartGame() {
+void MenuState::StartGame(Element& _) {
     baseClient->RemoteFunction(Replicated::StartGame, nullptr);
 }
 
@@ -308,10 +341,10 @@ void MenuState::TextEntry() {
 
 
     auto w = Window::GetKeyboard();
-    auto& textElement = canvas->GetElementByIndex(activeText, "joinGame");
+    auto& textElement = canvas->GetElementByIndex(activeText, "multiplayer");
 
 
-    if (w->KeyPressed(KeyboardKeys::BACK)) {
+    if (w->KeyHeld(KeyboardKeys::BACK)) {
         if (!textElement.GetTextData().text.empty()) {
             textElement.GetTextData().text.pop_back();
         }
@@ -332,6 +365,10 @@ void MenuState::TextEntry() {
 
     if (w->KeyPressed(KeyboardKeys::PERIOD)) {
         textElement.GetTextData().text += ".";
+    }
+
+    if (w->KeyPressed(KeyboardKeys::SPACE)) {
+        textElement.GetTextData().text += " ";
     }
 }
 

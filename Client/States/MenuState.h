@@ -18,7 +18,7 @@ namespace NCL {
         class MenuState : public State, PacketReceiver
         {
         public:
-            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas, SoundManager* pSoundManager);
+            MenuState(GameTechRenderer* rendererRef, GameWorld* gameWorldRef, GameClient* clientRef, Canvas* pCanvas, SoundManager* pSoundManager, std::atomic<bool> &serverStartFlag);
             ~MenuState();
             void Update(float dt) override;
 
@@ -42,11 +42,16 @@ namespace NCL {
             std::unique_ptr<Font> menuFont;
             std::string statusText;
             std::unique_ptr<TweenManager> tweenManager;
-            ShaderBase* curvyShader;
+            ShaderBase* hoverShader;
+            ShaderBase* titleShader;
             int hoverBox;
             int mHoverBox;
             int selected;
             int mSelected;
+
+            std::atomic<bool> &shouldServerStart;
+
+            std::array<std::string, 4> lobbyInfo;
 
             int activeText;
             int textLimit;
@@ -63,7 +68,7 @@ namespace NCL {
             void ConnectToGame(const string &address);
             void RegisterPackets();
             void ConnectedToServer();
-            void StartGame();
+            void StartGame(Element& _);
             void InitCanvas();
             void OptionHover(Element &element);
             void InitLua();
@@ -80,7 +85,18 @@ namespace NCL {
             void ConnectWithIp(Element& element);
 
             void InitMenuSounds();
+
             void LoadingScreen();
+
+
+            void GoBack(Element &element);
+            void JoinLobby();
+            void CreateLobby(Element &element);
+
+            void LeaveLobby(Element &element);
+
+            void StartSingleplayer();
+
         };
     }
 }

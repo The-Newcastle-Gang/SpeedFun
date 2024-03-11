@@ -13,17 +13,20 @@
 #include "Resources.h"
 #include "ClientNetworkData.h"
 #include "ClientThread.h"
-#include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "DebugMode.h"
 #include "SoundManager.h"
-
+#include "AnimatorObject.h"
+#include "LevelManager.h"
 
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
 
         enum LoadingStates {
             NOT_LOADED,
@@ -64,6 +67,9 @@ namespace NCL {
             void SetTestSprings();
             void SetTestFloor();
 
+            std::unique_ptr<LevelManager> levelManager;
+
+            std::string medalImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -88,8 +94,13 @@ namespace NCL {
 
             float loadingTime = 0.0f;
 
+            TextureBase* deathImageTex;
+
+
             void SendInputData();
             void CreatePlayers();
+
+            void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
             void ManageLoading(float dt);
             void FinishLoading();
@@ -103,16 +114,15 @@ namespace NCL {
             int totalThingsToLoad = 0;
             int totalThingsLoaded = 0;
 
+            float totalDTElapsed = 0.0f;
+            bool debugMovementEnabled = false;
+
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
-
             void ReadNetworkFunctions();
-
-
             void ReadNetworkPackets();
 
             void CreateRock();
             void ResetCameraAnimation();
-
 
             void WalkCamera(float dt);
             float groundedMovementSpeed = 0.0f;
@@ -157,6 +167,11 @@ namespace NCL {
             int PlayerBlip;
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            std::string GetMedalImage();
+
+            DebugMode* debugger;
+            bool displayDebugger = false;
         };
     }
 }

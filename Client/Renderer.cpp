@@ -21,6 +21,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "scene.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    noiseTexture = (OGLTexture*)LoadTexture("noise.png");
     postProcessBase = new OGLShader("post.vert", "post.frag");
 
 	lineCount = 0;
@@ -291,8 +292,20 @@ void GameTechRenderer::RenderRayMap() {
 void GameTechRenderer::RenderUI() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     auto& layers = canvas.GetActiveLayers();
-    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+
+    int blockingLayer = layers.size() - 1;
+
+    for (int i=blockingLayer; i >= 0; i--) {
+        if (layers[blockingLayer]->CheckBlocking()) {
+            break;
+        }
+
+        blockingLayer = i;
+    }
+
+    for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
             auto activeShader = defaultUIShader;
@@ -331,6 +344,12 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
 
 
             glBindVertexArray(uiVAO);
@@ -343,9 +362,6 @@ void GameTechRenderer::RenderUI() {
                 RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
             }
 
-        }
-        if ((*i)->CheckBlocking()) {
-            break;
         }
     }
 }
@@ -466,7 +482,7 @@ void GameTechRenderer::RenderCamera() {
 
     for (const RenderObject* i : activeObjects) {
 
-        Vector3 scale = i->GetTransform()->GetScale();
+        Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
@@ -511,8 +527,14 @@ void GameTechRenderer::RenderCamera() {
 
             activeShader = shader;
         }
-
+        Vector3 originalScale = (*i).GetTransform()->GetScale();
+        Vector3 originalPosition = (*i).GetTransform()->GetPosition();
+        (*i).GetTransform()->SetScale(scale); //multiply scale before we get the matrix
+        (*i).GetTransform()->SetPosition(originalPosition + (*i).GetMeshOffset()); //add offset before we get the matrix
         Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
+        (*i).GetTransform()->SetScale(originalScale); //set it back to normal
+        (*i).GetTransform()->SetPosition(originalPosition); //set it back to normal
+
         glUniformMatrix4fv(modelLocation, 1, false, (float *) &modelMatrix);
 
         Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
@@ -619,26 +641,55 @@ MeshGeometry* GameTechRenderer::LoadOBJMesh(const string& name) {
     const std::vector<int>& material_ids = shapes[0].mesh.material_ids;
 
     std::vector<Vector3> vertexPositions;
-    vertexPositions.reserve(attrib.vertices.size() / 3);
+    std::vector<Vector2> vertexTexcoords;
+    std::vector<Vector4> vertexColors;
+    std::vector<GLuint> vertexIndices;
 
-    // Must be better way of this, it's literally the same in memory
-    for (int i = 0; i < attrib.vertices.size(); i += 3) {
-        vertexPositions.emplace_back(attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2]);
+    for (size_t index = 0; index < material_ids.size(); index++) {
+        Vector3 original[] = {
+                Vector3(attrib.vertices[indices[3 * index].vertex_index * 3],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 1].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 2].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 2])
+        };
+
+        vertexPositions.push_back(original[0]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[1]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[2]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
     }
 
     mesh->SetVertexPositions(vertexPositions);
-
-    std::vector<GLuint> vertexIndicies;
-
-    for (int i = 0; i < indices.size(); i++) {
-        vertexIndicies.push_back(indices[i].vertex_index);
-    }
-
-    mesh->SetVertexIndices(vertexIndicies);
-
-//    std::vector<Vector2> vertexTexcoords;
-//    vertexTexcoords.resize(attrib.vertices.size() / 3);
-//    std::fill(vertexTexcoords.begin(), vertexTexcoords.end(), Vector2(0,0));
+    mesh->SetVertexTextureCoords(vertexTexcoords);
+    mesh->SetVertexColours(vertexColors);
+    mesh->SetVertexIndices(vertexIndices);
 
     mesh->RecalculateNormals();
     mesh->UploadToGPU();

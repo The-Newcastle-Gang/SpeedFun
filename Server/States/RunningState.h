@@ -9,11 +9,9 @@
 #include "PlayerMovement.h"
 #include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
+#include "Levels/LevelManager.h"
 #include "ObjectOscillator.h"
-#include "DamagingObstacle.h"
-
 #include "Spring.h"
-
 
 #include <iostream>
 #include <thread>
@@ -48,10 +46,12 @@ namespace NCL {
             std::unique_ptr<PhysicsSystem> physics;
             std::unique_ptr<GameWorld> world;
             std::unique_ptr<ServerNetworkData> networkData;
+            std::unique_ptr<LevelManager> levelManager;
 
             std::thread* networkThread;
 
             std::unordered_map<int, PlayerInfo> playerInfo;
+            std::unordered_map<int, Replicated::PlayerAnimationStates> playerAnimationInfo;
 
             std::vector<std::pair<TriggerVolumeObject::TriggerType, Vector3>> triggersVector;
             LevelReader* levelReader;
@@ -70,6 +70,11 @@ namespace NCL {
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
+
+            void StartTriggerVolFunc(int id);
+            void EndTriggerVolFunc(int id);
+            void DeathTriggerVolFunc(int id);
+            void DeathTriggerVolEndFunc(int id);
 
             void SendWorldToClient();
 
@@ -91,10 +96,17 @@ namespace NCL {
 
             void ApplyPlayerMovement();
 
+            void UpdatePlayerAnimations();
+
+            void SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object);
+
+            void SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object);
+
             void SetTestSprings();
             void SetTestFloor();
 
             void SetTriggerTypePositions();
+
         };
     }
 }
