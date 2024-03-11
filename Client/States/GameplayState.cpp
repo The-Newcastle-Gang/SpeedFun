@@ -17,6 +17,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
+    levelManager->LoadLevelMap();
     medalImage = "medal.png";
 }
 
@@ -460,7 +461,7 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel();
+    InitLevel(TEST_LEVEL);
     CreatePlayers();
     worldHasLoaded = LoadingStates::LOADED;
 }
@@ -507,8 +508,8 @@ void GameplayState::CreatePlayers() {
     }
 }
 
-void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+void GameplayState::InitLevel(int level) {
+    levelManager->TryReadLevel(levelManager->GetLevelMap()[level]);
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();

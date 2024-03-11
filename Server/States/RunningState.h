@@ -67,7 +67,7 @@ namespace NCL {
 
             std::unordered_map<int, GameObject*> playerObjects;
 
-            void LoadLevel();
+            void LoadLevel(int level);
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 

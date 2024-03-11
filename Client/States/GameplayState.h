@@ -54,7 +54,7 @@ namespace NCL {
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
-            void InitLevel();
+            void InitLevel(int level);
             void InitCanvas();
 
             void ResetCameraToForwards();

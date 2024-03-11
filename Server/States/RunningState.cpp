@@ -12,6 +12,7 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
     levelManager = std::make_unique<LevelManager>();
+    levelManager->LoadLevelMap();
 
     currentLevelDeathPos = {0,0,0};
 }
@@ -26,7 +27,7 @@ void RunningState::OnEnter() {
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
     CreateNetworkThread();
-    LoadLevel();
+    LoadLevel(TEST_LEVEL);
     world->StartWorld();
 
 }
@@ -103,8 +104,8 @@ void RunningState::Update(float dt) {
     levelManager->UpdateTimer(dt);
 }
 
-void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+void RunningState::LoadLevel(int level) {
+    BuildLevel(levelManager->GetLevelMap()[level]);
     CreatePlayers();
     AddTriggersToLevel();
 }
