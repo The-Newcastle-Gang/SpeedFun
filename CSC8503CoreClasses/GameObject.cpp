@@ -1,4 +1,6 @@
 #include "GameObject.h"
+#include "GameObject.h"
+#include "GameObject.h"
 #include "CollisionDetection.h"
 #include "PhysicsObject.h"
 #include "RenderObject.h"
@@ -55,6 +57,18 @@ void GameObject::UpdateBroadphaseAABB() {
         Vector3 halfSizes = ((OBBVolume&)*boundingVolume).GetHalfDimensions();
         broadphaseAABB = mat * halfSizes;
     }
+}
+
+void GameObject::SetBroadXHalfDim(float halfDim) {
+    broadXHalfDim = halfDim;
+}
+
+void GameObject::UpdateBroadphaseXBounds() {
+    if (!boundingVolume) {
+        return;
+    }
+    broadXLowerBound = transform.GetPosition().x - broadXHalfDim;
+    broadXUpperBound = transform.GetPosition().x + broadXHalfDim;
 }
 
 void GameObject::DrawCollision()

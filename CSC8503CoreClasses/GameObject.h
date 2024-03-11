@@ -1,6 +1,10 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include "AABBVolume.h"
+#include "OBBVolume.h"
+#include "CapsuleVolume.h"
+#include "SphereVolume.h"
 #include "AnimatorObject.h"
 #include "Component.h"
 
@@ -43,6 +47,27 @@ namespace NCL::CSC8503 {
 
         void SetBoundingVolume(CollisionVolume* vol) {
             boundingVolume = vol;
+            float halfDim = 0.0f;
+            switch (vol->type)
+            {
+                case VolumeType::AABB: {
+                    halfDim = ((AABBVolume*)vol)->GetHalfDimensions().x;
+                }
+                case VolumeType::OBB: {
+                    Vector3 halfDims = ((OBBVolume*)vol)->GetHalfDimensions();
+                    halfDim = std::max(halfDims.x, halfDims.y);
+                    halfDim = std::max(halfDim, halfDims.z);
+                }
+                case VolumeType::Capsule: {
+                    halfDim = ((CapsuleVolume*)vol)->GetHalfHeight();
+                }
+                case VolumeType::Sphere: {
+                    halfDim = ((SphereVolume*)vol)->GetRadius();
+                }
+                default:
+                    break;
+            }
+            SetBroadXHalfDim(halfDim);
         }
 
         const CollisionVolume* GetBoundingVolume() const {
@@ -101,6 +126,10 @@ namespace NCL::CSC8503 {
 
         void UpdateBroadphaseAABB();
 
+        void SetBroadXHalfDim(float halfDim);
+
+        void UpdateBroadphaseXBounds();
+
         void SetWorldID(int newID) {
             worldID = newID;
         }
@@ -139,6 +168,10 @@ namespace NCL::CSC8503 {
         [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
         void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
 
+
+        float* GetXLowerBound() { return &broadXLowerBound; }
+        float* GetXUpperBound() { return &broadXUpperBound; }
+
     protected:
 
         CollisionVolume*	boundingVolume;
@@ -157,6 +190,12 @@ namespace NCL::CSC8503 {
         Tag tag;
 
         Vector3 broadphaseAABB;
+
+        float broadXLowerBound = 0.0f;
+        float broadXUpperBound = 0.0f;
+
+        float broadXHalfDim = 0.0f;
+
     };
 }
 
