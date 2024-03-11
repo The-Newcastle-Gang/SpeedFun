@@ -104,10 +104,15 @@ void MenuState::BeginSingleplayer(Element& _) {
 }
 
 void MenuState::LoadingScreen() {
-    Canvas* lSCanvas = new Canvas();
-    lSCanvas->CreateNewLayer("Loading");
-    lSCanvas->PushActiveLayer("Loading");
-    lSCanvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
+
+    auto quad = canvas->AddElement();
+    quad.OnUpdate.connect<&MenuState::LoadingScreen>(this);
+
+    //while (!loaded) {/*do stuff*/ }
+    
+    canvas->CreateNewLayer("Loading");
+    canvas->PushActiveLayer("Loading");
+    canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
         .SetAbsoluteSize({ 300,300 })
         .AlignCenter()
         .AlignMiddle().SetShader(titleShader);
