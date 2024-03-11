@@ -107,7 +107,8 @@ void MenuState::LoadingScreen() {
     canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
         .SetAbsoluteSize({ 300,300 })
         .AlignCenter()
-        .AlignMiddle();
+        .AlignMiddle().SetShader(titleShader);
+
 }
 
 void MenuState::ShowMultiplayerOptions(Element& _) {
