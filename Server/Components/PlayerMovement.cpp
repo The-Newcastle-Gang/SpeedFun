@@ -49,6 +49,10 @@ void PlayerMovement::UpdateInputs(Vector3 pRightAxis, Vector2 pInputDirection, Q
     playerRotation = pPlayerRotation;
 }
 
+void PlayerMovement::SetInAir() {
+    SwitchToState(&air);
+}
+
 void PlayerMovement::SwitchToState(MovementState* state) {
     activeState->OnExit();
     activeState = state;
