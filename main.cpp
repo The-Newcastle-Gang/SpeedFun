@@ -40,7 +40,7 @@ void ServerThreadFunction() {
 }
 
 int main() {
-    Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1920, 1200, true);
+    Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1280, 720, false);
 
     if (!w->HasInitialised()) {
         return -1;
