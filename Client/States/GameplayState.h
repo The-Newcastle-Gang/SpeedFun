@@ -86,7 +86,7 @@ namespace NCL {
 
             Diagnostics packetsSent{};
 
-            
+            float loadingTime = 0.0f;
 
             void SendInputData();
             void CreatePlayers();
@@ -98,7 +98,10 @@ namespace NCL {
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
-            float loadingTime = 0.0f;
+            std::vector<std::string> soundsToLoad = { songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" };
+
+            int totalThingsToLoad = 0;
+            int totalThingsLoaded = 0;
 
             static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
 

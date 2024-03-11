@@ -108,22 +108,24 @@ void GameplayState::OnEnter() {
 }
 void GameplayState::InitialiseAssets() {
     
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    std::string songToPlay = soundManager->SM_SelectRandomSong();
+    soundsToLoad.push_back(songToPlay);
+
+    totalThingsToLoad = soundsToLoad.size();
     InitWorld();
     InitCamera();
+    
+
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
     FinishLoading();
 }
 void GameplayState::InitSounds() {
     std::cout << "\n\nLoading Sounds!\n\n";
-
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
-    std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav" });
+    soundManager->SM_AddSoundsToLoad(soundsToLoad);
     soundManager->SM_LoadSoundList();
-
     soundHasLoaded = LoadingStates::LOADED;
-    
 }
 
 void GameplayState::CreateNetworkThread() {
@@ -401,6 +403,7 @@ void GameplayState::InitLevel() {
     auto opList  = lr->GetOscillatorPList();
     auto harmOpList  = lr->GetHarmfulOscillatorPList();
 
+    totalThingsToLoad += plist.size() + opList.size() + harmOpList.size();
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
