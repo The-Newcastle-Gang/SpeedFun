@@ -47,6 +47,11 @@ public:
         PlayerDebug
     };
 
+    static const Vector4 PLATINUM;
+    static const Vector4 GOLD;
+    static const Vector4 SILVER;
+    static const Vector4 BRONZE;
+
     Replicated();
     void InitLevel();
     int GetCurrentLevelLen();

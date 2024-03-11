@@ -87,9 +87,9 @@ void GameplayState::InitTimerBar(){
 
     timeBarTimerBox = &canvas->AddElement()
         .SetColor({ 0,0,0,1 })
-        .SetAbsoluteSize({ 96, timerBarHeight + 16 })
+        .SetAbsoluteSize({ 96, timerBarHeight })
         .AlignCenter(400)
-        .AlignTop(timerTopOffset - 8);
+        .AlignTop(timerTopOffset);
     timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
 
 

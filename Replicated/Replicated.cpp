@@ -4,7 +4,10 @@
 
 #include "Replicated.h"
 
-
+const Vector4 Replicated::PLATINUM = Vector4(0.90f, 0.894f, 0.886f, 1.0f);
+const Vector4 Replicated::GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
+const Vector4 Replicated::SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
+const Vector4 Replicated::BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
 
 Replicated::Replicated() {
 
