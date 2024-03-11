@@ -291,7 +291,7 @@ void GameTechRenderer::RenderFrame() {
 
 	BuildObjectList();
 	SortObjectList();
-	RenderShadowMap();
+	//RenderShadowMap();
     FillDiffuseBuffer();
     RenderDeferredLighting();
     CombineBuffers();
