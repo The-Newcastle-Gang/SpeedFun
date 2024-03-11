@@ -43,8 +43,18 @@ public:
 
     CameraAnimationCallData cameraAnimationCalls;
 
-    void ToggleDebug() { debugEnabled = !debugEnabled; }
+    struct PlayerAnimationCallData {
+        bool isGrappling = false;
+        bool inAir = false;
+        int strafe = 0;
+        bool backwards = false;
+        bool hasInput = false;
+        bool isFalling = false;
+    };
 
+    PlayerAnimationCallData playerAnimationCallData;
+
+    void ToggleDebug() { debugEnabled = !debugEnabled; }
 private:
     GameWorld* world;
 
@@ -102,6 +112,7 @@ private:
     void UpdateInAir(float dt);
     void LeaveInAir();
     void StartGround();
+    void UpdateAnimDataFromInput();
     void UpdateOnGround(float dt);
     void LeaveGround();
     void SwitchToState(MovementState *state);
