@@ -12,7 +12,6 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
     levelManager = std::make_unique<LevelManager>();
-    levelManager->LoadLevelMap();
 
     currentLevelDeathPos = {0,0,0};
 }

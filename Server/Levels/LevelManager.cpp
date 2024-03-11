@@ -42,9 +42,3 @@ int LevelManager::GetCurrentMedal() const {
 Vector4 LevelManager::GetCurrentMedalColour() const {
     return stageTimer->GetCurrentMedalColour();
 }
-
-void LevelManager::LoadLevelMap()
-{
-    levelMap.insert(std::pair<int, std::string>(TEST_LEVEL, "newTest"));
-    levelMap.insert(std::pair<int, std::string>(LEVEL_1, "level1"));
-}

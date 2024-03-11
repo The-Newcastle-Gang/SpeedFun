@@ -50,7 +50,10 @@ protected:
 
     int currentMedal;
 
-    std::map<int, std::string> levelMap;
+    const std::map<int, std::string> levelMap = {
+        { TEST_LEVEL, "newTest" },
+        { LEVEL_1, "level1" }
+    };
 
 };
 

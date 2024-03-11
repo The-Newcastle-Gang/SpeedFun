@@ -17,7 +17,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
-    levelManager->LoadLevelMap();
     medalImage = "medal.png";
 }
 
