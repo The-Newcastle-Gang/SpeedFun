@@ -31,9 +31,16 @@ void GameplayState::InitCanvas(){
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
 
-    InitCrossHeir();
-    InitTimerBar();
-    InitLevelMap();
+    if (finishedLoading == LoadingStates::READY) {
+        InitCrossHeir();
+        InitTimerBar();
+        InitLevelMap();
+    }
+    else {
+        /*canvas->CreateNewLayer("Loading");*/
+        
+
+    }
 }
 
 void GameplayState::InitCrossHeir(){
@@ -103,8 +110,9 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
-    InitialiseAssets();
     InitCanvas();
+    InitialiseAssets();
+    
 }
 void GameplayState::InitialiseAssets() {
     
@@ -167,11 +175,11 @@ void GameplayState::ManageLoading(float dt) {
     }
 }
 void GameplayState::Update(float dt) {
+    ResetCameraAnimation();
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
     }
-    ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
 

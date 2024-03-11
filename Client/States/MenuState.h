@@ -80,6 +80,7 @@ namespace NCL {
             void ConnectWithIp(Element& element);
 
             void InitMenuSounds();
+            void LoadingScreen();
         };
     }
 }

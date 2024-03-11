@@ -84,7 +84,17 @@ void MenuState::InitLua() {
 }
 
 void MenuState::BeginSingleplayer(Element& _) {
+    LoadingScreen();
     ConnectToGame("127.0.0.1");
+}
+
+void MenuState::LoadingScreen() {
+    canvas->CreateNewLayer("Loading");
+    canvas->PushActiveLayer("Loading");
+    canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
+        .SetAbsoluteSize({ 300,300 })
+        .AlignCenter()
+        .AlignMiddle();
 }
 
 void MenuState::ShowMultiplayerOptions(Element& _) {
@@ -123,6 +133,7 @@ void MenuState::SetActiveTextEntry(Element& element) {
 void MenuState::ConnectWithIp(Element& element) {
     auto& textElement = canvas->GetElementById("IpAddressText", "joinGame");
     ConnectToGame(textElement.GetTextData().text);
+    LoadingScreen();
 }
 
 void MenuState::AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const std::string& id) {
