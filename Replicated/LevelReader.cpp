@@ -35,7 +35,6 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
     }
 
 
-
 	for (auto& item : jData["primitiveGameObject"].items()) {
         auto tempGOPrimitive = new PrimitiveGameObject();
         tempGOPrimitive->meshName = item.value()["mesh"];

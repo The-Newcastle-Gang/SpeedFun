@@ -31,6 +31,7 @@ target_include_directories(client PUBLIC
         ./UI
         ../raudio/src
         ../NotLua
+        ../Server/Levels
 )
 
 target_link_libraries(client PUBLIC
