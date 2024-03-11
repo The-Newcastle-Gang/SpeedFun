@@ -115,8 +115,6 @@ void GameplayState::OnEnter() {
 
     renderer->SetPointLights(world->GetPointLights());
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
-
-    InitSounds();
 }
 void GameplayState::InitialiseAssets() {
     
@@ -542,7 +540,7 @@ void GameplayState::InitLevel() {
     }
 
     //SetTestSprings();
-    //SetTestFloor();
+    SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
