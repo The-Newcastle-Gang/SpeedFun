@@ -341,7 +341,8 @@ void GameTechRenderer::RenderDeferredLighting() {
     glActiveTexture(GL_TEXTURE7);
     glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
 
-    float* camPos = (float*)&gameWorld.GetMainCamera()->GetPosition().array[0];
+    const Vector3 &cameraPosition = gameWorld.GetMainCamera()->GetPosition();
+    float* camPos = (float*)&cameraPosition.array[0];
 
     glUniform3fv(glGetUniformLocation(shaderProg, "cameraPos"), 1, camPos);
     glUniform2f(glGetUniformLocation(shaderProg, "pixelSize"), 1.0f / windowWidth, 1.0f / windowHeight);
