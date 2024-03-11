@@ -51,10 +51,10 @@ void GameClient::UpdateClient() {
         return;
     }
 
-    updateCalled.gameTimer->Tick();
-    if (updateCalled.gameTimer->GetTimeDeltaSeconds() > 0.1) {
-        std::cout << "Delay in update client function: " << updateCalled.gameTimer->GetTimeDeltaSeconds() << std::endl;
-    }
+//    updateCalled.gameTimer->Tick();
+//    if (updateCalled.gameTimer->GetTimeDeltaSeconds() > 0.1) {
+//        std::cout << "Delay in update client function: " << updateCalled.gameTimer->GetTimeDeltaSeconds() << std::endl;
+//    }
 
     ENetEvent event;
     while (enet_host_service(netHandle, &event, 0) > 0) {

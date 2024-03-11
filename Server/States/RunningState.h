@@ -60,6 +60,8 @@ namespace NCL {
             Vector3 currentLevelDeathPos;
             std::vector<Vector3> currentLevelCheckPointPositions;
 
+            std::atomic<bool> shouldClose;
+
             float packetTimer;
             int sceneSnapshotId;
 
@@ -86,7 +88,7 @@ namespace NCL {
             void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
-            static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
+            void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
 
             void CreateNetworkThread();
 
