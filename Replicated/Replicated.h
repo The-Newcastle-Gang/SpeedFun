@@ -61,6 +61,8 @@ public:
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
     LevelReader* levelReader;
+
+    void AddGrapplesToWorld(GameObject *g, GameWorld &world, int index);
 };
 
 struct Diagnostics {

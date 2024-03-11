@@ -163,6 +163,8 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
+
+            void CreateGrapples();
         };
     }
 }

@@ -494,6 +494,14 @@ void GameplayState::InitLevel() {
     swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
+void GameplayState::CreateGrapples() {
+    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
+        auto g = new GameObject();
+        replicated->AddGrapplesToWorld(g, *world, i);
+        g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("Color")))
+    }
+}
+
 void GameplayState::SetTestSprings() {
     for (int i = 0; i < 4; i++) {
         auto g = new GameObject();
