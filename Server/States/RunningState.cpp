@@ -96,6 +96,7 @@ void RunningState::OnExit() {
 void RunningState::Update(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
+    UpdatePlayerAnimations();
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -135,9 +136,25 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
+void RunningState::SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object) {
+    int id = object->GetNetworkObject()->GetNetworkId();
+    if (playerAnimationInfo[id] == state)return;
+    playerAnimationInfo[id] = state;
+    SendPlayerAnimationCall(state, object);
+}
+
+void RunningState::SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object) {
+    FunctionData data{};
+    DataHandler handler(&data);
+    Replicated::RemoteAnimationData animData(object->GetNetworkObject()->GetNetworkId(), state);
+    handler.Pack(animData);
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::Player_Animation_Call, &data));
+}
+
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
     for (auto& pair : playerInfo) {
+        playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
 
@@ -241,9 +258,50 @@ void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &trigg
     }
 }
 
-void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
+void RunningState::UpdatePlayerAnimations() {
+    for (std::pair<int,GameObject*> playerObject : playerObjects){
+        PlayerMovement* playerMovement;
+        if (playerObject.second->TryGetComponent<PlayerMovement>(playerMovement)) {
+            PlayerMovement::PlayerAnimationCallData data = playerMovement->playerAnimationCallData;
+            if (data.isGrappling || (data.inAir && !data.isFalling)) {
+                SetPlayerAnimation(Replicated::JUMP, playerObject.second);
+                continue;
+            }
+            if (data.inAir) {
+                SetPlayerAnimation(Replicated::FALLING, playerObject.second);
+                continue;
+            }
+            if (!data.hasInput) {
+                SetPlayerAnimation(Replicated::IDLE, playerObject.second);
+                continue;
+            }
+            if (data.backwards) {
+                SetPlayerAnimation(Replicated::RUNNING_BACK, playerObject.second);
+                continue;
+            }
+            if (data.strafe ==0) {
+                SetPlayerAnimation(Replicated::RUNNING_FORWARD, playerObject.second);
+                continue;
+            }
+            if (data.strafe > 0) {
+                SetPlayerAnimation(Replicated::RUNNING_RIGHT, playerObject.second);
+                continue;
+            }
+            else {
+                SetPlayerAnimation(Replicated::RUNNING_LEFT, playerObject.second);
+                continue;
+            }
+        }
+    }
+}
 
-    player->GetTransform().SetOrientation(inputInfo.playerRotation);
+
+void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& inputInfo) {
+    Vector3 lookDir = inputInfo.playerRotation.ToEuler();
+    lookDir.x = 0;
+    lookDir.z = 0;
+    player->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(lookDir.x,lookDir.y,lookDir.z));
+    //player->GetTransform().SetOrientation(inputInfo.playerRotation); //just in case we need it in the future
     auto rightAxis = inputInfo.rightAxis;
 
     PlayerMovement* playerMovement;
@@ -260,6 +318,7 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(player->GetPhysicsObject()->GetLinearVelocity());
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::Player_Velocity_Call, &data)));
     }
+
     if (playerMovement->cameraAnimationCalls.groundMovement > 0.05f) {
         auto id = GetIdFromPlayerObject(player);
         FunctionData data;

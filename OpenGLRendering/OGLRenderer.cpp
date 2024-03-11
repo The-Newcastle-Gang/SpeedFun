@@ -178,8 +178,8 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
 {
     const std::vector<Matrix4> bindPose = boundMesh->GetBindPose();
     const std::vector<Matrix4> invBindPose = boundMesh->GetInverseBindPose();
-    const Matrix4* frameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetCurrentFrame());
-    const Matrix4* nextFrameData = boundAnimation->GetAnimation()->GetJointData(boundAnimation->GetNextFrame());
+    const Matrix4* frameData = boundAnimation->GetCurrentFrameData();
+    const Matrix4* nextFrameData = boundAnimation->GetNextFrameData();
     const int* bindPoseIndices = boundMesh->GetBindPoseIndices();
     SubMeshPoses pose;
 
@@ -196,7 +196,7 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
         vector<Matrix4> frameMatrices;
         vector<Matrix4> nextFrameMatrices;
         for (unsigned int i = 0; i < pose.count; ++i) {
-            int jointID = bindPoseIndices[pose.start + i];
+            int jointID = jointID = bindPoseIndices[pose.start + i];
 
             Matrix4 mat = frameData[jointID] * invBindPose[pose.start + i];
             Matrix4 nextMat = nextFrameData[jointID] * invBindPose[pose.start + i];
@@ -212,7 +212,6 @@ void OGLRenderer::DrawBoundAnimation(int layerCount)
         OGLTexture* layerTex = (OGLTexture*)boundMeshMaterial->GetMaterialForLayer(l)->GetEntry("Diffuse");
         
         BindTextureToShader(layerTex, "mainTex", 0);
-
         DrawBoundMesh(l);
     }
 }

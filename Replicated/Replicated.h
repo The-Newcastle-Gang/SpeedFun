@@ -29,8 +29,10 @@ public:
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
-	    EndReached,
+        EndReached,
         Grapple_Event,
+        Player_Velocity_Call,
+        Player_Animation_Call,
         Death_Event,
         Death_Event_End,
         Stage_Start,
@@ -47,10 +49,28 @@ public:
         PlayerDebug
     };
 
+
     static const Vector4 PLATINUM;
     static const Vector4 GOLD;
     static const Vector4 SILVER;
     static const Vector4 BRONZE;
+
+    enum PlayerAnimationStates {
+        RUNNING_FORWARD,
+        RUNNING_BACK,
+        RUNNING_LEFT,
+        RUNNING_RIGHT,
+        FALLING,
+        JUMP,
+        IDLE
+    };
+
+    struct RemoteAnimationData
+    {
+        int networkID = 0;
+        PlayerAnimationStates state = IDLE;
+    };
+
 
     Replicated();
     void InitLevel();

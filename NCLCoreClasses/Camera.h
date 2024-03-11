@@ -86,8 +86,9 @@ namespace NCL {
 		//Gets position in world space
 		Vector3 GetPosition() const { return position; }
 		//Sets position in world space
-		Camera& SetPosition(const Vector3& val) { position = val;  return *this; }
+		Camera& SetPosition(const Vector3& val) { position = val + cameraOffset;  return *this; }
 
+        void SetCameraOffset(Vector3 o) {cameraOffset = o;};
 
 		Vector3 GetOffsetPosition() const { return offset; }
 		
@@ -126,6 +127,7 @@ namespace NCL {
 		float	roll;
 		Vector3 position;
 
+        Vector3 cameraOffset = Vector3(0, 0, 0); //this is used for ofsseting the camera to match the player's head etc.
 		Vector3 offset = Vector3(0,0,0);
 	};
 }
