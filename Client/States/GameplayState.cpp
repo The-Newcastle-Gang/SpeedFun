@@ -420,6 +420,7 @@ void GameplayState::InitWorld() {
     worldHasLoaded = LoadingStates::LOADED;
 }
 
+[[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
     world->AddGameObject(rock, true);
