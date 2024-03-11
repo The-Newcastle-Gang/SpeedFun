@@ -20,12 +20,8 @@ void ObjectOscillator::OnCollisionEnter(GameObject* other) {
         float topOfOscillator = gameObject->GetTransform().GetPosition().y + halfHeight;
         CapsuleVolume* capVolume = ((CapsuleVolume*)other->GetBoundingVolume());
         float playerFeet = other->GetTransform().GetPosition().y - capVolume->GetHalfHeight();
-        std::cout << topOfOscillator << " PLATFORM POS\n";
-        std::cout << capVolume->GetHalfHeight()<< "  <HEIGHT " << capVolume->GetRadius() << " <RAD\n";
-        std::cout << playerFeet << " PLAYER POS\n";
         if (playerFeet >= topOfOscillator)
         {
-            std::cout << "PLAYER ON PLAYFORM!!\n";
             objectsOnPlatform[other] = true;
 
         }
