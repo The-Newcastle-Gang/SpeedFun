@@ -70,6 +70,7 @@ namespace NCL {
             void RenderCamera();
             void ApplyPostProcessing();
             void RenderSkybox();
+            void RenderRayMarching();
             void FillDiffuseBuffer();
             void RenderDeferredLighting();
             void CombineBuffers();
@@ -93,6 +94,13 @@ namespace NCL {
 
             GLuint bufferFBO;
             GLuint lightFBO;
+            GLuint rayMarchFBO;
+
+            GLuint rayMarchColor;
+            GLuint rayMarchDepth;
+            GLuint rayMarchNormal;
+
+            OGLShader* rayMarchShader;
 
             OGLShader* combineShader;
             OGLShader* pointLightShader;
@@ -150,10 +158,6 @@ namespace NCL {
 
             GLuint uiVAO;
             GLuint uiVBO;
-
-            GLuint rayMarchFBO;
-            GLuint rayMarchTexture;
-
 
             GLuint sceneColorTexture;
             GLuint sceneDepthTexture;
