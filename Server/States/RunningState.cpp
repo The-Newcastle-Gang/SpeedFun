@@ -1,5 +1,6 @@
 #include "RunningState.h"
 #include "RunningState.h"
+#include <winnt.h>
 using namespace NCL;
 using namespace CSC8503;
 
@@ -80,6 +81,19 @@ void RunningState::ReadNetworkFunctions() {
     }
 }
 
+void RunningState::SetNetworkObjectActive(GameObject *object, bool isActive) {
+  if (!object->GetNetworkObject()) return;
+
+  FunctionData data;
+  DataHandler handler(&data);
+  handler.Pack(object->GetNetworkObject()->GetNetworkId());
+  handler.Pack(isActive);
+
+  networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SetNetworkActive, &data));
+
+  object->SetActive(isActive);
+}
+
 void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
@@ -110,7 +124,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("woahcool");
     CreatePlayers();
     AddTriggersToLevel();
 }

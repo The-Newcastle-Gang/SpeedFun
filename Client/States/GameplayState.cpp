@@ -123,18 +123,16 @@ void GameplayState::OnEnter() {
     renderer->SetPointLights(world->GetPointLights());
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
+
 void GameplayState::InitialiseAssets() {
-    
     InitWorld();
     InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
     FinishLoading();
 }
-void GameplayState::InitSounds() {
-    // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
-    // guards on the PlaySound method.
 
+void GameplayState::InitSounds() {
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
@@ -331,6 +329,13 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Player_Animation_Call): {
                 Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
                 UpdatePlayerAnimation(data.networkID, data.state);
+            } break;
+
+            case(Replicated::SetNetworkActive): {
+                int networkId = handler.Unpack<int>();
+                bool isActive = handler.Unpack<bool>();
+                GameObject* object = world->GetObjectByNetworkId(networkId);
+                object->SetActive(isActive);
             }
         }
     }
@@ -529,7 +534,7 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+    levelManager->TryReadLevel("woahcool");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();

@@ -93,6 +93,7 @@ namespace NCL {
             void CreateNetworkThread();
 
             void ReadNetworkFunctions();
+            void SetNetworkObjectActive(GameObject* gameobject, bool isActive);
 
             void ReadNetworkPackets();
 

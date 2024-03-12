@@ -49,6 +49,10 @@ namespace NCL::CSC8503 {
             return boundingVolume;
         }
 
+        void SetActive(bool pActive) {
+          isActive = pActive;
+        }
+
         bool IsActive() const {
             return isActive;
         }

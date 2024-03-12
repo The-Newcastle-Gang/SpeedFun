@@ -206,19 +206,23 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
 bool PlayerMovement::GroundCheck() {
 
     constexpr static float groundOffset = 0.1;
-    constexpr static float groundDistanceCheck = 0.2;
+    constexpr static float groundDistanceCheck = 0.15;
 
     auto physicsObject = gameObject->GetPhysicsObject();
     auto position = gameObject->GetTransform().GetPosition();
 
     auto collVol = (CapsuleVolume*)gameObject->GetBoundingVolume();
-    Vector3 capBottom =  position - Vector3(0, collVol->GetHalfHeight(),0);
+    Vector3 capBottom =  position - Vector3(0, collVol->GetHalfHeight() + collVol->GetRadius(),0);
     capBottom += Vector3(0, groundOffset, 0);
+
 
     Ray ray = Ray(capBottom, Vector3(0,-1,0));
     RayCollision closestCollision;
 
+    Vector3 viewOffset = Vector3(3.0, 0, 0);
+
     if (world->Raycast(ray, closestCollision, true, gameObject)) {
+        Debug::DrawLine(ray.GetPosition() + viewOffset, closestCollision.collidedAt + viewOffset);
         Vector3 dist = closestCollision.collidedAt - capBottom;
         if (dist.Length() < groundDistanceCheck) {
             return true;

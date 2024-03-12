@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(ASSET_ROOT "${CMAKE_SOURCE_DIR}/Assets/" CACHE STRING "" FORCE)
 add_compile_definitions(ASSETROOTLOCATION="${ASSET_ROOT}")
 
+
+
 if(MSVC)
     add_compile_definitions("NOMINMAX")
     add_compile_options(/wd4293 /wd4018 /wd4244 /wd4312 /wd4267 /wd4005)
@@ -14,6 +16,8 @@ endif()
 include_directories(enet)
 include_directories(entt)
 include_directories(External)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(raudio)
 add_subdirectory(enet)
