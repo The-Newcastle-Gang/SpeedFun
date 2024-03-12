@@ -466,8 +466,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    }
     world->StartWorld();
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {

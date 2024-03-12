@@ -62,11 +62,13 @@ namespace NCL {
 
             std::atomic<bool> shouldClose;
 
+            float countdownTimer = 5.0f;
             float packetTimer;
             int sceneSnapshotId;
 
             int playerTestId = -1;
 
+            int numPlayersLoaded = 0;
             std::unordered_map<int, GameObject*> playerObjects;
 
             void LoadLevel();
