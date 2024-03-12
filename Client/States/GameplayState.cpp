@@ -18,6 +18,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
+    crosshairImage = "crosshair.png";
 }
 
 GameplayState::~GameplayState() {
@@ -42,18 +43,16 @@ void GameplayState::InitCanvas(){
 
 void GameplayState::InitCrossHeir(){
     //crossheir
-    auto crossHeirVert = canvas->AddElement()
-            .SetColor({1.0,1.0,1.0,1.0})
-            .SetAbsoluteSize({15,3})
-            .AlignCenter()
-            .AlignMiddle();
+    canvas->CreateNewLayer("UI");
+    canvas->PushActiveLayer("UI");
 
-    auto crossHeirHoriz = canvas->AddElement()
-            .SetColor({1.0,1.0,1.0,1.0})
-            .SetAbsoluteSize({3,15})
-            .AlignCenter()
-            .AlignMiddle();
 
+
+    crosshair = &canvas->AddImageElement(crosshairImage, "UI")
+        .SetAbsoluteSize({ 32, 32 })
+        .AlignCenter()
+        .AlignMiddle();
+    crosshair->OnUpdate.connect<&GameplayState::UpdateCrosshair>(this);
 }
 
 void GameplayState::InitTimerBar(){
@@ -414,6 +413,11 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
             break;
         }
     }
+}
+
+void GameplayState::UpdateCrosshair(Element& element, float dt) {
+    element.SetRotation(Quaternion::EulerAnglesToQuaternion(0, 0, crossHairRotation));
+    crossHairRotation += dt;
 }
 
 void GameplayState::UpdateTimerUI(Element& element, float dt) {

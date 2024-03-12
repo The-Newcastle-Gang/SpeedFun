@@ -70,6 +70,7 @@ namespace NCL {
             std::unique_ptr<LevelManager> levelManager;
 
             std::string medalImage;
+            std::string crosshairImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -183,6 +184,10 @@ namespace NCL {
             void UpdateTimerText(Element& element, float dt);
             void UpdateTimerNub(Element& element, float dt);
             void UpdatePlayerBlip(Element &element, float dt);
+
+            Element* crosshair;
+            void UpdateCrosshair(Element& element, float dt);
+            float crossHairRotation = 0.0f;
 
             std::string GetMedalImage();
 
