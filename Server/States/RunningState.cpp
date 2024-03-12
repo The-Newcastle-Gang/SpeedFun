@@ -178,7 +178,6 @@ void NCL::CSC8503::RunningState::ClearLevel()
     currentLevelDeathPos = { 0, 0, 0 };
     currentLevelEndPos = { 0, 0, 0 };
     currentLevelStartPos = { 0, 0, 0 };
-    Debug::lines
     triggersVector.clear();
     world->Clear();
 }
@@ -241,7 +240,7 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
         trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
 
-        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 10.0f);
     }
 }
 
