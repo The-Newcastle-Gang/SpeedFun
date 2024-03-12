@@ -362,7 +362,7 @@ void PhysicsSystem::UpdateObjectSortSweepBounds() {
 void PhysicsSystem::SortAndSweep() {
     broadphaseCollisions.clear();
 
-    SSInsertionSort();
+    SortAndSweepInsertionSort();
     std::set<GameObject*> currentValidObjects;
     for (int i = 0; i < sortAndSweepData.size(); i++) {
         SortSweepStruct currentBound = sortAndSweepData[i];
@@ -385,7 +385,7 @@ void PhysicsSystem::SortAndSweep() {
 
 }
 
-void PhysicsSystem::SSInsertionSort() { //adapted from https://www.geeksforgeeks.org/cpp-program-for-insertion-sort/
+void PhysicsSystem::SortAndSweepInsertionSort() { //adapted from https://www.geeksforgeeks.org/cpp-program-for-insertion-sort/
     SortSweepStruct currentValue;
     for (int i = 1; i < sortAndSweepData.size(); i++) {
         currentValue = sortAndSweepData[i];

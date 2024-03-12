@@ -64,7 +64,7 @@ namespace NCL {
 
             void SortAndSweep();
 
-            void SSInsertionSort();
+            void SortAndSweepInsertionSort();
 
 			void ClearForces();
 

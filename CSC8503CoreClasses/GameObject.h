@@ -52,17 +52,21 @@ namespace NCL::CSC8503 {
             {
                 case VolumeType::AABB: {
                     halfDim = ((AABBVolume*)vol)->GetHalfDimensions().x;
+                    break;
                 }
                 case VolumeType::OBB: {
                     Vector3 halfDims = ((OBBVolume*)vol)->GetHalfDimensions();
                     halfDim = std::max(halfDims.x, halfDims.y);
                     halfDim = std::max(halfDim, halfDims.z);
+                    break;
                 }
                 case VolumeType::Capsule: {
                     halfDim = ((CapsuleVolume*)vol)->GetHalfHeight();
+                    break;
                 }
                 case VolumeType::Sphere: {
                     halfDim = ((SphereVolume*)vol)->GetRadius();
+                    break;
                 }
                 default:
                     break;
