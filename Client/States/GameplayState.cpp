@@ -401,6 +401,7 @@ void GameplayState::InitLevel() {
     auto opList  = lr->GetOscillatorPList();
     auto harmOpList  = lr->GetHarmfulOscillatorPList();
     auto speedUpList = lr->GetSpeedupBlockPrimitiveList();
+    auto bridgeList = lr->GetBridgePrimitiveList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -430,6 +431,12 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
+    for (auto& x : bridgeList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
 
     //SetTestSprings();
 
@@ -441,8 +448,8 @@ void GameplayState::InitLevel() {
     //auto swingingTemp = new GameObject();
     //replicated->AddSwingingBlock(swingingTemp, *world);
     //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
-    SpeedUpBlockTest();
-    SetBridgeTest();
+    //SpeedUpBlockTest();
+    //SetBridgeTest();
 }
 
 void GameplayState::SetTestSprings() {

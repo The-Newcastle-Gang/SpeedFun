@@ -13,7 +13,7 @@ void TestBridge::BridgeFall(float dt) {
 	fallTime += dt;
 	if (fallTime <= 7.168) {
 		currentOrientation = gameObject->GetTransform().GetOrientation();
-		fallOrientation = currentOrientation * Quaternion::EulerAnglesToQuaternion(4*sin(dt*PI), 0.0, 0.0);
+		fallOrientation = currentOrientation * Quaternion::EulerAnglesToQuaternion(0.0, 0.0, 4 * sin(dt * PI));
 		gameObject->GetTransform().SetOrientation(fallOrientation);
 	}
 	else {
@@ -23,6 +23,7 @@ void TestBridge::BridgeFall(float dt) {
 }
 
 void TestBridge::TriggerOn() {
+	std::cout << "Bridge fall!\n";
 	bridgeFall = true;
 }
 

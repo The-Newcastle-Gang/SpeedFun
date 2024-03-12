@@ -57,6 +57,7 @@ public:
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
     [[nodiscard]] std::vector<Vector3> GetCheckPointPositions() const { return checkPointPositions; }
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetSpeedupBlockPrimitiveList() const { return speedupBlockPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetBridgePrimitiveList() const { return bridgePrimitives; }
 
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
@@ -70,6 +71,7 @@ protected:
     std::vector<OscillatorPrimitive*> oscillatorPrimitives;
     std::vector<OscillatorPrimitive*> harmfulOscillatorPrimitives;
     std::vector<PrimitiveGameObject*> speedupBlockPrimitives;
+    std::vector<PrimitiveGameObject*> bridgePrimitives;
 
     std::vector<GroundCubePrimitive*> groundCubes;
 
