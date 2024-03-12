@@ -380,6 +380,11 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
 }
 
 void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
+    UpdateGameTimerInfo(player, inputInfo);
+    UpdatePlayerPositionsInfo(player, inputInfo);
+}
+
+void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo) {
     auto id = GetIdFromPlayerObject(player);
     FunctionData data;
     DataHandler handler(&data);
@@ -390,9 +395,23 @@ void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& i
 
     int medalID = (int)levelManager->GetCurrentMedal();
     handler.Pack(medalID);
-
-
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
+}
+
+void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+
+    for (auto players : playerObjects)
+    {
+        int playerID = players.first;
+        Vector3 playerPosition = players.second->GetTransform().GetPosition();
+        handler.Pack(playerID);
+        handler.Pack(playerPosition);
+    }
+    handler.Pack(-999);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_PlayerPositions, &data)));
 }
 void RunningState::ApplyPlayerMovement() {
 

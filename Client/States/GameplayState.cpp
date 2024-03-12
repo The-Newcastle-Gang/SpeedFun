@@ -113,7 +113,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     if (!firstPersonPosition) return;
-    float tVal = CalculateCompletion(firstPersonPosition->GetPosition());
+    float tVal = CalculateCompletion(playerPositions[element.GetId()]);
     tVal = std::clamp(tVal, 0.0f, 1.0f);
     tVal = tVal * 300 - 150;
 
@@ -130,14 +130,25 @@ void GameplayState::InitLevelMap(){
             .SetTransformTranslation(Vector2(98,50));
     
 
+    /*
     auto& playerElement = canvas->AddImageElement(playerblipImage)
             .SetColor({0.5,0.0,0.,1})
             .SetAbsoluteSize({30,30})
             .CenterSprite();
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
+    */
 }
 
+void GameplayState::InitPlayerBlip(int id) {
+    auto& playerElement = canvas->AddImageElement(playerblipImage)
+        .SetColor({ 0.5,0.0,0.,1 })
+        .SetAbsoluteSize({ 30,30 })
+        .CenterSprite()
+        .SetId("blip_" + std::to_string(id));
+
+    playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
+}
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -404,6 +415,23 @@ void GameplayState::ReadNetworkFunctions() {
                     crossHairScale = 1.15f;
                 }
             } 
+            break;
+
+            case(Replicated::GameInfo_PlayerPositions): {
+                int unpackFlag = 0;
+                while (unpackFlag != -999) {
+                    unpackFlag = handler.Unpack<int>();
+                    if (unpackFlag == -999) continue;
+
+                    std::string unpackFlagID = "blip_" + std::to_string(unpackFlag);
+                    if (playerPositions.find(unpackFlagID) == playerPositions.end()) {
+                        playerPositions.insert({ unpackFlagID, Vector3()});
+                        InitPlayerBlip(unpackFlag);
+                    }
+                    Vector3 position = handler.Unpack<Vector3>();
+                    playerPositions[unpackFlagID] = position;
+                }
+            }
             break;
         }
     }

@@ -37,7 +37,8 @@ public:
         Stage_Start,
         Player_Velocity_Call,
         GameInfo_Timer,
-        GameInfo_GrappleAvailable
+        GameInfo_GrappleAvailable,
+        GameInfo_PlayerPositions
         };
 
     // In the situation where the server is the remote (Client to server)

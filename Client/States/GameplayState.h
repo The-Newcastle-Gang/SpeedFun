@@ -167,6 +167,10 @@ namespace NCL {
             float timerMedalShakeTimer = 0.0f;
             float medalTimes[3] = { -1.0f, -1.0f, -1.0f };
 
+            int PlayerBlip;
+            void InitPlayerBlip(int id);
+            std::unordered_map<std::string, Vector3> playerPositions;
+
             std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
 
             Element* timerNubs[3];
@@ -180,7 +184,6 @@ namespace NCL {
             const int timerBoxWidth = 96;
             const int timerBarOutline = 3;
             float timerRatio = 0.0f;
-            int PlayerBlip;
 
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);

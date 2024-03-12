@@ -88,6 +88,8 @@ namespace NCL {
             void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
             void UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo);
+            void UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo);
+            void UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo);
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
             void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
 
