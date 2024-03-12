@@ -413,7 +413,8 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, crossHairRotation));
-    crossHairRotation += dt * 3;
+    element.SetTransformTranslation(Vector2(50, 50));
+    crossHairRotation += dt * 45;
 }
 
 void GameplayState::UpdateTimerUI(Element& element, float dt) {

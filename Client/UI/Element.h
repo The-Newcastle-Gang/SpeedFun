@@ -82,6 +82,14 @@ public:
         return *this;
     }
 
+    Element& SetTransformTranslation(Vector2 v) {
+        
+        Vector2 screenSize = Vector2(Window::GetWindow()->GetScreenSize().x, Window::GetWindow()->GetScreenSize().y);
+        Vector2 screenPos = screenSize * 0.01 * v;
+        transform.SetPosition(Vector3(screenPos.x, screenPos.y, 0));
+        return *this;
+    }
+
     Element& SetAbsoluteSize(Vector2Int v) {
         dimensions.absoluteSize = v;
         return *this;
