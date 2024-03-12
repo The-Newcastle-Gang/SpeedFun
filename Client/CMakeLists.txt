@@ -68,6 +68,7 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
         "../NCLCoreClasses/Matrix2.h"
         "../NCLCoreClasses/Matrix3.h"
         "../NCLCoreClasses/Matrix4.h"
+        "../NCLCoreClasses/Transform.h"
 
         "../NCLCoreClasses/GameTimer.h"
 )

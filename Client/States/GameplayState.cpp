@@ -43,15 +43,11 @@ void GameplayState::InitCanvas(){
 
 void GameplayState::InitCrossHeir(){
     //crossheir
-    canvas->CreateNewLayer("UI");
-    canvas->PushActiveLayer("UI");
 
-
-
-    crosshair = &canvas->AddImageElement(crosshairImage, "UI")
+    crosshair = &canvas->AddImageElement(crosshairImage)
         .SetAbsoluteSize({ 32, 32 })
-        .AlignCenter()
-        .AlignMiddle();
+        .AlignCenter(0, false)
+        .AlignMiddle(0, false);
     crosshair->OnUpdate.connect<&GameplayState::UpdateCrosshair>(this);
 }
 
@@ -416,8 +412,8 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
 }
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
-    element.SetRotation(Quaternion::EulerAnglesToQuaternion(0, 0, crossHairRotation));
-    crossHairRotation += dt;
+    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, crossHairRotation));
+    crossHairRotation += dt * 3;
 }
 
 void GameplayState::UpdateTimerUI(Element& element, float dt) {

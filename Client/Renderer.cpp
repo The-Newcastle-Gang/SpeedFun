@@ -321,12 +321,9 @@ void GameTechRenderer::RenderUI() {
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
             auto absPos = e.GetAbsolutePosition();
-            auto rotation = e.GetRotation();
-            auto transformation = Transform();
+            auto transformation = e.GetTransform();
             auto relSize = e.GetRelativeSize();
             auto absSize = e.GetAbsoluteSize();
-
-            transformation.SetOrientation(rotation);
 
             TextureBase* tex = e.GetTexture();
             if (tex) {

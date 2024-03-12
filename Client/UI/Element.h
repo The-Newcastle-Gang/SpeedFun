@@ -12,15 +12,18 @@
 #include "entt.hpp"
 #include "Window.h"
 #include "TextData.h"
+#include "Transform.h"
 
 using namespace NCL;
+using namespace NCL::CSC8503;
 
 class Element {
 public:
     Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
-        rotation = Quaternion();
+        transform = Transform();
+        transform.SetPosition(Vector3(0, 0, 0)).SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, 0)).SetScale(Vector3(1, 1, 1));
         texture = nullptr;
         shader = nullptr;
         hoverTimer = 0;
@@ -40,8 +43,8 @@ public:
         return dimensions;
     }
 
-    [[nodiscard]] Quaternion GetRotation() const {
-        return rotation;
+    [[nodiscard]] Transform& GetTransform() {
+        return transform;
     }
     
     [[nodiscard]] Vector4 GetColor() const {
@@ -89,11 +92,6 @@ public:
         return *this;
     }
 
-    Element& SetRotation(Quaternion r) {
-        rotation = r;
-        return *this;
-    }
-
     Element& SetRelativePosition(Vector2 v) {
         dimensions.relativePosition = v;
         return *this;
@@ -127,9 +125,9 @@ public:
         return *this;
     }
 
-    Element& AlignCenter(int padding = 0) {
-        dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
-        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2 + padding;
+    Element& AlignCenter(int padding = 0, bool reposition = true) {
+        if (reposition) dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
+        dimensions.absolutePosition.x = - dimensions.absoluteSize.x / 2 + padding;
         return *this;
     }
 
@@ -139,9 +137,9 @@ public:
         return *this;
     }
 
-    Element& AlignMiddle(int padding = 0) {
-        dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
-        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2 + padding;
+    Element& AlignMiddle(int padding = 0, bool reposition = true) {
+        if (reposition) dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
+        dimensions.absolutePosition.y = - dimensions.absoluteSize.y / 2 + padding;
         return *this;
     }
 
@@ -217,7 +215,7 @@ public:
 private:
     UIDim dimensions;
     Vector4 color;
-    Quaternion rotation;
+    Transform transform;
     TextureBase* texture;
     ShaderBase* shader;
     std::string id;
