@@ -638,25 +638,29 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
 void GameplayState::AddLava(Vector3 position){
     auto LavaQuad = new GameObject();
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
-    replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position);
-    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
+    replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
+    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("QuadSequel.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
     auto endP    =  new GameObject();
     auto endQuad =  new GameObject();
     endQuad->GetTransform().SetOrientation(Quaternion (Matrix4::Rotation(90, {0,1,0})));
-    replicated->AddTestObjectToLevel(endP, * world, {1,1,1}, position);
-    replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position);
+    replicated->AddTestObjectToLevel(endP, * world, {1,1,1}, position, false);
+    replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position, false);
 
     endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
-    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default"), resources->GetShader("scene")));
+    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default.png"), resources->GetShader("scene")));
 
 }
 
 void GameplayState::ObjectsToRender(){
     Vector3 lavaPos = deathPos - Vector3(0,50,0); // CHANGE THIS ONCE LEVELS HAVE BEEN PROPERLY MADE.
     
-    AddEndPortal(endPos);
+
     AddLava(lavaPos + Vector3(0, 5, 0));
+
+    AddEndPortal(endPos);
+
+
 }

@@ -10,6 +10,7 @@
 #include "Vector2.h"
 #include "Font.h"
 #include "Frustum.h"
+#include "GameWorld.h"
 
 #include "Assets.h"
 #include "Element.h"
