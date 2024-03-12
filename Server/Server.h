@@ -34,8 +34,8 @@ public:
     void InitStateMachine();
 
 private:
-    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameServer> serverBase;
+    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<PhysicsSystem> physics;
     std::unique_ptr<Replicated> replicated;

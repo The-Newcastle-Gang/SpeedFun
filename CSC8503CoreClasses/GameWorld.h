@@ -15,6 +15,12 @@ namespace NCL {
         class GameObject;
         class Constraint;
 
+        struct PointLightInfo {
+            Vector4		lightColour;
+            float		lightRadius;
+            Vector3		lightPosition;
+        };
+
         typedef std::function<void(GameObject*)> GameObjectFunc;
         typedef std::vector<GameObject*>::const_iterator GameObjectIterator;
 
@@ -80,6 +86,12 @@ namespace NCL {
                 return networkObjects.end();
             }
 
+            void AddPointLightToWorld(PointLightInfo pointLight) {
+                pointLights.push_back(pointLight);
+            }
+
+            std::vector<PointLightInfo>* GetPointLights() { return &pointLights; }
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;
@@ -95,6 +107,7 @@ namespace NCL {
 
             int networkIdCounter;
 
+            std::vector<PointLightInfo> pointLights;
 
         };
     }

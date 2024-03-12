@@ -30,6 +30,9 @@ namespace NCL {
             GameTechRenderer(GameWorld& world, Canvas& canvas);
             ~GameTechRenderer();
 
+            void SetPointLights(std::vector<PointLightInfo>* lights) { pointLights = lights; }
+            void SetPointLightMesh(MeshGeometry* mesh) { pointLightSphereMesh = mesh; }
+
             MeshGeometry*	LoadMesh(const string& name);
             TextureBase*	LoadTexture(const string& name);
             ShaderBase*		LoadShader(const string& vertex, const string& fragment);
@@ -40,6 +43,7 @@ namespace NCL {
             void CreatePostProcessQuad();
             void CreateQuad();
             void RenderQuad();
+            void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }
 
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
             void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
@@ -66,7 +70,12 @@ namespace NCL {
             void SortObjectList();
             void RenderShadowMap();
             void RenderCamera();
+            void ApplyPostProcessing();
             void RenderSkybox();
+            void FillDiffuseBuffer();
+            void RenderDeferredLighting();
+            void CombineBuffers();
+            void GenerateScreenTexture(GLuint& into, bool depth);
 
             void LoadSkybox();
 
@@ -74,6 +83,21 @@ namespace NCL {
             void SetDebugLineBufferSizes(size_t newVertCount);
 
             vector<const RenderObject*> activeObjects;
+
+
+            bool doDeferred = false;
+
+            GLuint bufferColourTex;
+            GLuint bufferNormalTex;
+            GLuint bufferDepthTex;
+            GLuint lightDiffuseTex;
+            GLuint lightSpecularTex;
+
+            GLuint bufferFBO;
+            GLuint lightFBO;
+
+            OGLShader* combineShader;
+            OGLShader* pointLightShader;
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
@@ -95,9 +119,9 @@ namespace NCL {
             // Ortho for UI
             Matrix4 uiOrthoView;
 
-            Vector4		lightColour;
-            float		lightRadius;
-            Vector3		lightPosition;
+
+            PointLightInfo sunlight;
+            std::vector<PointLightInfo>* pointLights;
 
             //Debug data storage things
             vector<Vector3> debugLineData;
@@ -110,6 +134,8 @@ namespace NCL {
             std::vector<OGLMesh*> UIQuads;
             OGLMesh* UIMesh;
             OGLShader* uiShader;
+
+            MeshGeometry* pointLightSphereMesh;
 
             GLuint lineVAO;
             GLuint lineVertVBO;

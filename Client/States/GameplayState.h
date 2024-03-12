@@ -88,6 +88,8 @@ namespace NCL {
 
             std::thread* networkThread;
 
+            std::atomic<bool> shouldShutDown;
+
             Transform* firstPersonPosition;
 
             Diagnostics packetsSent{};
@@ -111,7 +113,7 @@ namespace NCL {
             float totalDTElapsed = 0.0f;
             bool debugMovementEnabled = false;
 
-            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+            void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
             void ReadNetworkPackets();
 
@@ -150,7 +152,7 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
-            float defaultFOV = 40.0f;
+            float defaultFOV = 70.0f;
 
             void HandleGrappleEvent(int event);
 
