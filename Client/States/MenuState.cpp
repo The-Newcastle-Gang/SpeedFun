@@ -81,6 +81,11 @@ void MenuState::InitLua() {
     L = luaL_newstate();
     luaL_openlibs(L);
 
+    lua_pushnumber(L, Window::GetWindow()->GetScreenSize().x);
+    lua_setglobal(L, "WindowWidth");
+    lua_pushnumber(L, Window::GetWindow()->GetScreenSize().y);
+    lua_setglobal(L, "WindowHeight");
+
     auto status = luaL_dofile(L, (Assets::DATADIR + "MainMenu.lua").c_str());
 
     if (status) {
