@@ -22,6 +22,13 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+
+    shouldShutDown.store(true);
+    networkThread->join();
+
+    delete networkThread;
+    networkThread = nullptr;
+
     delete debugger;
     delete loadSoundThread;
 }
@@ -124,6 +131,7 @@ void GameplayState::InitLevelMap(){
             .SetColor({0.0,0.0,0.,1})
             .SetAbsoluteSize({20,20})
             .AlignRight(20)
+            .AlignMiddle(-150)
             .AlignMiddle(-150);
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
@@ -133,13 +141,13 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
     auto threadClient = ClientThread(client, networkData);
 
-    while (client) {
+    while (!shouldShutDown) {
         threadClient.Update();
     }
-
 }
 
 void GameplayState::OnEnter() {
+    renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
@@ -149,6 +157,9 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
+
+    renderer->SetPointLights(world->GetPointLights());
+    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 
 void GameplayState::InitialiseAssets() {
@@ -161,30 +172,40 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::InitSounds() {
+    // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
+    // guards on the PlaySound method.
+
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
+    // Probably should be made atomic though probably doesn't matter.
     soundHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateNetworkThread() {
+    shouldShutDown.store(false);
     GameClient* client = baseClient;
-    baseClient = nullptr;
     networkData = std::make_unique<ClientNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
+
     world->ClearAndErase();
     renderer->Render();
     soundManager->SM_UnloadSoundList();
+    baseClient->ClearPacketHandlers();
+
+    shouldShutDown.store(true);
+    networkThread->join();
     
     delete networkThread;
+    networkThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -342,7 +363,7 @@ void GameplayState::ReadNetworkFunctions() {
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
                 float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
                 renderer->SetSpeedLineAmount(speedVisualModifier);
-                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 30.0f);
             }
             break;
 
@@ -636,15 +657,18 @@ void GameplayState::InitLevel() {
     }
 
     //SetTestSprings();
-    //SetTestFloor();
+    SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
 
     // TEST SWINGING OBJECT ON THE CLIENT
-    auto swingingTemp = new GameObject();
-    replicated->AddSwingingBlock(swingingTemp, *world);
-    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    //auto swingingTemp = new GameObject();
+    //replicated->AddSwingingBlock(swingingTemp, *world);
+    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+
+    SetTestSprings();
+
 }
 
 void GameplayState::SetTestSprings() {
@@ -653,6 +677,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -40.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -660,6 +690,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -50.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 }
 

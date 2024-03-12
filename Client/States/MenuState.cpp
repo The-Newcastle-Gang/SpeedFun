@@ -295,7 +295,7 @@ void MenuState::InitCanvas() {
 
 void MenuState::OnEnter() {
     isGameStarted = false;
-
+    renderer->SetDeferred(false);
     InitCanvas();
     InitMenuSounds();
     RegisterPackets();

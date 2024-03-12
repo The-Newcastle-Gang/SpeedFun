@@ -12,7 +12,7 @@ using namespace CSC8503;
 bool debugMode =false;
 
 int main() {  
-    Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1280, 720);
+    Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1920, 1200,true);
    
 
     if (!w->HasInitialised()) {

@@ -12,12 +12,14 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
     levelManager = std::make_unique<LevelManager>();
+    shouldClose.store(false);
 
     currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
-
+    shouldClose.store(true);
+    networkThread->join();
 }
 
 void RunningState::OnEnter() {
@@ -25,6 +27,9 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+
+    shouldClose.store(false);
+
     CreateNetworkThread();
     LoadLevel();
     world->StartWorld();
@@ -34,18 +39,15 @@ void RunningState::OnEnter() {
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
     auto threadServer = ServerThread(server, networkData);
 
-    while (server) {
+    while (!shouldClose) {
         threadServer.Update();
     }
 }
 
 void RunningState::CreateNetworkThread() {
     GameServer* server = serverBase;
-    // Again, make sure serverBase isn't used without confirmation.
-    serverBase = nullptr;
     networkData = std::make_unique<ServerNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, server, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(&RunningState::ThreadUpdate, this, server, networkData.get());
 }
 
 void RunningState::ReadNetworkFunctions() {
@@ -87,9 +89,13 @@ void RunningState::ReadNetworkPackets() {
 }
 
 void RunningState::OnExit() {
+    serverBase->ClearPacketHandlers();
     world->ClearAndErase();
     physics->Clear();
     playerObjects.clear();
+
+    shouldClose.store(true);
+    networkThread->join();
 }
 
 
@@ -427,7 +433,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(dO);
     }
 
-    //SetTestSprings();
+    //SetTestSprings(); 
     //SetTestFloor();
 }
 

@@ -12,7 +12,6 @@ ServerThread::ServerThread(GameServer *server, ServerNetworkData *data) {
 }
 
 ServerThread::~ServerThread() {
-    baseServer->ClearPacketHandlers();
 }
 
 void ServerThread::ReadPacketsToSend() {
