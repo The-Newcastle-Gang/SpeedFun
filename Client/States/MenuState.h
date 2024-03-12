@@ -44,7 +44,8 @@ namespace NCL {
             std::unique_ptr<TweenManager> tweenManager;
             ShaderBase* hoverShader;
             ShaderBase* titleShader;
-            ShaderBase* menuParticleShader;
+            ShaderBase* menuLavaShader;
+            ShaderBase* menuSmokeShader;
             int hoverBox;
             int mHoverBox;
             int selected;

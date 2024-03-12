@@ -136,16 +136,20 @@ canvas = {
             rSize = Vector2:new(1, 1),
 
         },
-        {
+        --[[{
             image = "Noise.png",
             color = COLORS.main,
-            aSize = Vector2:new(1300, 700),
-            align = {
-                AlignTo("center", 0),
-                AlignTo("top", 0),
-            },
+            rSize = Vector2:new(1, 1),
             tags = {
-                "particleEffect",
+                "particleLavaEffect",
+            }
+        },
+        --]]
+        {
+            --image = "Noise.png",
+            rSize = Vector2:new(1, 1),
+            tags = {
+                "particleSmokeEffect",
             }
         },
         {
