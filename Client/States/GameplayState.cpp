@@ -21,6 +21,13 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+
+    shouldShutDown.store(true);
+    networkThread->join();
+
+    delete networkThread;
+    networkThread = nullptr;
+
     delete debugger;
     delete loadSoundThread;
 }
@@ -86,6 +93,7 @@ void GameplayState::InitLevelMap(){
             .SetColor({0.0,0.0,0.,1})
             .SetAbsoluteSize({20,20})
             .AlignRight(20)
+            .AlignMiddle(-150)
             .AlignMiddle(-150);
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
@@ -95,13 +103,13 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
     auto threadClient = ClientThread(client, networkData);
 
-    while (client) {
+    while (!shouldShutDown) {
         threadClient.Update();
     }
-
 }
 
 void GameplayState::OnEnter() {
+    renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
@@ -111,9 +119,12 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
+
+    renderer->SetPointLights(world->GetPointLights());
+    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 void GameplayState::InitialiseAssets() {
-    
+
     InitWorld();
     InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
@@ -121,31 +132,41 @@ void GameplayState::InitialiseAssets() {
     FinishLoading();
 }
 void GameplayState::InitSounds() {
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg" });
+    // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
+    // guards on the PlaySound method.
+
+    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
+    // Probably should be made atomic though probably doesn't matter.
     soundHasLoaded = LoadingStates::LOADED;
 }
 
 void GameplayState::CreateNetworkThread() {
+    shouldShutDown.store(false);
     GameClient* client = baseClient;
-    baseClient = nullptr;
     networkData = std::make_unique<ClientNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, client, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
+
     world->ClearAndErase();
     renderer->Render();
     soundManager->SM_UnloadSoundList();
-    
+    baseClient->ClearPacketHandlers();
+
+    shouldShutDown.store(true);
+    networkThread->join();
+
     delete networkThread;
+    networkThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -199,7 +220,7 @@ void GameplayState::Update(float dt) {
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
-            Debug::Print("Debug Movement!", 
+            Debug::Print("Debug Movement!",
                 Vector2(2.0f + 0.5f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.5f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
                 Debug::RAINBOW_ARRAY[i]);
         }
@@ -303,7 +324,7 @@ void GameplayState::ReadNetworkFunctions() {
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
                 float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
                 renderer->SetSpeedLineAmount(speedVisualModifier);
-                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 30.0f);
             }
             break;
 
@@ -313,12 +334,54 @@ void GameplayState::ReadNetworkFunctions() {
                 auto targetObject = world->GetObjectByNetworkId(networkObjectId);
                 targetObject->SetActive(isActive);
             } break;
+            case(Replicated::Player_Animation_Call): {
+                Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
+                UpdatePlayerAnimation(data.networkID, data.state);
+            }
+        }
+    }
+}
+
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
+
+    switch (state) {
+        case Replicated::IDLE: {
+            playerAnimator->TransitionAnimation("Idle", 0.1f);
+            break;
+        }
+        case Replicated::JUMP: {
+            playerAnimator->TransitionAnimation("Jump", 0.1f);
+            break;
+        }
+        case Replicated::FALLING: {
+            playerAnimator->TransitionAnimation("Fall", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_FORWARD: {
+            playerAnimator->TransitionAnimation("Run", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_BACK: {
+            playerAnimator->TransitionAnimation("RunBack", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_LEFT: {
+            playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
+            break;
+        }
+        case Replicated::RUNNING_RIGHT: {
+            playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
+            break;
         }
     }
 }
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
+
 }
 
 void GameplayState::ResetCameraAnimation() {
@@ -327,7 +390,7 @@ void GameplayState::ResetCameraAnimation() {
 }
 
 void GameplayState::WalkCamera(float dt) {
-    
+
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         soundManager->SM_PlaySound("footsteps.wav");
@@ -358,7 +421,7 @@ void GameplayState::HandleGrappleEvent(int event) {
 }
 
 void GameplayState::LandCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() +
                                               Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
     landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
 }
@@ -414,11 +477,13 @@ void GameplayState::FinishLoading() {
 }
 
 void GameplayState::InitCamera() {
-    world->GetMainCamera()->SetNearPlane(0.1f);
-    world->GetMainCamera()->SetFarPlane(500.0f);
-    world->GetMainCamera()->SetPitch(-15.0f);
-    world->GetMainCamera()->SetYaw(315.0f);
-    world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+    Camera* cam = world->GetMainCamera();
+    cam->SetNearPlane(0.1f);
+    cam->SetFarPlane(500.0f);
+    cam->SetPitch(-15.0f);
+    cam->SetYaw(315.0f);
+    cam->SetPosition(Vector3(-60, 40, 60));
+    cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
 }
 
 void GameplayState::InitWorld() {
@@ -428,6 +493,7 @@ void GameplayState::InitWorld() {
     worldHasLoaded = LoadingStates::LOADED;
 }
 
+[[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
     world->AddGameObject(rock, true);
@@ -443,21 +509,29 @@ void GameplayState::CreateRock() {
 
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
-    MeshGeometry* playerMesh = resources->GetMesh("Rig_Maximilian.msh");
-    MeshAnimation* testAnimation = resources->GetAnimation("Max_Run.anm");
+    MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-      
-        playerMesh->AddAnimationToMesh("Run", testAnimation);
-        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
 
-        AnimatorObject* newAnimator = new AnimatorObject();
-        newAnimator->SetAnimation(playerMesh->GetAnimation("Run"));
+        playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
+        playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
+        playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
+        playerMesh->AddAnimationToMesh("RunBack", resources->GetAnimation("Player_RunBack.anm"));
+        playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Player_Idle.anm"));
+        playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
+        playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
+        player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
+
+        AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
+        newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
+        newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
-        //player->SetRenderObject(new RenderObject(&player->GetTransform(), resources->GetMesh("Capsule.msh"), nullptr, nullptr));
+        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+
     }
 }
 
@@ -491,15 +565,16 @@ void GameplayState::InitLevel() {
     }
 
     //SetTestSprings();
-    //SetTestFloor();
+    SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
 
-    // TEST SWINGING OBJECT ON THE CLIENT
-//    auto swingingTemp = new GameObject();
-//    replicated->AddSwingingBlock(swingingTemp, *world);
-//    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+    //auto swingingTemp = new GameObject();
+    //replicated->AddSwingingBlock(swingingTemp, *world);
+    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
+
+    SetTestSprings();
 }
 
 void GameplayState::CreateGrapples() {
@@ -516,6 +591,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -40.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -523,6 +604,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -50.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 }
 
@@ -543,7 +630,13 @@ bool GameplayState::IsDisconnected() {
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
+
+    delete player->GetRenderObject();
     player->SetRenderObject(nullptr);
+
+    delete player->GetAnimatorObject();
+    player->SetAnimatorObject(nullptr);
+
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 }

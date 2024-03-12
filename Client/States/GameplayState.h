@@ -17,6 +17,7 @@
 #include "TriggerVolumeObject.h"
 #include "DebugMode.h"
 #include "SoundManager.h"
+#include "AnimatorObject.h"
 #include "LevelManager.h"
 
 #include <thread>
@@ -87,6 +88,8 @@ namespace NCL {
 
             std::thread* networkThread;
 
+            std::atomic<bool> shouldShutDown;
+
             Transform* firstPersonPosition;
 
             Diagnostics packetsSent{};
@@ -95,6 +98,8 @@ namespace NCL {
 
             void SendInputData();
             void CreatePlayers();
+
+            void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
             void ManageLoading(float dt);
             void FinishLoading();
@@ -108,7 +113,7 @@ namespace NCL {
             float totalDTElapsed = 0.0f;
             bool debugMovementEnabled = false;
 
-            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+            void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
             void ReadNetworkPackets();
 
@@ -147,7 +152,7 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
-            float defaultFOV = 40.0f;
+            float defaultFOV = 70.0f;
 
             void HandleGrappleEvent(int event);
 

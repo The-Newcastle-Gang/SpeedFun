@@ -38,15 +38,16 @@ using namespace CSC8503;
 class Client{
 public:
     Client(std::atomic<bool> &shouldStart);
+    ~Client();
     void Update(float dt);
 
 private:
 
-    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
     std::unique_ptr<GameClient> baseClient;
+    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
     std::unique_ptr<SoundManager> soundManager;
