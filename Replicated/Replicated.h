@@ -36,7 +36,6 @@ public:
         Death_Event,
         Death_Event_End,
         Stage_Start,
-        Player_Velocity_Call,
         SetNetworkActive,
 };
 
