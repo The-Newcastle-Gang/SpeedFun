@@ -91,7 +91,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("level 2");
     AddTriggersToLevel();
     CreatePlayers();
 }
@@ -277,6 +277,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelReader->GetPrimitiveList();
     auto opList = levelReader->GetOscillatorPList();
     auto harmOpList = levelReader->GetHarmfulOscillatorPList();
+    auto speedUpList = levelReader->GetSpeedupBlockPrimitiveList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -308,6 +309,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         DamagingObstacle* dO = new DamagingObstacle(g);
         g->AddComponent(oo);
         g->AddComponent(dO);
+    }
+
+    for (auto& x : speedUpList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        TestSpeedUpBlock* spb = new TestSpeedUpBlock(g);
+        g->AddComponent(spb);
     }
     AddTestSpeedUpBlock();
     //SetTestSprings();

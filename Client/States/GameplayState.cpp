@@ -396,16 +396,17 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
     auto lr= new LevelReader();
-    lr->HasReadLevel("newTest.json");
+    lr->HasReadLevel("level 2.json");
     auto plist  = lr->GetPrimitiveList();
     auto opList  = lr->GetOscillatorPList();
     auto harmOpList  = lr->GetHarmfulOscillatorPList();
+    auto speedUpList = lr->GetSpeedupBlockPrimitiveList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+        temp->GetRenderObject()->SetColour({1.0f, 0.65f, 0.90f, 1.0f});
     }
 
     for (auto &x : opList) {
@@ -416,6 +417,13 @@ void GameplayState::InitLevel() {
     }
 
     for (auto &x : harmOpList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
+    }
+
+    for (auto& x : speedUpList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
