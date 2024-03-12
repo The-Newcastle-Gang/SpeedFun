@@ -319,8 +319,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
-        TestSpeedUpBlock* spb = new TestSpeedUpBlock(g);
-        g->AddComponent(spb);
+        TestSpeedUpBlock* spd = new TestSpeedUpBlock(g);
+        g->AddComponent(spd);
     }
 
     for (auto& x : bridgeList) {
@@ -329,11 +329,11 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
         TestBridge* ts = new TestBridge(g);
         g->AddComponent(ts);
         SetTestBridge(ts);
     }
-
     //AddTestSpeedUpBlock();
     //SetTestSprings();
     SetTestFloor();
@@ -395,18 +395,7 @@ void RunningState::AddTestSpeedUpBlock() {
 }
 
 void RunningState::SetTestBridge(TestBridge* theBridge) {
-    //auto testBridge = new GameObject();
-    //auto x = new PrimitiveGameObject();
-    //x->position = Vector3(-90, 5, 5);
-    //x->colliderExtents = Vector3(10, 20, 0.5);
-    //x->dimensions = Vector3(10, 20, 0.5);
-    //x->shouldNetwork = true;
-    //replicated->AddBlockToLevel(testBridge, *world, x);
-    //testBridge->SetPhysicsObject(new PhysicsObject(&testBridge->GetTransform(), testBridge->GetBoundingVolume(), new PhysicsMaterial()));
-    //testBridge->GetPhysicsObject()->SetInverseMass(0.0);
-    //TestBridge* bridgeComp = new TestBridge(thebridge);
-    //thebridge->AddComponent(bridgeComp);
-
+  
     auto bridgeTrigger = new GameObject();
     replicated->AddTriggerVolumeToWorld(Vector3(1, 1, 1), bridgeTrigger, *world);
     bridgeTrigger->SetPhysicsObject(new PhysicsObject(&bridgeTrigger->GetTransform(), bridgeTrigger->GetBoundingVolume(), physics->GetPhysMat("Default")));

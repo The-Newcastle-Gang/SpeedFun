@@ -61,7 +61,7 @@ public:
 
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
-
+    
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;
@@ -70,6 +70,7 @@ protected:
     std::vector<PrimitiveGameObject*> primGOList;
     std::vector<OscillatorPrimitive*> oscillatorPrimitives;
     std::vector<OscillatorPrimitive*> harmfulOscillatorPrimitives;
+
     std::vector<PrimitiveGameObject*> speedupBlockPrimitives;
     std::vector<PrimitiveGameObject*> bridgePrimitives;
 
