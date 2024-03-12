@@ -139,7 +139,7 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         auto& rad = item.value()["radius"];
 
         newLight.lightColour = Vector4((float)colour["x"], (float)colour["y"], (float)colour["z"], (float)colour["w"]);
-        newLight.lightPosition = Vector3((float)pos["x"], (float)pos["y"], (float)pos["z"]);
+        newLight.lightPosition = Vector3((float)pos["x"], (float)pos["y"], (float)pos["z"] * -1);
         newLight.lightRadius = (float)rad;
 
         pointLights.emplace_back(newLight);
