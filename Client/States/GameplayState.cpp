@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -529,11 +530,12 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+    levelManager->TryReadLevel("DesertBus");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -555,6 +557,10 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
+    }
+
+    for (auto& l : lightList) {
+        AddPointLight(l);
     }
 
     //SetTestSprings();
@@ -598,6 +604,10 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+}
+
+void GameplayState::AddPointLight(PointLightInfo light) {
+    world->AddPointLightToWorld(light);
 }
 
 void GameplayState::SetTestFloor() {
