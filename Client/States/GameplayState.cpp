@@ -530,7 +530,7 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("DesertBus");
+    levelManager->TryReadLevel("newTest");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();

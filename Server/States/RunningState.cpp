@@ -110,7 +110,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("DesertBus");
+    BuildLevel("newTest");
     CreatePlayers();
     AddTriggersToLevel();
 }
