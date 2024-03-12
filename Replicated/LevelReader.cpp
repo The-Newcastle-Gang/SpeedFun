@@ -134,5 +134,29 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
     }
 
 
+    for (auto& item : jData["speedBlockList"].items()) {
+        auto tempGOPrimitive = new PrimitiveGameObject();
+        tempGOPrimitive->meshName = item.value()["mesh"];
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        tempGOPrimitive->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        tempGOPrimitive->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        tempGOPrimitive->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        tempGOPrimitive->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        tempGOPrimitive->shouldNetwork = item.value()["shouldNetwork"];
+        tempGOPrimitive->colliderRadius = item.value()["colliderRadius"];
+        tempGOPrimitive->inverseMass = item.value()["inverseMass"];
+        tempGOPrimitive->physicsType = item.value()["physicType"];
+
+
+        speedBlockPrimitives.emplace_back(tempGOPrimitive);
+    }
+
+
     return true;
 }
