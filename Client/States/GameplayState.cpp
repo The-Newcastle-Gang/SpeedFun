@@ -18,6 +18,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     timeBar = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
+    titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
 }
 
 GameplayState::~GameplayState() {
@@ -40,16 +41,12 @@ void GameplayState::InitCanvas(){
     //I can bet money on the fact that this code is going to be at release
     //if u see this owen dont kill this
 
+    shouldLoadScreen.store(true);
     if (finishedLoading == LoadingStates::READY) {
+    }
         InitCrossHeir();
         InitTimerBar();
         InitLevelMap();
-    }
-    else {
-        /*canvas->CreateNewLayer("Loading");*/
-        
-
-    }
 }
 
 void GameplayState::InitCrossHeir(){
@@ -113,15 +110,36 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
     }
 }
 
+void GameplayState::LoadingScreenTUpdate() {
+
+    std::cout << "LoadingScreenTUpdate Reached!\n";
+    canvas->CreateNewLayer("Loading");
+    canvas->PushActiveLayer("Loading");
+    canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
+        .SetAbsoluteSize({ 300,300 })
+        .AlignCenter()
+        .AlignMiddle().
+        SetShader(titleShader);
+
+    while (!shouldLoadScreen) {
+        //canvas->Update(1.0f);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+        canvas->PopActiveLayer();
+
+}
+
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     debugger = new DebugMode(world->GetMainCamera());
-    InitCanvas();
     InitialiseAssets();
-    
+    InitCanvas();
+
+
 }
 void GameplayState::InitialiseAssets() {
     
@@ -136,6 +154,7 @@ void GameplayState::InitialiseAssets() {
 
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
+    //shouldLoadScreen.store(true);
     FinishLoading();
 }
 void GameplayState::InitSounds() {
@@ -159,6 +178,11 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+    shouldLoadScreen.store(false);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
+}
+
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
@@ -179,10 +203,11 @@ void GameplayState::OnExit() {
 void GameplayState::ManageLoading(float dt) {
 
     if (loadingTime > 0.1f) {
-        std::cout << ".\n";
+        //std::cout << ".\n";
         loadingTime = 0.0f;
     }
     loadingTime += dt;
+
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";

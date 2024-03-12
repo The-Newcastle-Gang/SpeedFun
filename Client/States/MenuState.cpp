@@ -94,8 +94,8 @@ void MenuState::StartSingleplayer() {
 
 void MenuState::BeginSingleplayer(Element& _) {
 
-    //LoadingScreen(); //Maybe look into states to call state->Update
-    loadingScreen = new std::thread(&MenuState::LoadingScreen, this);
+    //LoadingScreen();
+    //loadingScreen = new std::thread(&MenuState::LoadingScreen, this);
     shouldServerStart.store(true);
     /*baseClient->PlayLoadingScreen();*/
     baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
@@ -105,18 +105,15 @@ void MenuState::BeginSingleplayer(Element& _) {
 
 void MenuState::LoadingScreen() {
 
-    auto quad = canvas->AddElement();
-    quad.OnUpdate.connect<&MenuState::LoadingScreen>(this);
+    //auto quad = canvas->AddElement();
+    //quad.OnUpdate.connect<&MenuState::LoadingScreen>(this);
 
-    //while (!loaded) {/*do stuff*/ }
-    
-    canvas->CreateNewLayer("Loading");
-    canvas->PushActiveLayer("Loading");
-    canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
-        .SetAbsoluteSize({ 300,300 })
-        .AlignCenter()
-        .AlignMiddle().SetShader(titleShader);
-    std::cout << "Loading the screen!\n";
+        canvas->CreateNewLayer("Loading", true);
+        canvas->PushActiveLayer("Loading");
+        canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
+                .SetAbsoluteSize({ 300,300 })
+                .AlignCenter()
+                .AlignMiddle().SetShader(titleShader);
 
 }
 

@@ -89,6 +89,8 @@ namespace NCL {
             std::thread* networkThread;
 
             std::atomic<bool> shouldShutDown;
+            std::atomic<bool> shouldLoadScreen;
+            ShaderBase* titleShader;
 
             Transform* firstPersonPosition;
 
@@ -174,6 +176,10 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
+
+            void LoadingScreenTUpdate();
+            void CreateLoadingScreenThread();
+            std::thread* loadingScreenThread;
         };
     }
 }
