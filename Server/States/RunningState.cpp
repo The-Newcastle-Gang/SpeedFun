@@ -417,7 +417,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(dO);
     }
 
-    //SetTestSprings();
+    //SetTestSprings(); 
     //SetTestFloor();
 }
 
