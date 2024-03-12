@@ -31,7 +31,6 @@ public:
         Camera_Strafe,
         EndReached,
         Grapple_Event,
-        Player_Velocity_Call,
         Player_Animation_Call,
         Death_Event,
         Death_Event_End,

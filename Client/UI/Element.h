@@ -20,6 +20,7 @@ public:
     Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
+        rotation = Quaternion();
         texture = nullptr;
         shader = nullptr;
         hoverTimer = 0;
@@ -39,6 +40,10 @@ public:
         return dimensions;
     }
 
+    [[nodiscard]] Quaternion GetRotation() const {
+        return rotation;
+    }
+    
     [[nodiscard]] Vector4 GetColor() const {
         return color;
     }
@@ -81,6 +86,11 @@ public:
 
     Element& SetColor(Vector4 pColor) {
         color = pColor;
+        return *this;
+    }
+
+    Element& SetRotation(Quaternion r) {
+        rotation = r;
         return *this;
     }
 
@@ -207,6 +217,7 @@ public:
 private:
     UIDim dimensions;
     Vector4 color;
+    Quaternion rotation;
     TextureBase* texture;
     ShaderBase* shader;
     std::string id;

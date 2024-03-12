@@ -321,8 +321,12 @@ void GameTechRenderer::RenderUI() {
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
             auto absPos = e.GetAbsolutePosition();
+            auto rotation = e.GetRotation();
+            auto transformation = Transform();
             auto relSize = e.GetRelativeSize();
             auto absSize = e.GetAbsoluteSize();
+
+            transformation.SetOrientation(rotation);
 
             TextureBase* tex = e.GetTexture();
             if (tex) {
@@ -339,6 +343,7 @@ void GameTechRenderer::RenderUI() {
             auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
 
             glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "model"), 1, false, (float*)transformation.GetMatrix().array);
             glUniform4fv(glGetUniformLocation(activeShader->GetProgramID(), "uiColor"), 1, colorAddress);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
