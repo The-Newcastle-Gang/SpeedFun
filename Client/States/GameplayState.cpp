@@ -46,8 +46,7 @@ void GameplayState::InitCrossHeir(){
 
     crosshair = &canvas->AddImageElement(crosshairImage)
         .SetAbsoluteSize({ 32, 32 })
-        .AlignCenter(0, false)
-        .AlignMiddle(0, false);
+        .CenterSprite();
     crosshair->OnUpdate.connect<&GameplayState::UpdateCrosshair>(this);
 }
 

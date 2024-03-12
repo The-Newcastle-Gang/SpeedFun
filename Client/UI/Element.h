@@ -133,6 +133,13 @@ public:
         return *this;
     }
 
+    // If you want to manipulate sprites like a normal person, you can use this.
+    Element& CenterSprite() {
+        AlignCenter(0, false);
+        AlignMiddle(0, false);
+        return *this;
+    }
+
     Element& AlignCenter(int padding = 0, bool reposition = true) {
         if (reposition) dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
         dimensions.absolutePosition.x = - dimensions.absoluteSize.x / 2 + padding;
