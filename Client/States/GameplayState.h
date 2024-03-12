@@ -71,6 +71,7 @@ namespace NCL {
 
             std::string medalImage;
             std::string crosshairImage;
+            std::string playerblipImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -159,6 +160,7 @@ namespace NCL {
 
             float levelLen;
             Vector3 startPos;
+            Vector3 endPos;
             float CalculateCompletion(Vector3 cp);
             float timeElapsed;
             int currentMedal = 4;

@@ -19,6 +19,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
+    playerblipImage = "playerBlip.png";
 }
 
 GameplayState::~GameplayState() {
@@ -116,23 +117,23 @@ void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     tVal = std::clamp(tVal, 0.0f, 1.0f);
     tVal = tVal * 300 - 150;
 
-    element.AlignMiddle((int)tVal);
+    element.GetTransform().SetPosition(Vector3(round(Window::GetWindow()->GetScreenSize().x * 0.98f), round(Window::GetWindow()->GetScreenSize().y / 2 + tVal),0));
 }
 
 void GameplayState::InitLevelMap(){
     //map bar
-    auto& levelBar = canvas->AddElement()
-            .SetColor({1,1,1,1})
-            .SetAbsoluteSize({20, 300})
-            .AlignRight(20)
-            .AlignMiddle();
 
-    auto& playerElement = canvas->AddElement()
-            .SetColor({0.0,0.0,0.,1})
-            .SetAbsoluteSize({20,20})
-            .AlignRight(20)
-            .AlignMiddle(-150)
-            .AlignMiddle(-150);
+    auto& levelBar = canvas->AddElement()
+            .SetColor({0,0,0,1})
+            .SetAbsoluteSize({6, 300})
+            .CenterSprite()
+            .SetTransformTranslation(Vector2(98,50));
+    
+
+    auto& playerElement = canvas->AddImageElement(playerblipImage)
+            .SetColor({0.5,0.0,0.,1})
+            .SetAbsoluteSize({30,30})
+            .CenterSprite();
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
@@ -678,7 +679,7 @@ void GameplayState::InitLevel() {
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
-
+    endPos = levelManager->GetLevelReader()->GetEndPosition();
     // TEST SWINGING OBJECT ON THE CLIENT
     //auto swingingTemp = new GameObject();
     //replicated->AddSwingingBlock(swingingTemp, *world);
@@ -745,6 +746,6 @@ void GameplayState::AssignPlayer(int netObject) {
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
-    auto progress = playerCurPos - startPos;
-    return progress.Length()/levelLen;
+    auto progress = playerCurPos - endPos;
+    return 1 - progress.Length()/levelLen;
 }
