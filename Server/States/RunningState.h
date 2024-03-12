@@ -71,6 +71,9 @@ namespace NCL {
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 
+            void ClearLevel();
+            void LoadNextLevel();
+
             void StartTriggerVolFunc(int id);
             void EndTriggerVolFunc(int id);
             void DeathTriggerVolFunc(int id);

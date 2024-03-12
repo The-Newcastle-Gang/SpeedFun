@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -38,6 +39,11 @@ void GameplayState::InitCanvas(){
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+}
+
+void GameplayState::ClearLevel()
+{
+    world->Clear();
 }
 
 void GameplayState::InitCrossHeir(){
@@ -273,6 +279,7 @@ void GameplayState::ReadNetworkFunctions() {
                         .AlignLeft();
                 // Disable player controls
                 // Clear the world
+                ClearLevel();
                 // Loading screen
                 // Load the next level
 

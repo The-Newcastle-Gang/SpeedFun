@@ -57,6 +57,9 @@ namespace NCL {
             void InitLevel(int level);
             void InitCanvas();
 
+            void ClearLevel();
+            void LoadNextLevel();
+
             void ResetCameraToForwards();
 
             void InitCrossHeir();

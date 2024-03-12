@@ -1,5 +1,6 @@
 #include "RunningState.h"
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -170,6 +171,18 @@ void RunningState::CreatePlayers() {
     }
 }
 
+void NCL::CSC8503::RunningState::ClearLevel()
+{
+    //physics->Clear();
+    currentLevelCheckPointPositions.clear();
+    currentLevelDeathPos = { 0, 0, 0 };
+    currentLevelEndPos = { 0, 0, 0 };
+    currentLevelStartPos = { 0, 0, 0 };
+    Debug::lines
+    triggersVector.clear();
+    world->Clear();
+}
+
 void RunningState::StartTriggerVolFunc(int id){
     FunctionData data;
     DataHandler handler(&data);
@@ -179,6 +192,7 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
+    ClearLevel();
     levelManager->EndStageTimer();
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
