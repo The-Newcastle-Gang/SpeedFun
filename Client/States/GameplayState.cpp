@@ -390,6 +390,20 @@ void GameplayState::ReadNetworkFunctions() {
                 UpdatePlayerAnimation(data.networkID, data.state);
             }
             break;
+
+            case(Replicated::GameInfo_GrappleAvailable): {
+                int eventType = handler.Unpack<int>();
+                if (eventType == 1) {
+                    crossHairRotation = 45.0f * rotationDirection;
+                    currentCHRotation = crossHairRotation;
+                    crossHairScale = 1.25f;
+                }
+                else {
+                    crossHairRotation = 0.0f;
+                    crossHairScale = 1.15f;
+                }
+            } 
+            break;
         }
     }
 }
@@ -432,9 +446,12 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
 }
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
-    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, crossHairRotation));
+    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
     element.SetTransformTranslation(Vector2(50, 50));
-
+    element.GetTransform().SetScale(Vector3(crossHairScale, crossHairScale, 1));
+    element.SetColor(crossHairRotation == 0 ? Vector4(0,0,1,1) : Vector4(1,1,1,1));
+    crossHairScale = std::clamp(crossHairScale - dt, 1.0f, 100.0f);
+    currentCHRotation = currentCHRotation * 0.9f + crossHairRotation * 0.1f;
 }
 
 void GameplayState::UpdateTimerUI(Element& element, float dt) {
@@ -560,7 +577,7 @@ void GameplayState::SendInputData() {
     input.rightAxis = Vector3(camWorld.GetColumn(0));
 
     input.playerDirection = InputListener::GetPlayerInput();
-
+    rotationDirection = input.playerDirection.x == 0 ? rotationDirection : (input.playerDirection.x > 0 ? -1 : 1);
     networkData->outgoingInput.Push(input);
 }
 

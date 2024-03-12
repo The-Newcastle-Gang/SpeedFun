@@ -368,6 +368,15 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
     }
+
+    if (playerMovement->uiAnimationData.grapplingAvailability != -1) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->uiAnimationData.grapplingAvailability);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_GrappleAvailable, &data)));
+        playerMovement->uiAnimationData.grapplingAvailability = -1;
+    }
 }
 
 void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {

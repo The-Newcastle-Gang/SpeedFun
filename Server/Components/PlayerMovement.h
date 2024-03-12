@@ -54,6 +54,12 @@ public:
 
     PlayerAnimationCallData playerAnimationCallData;
 
+    struct UIAnimationData {
+        int grapplingAvailability = -1;
+    };
+
+    UIAnimationData uiAnimationData;
+
     void ToggleDebug() { debugEnabled = !debugEnabled; }
 private:
     GameWorld* world;

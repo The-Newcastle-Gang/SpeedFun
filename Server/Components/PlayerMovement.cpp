@@ -259,7 +259,7 @@ void PlayerMovement::Grapple() {
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
     grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
     grappleProjectileInfo.travelDistance = 0;
-
+    uiAnimationData.grapplingAvailability = 0;
     grappleProjectileInfo.SetActive(true);
 }
 
@@ -275,6 +275,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
             grapplePoint = tempGrapplePoint;
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
+            uiAnimationData.grapplingAvailability = 1;
             return;
         }
     }
@@ -285,6 +286,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
 
     if (grappleProjectileInfo.travelDistance >= grappleProjectileInfo.maxDistance) {
         grappleProjectileInfo.SetActive(false);
+        uiAnimationData.grapplingAvailability = 1;
     }
 }
 

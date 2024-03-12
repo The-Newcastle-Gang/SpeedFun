@@ -189,7 +189,10 @@ namespace NCL {
 
             Element* crosshair;
             void UpdateCrosshair(Element& element, float dt);
-            float crossHairRotation = 0.0f;
+            float crossHairRotation = 45.0f;
+            float currentCHRotation = 0.0f;
+            int rotationDirection = 1.0f;
+            float crossHairScale = 1.0f;
 
             std::string GetMedalImage();
 
