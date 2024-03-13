@@ -402,6 +402,7 @@ void GameplayState::InitLevel() {
     auto harmOpList  = lr->GetHarmfulOscillatorPList();
     auto speedUpList = lr->GetSpeedupBlockPrimitiveList();
     auto bridgeList = lr->GetBridgePrimitiveList();
+    auto trapBlockList = lr->GetTrapBlockPrimitiveList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -436,6 +437,13 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,1.0f, 1.0f });
+    }
+
+    for (auto& x : trapBlockList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 0.5f,1.0f, 1.0f });
     }
 
     //SetTestSprings();

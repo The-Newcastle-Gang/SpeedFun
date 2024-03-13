@@ -14,6 +14,7 @@
 #include "Components/SpeedUpBlock.h"
 #include "TestBridge.h"
 #include "BridgeTrigger.h"
+#include "TrapObject.h"
 
 #include "Spring.h"
 

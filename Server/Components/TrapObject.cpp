@@ -3,17 +3,20 @@
 using namespace NCL;
 using namespace CSC8503;
 
-void TestTrapBlock::Update(float dt) {
+void TrapBlock::Update(float dt) {
 	if (blockFall) {
 		TrapBlockFall(dt);
 	}
 }
 
-void TestTrapBlock::OnCollisionEnter(GameObject* otherObject) {
-	blockFall = true;
+void TrapBlock::OnCollisionEnter(GameObject* otherObject) {
+	if (otherObject->GetTag() == Tag::PLAYER) {
+		blockFall = true;
+	}
+	
 }
 
-void TestTrapBlock::TrapBlockFall(float dt) {
+void TrapBlock::TrapBlockFall(float dt) {
 	warningTime += dt;
 	if (warningTime >= 5) {
 		gameObject->GetTransform().SetPosition(Vector3(-107, -5 - 5 * warningTime, -15));

@@ -7,8 +7,6 @@
 #include "PhysicsObject.h"
 #include "GameWorld.h"
 
-#include <functional>
-
 using namespace NCL;
 using namespace CSC8503;
 using namespace Maths;
@@ -16,11 +14,11 @@ using namespace Maths;
 namespace NCL::CSC8503 {
 	class GameObject;
 	class GameWorld;
-	class TestTrapBlock : public Component
+	class TrapBlock : public Component
 	{
 	public:
 
-		TestTrapBlock(GameObject* go) { gameObject = go;}
+		TrapBlock(GameObject* go) { gameObject = go;}
 
 		void Update(float dt)override;
 
@@ -32,7 +30,6 @@ namespace NCL::CSC8503 {
 	protected:
 		double warningTime = 0.0;
 		bool blockFall = false;
-		std::unordered_map<const GameObject*, float> pushableObject;
 	};
 }
 

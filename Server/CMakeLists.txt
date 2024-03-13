@@ -13,6 +13,7 @@ add_library(server
         Components/DamagingObstacle.cpp
         Components/TestBridge.cpp
         Components/BridgeTrigger.cpp
+        Components/TrapObject.cpp
 )
 
 target_include_directories(server PUBLIC
