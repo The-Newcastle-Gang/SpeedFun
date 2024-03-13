@@ -10,8 +10,6 @@ Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDela
     this->radius = radius;
     this->changeAxis = changeAxis;
     this->changeDirection = changeDirection;
-
-    phys = go->GetPhysicsObject();
 }
 
 void Swinging::OnCollisionEnter(GameObject* other) {

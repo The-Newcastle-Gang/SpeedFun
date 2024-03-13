@@ -1,7 +1,5 @@
 #include "Component.h"
 #include "GameObject.h"
-#include "PhysicsObject.h"
-#include <unordered_map>
 
 using namespace NCL;
 using namespace CSC8503;
@@ -22,11 +20,7 @@ private:
 
     void UpdateOscillation(float dt);
 
-    PhysicsObject* phys;
     Vector3 initPosition;
-
-    Vector3 normalisedDirection; //should be normalised!
-    float distance = 1.0f;
 
     float waitDelay = 0.0f;
 
@@ -44,6 +38,4 @@ private:
 
     bool changeAxis = false;
     bool changeDirection = false;
-
-    std::unordered_map<GameObject*,bool> objectsOnPlatform; //means we only add to the map once per player.
 };
