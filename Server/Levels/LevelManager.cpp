@@ -8,6 +8,7 @@ LevelManager::LevelManager() {
     std::cout << "initialize manager" << std::endl;
     levelReader = std::make_unique<LevelReader>();
     stageTimer = std::make_unique<StageTimer>();
+    totalLevels =  levelReader->GetNumberOfLevels();
     std::cout <<" level and stagetimer inits" <<std::endl;
     currentMedal = 0;
 }

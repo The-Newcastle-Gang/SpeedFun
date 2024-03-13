@@ -77,6 +77,8 @@ public:
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
 
+    int GetNumberOfLevels() { return levelIDToLevelNameMap.size(); }
+
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;

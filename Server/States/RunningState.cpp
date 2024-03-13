@@ -38,7 +38,7 @@ void RunningState::OnEnter() {
     WaitUntilClientsInGameplay(); //so we dont send the Load_Level packet to MenuState
 
     //this could be changed, from a level select menu for example
-    MoveToNewLevel(9);
+    MoveToNewLevel(0);
 }
 
 void RunningState::SendLevelToClients(int level) {
@@ -156,9 +156,9 @@ void RunningState::Update(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
-    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
-        Tick(dt);
-    }
+    //if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+    //    Tick(dt);
+    //}
 
     if (!levelManager->UpdateCountdown(dt)) {
         return;
@@ -271,6 +271,8 @@ void RunningState::EndTriggerVolFunc(int id){
     }
     if (!hasAllPlayersFinished)return;
     OnAllPlayersFinished();
+    ResetLevel();
+    MoveToNewLevel(levelManager->GetNextLevel());
 }
 
 void RunningState::SendMedalToClient(int id) {

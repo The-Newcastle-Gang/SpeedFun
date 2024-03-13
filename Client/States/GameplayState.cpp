@@ -126,7 +126,6 @@ void GameplayState::OnEnter() {
     InitCanvas();
 
     WaitForServerLevel(); //wait until server tells us what level to load
-    OnNewLevel();
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
@@ -139,7 +138,7 @@ void GameplayState::WaitForServerLevel() {
 }
 
 void GameplayState::OnNewLevel() {
-    world->Clear();
+    networkData->incomingState.Clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
     worldHasLoaded = LoadingStates::NOT_LOADED;
@@ -210,7 +209,10 @@ void GameplayState::ManageLoading(float dt) {
     }
 
     if (soundHasLoaded == LoadingStates::READY) {
-        delete loadSoundThread;
+        if (loadSoundThread) {
+            delete loadSoundThread;
+            loadSoundThread = nullptr;
+        }
         finishedLoading = LoadingStates::READY;
     }
 }
@@ -368,9 +370,15 @@ void GameplayState::ReadNetworkFunctions() {
                 int level = handler.Unpack<int>();
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
+                OnNewLevel();
             }
             break;
 
+            //case(Replicated::All_Players_Finished): {
+            //    levelManager->SetHasReceivedLevel(true);
+            //    levelManager->ChangeLevel(level);
+            //}
+            //break;
         }
     }
 }
@@ -505,11 +513,10 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
-
 }
 
 void GameplayState::InitCamera() {

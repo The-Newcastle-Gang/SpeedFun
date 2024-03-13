@@ -181,6 +181,8 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
+
+            bool isUpdating = false;
         };
     }
 }

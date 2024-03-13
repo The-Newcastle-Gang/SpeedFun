@@ -33,6 +33,8 @@ public:
         stageTimer->ResetTimer();
     }
 
+    int GetTotalLevels() { return totalLevels; }
+    int GetNextLevel() { return (currentLevel + 1) % totalLevels; }
     void ChangeLevel(int level);
 
     void SetHasReceivedLevel(bool hasReceived) { hasReceivedLevelFromServer = hasReceived; }
@@ -60,6 +62,7 @@ protected:
     int currentMedal;
 
     int currentLevel = 0;
+    int totalLevels = 0;
 
     bool hasReceivedLevelFromServer = false;
 };
