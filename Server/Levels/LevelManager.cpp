@@ -16,6 +16,11 @@ void LevelManager::UpdateTimer(float dt) {
     stageTimer->Update(dt);
 }
 
+bool LevelManager::UpdateCountdown(float dt) {
+    countdownTimer -= dt;
+    return countdownTimer <= 0.0f;
+}
+
 void LevelManager::StartStageTimer() {
     stageTimer->ResetTimer();
     stageTimer->ResumeTimer();

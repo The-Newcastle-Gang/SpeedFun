@@ -13,12 +13,14 @@ RunningState::RunningState(GameServer* pBaseServer) : State() {
     world = std::make_unique<GameWorld>();
     physics = std::make_unique<PhysicsSystem>(*world);
     levelManager = std::make_unique<LevelManager>();
+    shouldClose.store(false);
 
     currentLevelDeathPos = {0,0,0};
 }
 
 RunningState::~RunningState() {
-
+    shouldClose.store(true);
+    networkThread->join();
 }
 
 void RunningState::OnEnter() {
@@ -26,6 +28,10 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+    numPlayersLoaded = 0;
+
+    shouldClose.store(false);
+
     CreateNetworkThread();
     LoadLevel(TEST_LEVEL);
     world->StartWorld();
@@ -35,18 +41,15 @@ void RunningState::OnEnter() {
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
     auto threadServer = ServerThread(server, networkData);
 
-    while (server) {
+    while (!shouldClose) {
         threadServer.Update();
     }
 }
 
 void RunningState::CreateNetworkThread() {
     GameServer* server = serverBase;
-    // Again, make sure serverBase isn't used without confirmation.
-    serverBase = nullptr;
     networkData = std::make_unique<ServerNetworkData>();
-    networkThread = new std::thread(ThreadUpdate, server, networkData.get());
-    networkThread->detach();
+    networkThread = new std::thread(&RunningState::ThreadUpdate, this, server, networkData.get());
 }
 
 void RunningState::ReadNetworkFunctions() {
@@ -54,6 +57,7 @@ void RunningState::ReadNetworkFunctions() {
         auto data = networkData->incomingFunctions.Pop();
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
+            numPlayersLoaded++;
         }
         else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
             auto player = GetPlayerObjectFromId(data.first);
@@ -87,16 +91,33 @@ void RunningState::ReadNetworkPackets() {
 }
 
 void RunningState::OnExit() {
+    serverBase->ClearPacketHandlers();
     world->ClearAndErase();
     physics->Clear();
     playerObjects.clear();
+
+    shouldClose.store(true);
+    networkThread->join();
 }
 
 
 void RunningState::Update(float dt) {
+
+    while (numPlayersLoaded < playerInfo.size()) {
+        ReadNetworkFunctions();
+        ReadNetworkPackets();
+    }
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
+
+    if (!levelManager->UpdateCountdown(dt)) {
+        return;
+    }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -391,6 +412,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -423,9 +445,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
+  
+    for (auto& x : springList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
-    //SetTestSprings();
-    //SetTestFloor();
+        Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
+        g->AddComponent(oo);
+    }
 }
 
 void RunningState::SetTriggerTypePositions(){
