@@ -194,9 +194,12 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    SendInputData();
+    if(countdownOver)SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
@@ -211,7 +214,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -466,8 +469,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    }
     world->StartWorld();
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {
