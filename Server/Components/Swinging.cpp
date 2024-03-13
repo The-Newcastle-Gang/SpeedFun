@@ -78,13 +78,20 @@ void Swinging::UpdateOscillation(float dt) {
 
     Vector3 lastPos = gameObject->GetTransform().GetPosition();
 
-    float cosTimer = cos((timer * frequency * TAU)); //this gets a value from 0 to 1 where 0 is the initial value
+    float cosTimer = cos((timer * frequency * TAU));
     float sinTimer = sin((timer * frequency * TAU));
 
     if (changeDirection) cosTimer *= -1;
 
     Vector3 tempPos = initPosition;
-    tempPos.y = initPosition.y + sinTimer * radius;
+    if (!isReturning) // on first swing it should go under, not over
+    {
+        tempPos.y = initPosition.y - sinTimer * radius;
+    }
+    else
+    {
+        tempPos.y = initPosition.y + sinTimer * radius;
+    }
 
     switch (changeAxis)
     {
@@ -93,6 +100,7 @@ void Swinging::UpdateOscillation(float dt) {
         break;
     case true:
         tempPos.x = initPosition.z + cosTimer * radius;
+        break;
     }
 
 

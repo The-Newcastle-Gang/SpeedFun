@@ -575,7 +575,7 @@ void GameplayState::InitLevel() {
     swingingTemp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
 
     //SetTestSprings();
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
