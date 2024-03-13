@@ -279,6 +279,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto harmOpList = levelReader->GetHarmfulOscillatorPList();
     auto speedUpList = levelReader->GetSpeedupBlockPrimitiveList();
     auto bridgeList = levelReader->GetBridgePrimitiveList();
+    auto traoBlockList = levelReader->GetTrapBlockPrimitiveList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -333,6 +334,15 @@ void RunningState::BuildLevel(const std::string &levelName)
         TestBridge* ts = new TestBridge(g);
         g->AddComponent(ts);
         SetTestBridge(ts);
+    }
+
+    for (auto& x : traoBlockList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
     }
     //AddTestSpeedUpBlock();
     //SetTestSprings();
