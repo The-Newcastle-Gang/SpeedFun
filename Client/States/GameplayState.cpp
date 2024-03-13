@@ -19,7 +19,12 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
+
     playerblipImage = "playerBlip.png";
+
+    timerBarShader = resources->GetShader("timerBar");
+    timerBoxShader = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+
 }
 
 GameplayState::~GameplayState() {
@@ -88,17 +93,18 @@ void GameplayState::InitTimerBar(){
 
 
     timeBar = &canvas->AddElement()
-            .SetColor({0.5,0,0,1})
+            .SetColor({0.969,0.729,0.,1})
             .SetAbsoluteSize({800, timerBarHeight })
             .AlignCenter()
-            .AlignTop(timerTopOffset);
+            .AlignTop(timerTopOffset)
+            .SetShader(timerBarShader);
     timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
 
     timeBarTimerBox = &canvas->AddElement()
-        .SetColor({ 0.05,0,0,1 })
-        .SetAbsoluteSize({ timerBoxWidth, timerBarHeight })
-        .AlignCenter(400)
-        .AlignTop(timerTopOffset);
+            .SetColor({0.05,0,0,1})
+            .SetAbsoluteSize({ timerBoxWidth, timerBarHeight })
+            .AlignCenter(400)
+            .AlignTop(timerTopOffset);
     timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
 
 
@@ -143,8 +149,10 @@ void GameplayState::InitLevelMap(){
 void GameplayState::InitPlayerBlip(int id) {
     auto& playerElement = canvas->AddImageElement(playerblipImage)
         .SetColor({ 0.5,0.0,0.,1 })
-        .SetAbsoluteSize({ 30,30 })
+        .SetAbsoluteSize({ 60,60 })
         .CenterSprite()
+        .SetTexture(resources->GetTexture("firemask.jpg"))
+        .SetShader(timerBoxShader)
         .SetId("blip_" + std::to_string(id));
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);

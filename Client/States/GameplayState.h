@@ -173,11 +173,13 @@ namespace NCL {
 
             std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
 
-            Element* timerNubs[3];
-            Element* timeBar;
-            Element* timeBarTimerBoxBack;
-            Element* timeBarTimerBox;
-            Element* timerText;
+            Element *timerNubs[3];
+            Element *timeBar;
+            Element *timeBarTimerBoxBack;
+            Element *timeBarTimerBox;
+            Element *timerText;
+            ShaderBase *timerBarShader;
+            ShaderBase *timerBoxShader;
 
             const int timerTopOffset = 32;
             const int timerBarHeight = 28;

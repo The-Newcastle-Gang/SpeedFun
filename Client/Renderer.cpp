@@ -26,6 +26,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
+    cheeseTexture = (OGLTexture*)LoadTexture("cheeseTex.jpg");
     postProcessBase = new OGLShader("post.vert", "post.frag");
 
 	lineCount = 0;
@@ -499,10 +500,14 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
             glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "cheeseTexture"), 2);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
+
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, cheeseTexture->GetObjectID());
 
 
             glBindVertexArray(uiVAO);

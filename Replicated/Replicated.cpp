@@ -23,7 +23,6 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new OBBVolume(currentPrimitive->colliderExtents * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
-    std::cout << currentPrimitive->colliderExtents << "\n";
     Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
     tempFix *= Vector3(-1,-1,1);
 

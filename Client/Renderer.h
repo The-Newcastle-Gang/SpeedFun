@@ -104,6 +104,7 @@ namespace NCL {
             GLuint		skyboxTex;
 
             OGLTexture* noiseTexture;
+            OGLTexture* cheeseTexture;
 
             //shadow mapping things
             OGLShader*	shadowShader;
