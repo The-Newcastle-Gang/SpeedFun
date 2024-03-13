@@ -10,6 +10,7 @@
 #include "Vector2.h"
 #include "Font.h"
 #include "Frustum.h"
+#include "Replicated.h"
 
 #include "Assets.h"
 #include "Element.h"
@@ -51,6 +52,9 @@ namespace NCL {
             MeshGeometry *LoadOBJMesh(const string &name);
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
+
+            void SetRopeInactive(int index);
+            void SetRopeActive(int index, const Vector3 &begin, const Vector3 &end);
 
         protected:
             void NewRenderLines();
@@ -147,6 +151,9 @@ namespace NCL {
             GLuint lineVertVBO;
             size_t lineCount = 0;
 
+            Vector3 ropesBegin[Replicated::PLAYERCOUNT];
+            Vector3 ropesEnd[Replicated::PLAYERCOUNT];
+
             GLuint textVAO;
             GLuint textVertVBO;
             GLuint textColourVBO;
@@ -182,6 +189,7 @@ namespace NCL {
             int isSpeedLinesActive;
             float speedLinePercent = 0;
             int speedLineDir;
+
 
         };
     }

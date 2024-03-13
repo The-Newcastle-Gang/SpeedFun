@@ -577,11 +577,20 @@ void GameplayState::InitLevel() {
     SetTestSprings();
 }
 
+void GameplayState::ToggleRopes(bool isActive, GameObject* grappleObject) {
+    int index = grappleObject->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+    if (!isActive) {
+        renderer->SetRopeInactive(index);
+    }
+    renderer->SetRopeActive(index, firstPersonPosition->GetPosition(), grappleObject->GetTransform().GetPosition());
+}
+
 void GameplayState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+        g->OnActiveToggle.connect<&GameplayState::ToggleRopes>(this);
     }
 }
 

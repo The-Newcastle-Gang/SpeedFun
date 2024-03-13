@@ -60,6 +60,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     GenerateScreenTexture(rayMarchColor, false);
     GenerateScreenTexture(rayMarchNormal, false);
 
+    Vector3 beginRopes[Replicated::PLAYERCOUNT];
+    Vector3 endRopes[Replicated::PLAYERCOUNT];
+
     glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -138,6 +141,21 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     isSpeedLinesActive = true;
     speedLineDir = 0;
 
+    for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
+        SetRopeInactive(i);
+    }
+
+}
+
+void GameTechRenderer::SetRopeInactive(int index) {
+    constexpr Vector3 inactivePoint = Vector3(-9999,-9999,-9999);
+    ropesBegin[index] = inactivePoint;
+    ropesEnd[index] = inactivePoint;
+}
+
+void GameTechRenderer::SetRopeActive(int index, const Vector3 &begin, const Vector3 &end) {
+    ropesBegin[index] = begin;
+    ropesEnd[index] = end;
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -327,17 +345,19 @@ void GameTechRenderer::RenderRayMarching() {
 
     BindShader(rayMarchShader);
 
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
 
-    int depthLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    int depthLoc        = glGetUniformLocation(rayMarchShader->GetProgramID(), "depthBuffer");
+    int beginLoc = glGetUniformLocation(rayMarchShader->GetProgramID(), "ropesBegin");
+    int endLoc = glGetUniformLocation(rayMarchShader->GetProgramID(), "ropesEnd");
 
+    glUniform3fv(beginLoc, Replicated::PLAYERCOUNT, (float*)&ropesBegin[0]);
+    glUniform3fv(endLoc, Replicated::PLAYERCOUNT, (float*)&ropesEnd[0]);
 
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
-
-
 }
 
 void GameTechRenderer::FillDiffuseBuffer() {
@@ -422,7 +442,6 @@ void GameTechRenderer::CombineBuffers() {
     projTemp.ToIdentity();
 
 
-
     glDepthMask(false);
     GLuint shaderID = combineShader->GetProgramID();
     glUniformMatrix4fv(glGetUniformLocation(shaderID, "modelMatrix"), 1, false, (float*)modelTemp.array);
@@ -443,6 +462,14 @@ void GameTechRenderer::CombineBuffers() {
     glUniform1i(glGetUniformLocation(shaderID, "specularLight"), 3);
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
+
+    glUniform1i(glGetUniformLocation(shaderID, "rayMarchColor"), 4);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, rayMarchColor);
+
+    glUniform1i(glGetUniformLocation(shaderID, "rayMarchNorm"), 5);
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, rayMarchNormal);
 
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLE_STRIP,0, 6);

@@ -170,6 +170,8 @@ namespace NCL {
             bool displayDebugger = false;
 
             void CreateGrapples();
+
+            void ToggleRopes(bool isActive, GameObject* grappleObject);
         };
     }
 }

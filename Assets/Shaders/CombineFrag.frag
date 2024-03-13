@@ -3,6 +3,8 @@ uniform sampler2D diffuseTex;
 uniform sampler2D diffuseNorm;
 uniform sampler2D diffuseLight;
 uniform sampler2D specularLight;
+uniform sampler2D rayMarchColor;
+uniform sampler2D rayMarchNorm;
 
 
 in Vertex{
@@ -16,6 +18,7 @@ void main(void){
 	float isLit = texture(diffuseNorm, IN.texCoord).w;
 	vec3 light = texture(diffuseLight,IN.texCoord).xyz;
 	vec3 specular = texture(specularLight, IN.texCoord).xyz;
+	vec4 rayColor = texture(rayMarchColor, IN.texCoord).xyzw;
 
 	isLit = 1; 
 	fragColour.xyz = diffuse;
