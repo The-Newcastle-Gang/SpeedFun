@@ -34,6 +34,9 @@ public:
 
     void ChangeLevel(int level);
 
+    void SetHasReceivedLevel(bool hasReceived) { hasReceivedLevelFromServer = hasReceived; }
+    bool GetHasReceivedLevel() { return hasReceivedLevelFromServer; }
+
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
 
@@ -56,6 +59,8 @@ protected:
     int currentMedal;
 
     int currentLevel = 0;
+
+    bool hasReceivedLevelFromServer = false;
 };
 
 

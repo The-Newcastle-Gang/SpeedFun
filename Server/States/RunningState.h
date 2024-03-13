@@ -67,18 +67,23 @@ namespace NCL {
 
             int playerTestId = -1;
 
+            void WaitUntilClientsInGameplay();
+            int numPlayersInGameplayState = 0;
             int numPlayersLoaded = 0;
+
             std::unordered_map<int, GameObject*> playerObjects;
             std::unordered_map<int, bool> playersFinished;
             bool isGameInProgress = false;
             bool hasAllPlayersFinished = false;
 
+            void ResetLevel();
+            void SendLevelToClients(int level);
             void LoadLevel(int level);
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
 
+            void MoveToNewLevel(int level);
             void ClearLevel();
-            void LoadNextLevel();
 
             void StartTriggerVolFunc(int id);
             void EndTriggerVolFunc(int id);

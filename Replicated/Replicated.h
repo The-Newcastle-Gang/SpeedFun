@@ -25,6 +25,7 @@ public:
     enum RemoteClientCalls {
         AssignPlayer,
         LoadGame,
+        Load_Level,
         Camera_GroundedMove,
         Camera_Jump,
         Camera_Land,
@@ -42,6 +43,7 @@ public:
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
         StartGame,
+        MenuToGameplay,
         GameLoaded,
         PlayerJump,
         PlayerGrapple,

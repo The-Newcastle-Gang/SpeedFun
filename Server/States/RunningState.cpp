@@ -26,6 +26,7 @@ RunningState::~RunningState() {
 void RunningState::OnEnter() {
     //serverBase has been called before the network thread has been created.
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
+
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
     numPlayersLoaded = 0;
@@ -33,11 +34,44 @@ void RunningState::OnEnter() {
     shouldClose.store(false);
 
     CreateNetworkThread();
+    WaitUntilClientsInGameplay(); //so we dont send the Load_Level packet to MenuState
 
-    //this needs to be changed: the level needs to be set from some external place
-    LoadLevel(9);
+    //this could be changed, from a level select menu for example
+    MoveToNewLevel(9);
+
+}
+
+void RunningState::SendLevelToClients(int level) {
+    FunctionData data{};
+    DataHandler handler(&data);
+    handler.Pack(level);
+    serverBase->CallRemoteAll(Replicated::RemoteClientCalls::Load_Level, &data);
+}
+
+void RunningState::WaitUntilClientsInGameplay() {
+    while (numPlayersInGameplayState < serverBase->GetPlayerInfo().size()) {
+        ReadNetworkFunctions();
+    }
+}
+
+void RunningState::MoveToNewLevel(int level) {
+    isGameInProgress = false;
+    ResetLevel();
+    SendLevelToClients(level);
+    LoadLevel(level);
     world->StartWorld();
+    isGameInProgress = true;
+}
 
+void RunningState::ResetLevel() {
+    hasAllPlayersFinished = false;
+    isGameInProgress = false;
+    numPlayersLoaded = 0;
+    for (std::pair<int, bool> info : playersFinished) {
+        playersFinished[info.first] = false;
+    }
+    levelManager->Reset();
+    world->ClearAndErase(); //free the memory too so we dont leak
 }
 
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
@@ -82,6 +116,9 @@ void RunningState::ReadNetworkFunctions() {
                 playerMovement->ToggleDebug();
             }
         }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::MenuToGameplay) {
+            numPlayersInGameplayState++;
+        }
     }
 }
 
@@ -105,6 +142,10 @@ void RunningState::OnExit() {
 
 void RunningState::Update(float dt) {
 
+    if (!isGameInProgress) {
+        ReadNetworkFunctions();
+        return;
+    }
     while (numPlayersLoaded < playerInfo.size()) {
         ReadNetworkFunctions();
         ReadNetworkPackets();

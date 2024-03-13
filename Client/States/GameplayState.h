@@ -34,6 +34,12 @@ namespace NCL {
             READY
         };
 
+        enum ClientState {
+            COUNTDOWN,
+            PLAYING,
+            COMPLETED
+        };
+
         class GameplayState : public State
         {
         public:
@@ -47,9 +53,12 @@ namespace NCL {
             bool IsDisconnected();
 
         protected:
+            void OnNewLevel();
+            void WaitForServerLevel();
             void InitialiseAssets();
             void InitCamera();
             void InitWorld();
+            void InitCurrentLevel();
             void InitSounds();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();

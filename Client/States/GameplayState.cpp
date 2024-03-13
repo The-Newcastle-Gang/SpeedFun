@@ -121,22 +121,42 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->LockMouseToWindow(true);
     CreateNetworkThread();
     InitialiseAssets();
-    Window::GetWindow()->LockMouseToWindow(true);
-    Window::GetWindow()->ShowOSPointer(false);
+
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 
-    renderer->SetPointLights(world->GetPointLights());
+    WaitForServerLevel(); //wait until server tells us what level to load
+    OnNewLevel();
+
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
+
+void GameplayState::WaitForServerLevel() {
+    while (!levelManager->GetHasReceivedLevel()) {
+        ReadNetworkFunctions();
+        //wait till the server tells us what level to load
+    }
+}
+
+void GameplayState::OnNewLevel() {
+    world->Clear();
+    levelManager->Reset();
+    finishedLoading = LoadingStates::NOT_LOADED;
+    worldHasLoaded = LoadingStates::NOT_LOADED;
+    InitCurrentLevel();
+    FinishLoading();
+
+}
 void GameplayState::InitialiseAssets() {
-    
-    InitWorld();
-    InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
-    FinishLoading();
 }
+
+void GameplayState::InitCurrentLevel() {
+    InitWorld();
+    InitCamera();
+}
+
 void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
     // guards on the PlaySound method.
@@ -342,6 +362,15 @@ void GameplayState::ReadNetworkFunctions() {
                 Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
                 UpdatePlayerAnimation(data.networkID, data.state);
             }
+            break;
+
+            case(Replicated::Load_Level): {
+                int level = handler.Unpack<int>();
+                levelManager->SetHasReceivedLevel(true);
+                levelManager->ChangeLevel(level);
+            }
+            break;
+
         }
     }
 }
@@ -494,8 +523,10 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel(9); //just to test, this value will be read from the server
+    InitLevel(levelManager->GetLevel()); //just to test, this value will be read from the server
     CreatePlayers();
+    renderer->SetPointLights(world->GetPointLights());
+
     worldHasLoaded = LoadingStates::LOADED;
 }
 
@@ -542,8 +573,6 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel(int level) {
-    levelManager->ChangeLevel(level);
-
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
@@ -582,7 +611,6 @@ void GameplayState::InitLevel(int level) {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
-
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
 }
