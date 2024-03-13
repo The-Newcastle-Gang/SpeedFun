@@ -99,9 +99,8 @@ void Swinging::UpdateOscillation(float dt) {
     case true:
         tempPos.x = initPosition.z + cosTimer * radius;
         break;
+    default:
+        break;
     }
-
-
     gameObject->GetTransform().SetPosition(tempPos);
-
 }
