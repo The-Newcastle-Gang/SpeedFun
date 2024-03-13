@@ -47,6 +47,15 @@ void PlayerMovement::UpdateInputs(Vector3 pRightAxis, Vector2 pInputDirection, Q
     rightAxis = pRightAxis;
     inputDirection = pInputDirection;
     playerRotation = pPlayerRotation;
+    UpdateAnimDataFromInput();
+}
+
+void PlayerMovement::UpdateAnimDataFromInput() {
+    if (inputDirection.Length() == 0.0f)playerAnimationCallData.hasInput = false;
+    else playerAnimationCallData.hasInput = true;
+
+    playerAnimationCallData.strafe = (int)inputDirection.x;
+    playerAnimationCallData.backwards = inputDirection.y < 0;
 }
 
 void PlayerMovement::SetInAir() {
@@ -60,11 +69,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
+    playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
+    playerAnimationCallData.isGrappling = true;
     cameraAnimationCalls.isGrappling = true;
     cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
@@ -93,6 +104,9 @@ void PlayerMovement::StartInAir() {
     static float airDragFactor = 0.5f;
     static float airMaxHorizontalVelocity = 20.0f;
 
+    playerAnimationCallData.inAir = true;
+
+
     runSpeed = airRunSpeed;
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
@@ -110,8 +124,16 @@ void PlayerMovement::UpdateInAir(float dt) {
             isFalling = true;
         }
         cameraAnimationCalls.fallDistance = fallApex - gameObject->GetTransform().GetPosition().y;
+
+        if (gameObject->GetPhysicsObject()->GetLinearVelocity().y < -10.0f) {
+            playerAnimationCallData.isFalling = true;
+        }
+        else {
+            playerAnimationCallData.isFalling = false;
+        }
         return;
     }
+
     
 }
 
@@ -119,6 +141,7 @@ void PlayerMovement::LeaveInAir() {
     cameraAnimationCalls.land = cameraAnimationCalls.fallDistance;
     cameraAnimationCalls.isGrounded = true;
     isFalling = false;
+    playerAnimationCallData.isFalling = false;
 }
 
 void PlayerMovement::StartGround() {
@@ -126,6 +149,8 @@ void PlayerMovement::StartGround() {
     static float groundJumpVelocity = 7.0f;
     static float groundDragFactor = 8.5f;
     static float groundMaxHorizontalVelocity = 20.0f;
+
+    playerAnimationCallData.inAir = false;
 
     runSpeed = groundRunSpeed;
     jumpVelocity = groundJumpVelocity;

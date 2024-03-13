@@ -17,8 +17,7 @@ public:
     void ReadPacketsToSend();
     void Update();
     void ReceivePacket(int type, GamePacket* payload, int source) override;
-
-
+    void ClearPacketHandlers();
 
 protected:
     GameClient* baseClient;
