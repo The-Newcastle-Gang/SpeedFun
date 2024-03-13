@@ -39,7 +39,6 @@ void RunningState::OnEnter() {
 
     //this could be changed, from a level select menu for example
     MoveToNewLevel(9);
-
 }
 
 void RunningState::SendLevelToClients(int level) {
@@ -140,6 +139,12 @@ void RunningState::OnExit() {
     networkThread->join();
 }
 
+void RunningState::WaitForPlayersLoaded() {
+    while (numPlayersLoaded < playerInfo.size()) {
+        ReadNetworkFunctions();
+        ReadNetworkPackets();
+    }
+}
 
 void RunningState::Update(float dt) {
 
@@ -147,10 +152,7 @@ void RunningState::Update(float dt) {
         ReadNetworkFunctions();
         return;
     }
-    while (numPlayersLoaded < playerInfo.size()) {
-        ReadNetworkFunctions();
-        ReadNetworkPackets();
-    }
+    WaitForPlayersLoaded();
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();

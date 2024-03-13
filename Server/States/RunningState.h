@@ -69,6 +69,8 @@ namespace NCL {
 
             void WaitUntilClientsInGameplay();
             int numPlayersInGameplayState = 0;
+
+            void WaitForPlayersLoaded();
             int numPlayersLoaded = 0;
 
             std::unordered_map<int, GameObject*> playerObjects;
