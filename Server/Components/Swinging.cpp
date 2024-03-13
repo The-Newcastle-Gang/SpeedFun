@@ -1,14 +1,13 @@
 #include "Swinging.h"
 #define TAU 6.283185
 
-Swinging::Swinging(GameObject * go, float period, float distance, Vector3 direction, float cooldown, float waitDelay) {
+Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDelay, float radius) {
     gameObject = go;
     initPosition = go->GetTransform().GetPosition();
     this->frequency = 1.0f/period;
-    this->distance = distance;
-    this->normalisedDirection = direction;
     this->cooldown = cooldown;
     this->waitDelay = waitDelay;
+    this->radius = radius;
 
     phys = go->GetPhysicsObject();
 }
@@ -81,19 +80,15 @@ void Swinging::UpdateOscillation(float dt) {
 
     Vector3 lastPos = gameObject->GetTransform().GetPosition();
 
-    float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value 
-    gameObject->GetTransform().SetPosition(initPosition + normalisedDirection * cosTimer * distance);
+    float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value
+    float sinTimer = (-1.0f * sin((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value
+    Vector3 tempPos = initPosition;
+    if (sinTimer >= 0.5) sinTimer * -1;
+    tempPos.y = initPosition.y + sinTimer * radius;
+    tempPos.z = initPosition.z + cosTimer * radius;
+    gameObject->GetTransform().SetPosition(tempPos);
 
 
-    Vector3 changeInPosition = (gameObject->GetTransform().GetPosition() - lastPos);
-    lastVelocity = changeInPosition / dt;
-    phys->SetLinearVelocity(lastVelocity); //do this so they can push things around!
-
-    for (std::pair<GameObject*, bool> pair : objectsOnPlatform) {
-        if (pair.second) {
-            Transform* t = pair.first->GetTransformPointer();
-            t->SetPosition(t->GetPosition() + changeInPosition); //subtract the velocity we added last update (cancel it out)
-        }
-    }
+    gameObject->GetTransform().SetPosition(tempPos);
 
 }

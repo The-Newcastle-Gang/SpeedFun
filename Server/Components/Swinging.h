@@ -12,7 +12,7 @@ class Swinging : public Component {
     };
 
 public:
-    Swinging(GameObject* go,float period,float distance,Vector3 direction, float cooldown = 0.0f, float waitDelay = 0.0f);
+    Swinging(GameObject* go,float period, float cooldown = 0.0f, float waitDelay = 0.0f, float radius = 5.0f);
     //void Update(float dt)override;
     void OnCollisionEnter(GameObject* other)override;
     void OnCollisionEnd(GameObject* other)override;
@@ -38,6 +38,8 @@ private:
     float timer = 0.0f;
 
     float frequency = 1.0f;
+
+    float radius = 5.0f;
 
     State state = RUNNING;
 

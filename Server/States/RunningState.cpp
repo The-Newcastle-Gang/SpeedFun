@@ -438,7 +438,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     g->GetPhysicsObject()->SetInverseMass(0.0f);
     g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
-    Swinging* swing = new Swinging(g, 1, 3, {0, 5, 0}, 1, 2);
+    Swinging* swing = new Swinging(g, 5, 3, 0.3, 25);
     g->AddComponent(swing);
 
     //SetTestSprings(); 
