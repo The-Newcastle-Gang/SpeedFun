@@ -196,7 +196,6 @@ void GameplayState::Update(float dt) {
     }
     bool countdownOver = levelManager->UpdateCountdown(dt); 
     float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
-    if(!countdownOver)std::cout << countdownTimer << "\n";
 
     totalDTElapsed += dt;
     ResetCameraAnimation();
