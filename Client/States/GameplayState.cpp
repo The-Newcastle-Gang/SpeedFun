@@ -1,5 +1,4 @@
 #include "GameplayState.h"
-#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
