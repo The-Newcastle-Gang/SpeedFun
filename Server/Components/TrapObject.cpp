@@ -19,7 +19,7 @@ void TrapBlock::OnCollisionEnter(GameObject* otherObject) {
 void TrapBlock::TrapBlockFall(float dt) {
 	warningTime += dt;
 	if (warningTime >= 5) {
-		gameObject->GetTransform().SetPosition(Vector3(-107, -5 - 5 * warningTime, -15));
+		gameObject->GetTransform().SetPosition(Vector3(gameObject->GetTransform().GetPosition().x, -5 - warningTime, -15));
 		warningTime = 0.0;
 	}
 }
