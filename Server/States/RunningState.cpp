@@ -114,7 +114,6 @@ void RunningState::Update(float dt) {
     }
 
     if (!levelManager->UpdateCountdown(dt)) {
-        std::cout << levelManager->GetCountdown() << "\n";
         return;
     }
 

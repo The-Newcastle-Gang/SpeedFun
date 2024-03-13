@@ -194,6 +194,9 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+
     totalDTElapsed += dt;
     ResetCameraAnimation();
     SendInputData();
@@ -211,7 +214,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
