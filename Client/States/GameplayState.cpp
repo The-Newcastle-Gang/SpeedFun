@@ -199,7 +199,7 @@ void GameplayState::Update(float dt) {
 
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    SendInputData();
+    if(countdownOver)SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
