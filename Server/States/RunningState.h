@@ -62,7 +62,6 @@ namespace NCL {
 
             std::atomic<bool> shouldClose;
 
-            float countdownTimer = 5.0f;
             float packetTimer;
             int sceneSnapshotId;
 

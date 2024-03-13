@@ -109,15 +109,15 @@ void RunningState::Update(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
-    if (countdownTimer == 5.0f) {//i.e only once, do this so player positions are correct.
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
         Tick(dt);
     }
 
-    if (countdownTimer > 0) {
-        countdownTimer -= dt;
-        std::cout << countdownTimer << "\n";
+    if (!levelManager->UpdateCountdown(dt)) {
+        std::cout << levelManager->GetCountdown() << "\n";
         return;
     }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
