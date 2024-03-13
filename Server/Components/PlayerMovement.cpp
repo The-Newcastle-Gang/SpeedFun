@@ -20,7 +20,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) : GrappleStart(onGra
     hasCoyoteExpired = false;
 
     grappleProjectileInfo.travelSpeed = 100.0f;
-    grappleProjectileInfo.maxDistance = 100.0f;
+    grappleProjectileInfo.maxDistance = Replicated::GRAPPLEDISTANCE;
     grappleProjectileInfo.SetActive(false);
 
     maxHorizontalVelocity = 7.0f;

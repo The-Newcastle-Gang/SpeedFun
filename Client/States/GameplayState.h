@@ -96,6 +96,12 @@ namespace NCL {
 
             TextureBase* deathImageTex;
 
+            constexpr static int chainLinkCount = 20;
+            constexpr static float chainSize = 0.2f;
+
+            GameObject* chains[chainLinkCount * Replicated::PLAYERCOUNT];
+            GameObject* grapples[Replicated::PLAYERCOUNT];
+
             void SendInputData();
             void CreatePlayers();
 
@@ -170,6 +176,17 @@ namespace NCL {
             bool displayDebugger = false;
 
             void CreateGrapples();
+            void
+
+            UpdateGrapples();
+
+            GameObject *CreateChainLink();
+
+            void CreateChains();
+
+            void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
+
+            void OnGrappleToggle(GameObject &gameObject, bool isActive);
         };
     }
 }

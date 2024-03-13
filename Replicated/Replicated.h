@@ -78,6 +78,7 @@ public:
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
+    constexpr static float GRAPPLEDISTANCE = 100.0f;
     LevelReader* levelReader;
 
     void AddGrapplesToWorld(GameObject *g, GameWorld &world, int index);

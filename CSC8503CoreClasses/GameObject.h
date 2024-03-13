@@ -3,6 +3,7 @@
 #include "CollisionVolume.h"
 #include "AnimatorObject.h"
 #include "Component.h"
+#include <entt.hpp>
 
 namespace NCL::CSC8503 {
     class NetworkObject;
@@ -48,6 +49,7 @@ namespace NCL::CSC8503 {
 
         void SetActive(bool pIsActive) {
             isActive = pIsActive;
+            onActiveSet.publish(*this, isActive);
         }
 
         const CollisionVolume* GetBoundingVolume() const {
@@ -144,7 +146,11 @@ namespace NCL::CSC8503 {
         [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
         void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
 
+        entt::sink<entt::sigh<void(GameObject&, bool)>> OnActiveSet;
+
     protected:
+
+        entt::sigh<void(GameObject&, bool)> onActiveSet;
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;

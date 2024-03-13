@@ -198,6 +198,7 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     SendInputData();
     ReadNetworkFunctions();
+    UpdateGrapples();
 
     Window::GetWindow()->ShowOSPointer(false);
     //Window::GetWindow()->LockMouseToWindow(true);
@@ -231,6 +232,7 @@ void GameplayState::Update(float dt) {
         }
         Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
     }
+
     renderer->Render();
     Debug::UpdateRenderables(dt);
 
@@ -389,6 +391,29 @@ void GameplayState::ResetCameraAnimation() {
     strafeSpeed = 0.0f;
 }
 
+GameObject* GameplayState::CreateChainLink() {
+    auto g = new GameObject("chain");
+    world->AddGameObject(g, false);
+    g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
+    g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->SetActive(false);
+    return g;
+}
+
+void GameplayState::CreateChains() {
+    for (int i=0; i < chainLinkCount * Replicated::PLAYERCOUNT; i++) {
+        chains[i] = CreateChainLink();
+        chains[i]->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 90, 0));
+    }
+}
+
+void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(GameObject&, int)>& opFunction) {
+    for (int i = 0; i < chainLinkCount; i++) {
+        int chainLinkIndex = grappleIndex * chainLinkCount + i;
+        opFunction(*chains[chainLinkIndex], i);
+    }
+}
+
 void GameplayState::WalkCamera(float dt) {
 
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
@@ -490,6 +515,7 @@ void GameplayState::InitWorld() {
     InitLevel();
     CreatePlayers();
     CreateGrapples();
+    CreateChains();
     worldHasLoaded = LoadingStates::LOADED;
 }
 
@@ -577,11 +603,36 @@ void GameplayState::InitLevel() {
     SetTestSprings();
 }
 
+void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
+    int id = gameObject.GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+    if (!isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
+        chainLink.SetActive(false);
+    });
+
+    if (isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
+       chainLink.SetActive(true);
+    });
+}
+
+void GameplayState::UpdateGrapples() {
+    for (GameObject* grapple: grapples) {
+        int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+        if (!chains[id * chainLinkCount]->IsActive()) continue;
+        Vector3 chainVector = grapple->GetTransform().GetPosition() -  firstPersonPosition->GetPosition();
+        OperateOnChains(id, [this, chainVector](GameObject& chainLink, int chainIndex) {
+            float chainTValue = (float)chainIndex / (float)chainLinkCount;
+            chainLink.GetTransform().SetPosition(firstPersonPosition->GetPosition() + chainVector * chainTValue);
+        });
+    }
+}
+
 void GameplayState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+        g->OnActiveSet.connect<&GameplayState::OnGrappleToggle>(this);
+        grapples[i] = g;
     }
 }
 
