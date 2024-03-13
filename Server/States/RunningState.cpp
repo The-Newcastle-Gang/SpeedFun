@@ -27,6 +27,7 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+    numPlayersLoaded = 0;
 
     shouldClose.store(false);
 
@@ -55,6 +56,7 @@ void RunningState::ReadNetworkFunctions() {
         auto data = networkData->incomingFunctions.Pop();
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
+            numPlayersLoaded++;
         }
         else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
             auto player = GetPlayerObjectFromId(data.first);
@@ -99,9 +101,22 @@ void RunningState::OnExit() {
 
 
 void RunningState::Update(float dt) {
+
+    while (numPlayersLoaded < playerInfo.size()) {
+        ReadNetworkFunctions();
+        ReadNetworkPackets();
+    }
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
+
+    if (!levelManager->UpdateCountdown(dt)) {
+        return;
+    }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -384,6 +399,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -416,9 +432,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
+  
+    for (auto& x : springList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
-    //SetTestSprings(); 
-    //SetTestFloor();
+        Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
+        g->AddComponent(oo);
+    }
 }
 
 void RunningState::SetTriggerTypePositions(){
