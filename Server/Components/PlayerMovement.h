@@ -28,6 +28,7 @@ public:
 
     void Jump();
     void Grapple();
+    void SetInAir();
 
     struct CameraAnimationCallData {
         bool jump = false;
@@ -43,6 +44,18 @@ public:
 
     CameraAnimationCallData cameraAnimationCalls;
 
+    struct PlayerAnimationCallData {
+        bool isGrappling = false;
+        bool inAir = false;
+        int strafe = 0;
+        bool backwards = false;
+        bool hasInput = false;
+        bool isFalling = false;
+    };
+
+    PlayerAnimationCallData playerAnimationCallData;
+
+    void ToggleDebug() { debugEnabled = !debugEnabled; }
 private:
     GameWorld* world;
 
@@ -51,6 +64,8 @@ private:
         std::function<void(float)> UpdateState;
         std::function<void()> OnExit;
     };
+
+    bool debugEnabled = false;
 
     bool hasCoyoteExpired;
 
@@ -98,6 +113,7 @@ private:
     void UpdateInAir(float dt);
     void LeaveInAir();
     void StartGround();
+    void UpdateAnimDataFromInput();
     void UpdateOnGround(float dt);
     void LeaveGround();
     void SwitchToState(MovementState *state);

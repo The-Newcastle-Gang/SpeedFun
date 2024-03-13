@@ -20,6 +20,8 @@ out Vertex
 	vec2 texCoord;
 	vec4 shadowProj;
 	vec3 normal;
+	vec3 tangent;
+	vec3 binormal;
 	vec3 worldPos;
 } OUT;
 

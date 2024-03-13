@@ -1,8 +1,7 @@
 #include "Renderer.h"
-#include "Renderer.h"
-#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
+#include "Resources.h"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tinyobjloader.h"
@@ -21,14 +20,18 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     debugShader  = new OGLShader("debug.vert", "debug.frag");
     shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
-    defaultShader = new OGLShader("scene.vert", "scene.frag");
+    defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
     particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticle.frag");
+    combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
+    pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
+    noiseTexture = (OGLTexture*)LoadTexture("noise.png");
     postProcessBase = new OGLShader("post.vert", "post.frag");
 
 	lineCount = 0;
 	textCount = 0;
 
+    GLenum buffers[2] = { GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1};
     LoadOBJMesh("stone_tallA.obj");
 
 	glGenTextures(1, &shadowTex);
@@ -43,11 +46,36 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenFramebuffers(1, &shadowFBO);
+    glGenFramebuffers(1, &shadowFBO);
+    glGenFramebuffers(1, &lightFBO);
+    glGenFramebuffers(1, &bufferFBO);
+
+    GenerateScreenTexture(bufferColourTex, false);
+    GenerateScreenTexture(bufferNormalTex, false);
+    GenerateScreenTexture(lightDiffuseTex, false);
+    GenerateScreenTexture(lightSpecularTex, false);
+    GenerateScreenTexture(bufferDepthTex, true);
+
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D, shadowTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
 	glDrawBuffer(GL_NONE);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bufferNormalTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, bufferDepthTex, 0);
+    glDrawBuffers(2, buffers);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, lightDiffuseTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, lightSpecularTex, 0);
+    glDrawBuffers(2, buffers);
+
 
 	glClearColor(1, 1, 1, 0);
 
@@ -55,9 +83,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	lineCount = 0;
 
 	//Set up the light properties
-	lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
-	lightRadius = 1000.0f;
-	lightPosition = Vector3(-200.0f, 500.0f, 200.0f);
+    sunlight.lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+    sunlight.lightRadius = 1000.0f;
+    sunlight.lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 
 	//Skybox!
 	skyboxShader = new OGLShader("skybox.vert", "skybox.frag");
@@ -97,17 +125,28 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     u_time = 0.0f;
     //InitRayMarching();
 
+    CreatePostProcessQuad();
     // SpeedLines
     uTime = 0.0f;
     isSpeedLinesActive = true;
     speedLineDir = 0;
-    
+
 }
 
 GameTechRenderer::~GameTechRenderer()	{
     glDeleteTextures(1, &shadowTex);
+    glDeleteTextures(1, &bufferColourTex);
+    glDeleteTextures(1, &bufferNormalTex);
+    glDeleteTextures(1, &lightDiffuseTex);
+    glDeleteTextures(1, &lightSpecularTex);
     glDeleteFramebuffers(1, &shadowFBO);
+    glDeleteFramebuffers(1, &lightFBO);
+    glDeleteFramebuffers(1, &bufferFBO);
+    delete shadowShader;
     delete defaultShader;
+    delete combineShader;
+    delete pointLightShader;
+    delete skyboxShader;
 }
 
 
@@ -269,32 +308,140 @@ void GameTechRenderer::LoadSkybox() {
 }
 
 void GameTechRenderer::RenderFrame() {
-
+    uTime += 0.01f;
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
-
+    glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-	glClearColor(1, 1, 1, 0);
+    glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glClearColor(1, 1, 1, 1);
+
 	BuildObjectList();
 	SortObjectList();
-	RenderShadowMap();
-	RenderSkybox();
-	RenderCamera();
-    // Render the particles
+	//RenderShadowMap();
+    FillDiffuseBuffer();
+    RenderDeferredLighting();
+    CombineBuffers();
+    ApplyPostProcessing();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
-	glDisable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //RenderRayMap();
 	NewRenderLines();
 	NewRenderText();
     RenderUI();
+}
 
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+void GameTechRenderer::FillDiffuseBuffer() {
+    glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(true);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    RenderSkybox();
+    RenderCamera();
+}
 
-    uTime += 0.01f;
+void GameTechRenderer::RenderDeferredLighting() {
+
+    float screenAspect = (float)windowWidth / (float)windowHeight;
+    Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+    Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+    BindShader(pointLightShader);
+    GLuint shaderProg = pointLightShader->GetProgramID();
+
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+    if (!doDeferred)return;
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glCullFace(GL_FRONT);
+    glDepthFunc(GL_ALWAYS);
+
+    glUniform1i(glGetUniformLocation(shaderProg, "depthTex"), 6);
+    glActiveTexture(GL_TEXTURE6);
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
+
+    glUniform1i(glGetUniformLocation(shaderProg, "normTex"), 7);
+    glActiveTexture(GL_TEXTURE7);
+    glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+
+    const Vector3 &cameraPosition = gameWorld.GetMainCamera()->GetPosition();
+    float* camPos = (float*)&cameraPosition.array[0];
+
+    glUniform3fv(glGetUniformLocation(shaderProg, "cameraPos"), 1, camPos);
+    glUniform2f(glGetUniformLocation(shaderProg, "pixelSize"), 1.0f / windowWidth, 1.0f / windowHeight);
+
+    Matrix4 invViewProj = (projMatrix * viewMatrix).Inverse();
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "inverseProjView"), 1, false, (float*)invViewProj.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "viewMatrix"), 1, false, (float*)viewMatrix.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProg, "projMatrix"), 1, false, (float*)projMatrix.array);
+
+    BindMesh(pointLightSphereMesh);
+    for (int i = 0; i < (*pointLights).size(); i++) {
+        PointLightInfo& l = (*pointLights)[i];
+        glUniform3fv(glGetUniformLocation(shaderProg, "lightPos"), 1, (float*)&l.lightPosition);
+        glUniform4fv(glGetUniformLocation(shaderProg, "lightColour"), 1, (float*)&l.lightColour);
+        glUniform1f(glGetUniformLocation(shaderProg, "lightRadius"), l.lightRadius);
+        DrawBoundMesh();
+    }
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glCullFace(GL_BACK);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
+
+    glDepthMask(GL_TRUE);
+    glClearColor(0, 0, 0, 1);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GameTechRenderer::CombineBuffers() {
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
+
+    BindShader(combineShader);
+    Matrix4 modelTemp;
+    Matrix4 viewTemp;
+    Matrix4 projTemp;
+    modelTemp.ToIdentity();
+    viewTemp.ToIdentity();
+    projTemp.ToIdentity();
+
+
+
+    glDepthMask(false);
+    GLuint shaderID = combineShader->GetProgramID();
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "modelMatrix"), 1, false, (float*)modelTemp.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "viewMatrix"), 1, false, (float*)viewTemp.array);
+    glUniformMatrix4fv(glGetUniformLocation(shaderID, "projMatrix"), 1, false, (float*)projTemp.array);
+
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseTex"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, bufferColourTex);
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseNorm"), 1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bufferNormalTex);
+
+    glUniform1i(glGetUniformLocation(shaderID, "diffuseLight"), 2);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, lightDiffuseTex);
+
+    glUniform1i(glGetUniformLocation(shaderID, "specularLight"), 3);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, lightSpecularTex);
+
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP,0, 6);
+    glEnable(GL_CULL_FACE);
+
+    glDepthMask(true);
+
 }
 
 void GameTechRenderer::InitRayMarching() {
@@ -322,10 +469,21 @@ void GameTechRenderer::RenderRayMap() {
 }
 
 void GameTechRenderer::RenderUI() {
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     auto& layers = canvas.GetActiveLayers();
-    for (auto i = layers.rbegin(); i != layers.rend(); i++) {
+
+    int blockingLayer = layers.size() - 1;
+
+    for (int i=blockingLayer; i >= 0; i--) {
+        if (layers[blockingLayer]->CheckBlocking()) {
+            break;
+        }
+
+        blockingLayer = i;
+    }
+
+    for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
             auto activeShader = defaultUIShader;
@@ -364,6 +522,12 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeRel"), relSize.x * windowWidth, relSize.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
 
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -375,9 +539,6 @@ void GameTechRenderer::RenderUI() {
                 RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
             }
 
-        }
-        if ((*i)->CheckBlocking()) {
-            break;
         }
     }
 }
@@ -396,7 +557,6 @@ void GameTechRenderer::BuildObjectList() {
 }
 
 void GameTechRenderer::SortObjectList() {
-
 }
 
 void GameTechRenderer::RenderShadowMap() {
@@ -410,7 +570,7 @@ void GameTechRenderer::RenderShadowMap() {
     BindShader(shadowShader);
     int mvpLocation = glGetUniformLocation(shadowShader->GetProgramID(), "mvpMatrix");
 
-    Matrix4 shadowViewMatrix = Matrix4::BuildViewMatrix(lightPosition, Vector3(0, 0, 0), Vector3(0,1,0));
+    Matrix4 shadowViewMatrix = Matrix4::BuildViewMatrix(sunlight.lightPosition, Vector3(0, 0, 0), Vector3(0,1,0));
     Matrix4 shadowProjMatrix = Matrix4::Perspective(100.0f, 500.0f, 1, 45.0f);
 
     Matrix4 mvMatrix = shadowProjMatrix * shadowViewMatrix;
@@ -439,6 +599,7 @@ void GameTechRenderer::RenderSkybox() {
     glDisable(GL_CULL_FACE);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
 
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
@@ -463,9 +624,11 @@ void GameTechRenderer::RenderSkybox() {
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 }
 
 void GameTechRenderer::RenderCamera() {
+    glEnable(GL_DEPTH_TEST);
     float screenAspect = (float)windowWidth / (float)windowHeight;
     Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
     Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
@@ -481,6 +644,7 @@ void GameTechRenderer::RenderCamera() {
     int hasVColLocation = 0;
     int hasTexLocation  = 0;
     int shadowLocation  = 0;
+    int isLitLocation   = 0;
 
     int lightPosLocation	= 0;
     int lightColourLocation = 0;
@@ -488,18 +652,17 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
-    float uTimeLocation = 0;
-    glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    //glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
+    //glClearColor(0.0, 0.0, 0.0, 0.0);
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     //TODO - PUT IN FUNCTION
-    glActiveTexture(GL_TEXTURE0 + 1);
+    glActiveTexture(GL_TEXTURE0+1);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
 
     for (const RenderObject* i : activeObjects) {
 
-        Vector3 scale = i->GetTransform()->GetScale();
+        Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
@@ -521,7 +684,9 @@ void GameTechRenderer::RenderCamera() {
             shadowLocation  = glGetUniformLocation(shader->GetProgramID(), "shadowMatrix");
             colourLocation  = glGetUniformLocation(shader->GetProgramID(), "objectColour");
             hasVColLocation = glGetUniformLocation(shader->GetProgramID(), "hasVertexColours");
+
             hasTexLocation  = glGetUniformLocation(shader->GetProgramID(), "hasTexture");
+            isLitLocation   = glGetUniformLocation(shader->GetProgramID(), "isLit");
 
             lightPosLocation    = glGetUniformLocation(shader->GetProgramID(), "lightPos");
             lightColourLocation = glGetUniformLocation(shader->GetProgramID(), "lightColour");
@@ -535,17 +700,23 @@ void GameTechRenderer::RenderCamera() {
             glUniformMatrix4fv(projLocation, 1, false, (float *) &projMatrix);
             glUniformMatrix4fv(viewLocation, 1, false, (float *) &viewMatrix);
 
-            glUniform3fv(lightPosLocation, 1, (float *) &lightPosition);
-            glUniform4fv(lightColourLocation, 1, (float *) &lightColour);
-            glUniform1f(lightRadiusLocation, lightRadius);
+            glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
+            glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
+            glUniform1f(lightRadiusLocation , sunlight.lightRadius);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);
 
             activeShader = shader;
         }
-
+        Vector3 originalScale = (*i).GetTransform()->GetScale();
+        Vector3 originalPosition = (*i).GetTransform()->GetPosition();
+        (*i).GetTransform()->SetScale(scale); //multiply scale before we get the matrix
+        (*i).GetTransform()->SetPosition(originalPosition + (*i).GetMeshOffset()); //add offset before we get the matrix
         Matrix4 modelMatrix = (*i).GetTransform()->GetMatrix();
+        (*i).GetTransform()->SetScale(originalScale); //set it back to normal
+        (*i).GetTransform()->SetPosition(originalPosition); //set it back to normal
+
         glUniformMatrix4fv(modelLocation, 1, false, (float *) &modelMatrix);
 
         Matrix4 fullShadowMat = shadowMatrix * modelMatrix;
@@ -557,6 +728,8 @@ void GameTechRenderer::RenderCamera() {
         glUniform1i(hasVColLocation, !(*i).GetMesh()->GetColourData().empty());
 
         glUniform1i(hasTexLocation, (OGLTexture *) (*i).GetDefaultTexture() || (*i).GetMeshMaterial() ? 1 : 0);
+
+        glUniform1i(isLitLocation, 1);
 
         BindMesh((*i).GetMesh());
 
@@ -580,10 +753,13 @@ void GameTechRenderer::RenderCamera() {
             }
         }
     }
-
     RenderParticles();
+}
 
 
+void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
+{
+    float screenAspect = (float)windowWidth / (float)windowHeight;
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -594,7 +770,7 @@ void GameTechRenderer::RenderCamera() {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sceneColorTexture);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, sceneDepthTexture);
+    glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
     glBindVertexArray(quadVAO);
 
     auto& camera = *gameWorld.GetMainCamera();
@@ -609,7 +785,7 @@ void GameTechRenderer::RenderCamera() {
     int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
-    glUniform3fv(lightLoc, 1, (float*)&lightPosition);
+    glUniform3fv(lightLoc, 1, (float*)&sunlight.lightPosition);
     glUniform1i(depthLoc, 1);
     glUniform1f(timeLoc, uTime);
     glUniform1f(speedLineAmountLoc, speedLinePercent);
@@ -620,8 +796,6 @@ void GameTechRenderer::RenderCamera() {
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
-
-
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {
@@ -655,26 +829,55 @@ MeshGeometry* GameTechRenderer::LoadOBJMesh(const string& name) {
     const std::vector<int>& material_ids = shapes[0].mesh.material_ids;
 
     std::vector<Vector3> vertexPositions;
-    vertexPositions.reserve(attrib.vertices.size() / 3);
+    std::vector<Vector2> vertexTexcoords;
+    std::vector<Vector4> vertexColors;
+    std::vector<GLuint> vertexIndices;
 
-    // Must be better way of this, it's literally the same in memory
-    for (int i = 0; i < attrib.vertices.size(); i += 3) {
-        vertexPositions.emplace_back(attrib.vertices[i], attrib.vertices[i+1], attrib.vertices[i+2]);
+    for (size_t index = 0; index < material_ids.size(); index++) {
+        Vector3 original[] = {
+                Vector3(attrib.vertices[indices[3 * index].vertex_index * 3],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 1].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 1].vertex_index * 3 + 2]),
+                Vector3(attrib.vertices[indices[3 * index + 2].vertex_index * 3],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 1],
+                        attrib.vertices[indices[3 * index + 2].vertex_index * 3 + 2])
+        };
+
+        vertexPositions.push_back(original[0]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[1]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 1].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
+
+        vertexPositions.push_back(original[2]);
+        vertexTexcoords.push_back(Vector2(
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2],
+                attrib.texcoords[indices[3 * index + 2].texcoord_index * 2 + 1]
+        ));
+
+        vertexColors.push_back(Vector4(1.0, 1.0, 1.0, 1.0));
+        vertexIndices.push_back(vertexPositions.size() - 1);
     }
 
     mesh->SetVertexPositions(vertexPositions);
-
-    std::vector<GLuint> vertexIndicies;
-
-    for (int i = 0; i < indices.size(); i++) {
-        vertexIndicies.push_back(indices[i].vertex_index);
-    }
-
-    mesh->SetVertexIndices(vertexIndicies);
-
-//    std::vector<Vector2> vertexTexcoords;
-//    vertexTexcoords.resize(attrib.vertices.size() / 3);
-//    std::fill(vertexTexcoords.begin(), vertexTexcoords.end(), Vector2(0,0));
+    mesh->SetVertexTextureCoords(vertexTexcoords);
+    mesh->SetVertexColours(vertexColors);
+    mesh->SetVertexIndices(vertexIndices);
 
     mesh->RecalculateNormals();
     mesh->UploadToGPU();
@@ -725,6 +928,20 @@ void GameTechRenderer::NewRenderText() {
     }
 }
 
+void GameTechRenderer::GenerateScreenTexture(GLuint& into, bool depth) {
+    glGenTextures(1, &into);
+    glBindTexture(GL_TEXTURE_2D, into);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    GLuint format = depth ? GL_DEPTH_COMPONENT24 : GL_RGBA8;
+    GLuint type = depth ? GL_DEPTH_COMPONENT : GL_RGBA;
+
+    glTexImage2D(GL_TEXTURE_2D, 0, format, windowWidth, windowHeight, 0, type, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 
 TextureBase* GameTechRenderer::LoadTexture(const string& name) {
@@ -803,7 +1020,6 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
 }
 
 void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color) {
-    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     BindShader(font->fontShader.get());
 

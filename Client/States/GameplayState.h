@@ -13,18 +13,28 @@
 #include "Resources.h"
 #include "ClientNetworkData.h"
 #include "ClientThread.h"
-#include "LevelBuilder.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
 #include "ParticleSystem.h"
+#include "DebugMode.h"
 #include "SoundManager.h"
-
+#include "AnimatorObject.h"
+#include "LevelManager.h"
 
 #include <thread>
 #include <iostream>
 
+
 namespace NCL {
     namespace CSC8503 {
+        class DebugMode;
+
+        enum LoadingStates {
+            NOT_LOADED,
+            LOADED,
+            READY
+        };
+
         class GameplayState : public State
         {
         public:
@@ -56,8 +66,12 @@ namespace NCL {
 
 
             void SetTestSprings();
+            void AddPointLight(PointLightInfo light);
             void SetTestFloor();
 
+            std::unique_ptr<LevelManager> levelManager;
+
+            std::string medalImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -76,27 +90,37 @@ namespace NCL {
 
             std::thread* networkThread;
 
+            std::atomic<bool> shouldShutDown;
+
             Transform* firstPersonPosition;
 
             Diagnostics packetsSent{};
 
-            
+            TextureBase* deathImageTex;
 
             void SendInputData();
             void CreatePlayers();
 
+            void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
+
+            void ManageLoading(float dt);
             void FinishLoading();
+            std::thread* loadWorldThread;
+            std::thread* loadSoundThread;
+            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
+            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            float loadingTime = 0.0f;
 
-            static void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
+            float totalDTElapsed = 0.0f;
+            bool debugMovementEnabled = false;
 
+            void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
-
-
             void ReadNetworkPackets();
 
             void CreateRock();
             void ResetCameraAnimation();
-
 
             void WalkCamera(float dt);
             float groundedMovementSpeed = 0.0f;
@@ -130,6 +154,8 @@ namespace NCL {
             const float strafeSpeedMax = 12.0f;
             float strafeTiltAmount = 1.0f;
 
+            float defaultFOV = 70.0f;
+
             void HandleGrappleEvent(int event);
 
             float levelLen;
@@ -145,6 +171,11 @@ namespace NCL {
             void UpdateParticleSystems(float dt);
 
             void UpdatePlayerBlip(Element &element, float dt);
+
+            std::string GetMedalImage();
+
+            DebugMode* debugger;
+            bool displayDebugger = false;
         };
     }
 }

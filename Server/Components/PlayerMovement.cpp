@@ -12,7 +12,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     gameObject = g;
 
     runSpeed = 5000.0f;
-    jumpVelocity = 500.0f;
+    jumpVelocity = 0.0f;
 
     dragFactor = 10.0f;
     coyoteTime = 0.5f;
@@ -47,6 +47,19 @@ void PlayerMovement::UpdateInputs(Vector3 pRightAxis, Vector2 pInputDirection, Q
     rightAxis = pRightAxis;
     inputDirection = pInputDirection;
     playerRotation = pPlayerRotation;
+    UpdateAnimDataFromInput();
+}
+
+void PlayerMovement::UpdateAnimDataFromInput() {
+    if (inputDirection.Length() == 0.0f)playerAnimationCallData.hasInput = false;
+    else playerAnimationCallData.hasInput = true;
+
+    playerAnimationCallData.strafe = (int)inputDirection.x;
+    playerAnimationCallData.backwards = inputDirection.y < 0;
+}
+
+void PlayerMovement::SetInAir() {
+    SwitchToState(&air);
 }
 
 void PlayerMovement::SwitchToState(MovementState* state) {
@@ -56,11 +69,13 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
+    playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
 }
 
 void PlayerMovement::OnGrappleStart() {
+    playerAnimationCallData.isGrappling = true;
     cameraAnimationCalls.isGrappling = true;
     cameraAnimationCalls.grapplingEvent = 1;
     StartInAir();
@@ -89,6 +104,9 @@ void PlayerMovement::StartInAir() {
     static float airDragFactor = 0.5f;
     static float airMaxHorizontalVelocity = 20.0f;
 
+    playerAnimationCallData.inAir = true;
+
+
     runSpeed = airRunSpeed;
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
@@ -106,8 +124,16 @@ void PlayerMovement::UpdateInAir(float dt) {
             isFalling = true;
         }
         cameraAnimationCalls.fallDistance = fallApex - gameObject->GetTransform().GetPosition().y;
+
+        if (gameObject->GetPhysicsObject()->GetLinearVelocity().y < -10.0f) {
+            playerAnimationCallData.isFalling = true;
+        }
+        else {
+            playerAnimationCallData.isFalling = false;
+        }
         return;
     }
+
     
 }
 
@@ -115,6 +141,7 @@ void PlayerMovement::LeaveInAir() {
     cameraAnimationCalls.land = cameraAnimationCalls.fallDistance;
     cameraAnimationCalls.isGrounded = true;
     isFalling = false;
+    playerAnimationCallData.isFalling = false;
 }
 
 void PlayerMovement::StartGround() {
@@ -122,6 +149,8 @@ void PlayerMovement::StartGround() {
     static float groundJumpVelocity = 7.0f;
     static float groundDragFactor = 8.5f;
     static float groundMaxHorizontalVelocity = 20.0f;
+
+    playerAnimationCallData.inAir = false;
 
     runSpeed = groundRunSpeed;
     jumpVelocity = groundJumpVelocity;
@@ -214,6 +243,7 @@ void PlayerMovement::Update(float dt) {
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
     
 
+
     Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
     float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
     cameraAnimationCalls.strafeSpeed = strafeSpeed;
@@ -283,12 +313,17 @@ void PlayerMovement::FireGrapple() {
 
 
 void PlayerMovement::Jump() {
+
+    float jumpVelocityValue = jumpVelocity;
+    if (debugEnabled) {
+        jumpVelocityValue = 7.0f;
+    }
     hasCoyoteExpired = false;
     PhysicsObject* physOb = gameObject->GetPhysicsObject();
 
     Vector3 currentVelocity = physOb->GetLinearVelocity();
-    gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocity*0.01f,0}); //hacky way to allow us to directly set velocity
-    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } * jumpVelocity);
+    gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocityValue *0.01f,0}); //hacky way to allow us to directly set velocity
+    physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocityValue);
     if(activeState!=&air) cameraAnimationCalls.jump = true;
     SwitchToState(&air);
     

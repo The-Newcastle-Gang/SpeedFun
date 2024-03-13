@@ -17,8 +17,8 @@ add_library(client
         UI/CanvasLayer.cpp
         TweenManager.cpp
         ParticleSystem.cpp
-        SoundManager.cpp)
-
+        SoundManager.cpp
+        DebugMode.cpp)
 
 target_include_directories(client PUBLIC
         ../NCLCoreClasses
@@ -32,6 +32,7 @@ target_include_directories(client PUBLIC
         ./UI
         ../raudio/src
         ../NotLua
+        ../Server/Levels
 )
 
 target_link_libraries(client PUBLIC
