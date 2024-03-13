@@ -1,13 +1,14 @@
 #include "Swinging.h"
 #define TAU 6.283185
 
-Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDelay, float radius) {
+Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDelay, float radius, bool changeAxis) {
     gameObject = go;
     initPosition = go->GetTransform().GetPosition();
     this->frequency = 1.0f/period;
     this->cooldown = cooldown;
     this->waitDelay = waitDelay;
     this->radius = radius;
+    this->changeAxis = changeAxis;
 
     phys = go->GetPhysicsObject();
 }
@@ -81,7 +82,15 @@ void Swinging::UpdateOscillation(float dt) {
 
     Vector3 tempPos = initPosition;
     tempPos.y = initPosition.y + sinTimer * radius;
-    tempPos.z = initPosition.z + cosTimer * radius;
+
+    switch (changeAxis)
+    {
+    case false:
+        tempPos.z = initPosition.z + cosTimer * radius;
+        break;
+    case true:
+        tempPos.x = initPosition.z + cosTimer * radius;
+    }
 
 
     gameObject->GetTransform().SetPosition(tempPos);
