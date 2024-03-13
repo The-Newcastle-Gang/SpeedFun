@@ -12,7 +12,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     gameObject = g;
 
     runSpeed = 5000.0f;
-    jumpVelocity = 500.0f;
+    jumpVelocity = 0.0f;
 
     dragFactor = 10.0f;
     coyoteTime = 0.5f;

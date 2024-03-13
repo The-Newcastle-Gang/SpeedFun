@@ -194,9 +194,12 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    SendInputData();
+    if(countdownOver)SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
@@ -211,7 +214,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -466,8 +469,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    }
     world->StartWorld();
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {
@@ -535,6 +541,7 @@ void GameplayState::InitLevel() {
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
+    auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -564,9 +571,10 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
     }
-
-    //SetTestSprings();
-    SetTestFloor();
+    
+    for (auto& l : lightList) {
+        AddPointLight(l);
+    }
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -598,6 +606,10 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+}
+
+void GameplayState::AddPointLight(PointLightInfo light) {
+    world->AddPointLightToWorld(light);
 }
 
 void GameplayState::SetTestFloor() {
