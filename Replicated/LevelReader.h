@@ -42,6 +42,15 @@ public:
     float           waitDelay;
 };
 
+struct SpringPrimitive : public PrimitiveGameObject {
+public:
+    float           force;
+    Vector3         direction;
+    float           activeTime;
+    bool           isContinuous;
+    float           continuousForce;
+};
+
 class LevelReader {
 public:
 
@@ -55,6 +64,7 @@ public:
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetPrimitiveList() const { return primGOList; }
     [[nodiscard]] std::vector<OscillatorPrimitive*> GetOscillatorPList() const { return oscillatorPrimitives; }
     [[nodiscard]] std::vector<OscillatorPrimitive*> GetHarmfulOscillatorPList() const { return harmfulOscillatorPrimitives; }
+    [[nodiscard]] std::vector<SpringPrimitive*> GetSpringPList() const { return springPrimitives; }
     [[nodiscard]] std::vector<PointLightInfo> GetPointLights() const { return pointLights; }
 
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
@@ -71,6 +81,7 @@ protected:
     std::vector<PrimitiveGameObject*> primGOList;
     std::vector<OscillatorPrimitive*> oscillatorPrimitives;
     std::vector<OscillatorPrimitive*> harmfulOscillatorPrimitives;
+    std::vector<SpringPrimitive*> springPrimitives;
     std::vector<PointLightInfo> pointLights;
 
     std::vector<GroundCubePrimitive*> groundCubes;
