@@ -11,6 +11,7 @@
 #include "DamagingObstacle.h"
 #include "Levels/LevelManager.h"
 #include "ObjectOscillator.h"
+#include "Swinging.h"
 #include "Spring.h"
 
 #include <iostream>

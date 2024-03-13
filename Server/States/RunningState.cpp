@@ -1,5 +1,4 @@
 #include "RunningState.h"
-#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -431,6 +430,16 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
+
+    // TEST SWINGING OBJECT
+    auto g = new GameObject();
+    replicated->AddTestObjectToLevel(g, *world, { 5, 5, 5 }, { 0, 10, 0 });
+    g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+    g->GetPhysicsObject()->SetInverseMass(0.0f);
+    g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+
+    Swinging* swing = new Swinging(g, 1, 3, {0, 5, 0}, 1, 2);
+    g->AddComponent(swing);
 
     //SetTestSprings(); 
     //SetTestFloor();

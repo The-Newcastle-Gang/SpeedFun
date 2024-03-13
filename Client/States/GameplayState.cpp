@@ -568,16 +568,17 @@ void GameplayState::InitLevel() {
         AddPointLight(l);
     }
 
+    // TEST SWINGING OBJECT ON THE CLIENT
+    auto swingingTemp = new GameObject();
+    replicated->AddTestObjectToLevel(swingingTemp, *world, { 5, 5, 5 }, { 0, 10, 0 });
+    swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
+    swingingTemp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
+
     //SetTestSprings();
     SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
-
-    // TEST SWINGING OBJECT ON THE CLIENT
-    //auto swingingTemp = new GameObject();
-    //replicated->AddSwingingBlock(swingingTemp, *world);
-    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 
     SetTestSprings();
 
