@@ -27,6 +27,7 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+    numPlayersLoaded = 0;
 
     shouldClose.store(false);
 
@@ -55,6 +56,7 @@ void RunningState::ReadNetworkFunctions() {
         auto data = networkData->incomingFunctions.Pop();
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
+            numPlayersLoaded++;
         }
         else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
             auto player = GetPlayerObjectFromId(data.first);
@@ -99,9 +101,22 @@ void RunningState::OnExit() {
 
 
 void RunningState::Update(float dt) {
+
+    while (numPlayersLoaded < playerInfo.size()) {
+        ReadNetworkFunctions();
+        ReadNetworkPackets();
+    }
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
+
+    if (!levelManager->UpdateCountdown(dt)) {
+        return;
+    }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -436,7 +451,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(dO);
     }
 
-    //SetTestSprings();
+    //SetTestSprings(); 
     //SetTestFloor();
 }
 

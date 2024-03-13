@@ -109,6 +109,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
@@ -118,6 +119,9 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
+
+    renderer->SetPointLights(world->GetPointLights());
+    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 void GameplayState::InitialiseAssets() {
     
@@ -190,9 +194,12 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    SendInputData();
+    if(countdownOver)SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
@@ -207,7 +214,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -320,7 +327,7 @@ void GameplayState::ReadNetworkFunctions() {
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
                 float speedVisualModifier = std::min(speed, 50.0f) / 50.0f;
                 renderer->SetSpeedLineAmount(speedVisualModifier);
-                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 20.0f);
+                world->GetMainCamera()->SetFieldOfVision( defaultFOV + speedVisualModifier * 30.0f);
             }
             break;
 
@@ -462,8 +469,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    }
     world->StartWorld();
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {
@@ -552,17 +562,8 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
-
-    //SetTestSprings();
-    //SetTestFloor();
-
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
-
-    // TEST SWINGING OBJECT ON THE CLIENT
-    //auto swingingTemp = new GameObject();
-    //replicated->AddSwingingBlock(swingingTemp, *world);
-    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
 }
 
 void GameplayState::SetTestSprings() {
@@ -571,6 +572,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -40.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(1.0f, 1.0f / 4.0f * i, 0.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -40.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 
     for (int i = 0; i < 4; i++) {
@@ -578,6 +585,12 @@ void GameplayState::SetTestSprings() {
         replicated->AddSpringToLevel(g, *world, Vector3(-40.0f + 15.0f * i, -3.0f, -50.0f));
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
         g->GetRenderObject()->SetColour(Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f));
+
+        PointLightInfo light;
+        light.lightColour = Vector4(0, 1.0f / 4.0f * i, 1.0f, 1.0f);
+        light.lightPosition = Vector3(-40.0f + 15.0f * i, 0.0f, -50.0f);
+        light.lightRadius = 7.0f;
+        world->AddPointLightToWorld(light);
     }
 }
 
