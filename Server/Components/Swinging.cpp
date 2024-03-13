@@ -82,11 +82,10 @@ void Swinging::UpdateOscillation(float dt) {
 
     float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value
     float sinTimer = (-1.0f * sin((timer * frequency * TAU)) + 1) * 0.5f;
+
     Vector3 tempPos = initPosition;
     tempPos.y = initPosition.y + sinTimer * radius;
     tempPos.z = initPosition.z + cosTimer * radius;
-    gameObject->GetTransform().SetPosition(tempPos);
-
 
     gameObject->GetTransform().SetPosition(tempPos);
 
