@@ -73,6 +73,8 @@ namespace NCL {
 
             std::unordered_map<int, GameObject*> playerObjects;
             std::unordered_map<int, bool> playersFinished;
+            std::unordered_map<int, float> playerTimes;
+
             bool isGameInProgress = false;
             bool hasAllPlayersFinished = false;
 
@@ -87,10 +89,12 @@ namespace NCL {
 
             void StartTriggerVolFunc(int id);
             void EndTriggerVolFunc(int id);
+            void OnAllPlayersFinished();
             void DeathTriggerVolFunc(int id);
             void DeathTriggerVolEndFunc(int id);
 
             void SendWorldToClient();
+            void SendMedalToClient(int id);
 
             Diagnostics dia{};
 

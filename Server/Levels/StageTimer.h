@@ -27,6 +27,8 @@ public:
     void EndTimer();
     void ResetTimer();
 
+    float GetElapsedTime() { return elapsedTime; }
+
     float GetFinalTime() const            { return finalTime; }
     Medal GetCurrentMedal() const         { return currentMedal; }
     NCL::Maths::Vector4 GetCurrentMedalColour() const { return currentMedalColour; }

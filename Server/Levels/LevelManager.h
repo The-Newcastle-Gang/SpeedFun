@@ -22,6 +22,7 @@ public:
 
     void StartStageTimer();
     void EndStageTimer();
+    float GetCurrentStageTime() { return stageTimer->GetElapsedTime(); }
 
     void SetLevel(int level) { currentLevel = level; }
     [[no_discard]] int GetLevel() const { return currentLevel; }

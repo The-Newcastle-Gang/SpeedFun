@@ -1,6 +1,7 @@
 #include "RunningState.h"
 #include "RunningState.h"
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -256,11 +257,21 @@ void RunningState::StartTriggerVolFunc(int id){
 
 void RunningState::EndTriggerVolFunc(int id){
     playersFinished[id] = true;
-    if (playersFinished.size() == playerObjects.size()) {
+    playerTimes[id] = levelManager->GetCurrentStageTime();
+
+    int numPlayersFinished = 0;
+    for (std::pair<int, bool> playerFinished : playersFinished) {
+        numPlayersFinished += playerFinished.second ? 1 : 0;
+    }
+
+    if (numPlayersFinished == playerObjects.size()) {
         hasAllPlayersFinished = true;
     }
-    ClearLevel();
-    levelManager->EndStageTimer();
+    if (!hasAllPlayersFinished)return;
+    OnAllPlayersFinished();
+}
+
+void RunningState::SendMedalToClient(int id) {
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
     FunctionData data;
@@ -269,6 +280,14 @@ void RunningState::EndTriggerVolFunc(int id){
     handler.Pack(medal);
     handler.Pack(medalColour);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, &data)));
+}
+
+void RunningState::OnAllPlayersFinished()
+{
+    ClearLevel();
+    levelManager->EndStageTimer();
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::All_Players_Finished, nullptr));
+    std::cout << "ALL PLAYERS DONE!!!!!!!\n";
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
