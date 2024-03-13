@@ -13,9 +13,7 @@ ClientThread::ClientThread(GameClient *client, ClientNetworkData *data) {
 }
 
 
-ClientThread::~ClientThread() {
-    baseClient->ClearPacketHandlers();
-}
+ClientThread::~ClientThread() {}
 
 void ClientThread::ReadPacketsToSend() {
     while (!networkData->outgoingFunctions.IsEmpty()) {
@@ -27,6 +25,10 @@ void ClientThread::ReadPacketsToSend() {
         InputPacket packet = networkData->outgoingInput.Pop();
         baseClient->SendPacket(packet);
     }
+}
+
+void ClientThread::ClearPacketHandlers() {
+    baseClient->ClearPacketHandlers();
 }
 
 void ClientThread::ReceivePacket(int type, GamePacket *payload, int source) {

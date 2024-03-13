@@ -29,9 +29,14 @@ public:
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
+        EndReached,
         Grapple_Event,
-        Player_Velocity_Call
-    };
+        Player_Velocity_Call,
+        Player_Animation_Call,
+        Death_Event,
+        Death_Event_End,
+        Stage_Start,
+        };
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
@@ -40,6 +45,23 @@ public:
         PlayerJump,
         PlayerGrapple,
         PlayerDash,
+        PlayerDebug
+    };
+
+    enum PlayerAnimationStates {
+        RUNNING_FORWARD,
+        RUNNING_BACK,
+        RUNNING_LEFT,
+        RUNNING_RIGHT,
+        FALLING,
+        JUMP,
+        IDLE
+    };
+
+    struct RemoteAnimationData
+    {
+        int networkID = 0;
+        PlayerAnimationStates state = IDLE;
     };
 
     Replicated();
@@ -74,6 +96,5 @@ struct Diagnostics {
         delete gameTimer;
     }
 };
-
 
 #endif //CSC8503_REPLICATED_H
