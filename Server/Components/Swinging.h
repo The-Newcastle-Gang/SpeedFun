@@ -21,10 +21,7 @@ public:
 private:
 
     void UpdateOscillation(float dt);
-
-    PhysicsObject* phys;
     Vector3 initPosition;
-    Vector3 lastVelocity;
 
     Vector3 normalisedDirection; //should be normalised!
     float distance = 1.0f;

@@ -14,17 +14,13 @@ Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDela
 
 void Swinging::OnCollisionEnter(GameObject* other) {
     if (other->GetTag() == PLAYER) {
-        if(other->GetTransform().GetPosition().y > gameObject->GetTransform().GetPosition().y)
-        objectsOnPlatform[other] = true;
-        std::cout << "PLAYER ON PLATFORM\n";
+        std::cout << "HIT THE SWINGING BLOCK\n";
     }
 }
 
 void Swinging::OnCollisionEnd(GameObject* other) {
     if (other->GetTag() == PLAYER) {
-        objectsOnPlatform[other] = false;
-        std::cout << "PLAYER LEFT PLATFORM\n";
-        other->GetPhysicsObject()->ApplyLinearImpulse(lastVelocity);
+        std::cout << "LEFT THE SWINGING BLOCK\n";
     }
 }
 
@@ -80,12 +76,13 @@ void Swinging::UpdateOscillation(float dt) {
 
     Vector3 lastPos = gameObject->GetTransform().GetPosition();
 
-    float cosTimer = (-1.0f * cos((timer * frequency * TAU)) + 1) * 0.5f; //this gets a value from 0 to 1 where 0 is the initial value
-    float sinTimer = (-1.0f * sin((timer * frequency * TAU)) + 1) * 0.5f;
+    float cosTimer = cos((timer * frequency * TAU)); //this gets a value from 0 to 1 where 0 is the initial value
+    float sinTimer = sin((timer * frequency * TAU));
 
     Vector3 tempPos = initPosition;
     tempPos.y = initPosition.y + sinTimer * radius;
     tempPos.z = initPosition.z + cosTimer * radius;
+
 
     gameObject->GetTransform().SetPosition(tempPos);
 
