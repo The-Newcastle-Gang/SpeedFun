@@ -12,7 +12,7 @@ class Swinging : public Component {
     };
 
 public:
-    Swinging(GameObject* go,float period, float cooldown = 0.0f, float waitDelay = 0.0f, float radius = 5.0f, bool changeAxis = false);
+    Swinging(GameObject* go,float period, float cooldown = 0.0f, float waitDelay = 0.0f, float radius = 5.0f, bool changeAxis = false, bool changeDirection = false);
     //void Update(float dt)override;
     void OnCollisionEnter(GameObject* other)override;
     void OnCollisionEnd(GameObject* other)override;
@@ -43,6 +43,7 @@ private:
     State state = RUNNING;
 
     bool changeAxis = false;
+    bool changeDirection = false;
 
     std::unordered_map<GameObject*,bool> objectsOnPlatform; //means we only add to the map once per player.
 };
