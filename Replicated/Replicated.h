@@ -30,6 +30,7 @@ public:
         Camera_Land,
         Camera_Strafe,
         EndReached,
+        All_Players_Finished,
         Grapple_Event,
         Player_Velocity_Call,
         Player_Animation_Call,
@@ -64,8 +65,8 @@ public:
     };
 
     Replicated();
-    void InitLevel();
     int GetCurrentLevelLen();
+
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
     void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
@@ -78,6 +79,7 @@ public:
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
     LevelReader* levelReader;
+
 };
 
 struct Diagnostics {

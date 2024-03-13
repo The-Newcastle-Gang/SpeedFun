@@ -10,14 +10,6 @@
 #include "LevelReader.h"
 #include "StageTimer.h"
 
-enum LEVELS
-{
-    TEST_LEVEL,
-    LEVEL_1,
-    LEVEL_2,
-    MAX_LEVELS
-};
-
 class LevelManager {
 public:
     LevelManager();
@@ -31,10 +23,19 @@ public:
     void StartStageTimer();
     void EndStageTimer();
 
+    void SetLevel(int level) { currentLevel = level; }
+    [[no_discard]] int GetLevel() const { return currentLevel; }
+
+    void Reset() {
+        countdownTimer = COUNTDOWN_MAX;
+        currentTimer = 0.0f;
+        stageTimer->ResetTimer();
+    }
+
+    void ChangeLevel(int level);
+
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
-
-    std::map<int, std::string> GetLevelMap() { return levelMap; }
 
     std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
 
@@ -52,15 +53,9 @@ protected:
 
     } currentLevelDetails;
 
-    std::vector<PrimitiveGameObject*> pList;
-
     int currentMedal;
 
-    const std::map<int, std::string> levelMap = {
-        { TEST_LEVEL, "newTest" },
-        { LEVEL_1, "dbtest" }
-    };
-
+    int currentLevel = 0;
 };
 
 

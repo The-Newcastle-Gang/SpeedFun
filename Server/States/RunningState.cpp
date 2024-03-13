@@ -33,7 +33,9 @@ void RunningState::OnEnter() {
     shouldClose.store(false);
 
     CreateNetworkThread();
-    LoadLevel(TEST_LEVEL);
+
+    //this needs to be changed: the level needs to be set from some external place
+    LoadLevel(9);
     world->StartWorld();
 
 }
@@ -126,7 +128,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel(int level) {
-    BuildLevel(levelManager->GetLevelMap()[level]);
+    BuildLevel(levelManager->GetLevelReader()->GetLevelName(level));
     CreatePlayers();
     AddTriggersToLevel();
 }
@@ -212,6 +214,10 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
+    playersFinished[id] = true;
+    if (playersFinished.size() == playerObjects.size()) {
+        hasAllPlayersFinished = true;
+    }
     ClearLevel();
     levelManager->EndStageTimer();
     int medal = levelManager->GetCurrentMedal();

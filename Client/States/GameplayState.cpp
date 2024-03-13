@@ -303,7 +303,7 @@ void GameplayState::ReadNetworkFunctions() {
                         .AlignLeft();
                 // Disable player controls
                 // Clear the world
-                ClearLevel();
+                //ClearLevel();
                 // Loading screen
                 // Load the next level
 
@@ -494,7 +494,7 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel(TEST_LEVEL);
+    InitLevel(9); //just to test, this value will be read from the server
     CreatePlayers();
     worldHasLoaded = LoadingStates::LOADED;
 }
@@ -542,7 +542,7 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel(int level) {
-    levelManager->TryReadLevel(levelManager->GetLevelMap()[level]);
+    levelManager->ChangeLevel(level);
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();

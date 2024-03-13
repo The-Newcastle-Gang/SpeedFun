@@ -69,7 +69,9 @@ namespace NCL {
 
             int numPlayersLoaded = 0;
             std::unordered_map<int, GameObject*> playerObjects;
+            std::unordered_map<int, bool> playersFinished;
             bool isGameInProgress = false;
+            bool hasAllPlayersFinished = false;
 
             void LoadLevel(int level);
             void BuildLevel(const std::string &levelName);

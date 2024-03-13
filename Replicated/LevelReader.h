@@ -59,6 +59,10 @@ public:
 
 	Vector3 GetStartPosition() const { return startPosition; }
 	Vector3 GetEndPosition() const { return endPosition; }
+
+    std::string GetLevelName(int id) { return levelIDToLevelNameMap[id]; }
+    void LoadLevelNameMap();
+
     [[nodiscard]] Vector3 GetDeathBoxPosition() const { return deathBoxPosition; } //TODO: rename this to deathPlane
 
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetPrimitiveList() const { return primGOList; }
@@ -85,5 +89,8 @@ protected:
     std::vector<PointLightInfo> pointLights;
 
     std::vector<GroundCubePrimitive*> groundCubes;
+
+    std::unordered_map<int, std::string> levelIDToLevelNameMap;
+
 
 };

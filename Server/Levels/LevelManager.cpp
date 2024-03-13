@@ -12,6 +12,13 @@ LevelManager::LevelManager() {
     currentMedal = 0;
 }
 
+void LevelManager::ChangeLevel(int level){
+    Reset();
+    currentLevel = level;
+    TryReadLevel(levelReader->GetLevelName(level));
+}
+
+
 void LevelManager::UpdateTimer(float dt) {
     stageTimer->Update(dt);
 }
