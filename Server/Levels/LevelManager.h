@@ -34,7 +34,7 @@ public:
     }
 
     int GetTotalLevels() { return totalLevels; }
-    int GetNextLevel() { return (currentLevel + 1) % totalLevels; }
+    int GetAndSetNextLevel() { currentLevel = (currentLevel + 1) % totalLevels; return currentLevel; }
     void ChangeLevel(int level);
 
     void SetHasReceivedLevel(bool hasReceived) { hasReceivedLevelFromServer = hasReceived; }

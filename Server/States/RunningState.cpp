@@ -73,6 +73,7 @@ void RunningState::ResetLevelInfo() {
         playersFinished[info.first] = false;
     }
     levelManager->Reset();
+    levelManager->GetLevelReader()->Clear();
 }
 
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
@@ -149,8 +150,9 @@ void RunningState::WaitForPlayersLoaded() {
 
 void RunningState::Update(float dt) {
     if (shouldMoveToNewLevel) {
-        MoveToNewLevel(levelManager->GetNextLevel());
+        MoveToNewLevel(levelManager->GetAndSetNextLevel());
         shouldMoveToNewLevel = false;
+        Tick(dt);
     }
     if (!isGameInProgress) {
         ReadNetworkFunctions();

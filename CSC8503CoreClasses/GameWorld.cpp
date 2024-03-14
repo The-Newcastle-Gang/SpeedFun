@@ -24,6 +24,7 @@ GameWorld::~GameWorld()	{
 void GameWorld::Clear() {
     gameObjects.clear();
     constraints.clear();
+    pointLights.clear();
     networkObjects.clear();
     worldIDCounter		= 0;
     worldStateCounter	= 0;
