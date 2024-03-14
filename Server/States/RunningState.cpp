@@ -152,7 +152,6 @@ void RunningState::Update(float dt) {
     if (shouldMoveToNewLevel) {
         MoveToNewLevel(levelManager->GetAndSetNextLevel());
         shouldMoveToNewLevel = false;
-        Tick(dt);
     }
     if (!isGameInProgress) {
         ReadNetworkFunctions();
