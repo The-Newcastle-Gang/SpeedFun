@@ -197,6 +197,9 @@ void PhysicsSystem::UpdateCollisionList() {
 			++i;
 		}
 	}
+    if (shouldClear) { //we need this in case an OnCollision method needs to clear the collision list
+        Clear();
+    }
 }
 
 void PhysicsSystem::UpdateObjectAABBs() {

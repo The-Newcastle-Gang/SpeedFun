@@ -79,6 +79,37 @@ public:
 
     int GetNumberOfLevels() { return levelIDToLevelNameMap.size(); }
 
+    void Clear() { //we need to free all the memory so we dont leak
+        for (auto& i : primGOList) {
+            delete i;
+        }
+        primGOList.clear();
+
+        for (auto& i : oscillatorPrimitives) {
+            delete i;
+        }
+        oscillatorPrimitives.clear();
+
+        for (auto& i : harmfulOscillatorPrimitives) {
+            delete i;
+        }
+        harmfulOscillatorPrimitives.clear();
+
+        for (auto& i : springPrimitives) {
+            delete i;
+        }
+        springPrimitives.clear();
+
+        pointLights.clear();
+
+        for (auto& i : groundCubes) {
+            delete i;
+        }
+        groundCubes.clear();
+
+        checkPointPositions.clear();
+    }
+
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;

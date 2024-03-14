@@ -31,6 +31,7 @@ namespace NCL {
 
             void Clear();
             void ClearAndErase();
+            void ClearAndEraseWithoutPlayers();
 
             void AddGameObject(GameObject* o, bool isNetworked);
             void RemoveGameObject(GameObject* o, bool andDelete = false);
@@ -71,6 +72,7 @@ namespace NCL {
             }
 
             GameObject* GetObjectByNetworkId(int networkId) {
+                if (networkId >= networkObjects.size())return nullptr;
                 return networkObjects[networkId]->GetParent();
             }
 

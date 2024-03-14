@@ -54,16 +54,18 @@ void RunningState::WaitUntilClientsInGameplay() {
     }
 }
 
-void RunningState::MoveToNewLevel(int level) {
+void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as it gets rid of stuff, needs to be done after update;
     isGameInProgress = false;
-    ResetLevel();
+    ResetLevelInfo();
+    world->ClearAndErase(); //free the memory too so we dont leak
+    physics->Clear();
     SendLevelToClients(level);
     LoadLevel(level);
     world->StartWorld();
     isGameInProgress = true;
 }
 
-void RunningState::ResetLevel() {
+void RunningState::ResetLevelInfo() {
     hasAllPlayersFinished = false;
     isGameInProgress = false;
     numPlayersLoaded = 0;
@@ -71,7 +73,6 @@ void RunningState::ResetLevel() {
         playersFinished[info.first] = false;
     }
     levelManager->Reset();
-    world->ClearAndErase(); //free the memory too so we dont leak
 }
 
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
@@ -147,7 +148,10 @@ void RunningState::WaitForPlayersLoaded() {
 }
 
 void RunningState::Update(float dt) {
-
+    if (shouldMoveToNewLevel) {
+        MoveToNewLevel(levelManager->GetNextLevel());
+        shouldMoveToNewLevel = false;
+    }
     if (!isGameInProgress) {
         ReadNetworkFunctions();
         return;
@@ -238,7 +242,7 @@ void RunningState::CreatePlayers() {
     }
 }
 
-void NCL::CSC8503::RunningState::ClearLevel()
+void RunningState::ClearLevel()
 {
     //physics->Clear();
     currentLevelCheckPointPositions.clear();
@@ -246,7 +250,7 @@ void NCL::CSC8503::RunningState::ClearLevel()
     currentLevelEndPos = { 0, 0, 0 };
     currentLevelStartPos = { 0, 0, 0 };
     triggersVector.clear();
-    world->Clear();
+    world->ClearAndErase();
 }
 
 void RunningState::StartTriggerVolFunc(int id){
@@ -271,8 +275,7 @@ void RunningState::EndTriggerVolFunc(int id){
     }
     if (!hasAllPlayersFinished)return;
     OnAllPlayersFinished();
-    ResetLevel();
-    MoveToNewLevel(levelManager->GetNextLevel());
+    shouldMoveToNewLevel = true;
 }
 
 void RunningState::SendMedalToClient(int id) {
@@ -288,7 +291,6 @@ void RunningState::SendMedalToClient(int id) {
 
 void RunningState::OnAllPlayersFinished()
 {
-    ClearLevel();
     levelManager->EndStageTimer();
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::All_Players_Finished, nullptr));
     std::cout << "ALL PLAYERS DONE!!!!!!!\n";

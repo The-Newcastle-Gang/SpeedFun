@@ -24,6 +24,7 @@ GameWorld::~GameWorld()	{
 void GameWorld::Clear() {
     gameObjects.clear();
     constraints.clear();
+    networkObjects.clear();
     worldIDCounter		= 0;
     worldStateCounter	= 0;
     networkIdCounter    = 0;
@@ -31,6 +32,17 @@ void GameWorld::Clear() {
 
 void GameWorld::ClearAndErase() {
     for (auto& i : gameObjects) {
+        delete i;
+    }
+    for (auto& i : constraints) {
+        delete i;
+    }
+    Clear();
+}
+
+void GameWorld::ClearAndEraseWithoutPlayers() {
+    for (auto& i : gameObjects) {
+        if (i->GetTag() == PLAYER)continue;
         delete i;
     }
     for (auto& i : constraints) {

@@ -183,6 +183,7 @@ namespace NCL {
             bool displayDebugger = false;
 
             bool isUpdating = false;
+            bool shouldMoveToNewLevel = false;
         };
     }
 }

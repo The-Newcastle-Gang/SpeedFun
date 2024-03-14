@@ -50,7 +50,7 @@ void GameplayState::InitCanvas(){
 
 void GameplayState::ClearLevel()
 {
-    world->Clear();
+    world->ClearAndErase();
 }
 
 void GameplayState::InitCrossHeir(){
@@ -138,6 +138,7 @@ void GameplayState::WaitForServerLevel() {
 }
 
 void GameplayState::OnNewLevel() {
+    world->ClearAndErase();
     networkData->incomingState.Clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
@@ -218,6 +219,10 @@ void GameplayState::ManageLoading(float dt) {
 }
 
 void GameplayState::Update(float dt) {
+    if (shouldMoveToNewLevel) {
+        OnNewLevel();
+        shouldMoveToNewLevel = false;
+    }
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
@@ -345,12 +350,16 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::Grapple_Event): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
             } break;
 
 
             case(Replicated::Player_Velocity_Call): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
@@ -361,6 +370,8 @@ void GameplayState::ReadNetworkFunctions() {
             break;
 
             case(Replicated::Player_Animation_Call): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
                 UpdatePlayerAnimation(data.networkID, data.state);
             }
@@ -370,7 +381,7 @@ void GameplayState::ReadNetworkFunctions() {
                 int level = handler.Unpack<int>();
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
-                OnNewLevel();
+                shouldMoveToNewLevel = true;
             }
             break;
 
@@ -385,6 +396,8 @@ void GameplayState::ReadNetworkFunctions() {
 
 void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
     GameObject *playerObject = world->GetObjectByNetworkId(networkID);
+    if (!playerObject)return;
+
     AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
     if (!playerAnimator)return;
 

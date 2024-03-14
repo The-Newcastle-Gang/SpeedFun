@@ -73,6 +73,8 @@ namespace NCL {
             void WaitForPlayersLoaded();
             int numPlayersLoaded = 0;
 
+            bool shouldMoveToNewLevel = false;
+
             std::unordered_map<int, GameObject*> playerObjects;
             std::unordered_map<int, bool> playersFinished;
             std::unordered_map<int, float> playerTimes;
@@ -80,7 +82,7 @@ namespace NCL {
             bool isGameInProgress = false;
             bool hasAllPlayersFinished = false;
 
-            void ResetLevel();
+            void ResetLevelInfo();
             void SendLevelToClients(int level);
             void LoadLevel(int level);
             void BuildLevel(const std::string &levelName);
