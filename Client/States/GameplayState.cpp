@@ -592,7 +592,7 @@ void GameplayState::InitLevel() {
     }
 
     //SetTestSprings();
-    SetTestFloor();
+    //SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
