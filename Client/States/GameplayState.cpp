@@ -547,7 +547,7 @@ void GameplayState::InitLevel() {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+//        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
     }
 
@@ -565,6 +565,8 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
+
+
     for (auto& x : springList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
@@ -575,6 +577,7 @@ void GameplayState::InitLevel() {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
+
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
