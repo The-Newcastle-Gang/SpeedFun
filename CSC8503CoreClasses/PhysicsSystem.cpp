@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= true;
-	useBroadPhase	= true;	
+    useBroadPhase = true;
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -13.0f, 0.0f));
@@ -91,6 +91,8 @@ int realHZ		= idealHZ;
 float realDT	= idealDT;
 
 void PhysicsSystem::Update(float dt) {
+    auto debugTime = std::chrono::system_clock::now();
+
 	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
 
 	GameTimer t;
@@ -105,7 +107,7 @@ void PhysicsSystem::Update(float dt) {
 	while(dTOffset > realDT) {
         //Update accelerations from external forces
 		if (useBroadPhase) {
-       SortAndSweep();
+            SortAndSweep();          
 		}
 		else {
 			BasicCollisionDetection();
@@ -150,6 +152,9 @@ void PhysicsSystem::Update(float dt) {
 			std::cout << "Raising iteration count due to short physics time...(now " << realHZ << ")\n";
 		}
 	}
+
+    std::cerr << std::chrono::system_clock::now() - debugTime << "\n";
+
 }
 
 void PhysicsSystem::UpdateCollisionList() {
@@ -215,6 +220,7 @@ void PhysicsSystem::BasicCollisionDetection() {
             }
         }
     }
+
 }
 
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
@@ -359,14 +365,17 @@ void PhysicsSystem::UpdateObjectSortSweepBounds() {
 }
 
 void PhysicsSystem::SortAndSweep() {
-  
+    
     broadphaseCollisions.clear();
 
     SortAndSweepInsertionSort();
     for (int i = 0; i < sortAndSweepData.size(); i++) {
+        currentBound = sortAndSweepData[i];
+        currentBoundObject = currentBound.gameObject;
         if (!currentBound.isUpper) {
             for (GameObject* other : currentValidObjects) {
                 if (!layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
+
                 info.a = Tmin(currentBoundObject, other);
                 info.b = Tmax(currentBoundObject, other);
                 broadphaseCollisions.insert(info);
@@ -392,6 +401,7 @@ void PhysicsSystem::SortAndSweep() {
         }
 
     }
+
 }
 
 void PhysicsSystem::SortAndSweepInsertionSort() { //adapted from https://www.geeksforgeeks.org/cpp-program-for-insertion-sort/
