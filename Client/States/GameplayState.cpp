@@ -445,7 +445,7 @@ void GameplayState::SendInputData() {
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+    if (Window::GetMouse()->ButtonPressed(MouseButtons::LEFT)) {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
