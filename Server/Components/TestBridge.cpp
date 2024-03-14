@@ -16,7 +16,13 @@ void TestBridge::BridgeFall(float dt) {
 }
 
 void TestBridge::TriggerOn() {
-	std::cout << "Bridge fall!\n";
+	
 	bridgeFall = !bridgeFall;
+	if (bridgeFall) {
+		std::cout << "Bridge fall!\n";
+	}
+	else {
+		std::cout << "Bridge stop!\n";
+	}
 }
 
