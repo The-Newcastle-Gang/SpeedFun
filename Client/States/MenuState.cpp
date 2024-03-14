@@ -94,6 +94,7 @@ void MenuState::StartSingleplayer() {
 
 void MenuState::BeginSingleplayer(Element& _) {
     shouldServerStart.store(true);
+    baseClient->SetSinglePlayer(true);
     baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
     baseClient->Connect("127.0.0.1", NetworkBase::GetDefaultPort());
 }
@@ -320,6 +321,7 @@ void MenuState::ConnectToGame(const std::string& address) {
 }
 
 void MenuState::StartGame(Element& _) {
+    baseClient->SetSinglePlayer(false);
     baseClient->RemoteFunction(Replicated::StartGame, nullptr);
 }
 
