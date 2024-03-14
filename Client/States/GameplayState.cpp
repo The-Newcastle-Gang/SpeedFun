@@ -194,9 +194,12 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    SendInputData();
+    if(countdownOver)SendInputData();
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(false);
@@ -211,7 +214,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -442,7 +445,7 @@ void GameplayState::SendInputData() {
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+    if (Window::GetMouse()->ButtonPressed(MouseButtons::LEFT)) {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
@@ -466,8 +469,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    }
     world->StartWorld();
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {
@@ -534,12 +540,14 @@ void GameplayState::InitLevel() {
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList  = levelManager->GetLevelReader()->GetSpringPList();
+    auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+//        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
     }
 
@@ -557,7 +565,16 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
-//    SetTestFloor();
+    for (auto& x : springList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+    
+    for (auto& l : lightList) {
+        AddPointLight(l);
+    }
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -565,13 +582,6 @@ void GameplayState::InitLevel() {
     endPos = levelManager->GetLevelReader()->GetEndPosition();
     
     RenderFlairObjects();
-
-    // TEST SWINGING OBJECT ON THE CLIENT
-    //auto swingingTemp = new GameObject();
-    //replicated->AddSwingingBlock(swingingTemp, *world);
-    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
-
-    SetTestSprings();
 }
 
 void GameplayState::SetTestSprings() {
@@ -600,6 +610,10 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+}
+
+void GameplayState::AddPointLight(PointLightInfo light) {
+    world->AddPointLightToWorld(light);
 }
 
 void GameplayState::SetTestFloor() {
@@ -653,4 +667,3 @@ void GameplayState::AddLava(Vector3 position){
 void GameplayState::AddEndPortal(Vector3 position){
 
 }
-
