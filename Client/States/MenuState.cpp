@@ -93,27 +93,9 @@ void MenuState::StartSingleplayer() {
 }
 
 void MenuState::BeginSingleplayer(Element& _) {
-
-    //LoadingScreen();
-    //loadingScreen = new std::thread(&MenuState::LoadingScreen, this);
     shouldServerStart.store(true);
-    /*baseClient->PlayLoadingScreen();*/
     baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
     baseClient->Connect("127.0.0.1", NetworkBase::GetDefaultPort());
-
-}
-
-void MenuState::LoadingScreen() {
-
-    //auto quad = canvas->AddElement();
-    //quad.OnUpdate.connect<&MenuState::LoadingScreen>(this);
-
-        canvas->CreateNewLayer("Loading", true);
-        canvas->PushActiveLayer("Loading");
-        canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
-                .SetAbsoluteSize({ 300,300 })
-                .AlignCenter()
-                .AlignMiddle().SetShader(titleShader);
 
 }
 

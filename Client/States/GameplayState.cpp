@@ -1,4 +1,6 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -17,9 +19,11 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timeBar = new Element(1);
     loadingImage = new Element(1);
+    loadingText = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    menuFont = renderer->LoadFont("Ubuntu-Bold.ttf", 55);
 }
 
 GameplayState::~GameplayState() {
@@ -114,12 +118,15 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::LoadingScreenTUpdate() {
 
+    int &&i = 10;
     while (!shouldLoadScreen) {
         std::cout << "Loading!\n";
+        i += 10;
+        //&loadingImage->SetColor({0.0f,0.0f,1.0f,1.0f});
         renderer->RenderLoadingScreen();
         //loadingImage.set pos
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -131,7 +138,6 @@ void GameplayState::OnEnter() {
     CreateNetworkThread();
     debugger = new DebugMode(world->GetMainCamera());
     InitialiseAssets();
-    //InitCanvas();
 }
 void GameplayState::InitialiseAssets() {
     
@@ -171,22 +177,128 @@ void GameplayState::CreateNetworkThread() {
 
 void GameplayState::CreateLoadingScreenThread() {
     canvas->Reset();
+
+    //InitLua();
+    //lua_getglobal(L, "canvas");
+    //lua_pushnil(L);
+    //while (lua_next(L, -2)) {
+    //    auto layerName = lua_tostring(L, -2);
+    //    lua_pushnil(L);
+    //    while (lua_next(L, -2)) {
+    //        AddCanvasElement(layerName, false);
+    //        lua_pop(L, 1);
+    //    }
+    //    lua_pop(L, 1);
+    //}
+    
     canvas->CreateNewLayer("Loading");
     canvas->PushActiveLayer("Loading");
-    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(100);
-    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignRight(100);
-    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 200,200 }).AlignMiddle();
+    canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
+    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
     renderer->RenderLoadingScreen();
 
     canvas->CreateNewLayer("Loading2");
     canvas->PushActiveLayer("Loading2");
-    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(100);
-    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(500);
+    canvas->AddImageElement("LoadingText.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
+    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignLeft(500);
     renderer->RenderLoadingScreen();
+    &loadingImage->SetRelativePosition({100,500});
 
     shouldLoadScreen.store(false);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
 }
+
+void GameplayState::AddCanvasElement(const std::string& layerName, bool blocking) {
+
+    if (layerName != "main" && !canvas->DoesLayerExist(layerName)) {
+        canvas->CreateNewLayer(layerName, blocking);
+    }
+
+    std::string image = getStringField(L, "image");
+
+    auto& element = image.empty() ? canvas->AddElement(layerName)
+        : canvas->AddImageElement(image, layerName);
+
+    element.SetAbsoluteSize(getVec2Field(L, "aSize"))
+        .SetRelativeSize(getVec2Field(L, "rSize"))
+        .SetAbsolutePosition(getVec2Field(L, "aPos"))
+        .SetRelativePosition(getVec2Field(L, "rPos"))
+        .SetColor(getVec4Field(L, "color"))
+        .SetZIndex(getIntField(L, "zIndex"));
+
+    AlignCanvasElement(element);
+
+    TextData text;
+    getTableField(L, "text");
+
+    text.text = getStringField(L, "text");
+    text.defaultText = text.text;
+    text.color = getVec4Field(L, "color");
+    text.SetFont(menuFont.get());
+    text.fontSize = (float)getNumberField(L, "size");
+
+    element.SetText(text);
+    lua_pop(L, 1); // text
+
+    std::unordered_set<std::string> tags;
+    getTableField(L, "tags");
+    lua_pushnil(L);
+    while (lua_next(L, -2)) {
+        tags.insert(lua_tostring(L, -1));
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1); // tags
+
+    std::string id = getStringField(L, "id");
+
+    element.AddTags(tags);
+    element.SetId(id);
+}
+
+void GameplayState::AlignCanvasElement(Element& element) {
+    getTableField(L, "align");
+    lua_pushnil(L);
+
+    while (lua_next(L, -2)) {
+        auto direction = getStringField(L, "to");
+        auto padding = getIntField(L, "padding");
+        if (!strcmp(direction, "top")) {
+            element.AlignTop(padding);
+        }
+        else if (!strcmp(direction, "middle")) {
+            element.AlignMiddle(padding);
+        }
+        else if (!strcmp(direction, "bottom")) {
+            element.AlignBottom(padding);
+        }
+        else if (!strcmp(direction, "left")) {
+            element.AlignLeft(padding);
+        }
+        else if (!strcmp(direction, "center")) {
+            element.AlignCenter(padding);
+        }
+        else if (!strcmp(direction, "right")) {
+            element.AlignRight(padding);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_pop(L, 1); // align
+}
+
+void GameplayState::InitLua() {
+    L = luaL_newstate();
+    luaL_openlibs(L);
+
+    auto status = luaL_dofile(L, (Assets::DATADIR + "LoadingScreen.lua").c_str());
+
+    if (status) {
+        std::cerr << "LUA CRIES OUT IN PAIN: " << lua_tostring(L, -1);
+    }
+}
+
+
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);

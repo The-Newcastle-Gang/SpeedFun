@@ -19,6 +19,8 @@
 #include "SoundManager.h"
 #include "AnimatorObject.h"
 #include "LevelManager.h"
+#include "lua.hpp"
+#include "utils.h"
 
 #include <thread>
 #include <iostream>
@@ -179,8 +181,14 @@ namespace NCL {
 
             void LoadingScreenTUpdate();
             void CreateLoadingScreenThread();
+            void AddCanvasElement(const std::string& layerName, bool blocking);
+            void AlignCanvasElement(Element& element);
+            void InitLua();
+            lua_State* L;
+            std::unique_ptr<Font> menuFont;
             std::thread* loadingScreenThread;
             Element* loadingImage;
+            Element* loadingText;
         };
     }
 }
