@@ -57,6 +57,18 @@ void GameObject::UpdateBroadphaseAABB() {
     }
 }
 
+void GameObject::SetBroadXHalfDim(float halfDim) {
+    broadXHalfDim = halfDim;
+}
+
+void GameObject::UpdateBroadphaseXBounds() {
+    if (!boundingVolume) {
+        return;
+    }
+    broadXLowerBound = transform.GetPosition().x - broadXHalfDim;
+    broadXUpperBound = transform.GetPosition().x + broadXHalfDim;
+}
+
 void GameObject::DrawCollision()
 {
     const CollisionVolume* volume = GetBoundingVolume();
