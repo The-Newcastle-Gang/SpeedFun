@@ -224,9 +224,23 @@ void RunningState::SendPlayerAnimationCall(Replicated::PlayerAnimationStates sta
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::Player_Animation_Call, &data));
 }
 
+int GetDirectionFromPlayerNumber(int num) {
+    return (((num % 2) * 2) - 1); // 0 = -1, 1 = 1
+}
+
+int GetMagnitudeFromPlayerNumber(int num) {
+    return num < 3 ? 1 : 3;
+}
+
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
+    Vector3 startPos = currentLevelStartPos;
+    float playerSeperation = 2.0f;
+    int currentPlayer = 1;
+
+    Vector3 thisPlayerStartPos;
     for (auto& pair : playerInfo) {
+        thisPlayerStartPos = startPos + Vector3(0,0,1) * GetDirectionFromPlayerNumber(currentPlayer) * GetMagnitudeFromPlayerNumber(currentPlayer)* playerSeperation;
         playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
@@ -237,7 +251,7 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
         player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
-        player->GetTransform().SetPosition(currentLevelStartPos);
+        player->GetTransform().SetPosition(thisPlayerStartPos);
         player->AddComponent((Component*)(new PlayerMovement(player, world.get())));
 
         playerObjects[pair.first] = player;
