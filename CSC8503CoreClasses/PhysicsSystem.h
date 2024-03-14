@@ -98,6 +98,11 @@ namespace NCL {
 			int numCollisionFrames	    = 5;
             float velocityThreshold    = 8.0f;
 
+            //sort and sweep variables
+            std::set<GameObject*> currentValidObjects;
+            SortSweepStruct currentBound;
+            GameObject* currentBoundObject;
+            CollisionDetection::CollisionInfo info;
 
             std::vector<GameObject*> staticObjects;
             std::vector<GameObject*> dynamicObjects;

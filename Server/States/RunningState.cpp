@@ -440,7 +440,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
         Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
         g->AddComponent(oo);

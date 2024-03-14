@@ -186,27 +186,6 @@ void PlayerMovement::UpdateOnGround(float dt) {
 void PlayerMovement::LeaveGround() {}
 
 
-void PlayerMovement::PhysicsUpdate(float fixedTime) {
-
-    // Add horizontal drag
-
-    Vector3 dlinearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
-    auto dhorizontalVel = Vector2(dlinearVel.x, dlinearVel.z);
-
-    auto dDragHorizontalVel = (dhorizontalVel * -1) * fixedTime * dragFactor;
-    dhorizontalVel += dDragHorizontalVel;
-    gameObject->GetPhysicsObject()->SetLinearVelocity({dhorizontalVel.x, dlinearVel.y, dhorizontalVel.y});
-
-    // Clamp max speed
-    Vector3 linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
-    auto horizontalVel = Vector2(linearVel.x, linearVel.z);
-
-    if (horizontalVel.Length() > maxHorizontalVelocity) {
-        auto newHorizontalVel = horizontalVel.Normalised() * maxHorizontalVelocity;
-        gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
-    }
-}
-
 bool PlayerMovement::GroundCheck() {
 
     constexpr static float groundOffset = 0.1;
@@ -234,6 +213,22 @@ bool PlayerMovement::GroundCheck() {
 
 
 void PlayerMovement::Update(float dt) {
+
+    Vector3 dlinearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
+    auto dhorizontalVel = Vector2(dlinearVel.x, dlinearVel.z);
+
+    auto dDragHorizontalVel = (dhorizontalVel * -1) * dt * dragFactor;
+    dhorizontalVel += dDragHorizontalVel;
+    gameObject->GetPhysicsObject()->SetLinearVelocity({ dhorizontalVel.x, dlinearVel.y, dhorizontalVel.y });
+
+    // Clamp max speed
+    Vector3 linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
+    auto horizontalVel = Vector2(linearVel.x, linearVel.z);
+
+    if (horizontalVel.Length() > maxHorizontalVelocity) {
+        auto newHorizontalVel = horizontalVel.Normalised() * maxHorizontalVelocity;
+        gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
+    }
 
     activeState->UpdateState(dt);
     UpdateGrapple(dt);
