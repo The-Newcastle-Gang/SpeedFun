@@ -29,6 +29,7 @@ public:
 
     void Jump();
     void Grapple();
+    void SetInAir();
 
     struct CameraAnimationCallData {
         bool jump = false;

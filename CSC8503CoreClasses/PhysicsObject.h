@@ -9,11 +9,11 @@ namespace NCL {
 		class Transform;
 
         enum CollisionLayer {
-            DEFAULT_LAYER = 1,
+            DYNAMIC_LAYER = 1,
             PLAYER_LAYER = 2,
             TRIGGER_LAYER = 4,
             STATIC_LAYER = 8,
-            GRAPPLE_LAYER = 16,
+            OSCILLATOR_LAYER = 16,
             MAX_LAYER = 32
         };
 
@@ -152,7 +152,7 @@ namespace NCL {
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
 
-            CollisionLayer layer =  DEFAULT_LAYER;
+            CollisionLayer layer =  DYNAMIC_LAYER;
 
             bool isTrigger;
 		};

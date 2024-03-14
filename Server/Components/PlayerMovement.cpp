@@ -12,7 +12,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) : GrappleStart(onGra
     gameObject = g;
 
     runSpeed = 5000.0f;
-    jumpVelocity = 500.0f;
+    jumpVelocity = 0.0f;
 
     dragFactor = 10.0f;
     coyoteTime = 0.5f;
@@ -56,6 +56,10 @@ void PlayerMovement::UpdateAnimDataFromInput() {
 
     playerAnimationCallData.strafe = (int)inputDirection.x;
     playerAnimationCallData.backwards = inputDirection.y < 0;
+}
+
+void PlayerMovement::SetInAir() {
+    SwitchToState(&air);
 }
 
 void PlayerMovement::SwitchToState(MovementState* state) {

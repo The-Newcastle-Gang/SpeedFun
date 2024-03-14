@@ -638,7 +638,7 @@ void GameTechRenderer::RenderCamera() {
 
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
-        if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
+        //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
         OGLShader *shader = (OGLShader *) (*i).GetShader();
         if (!shader) {
