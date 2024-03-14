@@ -256,7 +256,7 @@ void PlayerMovement::Grapple() {
     }
 
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
-    grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
+    grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition() + Matrix3(gameObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET, lookDirection);
     grappleProjectileInfo.travelDistance = 0;
 
     grappleProjectileInfo.SetActive(true);

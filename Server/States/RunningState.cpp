@@ -155,10 +155,11 @@ void RunningState::GrappleStart(GameObject* player, Vector3 direction) {
     int playerId = GetIdFromPlayerObject(player);
     const Vector3 &pos = player->GetTransform().GetPosition();
     grapples[playerId]->GetTransform().SetPosition(pos);
-    SetNetworkActive(grapples[playerId], true);
     auto lookDirection = Quaternion(Matrix4::BuildViewMatrix(pos, pos + direction, Vector3(0, 1, 0)).Inverse());
     auto flatRotation = Matrix3::Rotation(-90, Vector3(1,0,0));
     grapples[playerId]->GetTransform().SetOrientation(Quaternion(Matrix3(lookDirection) * flatRotation).Normalised());
+
+    SetNetworkActive(grapples[playerId], true);
 }
 
 void RunningState::GrappleUpdate(GameObject* player, Vector3 position) {

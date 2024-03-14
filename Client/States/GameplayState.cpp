@@ -619,7 +619,7 @@ void GameplayState::UpdateGrapples() {
         int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
         if (!chains[id * chainLinkCount]->IsActive()) continue;
 
-        const Vector3 &playerPos = firstPersonPosition->GetPosition();
+        const Vector3 &playerPos = firstPersonPosition->GetPosition() + Matrix3(firstPersonPosition->GetOrientation()) * Replicated::HANDOFFSET;
         const Vector3 &grapplePos = grapple->GetTransform().GetPosition();
 
         Vector3 chainVector = (grapplePos - playerPos).Normalised() * Replicated::GRAPPLEDISTANCE / chainSize / 4;
