@@ -403,7 +403,7 @@ GameObject* GameplayState::CreateChainLink() {
 void GameplayState::CreateChains() {
     for (int i=0; i < chainLinkCount * Replicated::PLAYERCOUNT; i++) {
         chains[i] = CreateChainLink();
-        chains[i]->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 90, 0));
+        //chains[i]->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, 90 * (i % 2)));
     }
 }
 
@@ -618,10 +618,20 @@ void GameplayState::UpdateGrapples() {
     for (GameObject* grapple: grapples) {
         int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
         if (!chains[id * chainLinkCount]->IsActive()) continue;
-        Vector3 chainVector = grapple->GetTransform().GetPosition() -  firstPersonPosition->GetPosition();
-        OperateOnChains(id, [this, chainVector](GameObject& chainLink, int chainIndex) {
+
+        const Vector3 &playerPos = firstPersonPosition->GetPosition();
+        const Vector3 &grapplePos = grapple->GetTransform().GetPosition();
+
+        Vector3 chainVector = (grapplePos - playerPos).Normalised() * Replicated::GRAPPLEDISTANCE / chainSize / 4;
+        auto rotation = Matrix3::LookAt(playerPos, grapplePos, Vector3(0, 1, 0));
+
+        OperateOnChains(id, [=](GameObject& chainLink, int chainIndex) {
             float chainTValue = (float)chainIndex / (float)chainLinkCount;
-            chainLink.GetTransform().SetPosition(firstPersonPosition->GetPosition() + chainVector * chainTValue);
+            Vector3 linkVector = chainVector * chainTValue;
+            Vector3 adjustment = linkVector.LengthSquared() < (grapplePos - playerPos).LengthSquared() ? linkVector : grapplePos - playerPos;
+            chainLink.GetTransform()
+                .SetPosition(playerPos + adjustment)
+                .SetOrientation(Quaternion(rotation).Normalised() * Quaternion::EulerAnglesToQuaternion(0, 0, 90 * (chainIndex % 2)));
         });
     }
 }
