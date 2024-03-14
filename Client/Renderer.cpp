@@ -22,8 +22,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
-    //particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticleVignette.frag");
-    particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticleTextured.frag");
+    particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticle.frag");
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
@@ -156,6 +155,7 @@ void GameTechRenderer::RenderParticles()
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
     BindShader(particleShader);
 
     float screenAspect = (float)windowWidth / (float)windowHeight;
@@ -173,6 +173,7 @@ void GameTechRenderer::RenderParticles()
         BindTextureToShader(ps->GetTexture(), "particleTex", 0);
         ps->DrawParticles();
     }
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
 
