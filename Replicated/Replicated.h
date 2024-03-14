@@ -43,6 +43,7 @@ public:
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
         StartGame,
+        SetLevel,
         MenuToGameplay,
         GameLoaded,
         PlayerJump,

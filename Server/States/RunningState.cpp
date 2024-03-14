@@ -37,8 +37,7 @@ void RunningState::OnEnter() {
     CreateNetworkThread();
     WaitUntilClientsInGameplay(); //so we dont send the Load_Level packet to MenuState
 
-    //this could be changed, from a level select menu for example
-    MoveToNewLevel(0);
+    MoveToNewLevel(selectedLevel);
 }
 
 void RunningState::SendLevelToClients(int level) {
@@ -178,6 +177,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel(int level) {
+    levelManager->SetCurrentLevel(level);
     BuildLevel(levelManager->GetLevelReader()->GetLevelName(level));
     CreatePlayers();
     AddTriggersToLevel();

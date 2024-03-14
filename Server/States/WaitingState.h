@@ -20,7 +20,10 @@ namespace NCL {
             void ReceivePacket(int type, GamePacket* payload, int source) override;
             bool CheckPlayersReady();
 
+            int GetSelectedLevel() { return selectedLevel; }
+
         protected:
+            int selectedLevel = 1;
             GameServer* serverBase;
             bool isReady;
             void StartGame();

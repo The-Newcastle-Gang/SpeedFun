@@ -40,6 +40,8 @@ namespace NCL {
                 return -1;
             }
 
+            void SetSelectedLevel(int level) { selectedLevel = level; }
+
         protected:
             GameServer* serverBase;
             std::unique_ptr<Replicated> replicated;
@@ -65,6 +67,7 @@ namespace NCL {
             float packetTimer;
             int sceneSnapshotId;
 
+            int selectedLevel = 0;
             int playerTestId = -1;
 
             void WaitUntilClientsInGameplay();

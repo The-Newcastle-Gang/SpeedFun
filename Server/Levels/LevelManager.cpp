@@ -15,7 +15,7 @@ LevelManager::LevelManager() {
 
 void LevelManager::ChangeLevel(int level){
     Reset();
-    currentLevel = level;
+    SetCurrentLevel(level);
     levelReader->Clear();
     TryReadLevel(levelReader->GetLevelName(level));
 }
