@@ -549,7 +549,7 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
-    }
+    } 
 
     for (auto &x : opList) {
         auto temp = new GameObject();
