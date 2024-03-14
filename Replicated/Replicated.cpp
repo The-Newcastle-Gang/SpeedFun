@@ -82,6 +82,19 @@ void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
             .SetPosition(Vector3(0 + (g->GetWorldID()%2) * 10,0,10 * (g->GetWorldID()/2)));
 }
 
+void Replicated::AddGrapplesToWorld(GameObject *g, GameWorld &world, int index) {
+    constexpr float meshSize = 1.0f;
+    world.AddGameObject(g, true);
+    auto volume = new SphereVolume(meshSize / 2);
+    g->SetBoundingVolume((CollisionVolume*)volume);
+    g->GetTransform()
+        .SetScale(Vector3(meshSize, meshSize, meshSize))
+        .SetPosition(Vector3(index * 10, 10, 10));
+
+    g->SetTag(Tag::GRAPPLE);
+
+}
+
 void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world){
     world.AddGameObject(g, false);
     auto volume = new AABBVolume(dimensions * 0.5f);

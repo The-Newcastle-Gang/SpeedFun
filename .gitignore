@@ -11,3 +11,4 @@
 /release
 /cmake-build-debug/
 cmake-build-release/
+.cache
