@@ -63,6 +63,8 @@ namespace NCL {
             void InitTimerBar();
             void InitLevelMap();
 
+            bool hasReachedEnd = false;
+            void InitEndScreen(Vector4 color);
 
             void SetTestSprings();
             void SetTestFloor();
@@ -202,7 +204,21 @@ namespace NCL {
             int rotationDirection = 1.0f;
             float crossHairScale = 1.0f;
 
+            enum MedalAnimationStages {
+                START,
+                TIMER_SCROLL,
+                TIMER_SHAKE,
+                MEDAL
+            };
             std::string GetMedalImage();
+            void UpdateMedalSprite(Element& element, float dt);
+            void UpdateFinalTimeTally(Element& element, float dt);
+            float medalTimer = 0.0f;
+            float finalTime = 0.0f;
+            float finalTimeScroll = 0.0f;
+            float finaltimeShrink = 1.0f;
+            float finalTimeShake = 0.0f;
+            MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
 
             DebugMode* debugger;
             bool displayDebugger = false;

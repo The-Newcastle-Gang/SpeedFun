@@ -351,19 +351,7 @@ void GameplayState::ReadNetworkFunctions() {
                 int networkId = handler.Unpack<int>();
                 int medal = handler.Unpack<int>();
                 Vector4 medalColour = handler.Unpack<Maths::Vector4>();
-
-                canvas->CreateNewLayer("FinishedLevelLayer");
-                canvas->PushActiveLayer("FinishedLevelLayer");
-
-                canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-                        .SetColor(medalColour)
-                        .SetAbsoluteSize({60,60})
-                        .AlignCenter()
-                        .AlignLeft();
-                // Disable player controls
-                // Clear the world
-                // Loading screen
-                // Load the next level
+                if (!hasReachedEnd) InitEndScreen(medalColour);
 
             } break;
 
@@ -456,93 +444,6 @@ void GameplayState::ReadNetworkFunctions() {
     }
 }
 
-void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
-    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
-    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
-    if (!playerAnimator)return;
-
-    switch (state) {
-        case Replicated::IDLE: {
-            playerAnimator->TransitionAnimation("Idle", 0.1f);
-            break;
-        }
-        case Replicated::JUMP: {
-            playerAnimator->TransitionAnimation("Jump", 0.1f);
-            break;
-        }
-        case Replicated::FALLING: {
-            playerAnimator->TransitionAnimation("Fall", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_FORWARD: {
-            playerAnimator->TransitionAnimation("Run", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_BACK: {
-            playerAnimator->TransitionAnimation("RunBack", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_LEFT: {
-            playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
-            break;
-        }
-        case Replicated::RUNNING_RIGHT: {
-            playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
-            break;
-        }
-    }
-}
-
-void GameplayState::UpdateCrosshair(Element& element, float dt) {
-    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
-    element.SetTransformTranslation(Vector2(50, 50));
-    element.GetTransform().SetScale(Vector3(crossHairScale, crossHairScale, 1));
-    element.SetColor(crossHairRotation == 0 ? Vector4(0,0,1,1) : Vector4(1,1,1,1));
-    crossHairScale = std::clamp(crossHairScale - dt, 1.0f, 100.0f);
-    currentCHRotation = currentCHRotation * 0.9f + crossHairRotation * 0.1f;
-}
-
-void GameplayState::UpdateTimerUI(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-
-    element.SetAbsoluteSize({ (int)round((800 - 96) * timerRatio), timerBarHeight });
-    element.SetColor(timerBarColor);
-}
-
-void GameplayState::UpdateTimerBox(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-    float positionRatio = timerRatio;
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio));
-}
-
-void GameplayState::UpdateTimerText(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-    float positionRatio = timerRatio;
-    element.textData.text = std::format("{:.2f}", timeElapsed);
-    element.textData.fontSize = 0.5f;
-
-    int randomX = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    int randomY = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    if (!baseClient->IsSinglePlayer()) {
-        randomX = 0;
-        randomY = 0;
-        positionRatio = 0.5;
-    }
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96/2 + 8 + randomX));
-    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
-
-    timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
-}
-
-void GameplayState::UpdateTimerNub(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-    int medalID = medalTimeRatios[element.GetId()].first;
-    if (medalTimeRatios[element.GetId()].second < 0.0f) {
-        medalTimeRatios[element.GetId()].second = 1 - std::clamp(medalTimes[medalID], 0.0f, medalTimes[2]) / medalTimes[2];
-        element.AlignCenter((int)round(-400 + (800 - timerBoxWidth) * medalTimeRatios[element.GetId()].second + timerBarOutline - 1));
-    }
-    
-}
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
@@ -657,6 +558,37 @@ void GameplayState::InitWorld() {
     worldHasLoaded = LoadingStates::LOADED;
 }
 
+void GameplayState::InitEndScreen(Vector4 color) {
+    hasReachedEnd = true;
+    finalTime = timeElapsed;
+    medalAnimationStage = MedalAnimationStages::TIMER_SCROLL;
+    canvas->CreateNewLayer("FinishedLevelLayer");
+    canvas->PushActiveLayer("FinishedLevelLayer");
+
+    canvas->AddElement("FinishedLevelLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    auto medal = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+        .SetColor(color - Vector4(0,0,0,1))
+        .SetAbsoluteSize({ 320,320 })
+        .CenterSprite()
+        .SetTransformTranslation(Vector2(25, 50));
+    medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
+
+    auto finalTime = canvas->AddElement("FinishedLevelLayer")
+        .SetColor({ 1,1,1,1 })
+        .CenterSprite()
+        .SetText(TextData());
+
+    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
+    // Disable player controls
+    // Clear the world
+    // Loading screen
+    // Load the next level
+}
 [[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
@@ -802,4 +734,145 @@ void GameplayState::AssignPlayer(int netObject) {
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     auto progress = playerCurPos - endPos;
     return 1 - progress.Length()/levelLen;
+}
+
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
+
+    switch (state) {
+    case Replicated::IDLE: {
+        playerAnimator->TransitionAnimation("Idle", 0.1f);
+        break;
+    }
+    case Replicated::JUMP: {
+        playerAnimator->TransitionAnimation("Jump", 0.1f);
+        break;
+    }
+    case Replicated::FALLING: {
+        playerAnimator->TransitionAnimation("Fall", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_FORWARD: {
+        playerAnimator->TransitionAnimation("Run", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_BACK: {
+        playerAnimator->TransitionAnimation("RunBack", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_LEFT: {
+        playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
+        break;
+    }
+    case Replicated::RUNNING_RIGHT: {
+        playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
+        break;
+    }
+    }
+}
+
+void GameplayState::UpdateCrosshair(Element& element, float dt) {
+    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
+    element.SetTransformTranslation(Vector2(50, 50));
+    element.GetTransform().SetScale(Vector3(crossHairScale, crossHairScale, 1));
+    element.SetColor(crossHairRotation == 0 ? Vector4(0, 0, 1, 1) : Vector4(1, 1, 1, 1));
+    crossHairScale = std::clamp(crossHairScale - dt, 1.0f, 100.0f);
+    currentCHRotation = currentCHRotation * 0.9f + crossHairRotation * 0.1f;
+}
+
+void GameplayState::UpdateTimerUI(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+
+    element.SetAbsoluteSize({ (int)round((800 - 96) * timerRatio), timerBarHeight });
+    element.SetColor(timerBarColor);
+}
+
+void GameplayState::UpdateTimerBox(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+    float positionRatio = timerRatio;
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio));
+}
+
+void GameplayState::UpdateTimerText(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+    float positionRatio = timerRatio;
+    element.textData.text = std::format("{:.2f}", timeElapsed);
+    element.textData.fontSize = 0.5f;
+
+    int randomX = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
+    int randomY = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
+    if (!baseClient->IsSinglePlayer()) {
+        randomX = 0;
+        randomY = 0;
+        positionRatio = 0.5;
+    }
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96 / 2 + 8 + randomX));
+    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
+
+    timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
+}
+
+void GameplayState::UpdateTimerNub(Element& element, float dt) {
+    if (medalTimes[0] == -1.0f) return;
+    int medalID = medalTimeRatios[element.GetId()].first;
+    if (medalTimeRatios[element.GetId()].second < 0.0f) {
+        medalTimeRatios[element.GetId()].second = 1 - std::clamp(medalTimes[medalID], 0.0f, medalTimes[2]) / medalTimes[2];
+        element.AlignCenter((int)round(-400 + (800 - timerBoxWidth) * medalTimeRatios[element.GetId()].second + timerBarOutline - 1));
+    }
+
+}
+
+void GameplayState::UpdateMedalSprite(Element& element, float dt) {
+    
+    if (medalAnimationStage != MedalAnimationStages::MEDAL) return;
+    Vector4 currentColor = element.GetColor();
+    float spinAmount = 360.0f * 2.0f;
+    float timeToTake =  0.5f;
+    float scaleFactor = 1.0f / (spinAmount)*medalTimer;
+    element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, scaleFactor));
+    medalTimer = std::clamp(medalTimer + dt * (spinAmount) / timeToTake, 0.0f, spinAmount);
+
+    element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
+    element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
+}
+
+void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
+    float textSize = 2.0f;
+    switch (medalAnimationStage)
+    {
+    case(MedalAnimationStages::TIMER_SCROLL): {
+        
+        float timeToScroll = finalTime / 1.5f;
+        float timeRatio = (finalTimeScroll / finalTime);
+        finalTimeScroll = std::clamp(finalTimeScroll + dt * timeToScroll, 0.0f, finalTime);
+        
+        element.textData.text = std::format("{:.2f}", finalTimeScroll);
+        element.textData.fontSize = textSize;
+        element.AlignCenter();
+        element.AlignMiddle(-16 * textSize);
+        element.textData.color = Vector4(1.0f, 1.0f, 1.0f, 0.10f);
+        if (finalTimeScroll == finalTime) {
+            medalAnimationStage = TIMER_SHAKE;
+            finalTimeShake = 1.0f;
+        }
+    }
+    break;
+    case(MedalAnimationStages::TIMER_SHAKE): {
+        int randomX = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * finalTimeShake * 4);
+        int randomY = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * finalTimeShake * 4);
+        finalTimeShake = std::clamp(finalTimeShake - dt, 0.0f, 1.0f);
+        finaltimeShrink = std::clamp(finaltimeShrink - dt * 4.5f, 0.0f, 1.0f);
+        textSize = 2.5f - 0.5f * cos( PI/2 * (finaltimeShrink));
+        element.textData.fontSize = textSize;
+        element.AlignCenter(randomX);
+        element.AlignMiddle(-16 * textSize + randomY);
+        if (finalTimeShake == 0.0f) {
+            medalAnimationStage = MEDAL;
+        }
+    }
+    break;
+    }
+    
 }
