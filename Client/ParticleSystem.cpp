@@ -45,7 +45,7 @@ void ParticleSystem::UpdateParticles(float dt, Vector3 cameraPos) {
 
 			positionData[4 * particlesCount] = p.position.x;
 			positionData[4 * particlesCount +1] = p.position.y;
-			positionData[4 * particlesCount+2] = p.position.z;
+			positionData[4 * particlesCount+2] = p.position.z + sin((float)Window::GetTimer()->GetTotalTimeSeconds());
 			positionData[4 * particlesCount+3] = p.size;
 
 		}
