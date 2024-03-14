@@ -158,12 +158,13 @@ void RunningState::Update(float dt) {
         return;
     }
     WaitForPlayersLoaded();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
-    //if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
-    //    Tick(dt);
-    //}
+
 
     if (!levelManager->UpdateCountdown(dt)) {
         return;
