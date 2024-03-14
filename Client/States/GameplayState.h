@@ -180,6 +180,7 @@ namespace NCL {
             void LoadingScreenTUpdate();
             void CreateLoadingScreenThread();
             std::thread* loadingScreenThread;
+            Element* loadingImage;
         };
     }
 }

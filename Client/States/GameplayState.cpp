@@ -16,6 +16,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
+    loadingImage = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
@@ -44,6 +45,7 @@ void GameplayState::InitCanvas(){
     shouldLoadScreen.store(true);
     if (finishedLoading == LoadingStates::READY) {
     }
+    canvas->Reset();
         InitCrossHeir();
         InitTimerBar();
         InitLevelMap();
@@ -112,21 +114,13 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::LoadingScreenTUpdate() {
 
-    std::cout << "LoadingScreenTUpdate Reached!\n";
-    canvas->CreateNewLayer("Loading");
-    canvas->PushActiveLayer("Loading");
-    canvas->AddImageElement("Default.png", "Loading").SetColor({ 1.0,1.0,1.0,1.0 })
-        .SetAbsoluteSize({ 300,300 })
-        .AlignCenter()
-        .AlignMiddle().
-        SetShader(titleShader);
-
     while (!shouldLoadScreen) {
-        //canvas->Update(1.0f);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-        canvas->PopActiveLayer();
+        std::cout << "Loading!\n";
+        renderer->RenderLoadingScreen();
+        //loadingImage.set pos
 
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
 }
 
 void GameplayState::OnEnter() {
@@ -137,9 +131,7 @@ void GameplayState::OnEnter() {
     CreateNetworkThread();
     debugger = new DebugMode(world->GetMainCamera());
     InitialiseAssets();
-    InitCanvas();
-
-
+    //InitCanvas();
 }
 void GameplayState::InitialiseAssets() {
     
@@ -154,8 +146,7 @@ void GameplayState::InitialiseAssets() {
 
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
-    //shouldLoadScreen.store(true);
-    FinishLoading();
+    /*FinishLoading();*/
 }
 void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
@@ -179,10 +170,23 @@ void GameplayState::CreateNetworkThread() {
 }
 
 void GameplayState::CreateLoadingScreenThread() {
+    canvas->Reset();
+    canvas->CreateNewLayer("Loading");
+    canvas->PushActiveLayer("Loading");
+    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(100);
+    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignRight(100);
+    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 200,200 }).AlignMiddle();
+    renderer->RenderLoadingScreen();
+
+    canvas->CreateNewLayer("Loading2");
+    canvas->PushActiveLayer("Loading2");
+    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(100);
+    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignMiddle().AlignLeft(500);
+    renderer->RenderLoadingScreen();
+
     shouldLoadScreen.store(false);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
 }
-
 
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
@@ -214,10 +218,15 @@ void GameplayState::ManageLoading(float dt) {
         soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
+    
+    if (worldHasLoaded == LoadingStates::LOADED) {
+        worldHasLoaded = LoadingStates::READY;
+    }
 
-    if (soundHasLoaded == LoadingStates::READY) {
+    if (soundHasLoaded == LoadingStates::READY && worldHasLoaded == LoadingStates::READY) {
         delete loadSoundThread;
         finishedLoading = LoadingStates::READY;
+        FinishLoading();
     }
 }
 
@@ -500,6 +509,7 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
+    InitCanvas();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
     world->StartWorld();
 }

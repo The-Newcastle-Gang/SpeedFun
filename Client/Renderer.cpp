@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
 
@@ -261,6 +262,30 @@ void GameTechRenderer::RenderFrame() {
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    uTime += 0.01f;
+}
+
+void GameTechRenderer::RenderLoadingScreenFrame() {
+
+    uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
+
+    glEnable(GL_CULL_FACE);
+    glClearColor(1, 1, 1, 0);
+    BuildObjectList();
+    SortObjectList();
+    // RenderTitle or some shit
+    //InitUIQuad();
+    RenderCamera();
+    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    NewRenderText();
+    RenderUI();
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     uTime += 0.01f;
 }

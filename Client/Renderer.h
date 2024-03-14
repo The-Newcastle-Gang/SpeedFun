@@ -51,8 +51,10 @@ namespace NCL {
         protected:
             void NewRenderLines();
             void NewRenderText();
-
             void RenderFrame()	override;
+
+            void RenderLoadingScreenFrame();
+
 
             OGLShader*	defaultShader;
             OGLShader* defaultUIShader;
