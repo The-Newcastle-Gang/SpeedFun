@@ -125,7 +125,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("MeshedLevel");
     CreatePlayers();
     AddTriggersToLevel();
 

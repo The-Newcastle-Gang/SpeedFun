@@ -535,7 +535,7 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+    levelManager->TryReadLevel("MeshedLevel");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
@@ -546,9 +546,9 @@ void GameplayState::InitLevel() {
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
-        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-//        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
-
+        if (x->meshName != "none") {
+            temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), resources->GetTexture("FlatColors.png"), nullptr));
+        }
     }
 
     for (auto &x : opList) {
