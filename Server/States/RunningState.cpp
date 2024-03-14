@@ -111,6 +111,7 @@ void RunningState::Update(float dt) {
 
 void RunningState::LoadLevel() {
     BuildLevel("newTest");
+    // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
     AddTriggersToLevel();
@@ -158,7 +159,6 @@ void RunningState::GrappleStart(GameObject* player, Vector3 direction) {
     auto lookDirection = Quaternion(Matrix4::BuildViewMatrix(pos, pos + direction, Vector3(0, 1, 0)).Inverse());
     auto flatRotation = Matrix3::Rotation(-90, Vector3(1,0,0));
     grapples[playerId]->GetTransform().SetOrientation(Quaternion(Matrix3(lookDirection) * flatRotation).Normalised());
-
     SetNetworkActive(grapples[playerId], true);
 }
 

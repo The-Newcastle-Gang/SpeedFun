@@ -97,8 +97,8 @@ namespace NCL {
             TextureBase* deathImageTex;
 
 
-            constexpr static float chainSize = 0.2f;
-            constexpr static int chainLinkCount = (int)(Replicated::GRAPPLEDISTANCE / chainSize); // Grapple distance / chainLength(-1 -> 1 * 0.2) / 0.9
+            constexpr static float chainSize = 0.1f;
+            constexpr static int chainLinkCount = (int)(Replicated::GRAPPLEDISTANCE / chainSize / 0.5); // Grapple distance / chainLength(-1 -> 1 * 0.2) / 0.9
 
 
             GameObject* chains[chainLinkCount * Replicated::PLAYERCOUNT];
@@ -178,9 +178,7 @@ namespace NCL {
             bool displayDebugger = false;
 
             void CreateGrapples();
-            void
-
-            UpdateGrapples();
+            void UpdateGrapples();
 
             GameObject *CreateChainLink();
 

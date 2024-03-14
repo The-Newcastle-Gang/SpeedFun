@@ -37,6 +37,7 @@ public:
         Death_Event_End,
         Stage_Start,
         SetNetworkActive,
+        ToggleGrapple,
 };
 
     // In the situation where the server is the remote (Client to server)

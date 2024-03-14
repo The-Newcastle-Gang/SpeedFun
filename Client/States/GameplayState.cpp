@@ -319,7 +319,6 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             } break;
 
-
             case(Replicated::Player_Velocity_Call): {
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
@@ -513,6 +512,7 @@ void GameplayState::InitCamera() {
 
 void GameplayState::InitWorld() {
     InitLevel();
+    // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
     CreateChains();
@@ -557,6 +557,7 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
     }
 }
@@ -610,16 +611,19 @@ void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
     });
 
     if (isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
-       chainLink.SetActive(true);
+        chainLink.SetActive(true);
     });
 }
 
 void GameplayState::UpdateGrapples() {
     for (GameObject* grapple: grapples) {
+
+
         int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+        auto playerObject = world->GetNetworkObject(grapple->GetNetworkObject()->GetNetworkId() - Replicated::PLAYERCOUNT)->GetParent();
         if (!chains[id * chainLinkCount]->IsActive()) continue;
 
-        const Vector3 &playerPos = firstPersonPosition->GetPosition() + Matrix3(firstPersonPosition->GetOrientation()) * Replicated::HANDOFFSET;
+        const Vector3 &playerPos = playerObject->GetTransform().GetPosition() + Matrix3(playerObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET;
         const Vector3 &grapplePos = grapple->GetTransform().GetPosition();
 
         Vector3 chainVector = (grapplePos - playerPos).Normalised() * Replicated::GRAPPLEDISTANCE / chainSize / 4;
