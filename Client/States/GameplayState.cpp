@@ -77,7 +77,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    lavaParticles = new ParticleSystem({ 0, 0, 0 }, { -300, 0, -10 }, { 300, 1, 0 }, 25, 10.0f, 10, 1, 0.25f, resources->GetTexture("Default.png"));
+    lavaParticles = new ParticleSystem({ 0, 0, 0 }, { -300, 0, -10 }, { 300, 1, 0 }, 25, 10.0f, 10, 0.5f, 1.25f, resources->GetTexture("Default.png"));
     particleSystems.push_back(lavaParticles);
 
     
