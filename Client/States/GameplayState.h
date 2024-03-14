@@ -156,6 +156,7 @@ namespace NCL {
             void UpdatePlayerBlip(Element &element, float dt);
 
             void SetBridgeTest();
+            void SetRaycastEnemy();
         };
     }
 }

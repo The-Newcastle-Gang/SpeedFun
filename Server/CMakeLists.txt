@@ -14,6 +14,8 @@ add_library(server
         Components/TestBridge.cpp
         Components/BridgeTrigger.cpp
         Components/TrapObject.cpp
+        Components/RayEnemyFollow.cpp
+        Components/RayEnemyShoot.cpp
 )
 
 target_include_directories(server PUBLIC

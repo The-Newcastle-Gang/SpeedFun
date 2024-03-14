@@ -521,3 +521,14 @@ void GameplayState::SetBridgeTest() {
     replicated->AddBlockToLevel(testBridge, *world, x);
     testBridge->SetRenderObject(new RenderObject(&testBridge->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
 }
+
+void GameplayState::SetRaycastEnemy() {
+    auto raycastEnemy = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-80, 6, -7);
+    x->colliderExtents = Vector3(1, 1, 1);
+    x->dimensions = Vector3(1, 1, 1);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(raycastEnemy, *world, x);
+    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
+}

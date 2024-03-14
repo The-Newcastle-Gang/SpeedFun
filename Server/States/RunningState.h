@@ -15,6 +15,8 @@
 #include "TestBridge.h"
 #include "BridgeTrigger.h"
 #include "TrapObject.h"
+#include "RayEnemyFollow.h"
+#include "RayEnemyShoot.h"
 
 #include "Spring.h"
 
@@ -100,6 +102,7 @@ namespace NCL {
             void AddTestSpeedUpBlock();
             void SetTriggerTypePositions();
             void SetTestBridge(TestBridge* theBridge);
+            void SetRayEnemy();
         };
     }
 }
