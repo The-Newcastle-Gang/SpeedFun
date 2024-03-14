@@ -165,7 +165,7 @@ namespace NCL {
             Element* timeBar;
             int PlayerBlip;
 
-            ParticleSystem* testParticles;
+            ParticleSystem* lavaParticles;
             vector<ParticleSystem*> particleSystems;
             void LoadParticleSystems();
             void UpdateParticleSystems(float dt);

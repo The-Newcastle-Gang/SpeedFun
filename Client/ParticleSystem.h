@@ -32,7 +32,7 @@ namespace NCL
 		class ParticleSystem
 		{
 		public:
-			ParticleSystem(Vector3 startPos, Vector3 rngLower, Vector3 rngHigher, int particlesPerSecond,
+			ParticleSystem(Vector3 startPos, Vector3 rngLower, Vector3 rngHigher, int particlesPerBurst,
 				float particleSpeed, float lifeSpan, float particleSize, float timeBetween, TextureBase* texture);
 			~ParticleSystem();
 
@@ -54,7 +54,7 @@ namespace NCL
 
 			Particle particles[MAX_PARTICLES] = {};
 			int lastUsedParticle = 0;
-			int particlesPerSecond;
+			int particlesPerBurst;
 			Vector3 startPos; //default position of particles
 			Vector3 rngLower; //the lower bound for random particle placement
 			Vector3 rngRange; //the range in which particles can be placed, from rngLower.

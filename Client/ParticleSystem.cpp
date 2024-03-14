@@ -5,7 +5,7 @@ using namespace NCL::CSC8503;
 ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHigher,int particlesPerBurst,float particleSpeed,float lifeSpan,float particleSize, float timeBetweenBursts, TextureBase* texture) {
 	lastUsedParticle = 0;
 	this->texture = texture;
-	this->particlesPerSecond = particlesPerBurst;
+	this->particlesPerBurst = particlesPerBurst;
 	this->particleSpeed = particleSpeed;
 	this->lifeSpan = lifeSpan;
 	this->particleSize = particleSize;
@@ -67,7 +67,7 @@ void ParticleSystem::CreateNewParticles(float dt) {
 	if (particleTimer >= timeBetween)
 	{
 		particleTimer = 0;
-		newParticles = particlesPerSecond;
+		newParticles = particlesPerBurst;
 	}
 
 	for (int i = 0; i < newParticles; i++) {
