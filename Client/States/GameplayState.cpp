@@ -557,14 +557,14 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
 
-    SetTestFloor();
+//    SetTestFloor();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     deathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
     
-    ObjectsToRender();
+    RenderFlairObjects();
 
     // TEST SWINGING OBJECT ON THE CLIENT
     //auto swingingTemp = new GameObject();
@@ -635,6 +635,14 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return progress.Length()/levelLen;
 }
 
+void GameplayState::RenderFlairObjects(){
+    Vector3 lavaPos = deathPos ;
+
+    AddLava(lavaPos + Vector3(0, 5, 0));
+    AddEndPortal(endPos);
+
+}
+
 void GameplayState::AddLava(Vector3 position){
     auto LavaQuad = new GameObject();
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
@@ -643,24 +651,14 @@ void GameplayState::AddLava(Vector3 position){
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
-    auto endP    =  new GameObject();
-    auto endQuad =  new GameObject();
-    endQuad->GetTransform().SetOrientation(Quaternion (Matrix4::Rotation(90, {0,1,0})));
-    replicated->AddTestObjectToLevel(endP, * world, {1,1,1}, position, false);
-    replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position, false);
-
-    endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
-    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default.png"), resources->GetShader("scene")));
-
-}
-
-void GameplayState::ObjectsToRender(){
-    Vector3 lavaPos = deathPos - Vector3(0,50,0); // CHANGE THIS ONCE LEVELS HAVE BEEN PROPERLY MADE.
-    
-
-    AddLava(lavaPos + Vector3(0, 5, 0));
-
-    AddEndPortal(endPos);
-
+//    auto endP    =  new GameObject();
+//    auto endQuad =  new GameObject();
+//    endQuad->GetTransform().SetOrientation(Quaternion (Matrix4::Rotation(90, {0,1,0})));
+//    replicated->AddTestObjectToLevel(endP, * world, {1,1,1}, position, false);
+//    replicated->AddTestObjectToLevel(endQuad, * world, {1,2,2}, position, false);
+//
+//    endQuad->SetRenderObject(new RenderObject(&endQuad->GetTransform(),resources->GetMesh("Quad.msh"),resources->GetTexture("Default.png"), resources->GetShader("portal")));
+//    endP->SetRenderObject(new RenderObject(&endP->GetTransform(), resources->GetMesh("Door.msh"),resources->GetTexture("Default.png"), resources->GetShader("scene")));
 
 }
+

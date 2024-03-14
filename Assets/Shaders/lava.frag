@@ -24,6 +24,14 @@ in Vertex
 
 out vec4 fragColor;
 
+float vignette(float value, vec2 uv){
+    uv *= 1.0-uv.yx;
+    float vig = uv.x*uv.y *10.0;
+    vig = pow(vig, value *1.0);
+    return vig;
+}
+
+
 vec4 uLerp( vec4 a, vec4 b, vec4 t){
   return mix(a,b, t);
 }
@@ -66,8 +74,8 @@ float fbm (in vec2 st) {
 }
 
 
-void main(void)
-{
+void main(void) {
+
 	vec2 uv = IN.texCoord;
 	vec2 uvOriginal = uv * 25;
   uv *= 100;
@@ -84,7 +92,6 @@ void main(void)
   col += fbm(firstNoise + 0.5) * 0.5;
   col = 1.0-col;
   
-  
   vec4 noiseyTexture = vec4(col, 1.0) +  texture(mainTex, distortedTexCoords);
   float tintOffset      = 1.0;
   vec4 tintColorStart   =  vec4(0.99, 0.35, 0.0, 1.0);
@@ -93,10 +100,7 @@ void main(void)
   float brightness = 1.0;
   vec4 newLavaCol = uLerp(tintColorStart, tintColorEnd, tintOffset* noiseyTexture);
   
-  fragColor =  newLavaCol * brightness + texture(mainTex, distortedTexCoords) * newLavaCol;
-
-
-  
-  // fragColor = noiseyTexture;
+  vec4 linetex = texture(mainTex, distortedTexCoords) * newLavaCol;
+  fragColor =  newLavaCol * brightness + linetex ;
 
 }

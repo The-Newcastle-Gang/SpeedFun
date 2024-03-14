@@ -172,7 +172,7 @@ namespace NCL {
 
             DebugMode* debugger;
             bool displayDebugger = false;
-            void ObjectsToRender();
+            void RenderFlairObjects();
 
         };
     }
