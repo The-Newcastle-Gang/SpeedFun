@@ -348,6 +348,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
     //SetTestSprings();
     SetTestFloor();
+    SetRayEnemy();
 
 }
 
@@ -403,11 +404,11 @@ void RunningState::SetBridge(TestBridge* theBridge) {
     replicated->AddTriggerVolumeToWorld(Vector3(1, 1, 1), bridgeTrigger, *world);
     bridgeTrigger->SetPhysicsObject(new PhysicsObject(&bridgeTrigger->GetTransform(), bridgeTrigger->GetBoundingVolume(), physics->GetPhysMat("Default")));
     bridgeTrigger->GetPhysicsObject()->SetInverseMass(0.0f);
-    bridgeTrigger->GetTransform().SetPosition(Vector3(-70, 6, -7));
+    bridgeTrigger->GetTransform().SetPosition(Vector3(-75, 6, 5));
     bridgeTrigger->GetPhysicsObject()->SetIsTriggerVolume(true);
     BridgeTrigger* briTriggerComp = new BridgeTrigger(bridgeTrigger);
     bridgeTrigger->AddComponent(briTriggerComp);
-    Debug::DrawAABBLines(Vector3(-70, 6, -7), Vector3(1, 1, 1), Debug::MAGENTA, 1000.0f);
+    Debug::DrawAABBLines(Vector3(-75, 6, 5), Vector3(1, 1, 1), Debug::MAGENTA, 1000.0f);
     briTriggerComp->SetBridgeTrigger(theBridge);
 
 }
@@ -416,7 +417,7 @@ void RunningState::SetRayEnemy() {
 
     auto rayenemyFollow = new GameObject();
     auto x = new PrimitiveGameObject();
-    x->position = Vector3(-80, 6, -7);
+    x->position = Vector3(-75, 6, 0);
     x->colliderExtents = Vector3(1, 1, 1);
     x->dimensions = Vector3(1, 1, 1);
     x->shouldNetwork = true;
@@ -428,14 +429,14 @@ void RunningState::SetRayEnemy() {
     rayenemyFollow->AddComponent(followComp);
 
     auto rayenemyShoot = new GameObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 10), rayenemyShoot, *world);
+    replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 20), rayenemyShoot, *world);
     rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), physics->GetPhysMat("Default")));
     rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
-    rayenemyShoot->GetTransform().SetPosition(Vector3(-80, 6, -7));
+    rayenemyShoot->GetTransform().SetPosition(Vector3(-75, 5, 0));
     rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
     RayEnemyShoot* shootComp = new RayEnemyShoot(rayenemyShoot);
     rayenemyShoot->AddComponent(shootComp);
-    Debug::DrawAABBLines(Vector3(-80, 6, -7), Vector3(5, 5, 5), Debug::MAGENTA, 1000.0f);
+    Debug::DrawAABBLines(Vector3(-75, 5, 0), Vector3(5, 5, 10), Debug::MAGENTA, 1000.0f);
 
     shootComp->SetFollowComponent(followComp);
 }

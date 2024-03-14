@@ -449,6 +449,7 @@ void GameplayState::InitLevel() {
     //SetTestSprings();
 
     SetTestFloor();
+    SetRaycastEnemy();
 
     levelLen = (lr->GetEndPosition()-lr->GetStartPosition()).Length();
     startPos = lr->GetStartPosition();
@@ -505,27 +506,11 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return progress.Length()/levelLen;
 }
 
-void GameplayState::SpeedUpBlockTest() {
-    auto speedUpBlock = new GameObject();
-    replicated->AddSpeedUpBlockToLevel(speedUpBlock, *world);
-    speedUpBlock->SetRenderObject(new RenderObject(&speedUpBlock->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-}
-
-void GameplayState::SetBridgeTest() {
-    auto testBridge = new GameObject();
-    auto x = new PrimitiveGameObject();
-    x->position = Vector3(-90, 5, 5);
-    x->colliderExtents = Vector3(10, 20, 0.5);
-    x->dimensions = Vector3(10, 20, 0.5);
-    x->shouldNetwork = true;
-    replicated->AddBlockToLevel(testBridge, *world, x);
-    testBridge->SetRenderObject(new RenderObject(&testBridge->GetTransform(), resources->GetMesh("Cube.msh"), nullptr, nullptr));
-}
 
 void GameplayState::SetRaycastEnemy() {
     auto raycastEnemy = new GameObject();
     auto x = new PrimitiveGameObject();
-    x->position = Vector3(-80, 6, -7);
+    x->position = Vector3(-75, 6, 0);
     x->colliderExtents = Vector3(1, 1, 1);
     x->dimensions = Vector3(1, 1, 1);
     x->shouldNetwork = true;

@@ -63,7 +63,8 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
-            void SpeedUpBlockTest();
+            void SetRaycastEnemy();
+
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -155,8 +156,7 @@ namespace NCL {
 
             void UpdatePlayerBlip(Element &element, float dt);
 
-            void SetBridgeTest();
-            void SetRaycastEnemy();
+
         };
     }
 }
