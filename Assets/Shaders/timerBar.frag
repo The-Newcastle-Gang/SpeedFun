@@ -49,7 +49,7 @@ void main() {
     if (hasTexture == 1) {
         outgoingColor *= texture(tex, TexCoords);
     }
-
+    
     vec2 uv = TexCoords;
     uv.x*= 20;
     uv.x += uTime;
@@ -77,7 +77,8 @@ void main() {
                 outgoingColor.rgb,
                 clamp(length(r.x),0.0,1.0));
 
-
+    int colourThreasholds = 8;
+    color = round(color * colourThreasholds) / colourThreasholds;
     // fragColor = outgoingColor * sin(uTime);
     fragColor = vec4(color, 1);
 }

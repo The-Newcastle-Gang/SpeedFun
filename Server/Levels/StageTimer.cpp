@@ -3,6 +3,7 @@
 //
 
 #include "StageTimer.h"
+#include "Replicated.h"
 
 StageTimer::StageTimer() {
     std::cout << "Timer initialized" << std::endl;
@@ -47,25 +48,25 @@ void StageTimer::CalculateMedal() {
         case(Medal::Platinum):
         
             currentMedal = Medal::Platinum;
-            currentMedalColour = { 0.90f, 0.894f, 0.886f, 1.0f };
+            currentMedalColour = Replicated::PLATINUM;
             break;
         
         case(Medal::Gold):
         
             currentMedal = Medal::Gold;
-            currentMedalColour = { 0.788f, 0.69f, 0.216f, 1.0f };
+            currentMedalColour = Replicated::GOLD;
             break;
         
         case(Medal::Silver):
         
             currentMedal = Medal::Silver;
-            currentMedalColour = { 0.843f, 0.843f, 0.843f, 1.0f };
+            currentMedalColour = Replicated::SILVER;
             break;
         
         case(Medal::Bronze):
         
             currentMedal = Medal::Bronze;
-            currentMedalColour = { 0.416f, 0.22f, 0.02f, 1.0f };
+            currentMedalColour = Replicated::BRONZE;
             break;
         
     }
