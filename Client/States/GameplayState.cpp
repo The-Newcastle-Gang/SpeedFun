@@ -66,47 +66,55 @@ void GameplayState::InitCrossHeir(){
 void GameplayState::InitTimerBar(){
     //timer Bar
     int outlineSize = timerBarOutline;
-    Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
-    for (int i = 0; i < 3; i++) {
+    if (baseClient->IsSinglePlayer())
+    {
+        Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
+        for (int i = 0; i < 3; i++) {
 
-        timerNubs[i] = &canvas->AddElement()
-            .SetColor(colours[i])
+            timerNubs[i] = &canvas->AddElement()
+                .SetColor(colours[i])
+                .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+                .AlignTop(timerTopOffset - 11)
+                .SetId("nub_" + std::to_string(i));
+
+            medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f} });
+            timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
+        }
+
+        auto platNub = canvas->AddElement()
+            .SetColor(Replicated::PLATINUM)
             .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-            .AlignTop(timerTopOffset-11)
-            .SetId("nub_" + std::to_string(i));
-
-        medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f}});
-        timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
+            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
+            .AlignTop(timerTopOffset - 11);
     }
-
-    auto platNub = canvas->AddElement()
-        .SetColor(Replicated::PLATINUM)
-        .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-        .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
-        .AlignTop(timerTopOffset - 11);
+    int backTimerBarWidth = (baseClient->IsSinglePlayer()) ? 800 : timerBoxWidth;
 
     auto backTimer = canvas->AddElement()
         .SetColor({ 0,0,0,1 })
-        .SetAbsoluteSize({ 800 + outlineSize*2, timerBarHeight + outlineSize*2 })
+        .SetAbsoluteSize({ backTimerBarWidth + outlineSize*2, timerBarHeight + outlineSize*2 })
         .AlignCenter()
         .AlignTop(timerTopOffset - outlineSize);
 
-
-    timeBar = &canvas->AddElement()
+    if (baseClient->IsSinglePlayer())
+    {
+        timeBar = &canvas->AddElement()
             .SetColor(Replicated::PLATINUM)
-            .SetAbsoluteSize({800, timerBarHeight })
+            .SetAbsoluteSize({ 800, timerBarHeight })
             .AlignCenter()
             .AlignTop(timerTopOffset)
             .SetShader(timerBarShader);
-    timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
-
+        timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
+    }
     timeBarTimerBox = &canvas->AddElement()
             .SetColor({0.05,0,0,1})
             .SetAbsoluteSize({ timerBoxWidth, timerBarHeight })
-            .AlignCenter(400)
+            .AlignCenter(baseClient->IsSinglePlayer() ? 400 : 0)
             .AlignTop(timerTopOffset);
-    timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
-
+    if (baseClient->IsSinglePlayer()) {
+        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
+    }
+    
+    
 
     timerText = &canvas->AddElement()
         .SetColor({ 0,0,0,1 })
@@ -503,18 +511,24 @@ void GameplayState::UpdateTimerUI(Element& element, float dt) {
 
 void GameplayState::UpdateTimerBox(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
-
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio));
+    float positionRatio = timerRatio;
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio));
 }
 
 void GameplayState::UpdateTimerText(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
+    float positionRatio = timerRatio;
     element.textData.text = std::format("{:.2f}", timeElapsed);
     element.textData.fontSize = 0.5f;
 
     int randomX = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
     int randomY = (int)round( ( - 0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * timerRatio - 96/2 + 8 + randomX));
+    if (!baseClient->IsSinglePlayer()) {
+        randomX = 0;
+        randomY = 0;
+        positionRatio = 0.5;
+    }
+    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96/2 + 8 + randomX));
     element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
 
     timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
