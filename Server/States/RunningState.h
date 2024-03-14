@@ -99,9 +99,8 @@ namespace NCL {
 
             void SetTestSprings();
             void SetTestFloor();
-            void AddTestSpeedUpBlock();
             void SetTriggerTypePositions();
-            void SetTestBridge(TestBridge* theBridge);
+            void SetBridge(TestBridge* theBridge);
             void SetRayEnemy();
         };
     }

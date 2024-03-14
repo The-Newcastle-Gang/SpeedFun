@@ -333,7 +333,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 
         TestBridge* ts = new TestBridge(g);
         g->AddComponent(ts);
-        SetTestBridge(ts);
+        SetBridge(ts);
     }
 
     for (auto& x : trapBlockList) {
@@ -346,10 +346,9 @@ void RunningState::BuildLevel(const std::string &levelName)
         TrapBlock* tbs = new TrapBlock(g);
         g->AddComponent(tbs);
     }
-    //AddTestSpeedUpBlock();
     //SetTestSprings();
     SetTestFloor();
-    //SetTestBridge();
+
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -398,15 +397,7 @@ void RunningState::SetTestFloor() {
     AddTriggersToLevel();
 }
 
-void RunningState::AddTestSpeedUpBlock() {
-    auto testSpeedUpBlock = new GameObject();
-    replicated->AddSpeedUpBlockToLevel(testSpeedUpBlock, *world);
-    testSpeedUpBlock->SetPhysicsObject(new PhysicsObject(&testSpeedUpBlock->GetTransform(), testSpeedUpBlock->GetBoundingVolume(), new PhysicsMaterial()));
-    testSpeedUpBlock->GetPhysicsObject()->SetInverseMass(0.0f);
-    testSpeedUpBlock->AddComponent((Component*)(new TestSpeedUpBlock(testSpeedUpBlock)));
-}
-
-void RunningState::SetTestBridge(TestBridge* theBridge) {
+void RunningState::SetBridge(TestBridge* theBridge) {
   
     auto bridgeTrigger = new GameObject();
     replicated->AddTriggerVolumeToWorld(Vector3(1, 1, 1), bridgeTrigger, *world);
