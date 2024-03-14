@@ -186,6 +186,7 @@ namespace NCL {
             const int timerBoxWidth = 96;
             const int timerBarOutline = 3;
             float timerRatio = 0.0f;
+            Vector4 timerBarColor = { Replicated::PLATINUM };
 
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);

@@ -93,7 +93,7 @@ void GameplayState::InitTimerBar(){
 
 
     timeBar = &canvas->AddElement()
-            .SetColor({0.969,0.729,0.,1})
+            .SetColor(Replicated::PLATINUM)
             .SetAbsoluteSize({800, timerBarHeight })
             .AlignCenter()
             .AlignTop(timerTopOffset)
@@ -401,6 +401,8 @@ void GameplayState::ReadNetworkFunctions() {
                 if (currentMedal != recievedMedal) {
                     timerMedalShakeTimer = 1.0f;
                     currentMedal = recievedMedal;
+                    Vector4 colours[4] = { Replicated::PLATINUM, Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
+                    timerBarColor = colours[ currentMedal ];
                 }
             }
             break; 
@@ -495,6 +497,7 @@ void GameplayState::UpdateTimerUI(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
 
     element.SetAbsoluteSize({ (int)round((800 - 96) * timerRatio), timerBarHeight });
+    element.SetColor(timerBarColor);
 }
 
 void GameplayState::UpdateTimerBox(Element& element, float dt) {
