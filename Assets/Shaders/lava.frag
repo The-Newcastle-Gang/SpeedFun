@@ -77,7 +77,7 @@ float fbm (in vec2 st) {
 void main(void) {
 
 	vec2 uv = IN.texCoord;
-	vec2 uvOriginal = uv * 25;
+	vec2 uvOriginal = uv * 20;
   uv *= 100;
   vec3 col = vec3(0.0, 0.0, 0.0);
 
