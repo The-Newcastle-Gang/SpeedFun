@@ -15,17 +15,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
-PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
-	applyGravity	= true;
+PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g) {
+    applyGravity = true;
     useBroadPhase = true;
-	dTOffset		= 0.0f;
-	globalDamping	= 0.995f;
-	SetGravity(Vector3(0.0f, -13.0f, 0.0f));
+    dTOffset = 0.0f;
+    globalDamping = 0.995f;
+    SetGravity(Vector3(0.0f, -13.0f, 0.0f));
     SetupPhysicsMaterials();
 }
 
 
-PhysicsSystem::~PhysicsSystem()	{
+PhysicsSystem::~PhysicsSystem() {
     for (auto pair : physicsMaterials) {
         delete pair.second;
     }
@@ -50,7 +50,7 @@ void PhysicsSystem::SetupPhysicsMaterials() {
 }
 
 void PhysicsSystem::SetGravity(const Vector3& g) {
-	gravity = g;
+    gravity = g;
 }
 
 /*
@@ -64,7 +64,7 @@ any collisions they are in.
 
 */
 void PhysicsSystem::Clear() {
-	allCollisions.clear();
+    allCollisions.clear();
 }
 
 /*
@@ -83,136 +83,130 @@ const float idealDT = 1.0f / idealHZ;
 
 /*
 This is the fixed update we actually have...
-If physics takes too long it starts to kill the framerate, it'll drop the 
+If physics takes too long it starts to kill the framerate, it'll drop the
 iteration count down until the FPS stabilises, even if that ends up
-being at a low rate. 
+being at a low rate.
 */
-int realHZ		= idealHZ;
-float realDT	= idealDT;
+int realHZ = idealHZ;
+float realDT = idealDT;
 
 void PhysicsSystem::Update(float dt) {
-    auto debugTime = std::chrono::system_clock::now();
+    dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
 
-	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
+    GameTimer t;
+    t.GetTimeDeltaSeconds();
 
-	GameTimer t;
-	t.GetTimeDeltaSeconds();
-  
-	if (useBroadPhase) {
-        UpdateObjectSortSweepBounds();
-	}
-  
-	int iteratorCount = 0;
+    int iteratorCount = 0;
 
-	while(dTOffset > realDT) {
+    while (dTOffset > realDT) {
         //Update accelerations from external forces
-		if (useBroadPhase) {
-            SortAndSweep();          
-		}
-		else {
-			BasicCollisionDetection();
-		}
+        if (useBroadPhase) {
+            UpdateObjectSortSweepBounds();
+            SortAndSweep();
+        }
+        else {
+            BasicCollisionDetection();
+        }
         IntegrateAccel(realDT);
-		if(isDebugDrawingCollision) DrawAllObjectCollision();
+        if (isDebugDrawingCollision) DrawAllObjectCollision();
 
-		float constraintDt = realDT /  (float)constraintIterationCount;
-		for (int i = 0; i < constraintIterationCount; ++i) {
-			UpdateConstraints(constraintDt);	
-		}
-		IntegrateVelocity(realDT); //update positions from new velocity changes
+        float constraintDt = realDT / (float)constraintIterationCount;
+        for (int i = 0; i < constraintIterationCount; ++i) {
+            UpdateConstraints(constraintDt);
+        }
+        IntegrateVelocity(realDT); //update positions from new velocity changes
         //gameWorld.UpdateWorldPhysics(realDT);
 
-		dTOffset -= realDT;
+        dTOffset -= realDT;
         iteratorCount++;
-	}
+    }
 
-//	ClearForces();	//Once we've finished with the forces, reset them to zero
+    //	ClearForces();	//Once we've finished with the forces, reset them to zero
 
-	UpdateCollisionList(); //Remove any old collisions
+    UpdateCollisionList(); //Remove any old collisions
 
-	t.Tick();
-	float updateTime = t.GetTimeDeltaSeconds();
+    t.Tick();
+    float updateTime = t.GetTimeDeltaSeconds();
 
-	//Uh oh, physics is taking too long...
-	if (updateTime > realDT) {
-		realHZ /= 2;
-		realDT *= 2;
-		std::cout << "Dropping iteration count due to long physics time...(now " << realHZ << ")\n";
-	}
-	else if(dt*2 < realDT) { //we have plenty of room to increase iteration count!
-		int temp = realHZ;
-		realHZ *= 2;
-		realDT /= 2;
+    std::cout << updateTime * 1000000 << "\n";
+    //Uh oh, physics is taking too long...
+    if (updateTime > realDT) {
+        realHZ /= 2;
+        realDT *= 2;
+        std::cout << "Dropping iteration count due to long physics time...(now " << realHZ << ")\n";
+    }
+    else if (dt * 2 < realDT) { //we have plenty of room to increase iteration count!
+        int temp = realHZ;
+        realHZ *= 2;
+        realDT /= 2;
 
-		if (realHZ > idealHZ) {
-			realHZ = idealHZ;
-			realDT = idealDT;
-		}
-		if (temp != realHZ) {
-			std::cout << "Raising iteration count due to short physics time...(now " << realHZ << ")\n";
-		}
-	}
-
-    std::cerr << std::chrono::system_clock::now() - debugTime << "\n";
+        if (realHZ > idealHZ) {
+            realHZ = idealHZ;
+            realDT = idealDT;
+        }
+        if (temp != realHZ) {
+            std::cout << "Raising iteration count due to short physics time...(now " << realHZ << ")\n";
+        }
+    }
 
 }
 
 void PhysicsSystem::UpdateCollisionList() {
-	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); )
+    for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); )
     {
         CollisionDetection::CollisionInfo& in = const_cast<CollisionDetection::CollisionInfo&>(*i);
 
-		if ((*i).framesLeft == numCollisionFrames) {
-			i->a->OnCollisionBegin(i->b);
-			i->b->OnCollisionBegin(i->a);
-		}
+        if ((*i).framesLeft == numCollisionFrames) {
+            i->a->OnCollisionBegin(i->b);
+            i->b->OnCollisionBegin(i->a);
+        }
         CollisionDetection::CollisionInfo blank;
-        if(i->a->GetPhysicsObject()->GetIsTriggerVolume()   ||
-           i->b->GetPhysicsObject()->GetIsTriggerVolume()   ||
-           i->a->GetHasComponent() ||
-           i->b->GetHasComponent() )
+        if (i->a->GetPhysicsObject()->GetIsTriggerVolume() ||
+            i->b->GetPhysicsObject()->GetIsTriggerVolume() ||
+            i->a->GetHasComponent() ||
+            i->b->GetHasComponent())
         {
             in.framesLeft = 4;
 
-            if(!CollisionDetection::ObjectIntersection(i->a,i->b, blank)){
+            if (!CollisionDetection::ObjectIntersection(i->a, i->b, blank)) {
                 in.framesLeft = 0;
             }
         }
 
-		in.framesLeft--;
+        in.framesLeft--;
 
-		if ((*i).framesLeft < 0) {
-			i->a->OnCollisionEnd(i->b);
-			i->b->OnCollisionEnd(i->a);
-			i = allCollisions.erase(i);
-		}
-		else {
-			++i;
-		}
-	}
+        if ((*i).framesLeft < 0) {
+            i->a->OnCollisionEnd(i->b);
+            i->b->OnCollisionEnd(i->a);
+            i = allCollisions.erase(i);
+        }
+        else {
+            ++i;
+        }
+    }
 }
 
 void PhysicsSystem::BasicCollisionDetection() {
-    
+
     std::vector<GameObject*>::const_iterator first;
     std::vector<GameObject*>::const_iterator last;
     gameWorld.GetObjectIterators(first, last);
 
-    for(auto i = first; i!=last; ++i){
-        if((*i)->GetPhysicsObject() == nullptr){
+    for (auto i = first; i != last; ++i) {
+        if ((*i)->GetPhysicsObject() == nullptr) {
             continue;
         }
 
         //we start this i+1 since we never have to check for objects colliding with themselves
-        for(auto j = i+1; j!= last; j++){
-            if((* j)->GetPhysicsObject() == nullptr){
+        for (auto j = i + 1; j != last; j++) {
+            if ((*j)->GetPhysicsObject() == nullptr) {
                 continue;
             }
 
 
             CollisionDetection::CollisionInfo info;
 
-            if(CollisionDetection::ObjectIntersection(*i,*j,info)){
+            if (CollisionDetection::ObjectIntersection(*i, *j, info)) {
                 //std::cout<< "Collision between " << (*i)->GetName() << " and " << (*j)->GetName() << " at "<< info.point.penetration<< "\n";
                 ImpulseResolveCollision(*info.a, *info.b, info.point);
                 info.framesLeft = numCollisionFrames;
@@ -225,74 +219,74 @@ void PhysicsSystem::BasicCollisionDetection() {
 
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
 
-    if(a.GetPhysicsObject()->GetIsTriggerVolume())
+    if (a.GetPhysicsObject()->GetIsTriggerVolume())
     {
         return;
     }
-    if(b.GetPhysicsObject()->GetIsTriggerVolume())
+    if (b.GetPhysicsObject()->GetIsTriggerVolume())
     {
         return;
     }
 
-	PhysicsObject* physA = a.GetPhysicsObject();
-	PhysicsObject* physB = b.GetPhysicsObject();
+    PhysicsObject* physA = a.GetPhysicsObject();
+    PhysicsObject* physB = b.GetPhysicsObject();
 
-	Transform& transformA = a.GetTransform();
-	Transform& transformB = b.GetTransform();
+    Transform& transformA = a.GetTransform();
+    Transform& transformB = b.GetTransform();
 
-	float cRestitution = physA->GetElasticity() * physB->GetElasticity();
-	float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
+    float cRestitution = physA->GetElasticity() * physB->GetElasticity();
+    float totalMass = physA->GetInverseMass() + physB->GetInverseMass();
 
-	if (totalMass == 0) {
-		return;
-	}
-	//projection method here lol
-	transformA.SetPosition(transformA.GetPosition() - p.normal * p.penetration * (physA->GetInverseMass() / totalMass));
-	transformB.SetPosition(transformB.GetPosition() + p.normal * p.penetration * (physB->GetInverseMass() / totalMass));
+    if (totalMass == 0) {
+        return;
+    }
+    //projection method here lol
+    transformA.SetPosition(transformA.GetPosition() - p.normal * p.penetration * (physA->GetInverseMass() / totalMass));
+    transformB.SetPosition(transformB.GetPosition() + p.normal * p.penetration * (physB->GetInverseMass() / totalMass));
 
-	Vector3 relativeA = p.localA;
-	Vector3 relativeB = p.localB;
+    Vector3 relativeA = p.localA;
+    Vector3 relativeB = p.localB;
 
-	Vector3 angVelocityA = Vector3::Cross(physA->GetAngularVelocity(), relativeA);
-	Vector3 angVelocityB = Vector3::Cross(physB->GetAngularVelocity(), relativeB);
+    Vector3 angVelocityA = Vector3::Cross(physA->GetAngularVelocity(), relativeA);
+    Vector3 angVelocityB = Vector3::Cross(physB->GetAngularVelocity(), relativeB);
 
-	Vector3 fullVelocityA = physA->GetLinearVelocity() + angVelocityA;
-	Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
+    Vector3 fullVelocityA = physA->GetLinearVelocity() + angVelocityA;
+    Vector3 fullVelocityB = physB->GetLinearVelocity() + angVelocityB;
 
-	Vector3 contactVelocity = fullVelocityB - fullVelocityA;
+    Vector3 contactVelocity = fullVelocityB - fullVelocityA;
 
-	if (contactVelocity.Length() < velocityThreshold) {
-		cRestitution = 0.0f;
-	}
+    if (contactVelocity.Length() < velocityThreshold) {
+        cRestitution = 0.0f;
+    }
 
-	float impulseForce = Vector3::Dot(contactVelocity, p.normal);
+    float impulseForce = Vector3::Dot(contactVelocity, p.normal);
 
-	Vector3 inertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, p.normal), relativeA);
-	Vector3 inertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, p.normal), relativeB);
+    Vector3 inertiaA = Vector3::Cross(physA->GetInertiaTensor() * Vector3::Cross(relativeA, p.normal), relativeA);
+    Vector3 inertiaB = Vector3::Cross(physB->GetInertiaTensor() * Vector3::Cross(relativeB, p.normal), relativeB);
 
-	float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
+    float angularEffect = Vector3::Dot(inertiaA + inertiaB, p.normal);
 
-	float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
-	Vector3 fullImpulse = p.normal * j;
+    float j = (-(1.0f + cRestitution) * impulseForce) / (totalMass + angularEffect);
+    Vector3 fullImpulse = p.normal * j;
 
 
 
-	physA->ApplyLinearImpulse(-fullImpulse);
-	physB->ApplyLinearImpulse(fullImpulse);
+    physA->ApplyLinearImpulse(-fullImpulse);
+    physB->ApplyLinearImpulse(fullImpulse);
 
-	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
-	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+    physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
+    physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 
 }
 
 template <class T>
 T Tmin(T a, T b) {
-	return a < b ? a : b;
+    return a < b ? a : b;
 }
 
 template <class T>
 T Tmax(T a, T b) {
-	return a > b ? a : b;
+    return a > b ? a : b;
 }
 
 void PhysicsSystem::SetupBounds(GameObject* g) {
@@ -365,7 +359,7 @@ void PhysicsSystem::UpdateObjectSortSweepBounds() {
 }
 
 void PhysicsSystem::SortAndSweep() {
-    
+
     broadphaseCollisions.clear();
 
     SortAndSweepInsertionSort();
@@ -425,14 +419,14 @@ The broadphase will now only give us likely collisions, so we can now go through
 and work out if they are truly colliding, and if so, add them into the main collision list
 */
 void PhysicsSystem::NarrowPhase() {
-	//iterating through every broad phase pair and then checking if it actually interacts
+    //iterating through every broad phase pair and then checking if it actually interacts
 
 }
 
 /*
 Integration of acceleration and velocity is split up, so that we can
 move objects multiple times during the course of a PhysicsUpdate,
-without worrying about repeated forces accumulating etc. 
+without worrying about repeated forces accumulating etc.
 
 This function will update both linear and angular acceleration,
 based on any forces that have been accumulated in the objects during
@@ -440,46 +434,46 @@ the course of the previous game frame.
 */
 void PhysicsSystem::IntegrateAccel(float dt) {
 
-	std::vector<GameObject*>::const_iterator first;
-	std::vector<GameObject*>::const_iterator last;
+    std::vector<GameObject*>::const_iterator first;
+    std::vector<GameObject*>::const_iterator last;
 
-	gameWorld.GetObjectIterators(first, last);          //setting our constructors to the first and last game objects in the scene
+    gameWorld.GetObjectIterators(first, last);          //setting our constructors to the first and last game objects in the scene
 
-	for (auto i = first; i != last; i++) {
+    for (auto i = first; i != last; i++) {
 
-		PhysicsObject* object = (*i)->GetPhysicsObject();     //Get the physics object from the game obj
+        PhysicsObject* object = (*i)->GetPhysicsObject();     //Get the physics object from the game obj
 
-		if (object == nullptr) {                                //if it's not physical then we go to the next one
-			continue;
-		}
+        if (object == nullptr) {                                //if it's not physical then we go to the next one
+            continue;
+        }
 
-		float inverseMass = object->GetInverseMass();       //getting inverse mass
+        float inverseMass = object->GetInverseMass();       //getting inverse mass
         if (inverseMass == 0.0f)continue;
 
-		Vector3 linearVel = object->GetLinearVelocity();
-		Vector3 force = object->GetForce();
+        Vector3 linearVel = object->GetLinearVelocity();
+        Vector3 force = object->GetForce();
 
         object->ClearForces();
-		Vector3 accel = force * inverseMass;                     //f*m^-1
+        Vector3 accel = force * inverseMass;                     //f*m^-1
 
         if (applyGravity && inverseMass > 0) {
             accel += gravity;
         }
 
         linearVel += accel * dt;                                // v = a(t).dt
-		object->SetLinearVelocity(linearVel);
+        object->SetLinearVelocity(linearVel);
 
-		Vector3 torque = object->GetTorque();
-		Vector3 angVel = object->GetAngularVelocity();
+        Vector3 torque = object->GetTorque();
+        Vector3 angVel = object->GetAngularVelocity();
 
-		object->UpdateInertiaTensor();                          //Basically this is getting the moment of intertia
+        object->UpdateInertiaTensor();                          //Basically this is getting the moment of intertia
 
-		Vector3 angAccel = object->GetInertiaTensor() * torque;
+        Vector3 angAccel = object->GetInertiaTensor() * torque;
 
-		angVel += angAccel * dt;                                //IW = tau . dt
-		object->SetAngularVelocity(angVel);
+        angVel += angAccel * dt;                                //IW = tau . dt
+        object->SetAngularVelocity(angVel);
 
-	}
+    }
 }
 
 /*
@@ -490,51 +484,51 @@ the world, looking for collisions.
 */
 void PhysicsSystem::IntegrateVelocity(float dt) {
 
-	std::vector<GameObject*>::const_iterator first;
-	std::vector<GameObject*>::const_iterator last;
+    std::vector<GameObject*>::const_iterator first;
+    std::vector<GameObject*>::const_iterator last;
     float frameLinearDamping = 1.0f - (0.1f * dt);
 
-	gameWorld.GetObjectIterators(first, last);
+    gameWorld.GetObjectIterators(first, last);
 
-	for (auto i = first; i != last; ++i) {
-		PhysicsObject* object = (*i)->GetPhysicsObject();
+    for (auto i = first; i != last; ++i) {
+        PhysicsObject* object = (*i)->GetPhysicsObject();
 
-		if (object == nullptr) {
-			continue;
-		}
+        if (object == nullptr) {
+            continue;
+        }
         if (object->GetInverseMass() == 0.0f)continue;
 
-		Transform& transform = (*i)->GetTransform();
+        Transform& transform = (*i)->GetTransform();
 
-		Vector3 position = transform.GetPosition();
-		Vector3 linearVel = object->GetLinearVelocity();
+        Vector3 position = transform.GetPosition();
+        Vector3 linearVel = object->GetLinearVelocity();
 
-		position += linearVel * dt;
-		transform.SetPosition(position);
+        position += linearVel * dt;
+        transform.SetPosition(position);
 
         linearVel = linearVel * frameLinearDamping;
-		object->SetLinearVelocity(linearVel);
+        object->SetLinearVelocity(linearVel);
 
-		Quaternion orientation = transform.GetOrientation();
-		Vector3 angVel = object->GetAngularVelocity();
+        Quaternion orientation = transform.GetOrientation();
+        Vector3 angVel = object->GetAngularVelocity();
 
-		orientation = orientation +
-			(Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);
-		orientation.Normalise();
+        orientation = orientation +
+            (Quaternion(angVel * dt * 0.5f, 0.0f) * orientation);
+        orientation.Normalise();
 
-		transform.SetOrientation((orientation));
+        transform.SetOrientation((orientation));
 
-		float frameAngDamp = 1.0f - (object->GetAngularDamp() * dt);
-		angVel = angVel * frameAngDamp;
-		object->SetAngularVelocity(angVel);
-	}
+        float frameAngDamp = 1.0f - (object->GetAngularDamp() * dt);
+        angVel = angVel * frameAngDamp;
+        object->SetAngularVelocity(angVel);
+    }
 }
 void PhysicsSystem::DrawAllObjectCollision() {
-	gameWorld.OperateOnContents(
-		[](GameObject* o) {
-			o->DrawCollision();
-		}
-	);
+    gameWorld.OperateOnContents(
+        [](GameObject* o) {
+            o->DrawCollision();
+        }
+    );
 }
 
 
@@ -544,11 +538,11 @@ clear out any accumulated forces, ready to receive new
 ones in the next 'game' frame.
 */
 void PhysicsSystem::ClearForces() {
-	gameWorld.OperateOnContents(
-		[](GameObject* o) {
-			o->GetPhysicsObject()->ClearForces();
-		}
-	);
+    gameWorld.OperateOnContents(
+        [](GameObject* o) {
+            o->GetPhysicsObject()->ClearForces();
+        }
+    );
 }
 
 
@@ -556,15 +550,15 @@ void PhysicsSystem::ClearForces() {
 
 As part of the final physics tutorials, we add in the ability
 to constrain objects based on some extra calculation, allowing
-us to model springs and ropes etc. 
+us to model springs and ropes etc.
 
 */
 void PhysicsSystem::UpdateConstraints(float dt) {
-	std::vector<Constraint*>::const_iterator first;
-	std::vector<Constraint*>::const_iterator last;
-	gameWorld.GetConstraintIterators(first, last);
+    std::vector<Constraint*>::const_iterator first;
+    std::vector<Constraint*>::const_iterator last;
+    gameWorld.GetConstraintIterators(first, last);
 
-	for (auto i = first; i != last; ++i) {
-		(*i)->UpdateConstraint(dt);
-	}
+    for (auto i = first; i != last; ++i) {
+        (*i)->UpdateConstraint(dt);
+    }
 }
