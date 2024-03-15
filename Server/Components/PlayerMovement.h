@@ -62,6 +62,26 @@ public:
     PlayerAnimationCallData playerAnimationCallData;
 
     void ToggleDebug() { debugEnabled = !debugEnabled; }
+
+    struct GrappleInfo {
+        Ray grappleRay;
+        float travelDistance;
+        float travelSpeed;
+        float maxDistance;
+
+        void SetActive(bool active) {
+            isActive = active;
+        }
+
+        bool GetActive() {
+            return isActive;
+        }
+    private:
+        bool isActive;
+    } grappleProjectileInfo;
+
+    void LeaveGrappleState() { SwitchToState(&air); }
+
 private:
     GameWorld* world;
 
@@ -85,22 +105,6 @@ private:
     float fallApex = 0.0f;
     bool isFalling = false;
 
-    struct GrappleInfo {
-        Ray grappleRay;
-        float travelDistance;
-        float travelSpeed;
-        float maxDistance;
-
-        void SetActive(bool active) {
-            isActive = active;
-        }
-
-        bool GetActive() {
-            return isActive;
-        }
-    private:
-        bool isActive;
-    } grappleProjectileInfo;
 
     Vector3 grapplePoint;
 

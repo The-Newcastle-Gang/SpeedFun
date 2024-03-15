@@ -107,6 +107,7 @@ namespace NCL {
             void GrappleEnd(GameObject *player);
             void GrappleUpdate(GameObject *player, Vector3 position);
             void GrappleStart(GameObject *player, Vector3 direction);
+            void CancelGrapple(int id);
         };
     }
 }

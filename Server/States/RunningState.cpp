@@ -1,5 +1,6 @@
 #include "RunningState.h"
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -249,6 +250,7 @@ void RunningState::EndTriggerVolFunc(int id){
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
+    CancelGrapple(id);
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
@@ -495,6 +497,17 @@ void RunningState::SetTriggerTypePositions(){
     };
     for (auto checkpoint : currentLevelCheckPointPositions) {
         triggersVector.emplace_back(std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), checkpoint));
+    }
+}
+
+void RunningState::CancelGrapple(int id)
+{
+    auto player = GetPlayerObjectFromId(id);
+    PlayerMovement* playerMovement;
+    if (player->TryGetComponent(playerMovement)) {
+        playerMovement->grappleProjectileInfo.SetActive(false);
+        playerMovement->grappleProjectileInfo.travelDistance = 0;
+        playerMovement->LeaveGrappleState();
     }
 }
 
