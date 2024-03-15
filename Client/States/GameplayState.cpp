@@ -137,6 +137,7 @@ void GameplayState::WaitForServerLevel() {
 }
 
 void GameplayState::OnNewLevel() {
+    if(&canvas->GetLayer("FinishedLevelLayer") == canvas->GetActiveLayer())canvas->PopActiveLayer(); //pop the ui if its still there
     world->ClearAndErase();
     networkData->incomingState.Clear();
     levelManager->Reset();
