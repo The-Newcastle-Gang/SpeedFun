@@ -1,5 +1,4 @@
 #include "GameplayState.h"
-#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -219,24 +218,47 @@ void GameplayState::ManageLoading(float dt) {
 }
 
 void GameplayState::Update(float dt) {
-    if (shouldMoveToNewLevel) {
-        OnNewLevel();
-        shouldMoveToNewLevel = false;
+    switch (state) {
+        case GameplayStateEnums::END_OF_LEVEL:{
+            UpdateEndOfLevel(dt);
+            break;
+        }
+
+        case GameplayStateEnums::PLAYING: {
+            UpdatePlaying(dt);
+            break;
+        }
+
+        case GameplayStateEnums::COUNTDOWN:{
+            UpdateCountdown(dt);
+            break;
+        }
+
+        case GameplayStateEnums::PLAYER_COMPLETED: {
+            UpdatePlayerCompleted(dt);
+            break;
+        }
+
     }
+}
+
+void GameplayState::UpdateCountdown(float dt){
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
     }
-    bool countdownOver = levelManager->UpdateCountdown(dt); 
-    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+    UpdateAndRenderWorld(dt);
 
+    bool countdownOver = levelManager->UpdateCountdown(dt);
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+    if (countdownOver) state = GameplayStateEnums::PLAYING;
+}
+
+void GameplayState::UpdateAndRenderWorld(float dt) {
+    ReadNetworkFunctions();
+    std::cout << state << "\n";
     totalDTElapsed += dt;
     ResetCameraAnimation();
-    if(countdownOver)SendInputData();
-    ReadNetworkFunctions();
-
-    Window::GetWindow()->ShowOSPointer(false);
-    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -247,7 +269,7 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    if(countdownOver)world->UpdateWorld(dt);
+    world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -256,7 +278,7 @@ void GameplayState::Update(float dt) {
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
-            Debug::Print("Debug Movement!", 
+            Debug::Print("Debug Movement!",
                 Vector2(2.0f + 0.5f * cos(2.0f * PI / 6.0f * i + totalDTElapsed), 94.0f + 0.5f * sin(2.0f * PI / 6.0f * i + totalDTElapsed)),
                 Debug::RAINBOW_ARRAY[i]);
         }
@@ -269,10 +291,27 @@ void GameplayState::Update(float dt) {
     }
     renderer->Render();
     Debug::UpdateRenderables(dt);
+}
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
-        ResetCameraToForwards();
+void GameplayState::UpdatePlaying(float dt){
+    SendInputData();
+    UpdateAndRenderWorld(dt);
+}
+
+void GameplayState::UpdatePlayerCompleted(float dt)
+{
+    UpdateAndRenderWorld(dt);
+}
+
+void GameplayState::UpdateEndOfLevel(float dt)
+{
+    if (shouldMoveToNewLevel) {
+        OnNewLevel();
+        shouldMoveToNewLevel = false;
+        Window::GetWindow()->ShowOSPointer(false);
+        state = GameplayStateEnums::COUNTDOWN;
     }
+    UpdateAndRenderWorld(dt);
 }
 
 void GameplayState::ResetCameraToForwards() {
@@ -319,7 +358,7 @@ void GameplayState::ReadNetworkFunctions() {
                 int networkId = handler.Unpack<int>();
                 int medal = handler.Unpack<int>();
                 Vector4 medalColour = handler.Unpack<Maths::Vector4>();
-                hasThisClientFinished = true;
+                if(state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
 
                 canvas->CreateNewLayer("FinishedLevelLayer");
                 canvas->PushActiveLayer("FinishedLevelLayer");
@@ -383,15 +422,14 @@ void GameplayState::ReadNetworkFunctions() {
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
                 shouldMoveToNewLevel = true;
-                hasThisClientFinished = false;
             }
             break;
 
-            //case(Replicated::All_Players_Finished): {
-            //    levelManager->SetHasReceivedLevel(true);
-            //    levelManager->ChangeLevel(level);
-            //}
-            //break;
+            case(Replicated::All_Players_Finished): {
+                state = GameplayStateEnums::END_OF_LEVEL;
+                //show a scoreboard?
+            }
+            break;
         }
     }
 }
@@ -497,7 +535,6 @@ void GameplayState::ReadNetworkPackets() {
 }
 
 void GameplayState::SendInputData() {
-    if (hasThisClientFinished)return;
     InputListener::InputUpdate();
     InputPacket input;
 

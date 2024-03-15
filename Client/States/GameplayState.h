@@ -78,6 +78,12 @@ namespace NCL {
             void InitTimerBar();
             void InitLevelMap();
 
+            void UpdateCountdown(float dt);
+            void UpdateAndRenderWorld(float dt);
+            void UpdatePlaying(float dt);
+            void UpdatePlayerCompleted(float dt);
+            void UpdateEndOfLevel(float dt);
+
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -185,7 +191,7 @@ namespace NCL {
             DebugMode* debugger;
             bool displayDebugger = false;
 
-            GameplayStateEnums::ClientState state = GameplayStateEnums::COUNTDOWN;
+            GameplayStateEnums::ClientState state = GameplayStateEnums::END_OF_LEVEL;
 
             bool hasThisClientFinished = false;
             bool isUpdating = false;
