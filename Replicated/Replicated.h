@@ -36,7 +36,9 @@ public:
         Death_Event,
         Death_Event_End,
         Stage_Start,
-        };
+        SetNetworkActive,
+        ToggleGrapple,
+};
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
@@ -77,7 +79,11 @@ public:
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
+    constexpr static float GRAPPLEDISTANCE = 50.0f;
+    constexpr static Vector3 HANDOFFSET = {0.0, -0.2, 0.0};
     LevelReader* levelReader;
+
+    void AddGrapplesToWorld(GameObject *g, GameWorld &world, int index);
 };
 
 struct Diagnostics {
