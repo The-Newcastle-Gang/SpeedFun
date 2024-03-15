@@ -13,6 +13,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     canvas = pCanvas;
     hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    dissolveShader = renderer->LoadShader("shakeUI.vert", "defaultUI.frag");
     activeText = -1;
     textLimit = 15;
 
@@ -106,6 +107,9 @@ void MenuState::BeginSingleplayer(Element& _) {
 void MenuState::ShowMultiplayerOptions(Element& _) {
     canvas->PushActiveLayer("multiplayer");
 }
+void MenuState::ShowSplashScreen(){
+    canvas->PushActiveLayer("splash");
+}
 
 void MenuState::JoinGame(Element& _) {
     canvas->PushActiveLayer("joinGame");
@@ -168,7 +172,6 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
     } if (tags.find("fireEffect") != tags.end()) {
         element.SetShader(titleShader);
     }
-
     if (id == "Singleplayer") {
         selected = element.GetIndex();
         element.OnMouseUp.connect<&MenuState::BeginSingleplayer>(this);
@@ -296,6 +299,17 @@ void MenuState::InitCanvas() {
         }
         lua_pop(L, 1);
     }
+    //TODO: ASK IDEAL PLACE TO KEEP THIS IN
+
+    InitSplashScreen();
+    ShowSplashScreen();
+
+}
+
+void MenuState::InitSplashScreen(){
+    auto& e = canvas->GetElementById("splash", "splash");
+    e.SetShader(dissolveShader);
+    e.OnUpdate.connect<&MenuState::UpdateSplashScreen>(this);
 }
 
 void MenuState::OnEnter() {
@@ -372,6 +386,10 @@ void MenuState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+}
+
+void MenuState::UpdateSplashScreen(Element& e, float dt){
+
 }
 
 void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {

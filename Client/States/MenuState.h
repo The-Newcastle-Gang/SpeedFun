@@ -44,6 +44,7 @@ namespace NCL {
             std::unique_ptr<TweenManager> tweenManager;
             ShaderBase* hoverShader;
             ShaderBase* titleShader;
+            ShaderBase* dissolveShader;
             int hoverBox;
             int mHoverBox;
             int selected;
@@ -93,6 +94,13 @@ namespace NCL {
             void LeaveLobby(Element &element);
 
             void StartSingleplayer();
+
+            void ShowSplashScreen();
+
+            void CheckSpace();
+
+            void InitSplashScreen();
+            void UpdateSplashScreen(Element &e, float dt);
         };
     }
 }

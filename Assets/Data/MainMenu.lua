@@ -79,7 +79,8 @@ local COLORS = {
     main = Vector4:newRGB(120, 10, 10, 255),
     white = Vector4:new(1.0, 1.0, 1.0, 1.0),
     lightgray = Vector4:newRGB(100, 100, 100, 255),
-    black = Vector4:new(0.0, 0.0, 0.0, 1.0);
+    black = Vector4:new(0.0, 0.0, 0.0, 1.0),
+    red = Vector4:new(1.0,0.0,0.0,1.0),
     menuBackground = Vector4:new(0.01, 0.01, 0.01, 1.0);
 }
 
@@ -278,6 +279,22 @@ canvas = {
 }
 
 blockingCanvas = {
+    splash = {
+        {
+            color = COLORS.menuBackground,
+            rSize =Vector2:new(1, 1)
+        },
+        {
+            color = COLORS.red,
+            aSize = Vector2:new(100,50),
+            align = {
+                AlignTo("middle", 0),
+                AlignTo("center", 0)
+            },
+            tags = {"splash"},
+            id= "splash"
+        }
+    },
     multiplayer = {
         {
             color = COLORS.menuBackground,
