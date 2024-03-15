@@ -112,9 +112,9 @@ namespace NCL {
             void FinishLoading();
             std::thread* loadWorldThread;
             std::thread* loadSoundThread;
-            LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
-            LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
-            LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            std::atomic<LoadingStates> soundHasLoaded = LoadingStates::NOT_LOADED;
+            std::atomic<LoadingStates> worldHasLoaded = LoadingStates::NOT_LOADED;
+            std::atomic<LoadingStates> finishedLoading = LoadingStates::NOT_LOADED;
             std::vector<std::string> soundsToLoad = { "footsteps.wav", "weird.wav" , "warning.wav" };
 
             int totalThingsToLoad = 0;
@@ -187,7 +187,6 @@ namespace NCL {
             lua_State* L;
             std::unique_ptr<Font> menuFont;
             std::thread* loadingScreenThread;
-            Element* loadingImage;
             Element* loadingText;
         };
     }

@@ -18,7 +18,6 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     canvas = pCanvas;
 
     timeBar = new Element(1);
-    loadingImage = new Element(1);
     loadingText = new Element(1);
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
@@ -118,14 +117,9 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::LoadingScreenTUpdate() {
 
-    int &&i = 10;
     while (!shouldLoadScreen) {
         std::cout << "Loading!\n";
-        i += 10;
-        //&loadingImage->SetColor({0.0f,0.0f,1.0f,1.0f});
         renderer->RenderLoadingScreen();
-        //loadingImage.set pos
-
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
@@ -194,7 +188,7 @@ void GameplayState::CreateLoadingScreenThread() {
     canvas->CreateNewLayer("Loading");
     canvas->PushActiveLayer("Loading");
     canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
-    loadingImage = &canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
+    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
     renderer->RenderLoadingScreen();
 
     canvas->CreateNewLayer("Loading2");
@@ -202,8 +196,7 @@ void GameplayState::CreateLoadingScreenThread() {
     canvas->AddImageElement("LoadingText.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
     canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignLeft(500);
     renderer->RenderLoadingScreen();
-    &loadingImage->SetRelativePosition({100,500});
-
+    
     shouldLoadScreen.store(false);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
     loadingScreenThread->detach();
