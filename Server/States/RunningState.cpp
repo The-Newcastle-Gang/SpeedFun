@@ -128,6 +128,8 @@ void RunningState::LoadLevel() {
     BuildLevel("newTest");
     CreatePlayers();
     AddTriggersToLevel();
+
+    physics->InitialiseSortAndSweepStructs();
 }
 
 void RunningState::Tick(float dt) {
@@ -399,6 +401,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -413,7 +416,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
 
 
@@ -443,16 +446,24 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
         DamagingObstacle* dO = new DamagingObstacle(g);
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
+  
+    for (auto& x : springList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
-    //SetTestSprings(); 
-    //SetTestFloor();
+        Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
+        g->AddComponent(oo);
+    }
 }
 
 void RunningState::SetTriggerTypePositions(){

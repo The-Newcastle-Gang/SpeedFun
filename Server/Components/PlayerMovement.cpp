@@ -58,6 +58,10 @@ void PlayerMovement::UpdateAnimDataFromInput() {
     playerAnimationCallData.backwards = inputDirection.y < 0;
 }
 
+void PlayerMovement::SetInAir() {
+    SwitchToState(&air);
+}
+
 void PlayerMovement::SwitchToState(MovementState* state) {
     activeState->OnExit();
     activeState = state;

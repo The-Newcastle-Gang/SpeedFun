@@ -445,7 +445,7 @@ void GameplayState::SendInputData() {
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+    if (Window::GetMouse()->ButtonPressed(MouseButtons::LEFT)) {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
@@ -540,12 +540,14 @@ void GameplayState::InitLevel() {
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList  = levelManager->GetLevelReader()->GetSpringPList();
+    auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+//        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
     }
 
@@ -561,6 +563,16 @@ void GameplayState::InitLevel() {
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
+    }
+    for (auto& x : springList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+    
+    for (auto& l : lightList) {
+        AddPointLight(l);
     }
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -592,6 +604,10 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+}
+
+void GameplayState::AddPointLight(PointLightInfo light) {
+    world->AddPointLightToWorld(light);
 }
 
 void GameplayState::SetTestFloor() {
