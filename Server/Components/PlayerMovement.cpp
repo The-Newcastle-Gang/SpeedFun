@@ -1,3 +1,4 @@
+#include "PlayerMovement.h"
 //
 // Created by jdhyd on 2/19/2024.
 //
@@ -205,6 +206,12 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
         auto newHorizontalVel = horizontalVel.Normalised() * maxHorizontalVelocity;
         gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
     }
+}
+
+void PlayerMovement::InterruptGrapple()
+{
+    SwitchToState(&air);
+    grappleProjectileInfo.travelDistance = 0;
 }
 
 bool PlayerMovement::GroundCheck() {

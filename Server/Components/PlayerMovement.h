@@ -18,7 +18,6 @@ using namespace CSC8503;
 using namespace Maths;
 
 
-
 class PlayerMovement : public Component {
 public:
     PlayerMovement(GameObject* g, GameWorld* w);
@@ -55,8 +54,6 @@ public:
 
     PlayerAnimationCallData playerAnimationCallData;
 
-    void ToggleDebug() { debugEnabled = !debugEnabled; }
-
     struct GrappleInfo {
         Ray grappleRay;
         float travelDistance;
@@ -72,9 +69,13 @@ public:
         }
     private:
         bool isActive;
-    } grappleProjectileInfo;
+    };
 
-    void LeaveGrappleState() { SwitchToState(&air); }
+    void ToggleDebug() { debugEnabled = !debugEnabled; }
+
+    GrappleInfo GetGrappleInfo() { return grappleProjectileInfo; }
+
+    void InterruptGrapple();
 
 private:
     GameWorld* world;
@@ -98,7 +99,8 @@ private:
     int jumpQueued;
     float fallApex = 0.0f;
     bool isFalling = false;
-
+    
+    GrappleInfo grappleProjectileInfo;
 
     Vector3 grapplePoint;
 

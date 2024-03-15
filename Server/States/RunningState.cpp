@@ -470,9 +470,8 @@ void RunningState::CancelGrapple(int id)
     auto player = GetPlayerObjectFromId(id);
     PlayerMovement* playerMovement;
     if (player->TryGetComponent(playerMovement)) {
-        playerMovement->grappleProjectileInfo.SetActive(false);
-        playerMovement->grappleProjectileInfo.travelDistance = 0;
-        playerMovement->LeaveGrappleState();
+        playerMovement->GetGrappleInfo().SetActive(false);
+        playerMovement->InterruptGrapple();
     }
 }
 
