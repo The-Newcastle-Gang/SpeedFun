@@ -67,7 +67,9 @@ namespace NCL {
 
             int playerTestId = -1;
 
+            int numPlayersLoaded = 0;
             std::unordered_map<int, GameObject*> playerObjects;
+            bool isGameInProgress = false;
 
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
@@ -112,6 +114,8 @@ namespace NCL {
             void SetTestFloor();
 
             void SetTriggerTypePositions();
+
+            void CancelGrapple(int id);
 
         };
     }

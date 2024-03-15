@@ -19,22 +19,27 @@ void SoundManager::SM_AddSoundsToLoad(std::vector<std::string> fileNames) {
 }
 
 void SoundManager::SM_PlaySound(std::string soundName) {
+	if (!SM_IsSoundReady(soundName)) return;
 	PlaySound(*sounds[soundName]);
 }
 
 void SoundManager::SM_StopSound(std::string soundName) {
+	if (!SM_IsSoundReady(soundName)) return;
 	StopSound(*sounds[soundName]);
 }
 
 void SoundManager::SM_ResumeSound(std::string soundName) {
+	if (!SM_IsSoundReady(soundName)) return;
 	ResumeSound(*sounds[soundName]);
 }
 
 bool SoundManager::SM_IsSoundPlaying(std::string soundName) {
+	if (!SM_IsSoundReady(soundName)) return false;
 	return IsSoundPlaying(*sounds[soundName]);
 }
 
 void SoundManager::SM_LoopIfEnd(std::string soundName) {
+	if (!SM_IsSoundReady(soundName)) return;
 	if (!SM_IsSoundPlaying(soundName)) SM_PlaySound(soundName);
 }
 
@@ -46,6 +51,10 @@ void SoundManager::SM_AddSongsToLoad(std::vector<std::string> fileNames) {
 	for (std::string fn : fileNames) {
 		SM_AddSongToLoad(fn);
 	}
+}
+
+bool SoundManager::SM_IsSoundReady(std::string soundName) {
+	return sounds.contains(soundName);
 }
 
 std::string SoundManager::SM_SelectRandomSong() {
@@ -63,8 +72,8 @@ bool SoundManager::SM_LoadSoundList() {
 		std::string path = Assets::SOUNDSDIR + fn;
 		Sound* sound = new Sound();
 		*sound = LoadSound(path.c_str());
+		if (!IsSoundReady(*sound)) return false;
 		sounds.insert({ fn, sound });
-		if (!IsSoundReady(*sounds[fn])) return false;
 	}
 	return true;
 }

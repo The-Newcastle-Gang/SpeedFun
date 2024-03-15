@@ -1,4 +1,7 @@
 #include "PhysicsSystem.h"
+#include "PhysicsSystem.h"
+#include "PhysicsSystem.h"
+#include "PhysicsSystem.h"
 #include "GameObject.h"
 #include "CollisionDetection.h"
 #include "Quaternion.h"
@@ -95,7 +98,7 @@ void PhysicsSystem::Update(float dt) {
 	t.GetTimeDeltaSeconds();
   
 	if (useBroadPhase) {
-		UpdateObjectAABBs();
+        UpdateObjectSortSweepBounds();
 	}
   
 	int iteratorCount = 0;
@@ -103,7 +106,7 @@ void PhysicsSystem::Update(float dt) {
 	while(dTOffset > realDT) {
         //Update accelerations from external forces
 		if (useBroadPhase) {
-			BroadPhase();
+            SortAndSweep();
 			NarrowPhase();
 		}
 		else {
@@ -111,9 +114,7 @@ void PhysicsSystem::Update(float dt) {
 		}
         IntegrateAccel(realDT);
 		if(isDebugDrawingCollision) DrawAllObjectCollision();
-		//This is our simple iterative solver - 
-		//we just run things multiple times, slowly moving things forward
-		//and then rechecking that the constraints have been met		
+
 		float constraintDt = realDT /  (float)constraintIterationCount;
 		for (int i = 0; i < constraintIterationCount; ++i) {
 			UpdateConstraints(constraintDt);	
@@ -153,17 +154,6 @@ void PhysicsSystem::Update(float dt) {
 	}
 }
 
-/*
-Later on we're going to need to keep track of collisions
-across multiple frames, so we store them in a set.
-
-The first time they are added, we tell the objects they are colliding.
-The frame they are to be removed, we tell them they're no longer colliding.
-
-From this simple mechanism, we we build up gameplay interactions inside the
-OnCollisionBegin / OnCollisionEnd functions (removing health when hit by a 
-rocket launcher, gaining a point when the player hits the gold coin, and so on).
-*/
 void PhysicsSystem::UpdateCollisionList() {
 	for (std::set<CollisionDetection::CollisionInfo>::iterator i = allCollisions.begin(); i != allCollisions.end(); )
     {
@@ -199,31 +189,6 @@ void PhysicsSystem::UpdateCollisionList() {
 	}
 }
 
-void PhysicsSystem::UpdateObjectAABBs() {
-	std::vector<GameObject*>::const_iterator first;
-	std::vector<GameObject*>::const_iterator last;
-
-	gameWorld.GetObjectIterators(first, last);
-
-	for (auto i = first; i != last; ++i) {
-		(*i)->UpdateBroadphaseAABB();
-	}
-	/*gameWorld.OperateOnContents(
-		[](GameObject* g) {
-			g->UpdateBroadphaseAABB();
-		}
-	);*/
-}
-
-/*
-
-This is how we'll be doing collision detection in tutorial 4.
-We step thorugh every pair of objects once (the inner for loop offset 
-ensures this), and determine whether they collide, and if so, add them
-to the collision set for later processing. The set will guarantee that
-a particular pair will only be added once, so objects colliding for
-multiple frames won't flood the set with duplicates.
-*/
 void PhysicsSystem::BasicCollisionDetection() {
     std::vector<GameObject*>::const_iterator first;
     std::vector<GameObject*>::const_iterator last;
@@ -240,7 +205,6 @@ void PhysicsSystem::BasicCollisionDetection() {
                 continue;
             }
 
-            if (!layerMatrix[(*j)->GetPhysicsObject()->GetLayer() | (*i)->GetPhysicsObject()->GetLayer()])continue;
 
             CollisionDetection::CollisionInfo info;
 
@@ -254,12 +218,6 @@ void PhysicsSystem::BasicCollisionDetection() {
     }
 }
 
-/*
-
-In tutorial 5, we start determining the correct response to a collision,
-so that objects separate back out. 
-
-*/
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
 
     if(a.GetPhysicsObject()->GetIsTriggerVolume())
@@ -332,47 +290,113 @@ T Tmax(T a, T b) {
 	return a > b ? a : b;
 }
 
-/*
+void PhysicsSystem::SetupBounds(GameObject* g) {
+    SortSweepStruct upperBound;
+    upperBound.gameObject = g;
+    upperBound.isUpper = true;
+    upperBound.xPos = g->GetXUpperBound();
 
-Later, we replace the BasicCollisionDetection method with a broadphase
-and a narrowphase collision detection method. In the broad phase, we
-split the world up using an acceleration structure, so that we can only
-compare the collisions that we absolutely need to. 
+    sortAndSweepData.push_back(upperBound);
 
-*/
-void PhysicsSystem::BroadPhase() {
-	broadphaseCollisions.clear();
-	QuadTree<GameObject*> tree(Vector2(1024, 1024), 7, 6);
+    SortSweepStruct lowerBound;
+    lowerBound.gameObject = g;
+    lowerBound.isUpper = false;
+    lowerBound.xPos = g->GetXLowerBound();
 
-	std::vector<GameObject*>::const_iterator first;
-	std::vector<GameObject*>::const_iterator last;
+    sortAndSweepData.push_back(lowerBound);
 
-	gameWorld.GetObjectIterators(first, last);
+}
 
-	//Creates the tree lawl
-	for (auto i = first; i != last; ++i) {
-		Vector3 halfSizes;
-		if (!(*i)->GetBroadphaseAABB(halfSizes)) {
-			continue;
-		}
-		Vector3 pos = (*i)->GetTransform().GetPosition();
-		tree.Insert(*i, pos, halfSizes);
-	}
+void PhysicsSystem::LoadStaticAndDynamicLists() {
+    std::vector<GameObject*>::const_iterator first;
+    std::vector<GameObject*>::const_iterator last;
+    gameWorld.GetObjectIterators(first, last);
+    for (auto i = first; i != last; ++i) {
+        CollisionLayer layer = (*i)->GetPhysicsObject()->GetLayer();
+        switch (layer)
+        {
+        case DYNAMIC_LAYER:
+            dynamicObjects.push_back((*i));
+            break;
+        case PLAYER_LAYER:
+            dynamicObjects.push_back((*i));
+            break;
+        case TRIGGER_LAYER:
+            staticObjects.push_back((*i));
+            break;
+        case STATIC_LAYER:
+            staticObjects.push_back((*i));
+            break;
+        case OSCILLATOR_LAYER:
+            dynamicObjects.push_back((*i));
+            break;
+        case MAX_LAYER:
+            break;
+        default:
+            break;
+        }
+    }
+}
 
-	//now we actually have to see what sets of objects may collide
+void PhysicsSystem::InitialiseSortAndSweepStructs() {
+    LoadStaticAndDynamicLists();
+    for (GameObject* gameObject : staticObjects) {
+        gameObject->UpdateBroadphaseXBounds();
+    }
+    UpdateObjectSortSweepBounds();
 
-	//this is a lambda function thats sending said thigns into the listr and capturing to it
-	tree.OperateOnContents(
-		[&](std::list<QuadTreeEntry<GameObject*>>& data) {
-			CollisionDetection::CollisionInfo info;
-			for (auto i = data.begin(); i != data.end(); ++i) {
-				for (auto j = std::next(i); j != data.end(); ++j) {
-					info.a = Tmin((*i).object, (*j).object);
-					info.b = Tmax((*i).object, (*j).object);
-					broadphaseCollisions.insert(info);
-				}
-			}
-		});
+    for (GameObject* gameObject : staticObjects) {
+        SetupBounds(gameObject);
+    }
+    for (GameObject* gameObject : dynamicObjects) {
+        SetupBounds(gameObject);
+    }
+}
+
+void PhysicsSystem::UpdateObjectSortSweepBounds() {
+    for (GameObject* gameObject : dynamicObjects) { //dont need to update statics!
+        gameObject->UpdateBroadphaseXBounds();
+    }
+}
+
+void PhysicsSystem::SortAndSweep() {
+    broadphaseCollisions.clear();
+
+    SortAndSweepInsertionSort();
+    std::set<GameObject*> currentValidObjects;
+    for (int i = 0; i < sortAndSweepData.size(); i++) {
+        SortSweepStruct currentBound = sortAndSweepData[i];
+        GameObject* currentBoundObject = currentBound.gameObject;
+        if (!currentBound.isUpper) {
+            for (GameObject* other : currentValidObjects) {
+                if (!layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
+
+                CollisionDetection::CollisionInfo info;
+                info.a = Tmin(currentBoundObject, other);
+                info.b = Tmax(currentBoundObject, other);
+                broadphaseCollisions.insert(info);
+            }
+            currentValidObjects.insert(currentBoundObject);
+        }
+        else {
+            currentValidObjects.erase(currentBoundObject);
+        }
+    }
+
+}
+
+void PhysicsSystem::SortAndSweepInsertionSort() { //adapted from https://www.geeksforgeeks.org/cpp-program-for-insertion-sort/
+    SortSweepStruct currentValue;
+    for (int i = 1; i < sortAndSweepData.size(); i++) {
+        currentValue = sortAndSweepData[i];
+        int j = i - 1;
+
+        while (j >= 0 && currentValue < sortAndSweepData[j]) {
+            sortAndSweepData[j + 1] = sortAndSweepData[j];
+            j = j - 1;
+        }
+        sortAndSweepData[j + 1] = currentValue;
+    }
 }
 
 

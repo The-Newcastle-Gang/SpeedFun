@@ -67,6 +67,7 @@ namespace NCL {
             void InitEndScreen(Vector4 color);
 
             void SetTestSprings();
+            void AddPointLight(PointLightInfo light);
             void SetTestFloor();
 
             std::unique_ptr<LevelManager> levelManager;

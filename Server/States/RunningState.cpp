@@ -1,5 +1,6 @@
 #include "RunningState.h"
 #include "RunningState.h"
+#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -27,6 +28,7 @@ void RunningState::OnEnter() {
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
+    numPlayersLoaded = 0;
 
     shouldClose.store(false);
 
@@ -55,6 +57,7 @@ void RunningState::ReadNetworkFunctions() {
         auto data = networkData->incomingFunctions.Pop();
         if (data.second.functionId == Replicated::RemoteServerCalls::GameLoaded) {
             AssignPlayer(data.first, GetPlayerObjectFromId(data.first));
+            numPlayersLoaded++;
         }
         else if(data.second.functionId == Replicated::RemoteServerCalls::PlayerJump){
             auto player = GetPlayerObjectFromId(data.first);
@@ -100,9 +103,22 @@ void RunningState::OnExit() {
 
 
 void RunningState::Update(float dt) {
+
+    while (numPlayersLoaded < playerInfo.size()) {
+        ReadNetworkFunctions();
+        ReadNetworkPackets();
+    }
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
+
+    if (!levelManager->UpdateCountdown(dt)) {
+        return;
+    }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -114,6 +130,8 @@ void RunningState::LoadLevel() {
     BuildLevel("newTest");
     CreatePlayers();
     AddTriggersToLevel();
+
+    physics->InitialiseSortAndSweepStructs();
 }
 
 void RunningState::Tick(float dt) {
@@ -198,6 +216,7 @@ void RunningState::EndTriggerVolFunc(int id){
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
+    CancelGrapple(id);
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
@@ -428,6 +447,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -442,7 +462,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
         g->AddComponent(oo);
@@ -453,16 +473,24 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
         DamagingObstacle* dO = new DamagingObstacle(g);
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
+  
+    for (auto& x : springList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
-    //SetTestSprings(); 
-    //SetTestFloor();
+        Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
+        g->AddComponent(oo);
+    }
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -478,6 +506,17 @@ void RunningState::SetTriggerTypePositions(){
     };
     for (auto checkpoint : currentLevelCheckPointPositions) {
         triggersVector.emplace_back(std::make_pair((TriggerVolumeObject::TriggerType::CheckPoint), checkpoint));
+    }
+}
+
+void RunningState::CancelGrapple(int id)
+{
+    auto player = GetPlayerObjectFromId(id);
+    PlayerMovement* playerMovement;
+    if (player->TryGetComponent(playerMovement)) {
+        playerMovement->grappleProjectileInfo.SetActive(false);
+        playerMovement->grappleProjectileInfo.travelDistance = 0;
+        playerMovement->LeaveGrappleState();
     }
 }
 
