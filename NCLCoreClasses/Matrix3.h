@@ -41,6 +41,8 @@ namespace NCL::Maths {
 
 		Vector3 ToEuler() const;
 
+        static Matrix3 LookAt(const Vector3& from, const Vector3& at, const Vector3& up);
+
 		inline Matrix3 Absolute() const {
 			Matrix3 m;
 

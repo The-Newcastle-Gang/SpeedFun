@@ -7,7 +7,7 @@
 #include "Ray.h"
 
 
-PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
+PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) : GrappleStart(onGrappleStart), GrappleEnd(onGrappleEnd), GrappleUpdate(onGrappleUpdate) {
     world = w;
     gameObject = g;
 
@@ -20,7 +20,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) {
     hasCoyoteExpired = false;
 
     grappleProjectileInfo.travelSpeed = 100.0f;
-    grappleProjectileInfo.maxDistance = 100.0f;
+    grappleProjectileInfo.maxDistance = Replicated::GRAPPLEDISTANCE;
     grappleProjectileInfo.SetActive(false);
 
     maxHorizontalVelocity = 7.0f;
@@ -69,6 +69,7 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 }
 
 void PlayerMovement::OnGrappleLeave() {
+    onGrappleEnd.publish(gameObject);
     playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
@@ -84,7 +85,7 @@ void PlayerMovement::OnGrappleStart() {
 void PlayerMovement::OnGrappleUpdate(float dt) {
     static float grappleSpeed = 5000.0f;
 
-    Debug::DrawLine(gameObject->GetTransform().GetPosition(), grapplePoint);
+    onGrappleUpdate.publish(gameObject, grapplePoint);
 
     Vector3 delta = grapplePoint - gameObject->GetTransform().GetPosition();
 
@@ -134,7 +135,7 @@ void PlayerMovement::UpdateInAir(float dt) {
         return;
     }
 
-    
+
 }
 
 void PlayerMovement::LeaveInAir() {
@@ -158,7 +159,7 @@ void PlayerMovement::StartGround() {
     maxHorizontalVelocity = groundMaxHorizontalVelocity;
 
     hasCoyoteExpired = false;
-    
+
 }
 
 void PlayerMovement::UpdateOnGround(float dt) {
@@ -179,7 +180,7 @@ void PlayerMovement::UpdateOnGround(float dt) {
 
     if (!isGrounded && hasCoyoteExpired) {
         hasCoyoteExpired = false;
-        return SwitchToState(&air); 
+        return SwitchToState(&air);
     }
 }
 
@@ -210,13 +211,13 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
 bool PlayerMovement::GroundCheck() {
 
     constexpr static float groundOffset = 0.1;
-    constexpr static float groundDistanceCheck = 0.2;
+    constexpr static float groundDistanceCheck = 0.15;
 
     auto physicsObject = gameObject->GetPhysicsObject();
     auto position = gameObject->GetTransform().GetPosition();
 
     auto collVol = (CapsuleVolume*)gameObject->GetBoundingVolume();
-    Vector3 capBottom =  position - Vector3(0, collVol->GetHalfHeight(),0);
+    Vector3 capBottom =  position - Vector3(0, collVol->GetHalfHeight() + collVol->GetRadius(),0);
     capBottom += Vector3(0, groundOffset, 0);
 
     Ray ray = Ray(capBottom, Vector3(0,-1,0));
@@ -241,8 +242,6 @@ void PlayerMovement::Update(float dt) {
     auto fwdAxis = Vector3::Cross(Vector3(0,1,0), rightAxis);
     gameObject->GetPhysicsObject()->AddForce(fwdAxis * inputDirection.y * runSpeed * dt);
     gameObject->GetPhysicsObject()->AddForce(rightAxis * inputDirection.x * runSpeed * dt);
-    
-
 
     Vector3 speed = gameObject->GetPhysicsObject()->GetLinearVelocity();
     float strafeSpeed = rightAxis.x * speed.x + rightAxis.z * speed.z;
@@ -261,10 +260,11 @@ void PlayerMovement::Grapple() {
     }
 
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
-    grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition(), lookDirection);
+    grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition() + Matrix3(gameObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET, lookDirection);
     grappleProjectileInfo.travelDistance = 0;
     uiAnimationData.grapplingAvailability = 0;
     grappleProjectileInfo.SetActive(true);
+    onGrappleStart.publish(gameObject, lookDirection);
 }
 
 void PlayerMovement::UpdateGrapple(float dt) {
@@ -286,16 +286,18 @@ void PlayerMovement::UpdateGrapple(float dt) {
 
     auto dir = grappleProjectileInfo.grappleRay.GetDirection().Normalised() * grappleProjectileInfo.travelDistance;
 
-    Debug::DrawLine(grappleProjectileInfo.grappleRay.GetPosition(), grappleProjectileInfo.grappleRay.GetPosition() + dir);
 
+    onGrappleUpdate.publish(gameObject, grappleProjectileInfo.grappleRay.GetPosition() + dir);
     if (grappleProjectileInfo.travelDistance >= grappleProjectileInfo.maxDistance) {
         grappleProjectileInfo.SetActive(false);
         uiAnimationData.grapplingAvailability = 1;
+        // This is terrible why did I code the grapple projectile like this.
+        onGrappleEnd.publish(gameObject);
     }
 }
 
 void PlayerMovement::FireGrapple() {
-    
+
     SwitchToState(&grapple);
 //    float gravity = -9.8;
 //
@@ -328,7 +330,7 @@ void PlayerMovement::Jump() {
     physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocityValue);
     if(activeState!=&air) cameraAnimationCalls.jump = true;
     SwitchToState(&air);
-    
-    
+
+
 }
 

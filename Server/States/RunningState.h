@@ -60,6 +60,7 @@ namespace NCL {
             Vector3 currentLevelDeathPos;
             std::vector<Vector3> currentLevelCheckPointPositions;
 
+            std::array<GameObject *, Replicated::PLAYERCOUNT> grapples;
             std::atomic<bool> shouldClose;
 
             float packetTimer;
@@ -97,26 +98,21 @@ namespace NCL {
 
 
             void CreateNetworkThread();
-
             void ReadNetworkFunctions();
-
             void ReadNetworkPackets();
-
             void ApplyPlayerMovement();
-
             void UpdatePlayerAnimations();
-
             void SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object);
-
             void SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object);
-
             void SetTestSprings();
             void SetTestFloor();
-
             void SetTriggerTypePositions();
-
+            void CreateGrapples();
+            void SetNetworkActive(GameObject *g, bool isActive);
+            void GrappleEnd(GameObject *player);
+            void GrappleUpdate(GameObject *player, Vector3 position);
+            void GrappleStart(GameObject *player, Vector3 direction);
             void CancelGrapple(int id);
-
         };
     }
 }
