@@ -18,6 +18,15 @@
 
 namespace NCL {
     namespace CSC8503 {
+
+        namespace RunningStateEnums {
+            enum RunningStateEnum {
+                COUNTDOWN,
+                GAMEPLAY,
+                END_OF_LEVEL
+            };
+        }
+
         class RunningState : public State
         {
         public:
@@ -64,6 +73,7 @@ namespace NCL {
 
             std::atomic<bool> shouldClose;
 
+            RunningStateEnums::RunningStateEnum state = RunningStateEnums::COUNTDOWN;
             float packetTimer;
             int sceneSnapshotId;
 
@@ -93,6 +103,10 @@ namespace NCL {
 
             void MoveToNewLevel(int level);
             void ClearLevel();
+
+            void UpdateInCountdown(float dt);
+            void UpdateInGameplay(float dt);
+            void UpdateInEndOfLevel(float dt);
 
             void StartTriggerVolFunc(int id);
             void EndTriggerVolFunc(int id);

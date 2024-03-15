@@ -34,11 +34,14 @@ namespace NCL {
             READY
         };
 
-        enum ClientState {
-            COUNTDOWN,
-            PLAYING,
-            COMPLETED
-        };
+        namespace GameplayStateEnums {
+            enum ClientState {
+                COUNTDOWN,
+                PLAYING,
+                PLAYER_COMPLETED,
+                END_OF_LEVEL
+            };
+        }
 
         class GameplayState : public State
         {
@@ -182,6 +185,9 @@ namespace NCL {
             DebugMode* debugger;
             bool displayDebugger = false;
 
+            GameplayStateEnums::ClientState state = GameplayStateEnums::COUNTDOWN;
+
+            bool hasThisClientFinished = false;
             bool isUpdating = false;
             bool shouldMoveToNewLevel = false;
         };

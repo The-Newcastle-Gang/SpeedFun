@@ -148,32 +148,59 @@ void RunningState::WaitForPlayersLoaded() {
 }
 
 void RunningState::Update(float dt) {
-    if (shouldMoveToNewLevel) {
-        MoveToNewLevel(levelManager->GetAndSetNextLevel());
-        shouldMoveToNewLevel = false;
+    switch (state) {
+        case RunningStateEnums::COUNTDOWN: {
+            UpdateInCountdown(dt);
+            break;
+        }
+
+        case RunningStateEnums::GAMEPLAY: {
+            UpdateInGameplay(dt);
+            break;
+        }
+        
+        case RunningStateEnums::END_OF_LEVEL: {
+            UpdateInEndOfLevel(dt);
+            break;
+        }
     }
-    if (!isGameInProgress) {
-        ReadNetworkFunctions();
-        return;
-    }
+}
+
+void RunningState::UpdateInCountdown(float dt) {
     WaitForPlayersLoaded();
     if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
         Tick(dt);
     }
+    if (levelManager->UpdateCountdown(dt)) {
+        state = RunningStateEnums::GAMEPLAY;
+    }
+}
+
+void RunningState::UpdateInGameplay(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
-
-
-    if (!levelManager->UpdateCountdown(dt)) {
-        return;
-    }
-
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
 
     levelManager->UpdateTimer(dt);
+}
+
+void RunningState::UpdateInEndOfLevel(float dt) {
+    if (levelManager->UpdateEndOfLevelTimer(dt)) {
+        shouldMoveToNewLevel = true;
+    }
+
+    if (shouldMoveToNewLevel) {
+        MoveToNewLevel(levelManager->GetAndSetNextLevel());
+        shouldMoveToNewLevel = false;
+        state = RunningStateEnums::COUNTDOWN;
+    }
+    ReadNetworkFunctions();
+    physics->Update(dt);
+    Tick(dt);
+
 }
 
 void RunningState::LoadLevel(int level) {
@@ -281,7 +308,7 @@ void RunningState::StartTriggerVolFunc(int id){
 void RunningState::EndTriggerVolFunc(int id){
     playersFinished[id] = true;
     playerTimes[id] = levelManager->GetCurrentStageTime();
-
+    SendMedalToClient(id);
     int numPlayersFinished = 0;
     for (std::pair<int, bool> playerFinished : playersFinished) {
         numPlayersFinished += playerFinished.second ? 1 : 0;
@@ -292,7 +319,6 @@ void RunningState::EndTriggerVolFunc(int id){
     }
     if (!hasAllPlayersFinished)return;
     OnAllPlayersFinished();
-    shouldMoveToNewLevel = true;
 }
 
 void RunningState::SendMedalToClient(int id) {
@@ -308,6 +334,7 @@ void RunningState::SendMedalToClient(int id) {
 
 void RunningState::OnAllPlayersFinished()
 {
+    state = RunningStateEnums::END_OF_LEVEL;
     levelManager->EndStageTimer();
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::All_Players_Finished, nullptr));
     std::cout << "ALL PLAYERS DONE!!!!!!!\n";

@@ -30,6 +30,11 @@ bool LevelManager::UpdateCountdown(float dt) {
     return countdownTimer <= 0.0f;
 }
 
+bool LevelManager::UpdateEndOfLevelTimer(float dt) {
+    endOfLevelTimer -= dt;
+    return endOfLevelTimer <= 0.0f;
+}
+
 void LevelManager::StartStageTimer() {
     stageTimer->ResetTimer();
     stageTimer->ResumeTimer();

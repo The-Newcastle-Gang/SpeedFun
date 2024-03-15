@@ -5,6 +5,7 @@
 #ifndef SPEEDFUN_LEVELMANAGER_H
 #define SPEEDFUN_LEVELMANAGER_H
 #define COUNTDOWN_MAX 5.0f
+#define END_OF_LEVEL_MAX 5.0f
 
 #include <iostream>
 #include "LevelReader.h"
@@ -20,6 +21,10 @@ public:
     void ResetCountdown() { countdownTimer = COUNTDOWN_MAX; }
     float GetCountdown() { return countdownTimer; }
 
+    bool UpdateEndOfLevelTimer(float dt);
+    void ResetEndOfLevelTimer() { endOfLevelTimer = END_OF_LEVEL_MAX; }
+    float GetEndOfLevelTimer() { return endOfLevelTimer; }
+
     void StartStageTimer();
     void EndStageTimer();
     float GetCurrentStageTime() { return stageTimer->GetElapsedTime(); }
@@ -28,8 +33,8 @@ public:
     [[no_discard]] int GetLevel() const { return currentLevel; }
 
     void Reset() {
-        countdownTimer = COUNTDOWN_MAX;
-        currentTimer = 0.0f;
+        ResetCountdown();
+        ResetEndOfLevelTimer();
         stageTimer->ResetTimer();
     }
 
@@ -51,7 +56,7 @@ protected:
     std::shared_ptr<LevelReader> levelReader;
     std::unique_ptr<StageTimer> stageTimer;
     float countdownTimer = COUNTDOWN_MAX;
-    int currentTimer;
+    float endOfLevelTimer = END_OF_LEVEL_MAX;
 
     struct {
         Vector3 currentStartPos;

@@ -319,6 +319,7 @@ void GameplayState::ReadNetworkFunctions() {
                 int networkId = handler.Unpack<int>();
                 int medal = handler.Unpack<int>();
                 Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+                hasThisClientFinished = true;
 
                 canvas->CreateNewLayer("FinishedLevelLayer");
                 canvas->PushActiveLayer("FinishedLevelLayer");
@@ -382,6 +383,7 @@ void GameplayState::ReadNetworkFunctions() {
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
                 shouldMoveToNewLevel = true;
+                hasThisClientFinished = false;
             }
             break;
 
@@ -495,6 +497,7 @@ void GameplayState::ReadNetworkPackets() {
 }
 
 void GameplayState::SendInputData() {
+    if (hasThisClientFinished)return;
     InputListener::InputUpdate();
     InputPacket input;
 
