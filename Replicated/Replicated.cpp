@@ -74,7 +74,7 @@ void Replicated::AddSwingingBlock(GameObject* g, GameWorld& world) {
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
-    auto volume = new CapsuleVolume(meshSize/2, meshSize/2);
+    auto volume = new CapsuleVolume(meshSize * 0.5f, meshSize * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
@@ -85,7 +85,7 @@ void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
 void Replicated::AddGrapplesToWorld(GameObject *g, GameWorld &world, int index) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
-    auto volume = new SphereVolume(meshSize / 2);
+    auto volume = new SphereVolume(meshSize * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
     g->GetTransform()
         .SetScale(Vector3(meshSize, meshSize, meshSize))
