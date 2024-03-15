@@ -39,15 +39,8 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
+    shouldLoadScreen.store(false);
 
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    shouldLoadScreen.store(true);
-    if (finishedLoading == LoadingStates::READY) {
-    }
     canvas->Reset();
         InitCrossHeir();
         InitTimerBar();
@@ -117,7 +110,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 
 void GameplayState::LoadingScreenTUpdate() {
 
-    while (!shouldLoadScreen) {
+    while (shouldLoadScreen) {
         std::cout << "Loading!\n";
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -158,7 +151,6 @@ void GameplayState::InitSounds() {
     soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
-    // Probably should be made atomic though probably doesn't matter.
     soundHasLoaded = LoadingStates::LOADED;
 }
 
@@ -197,7 +189,7 @@ void GameplayState::CreateLoadingScreenThread() {
     canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignLeft(500);
     renderer->RenderLoadingScreen();
     
-    shouldLoadScreen.store(false);
+    shouldLoadScreen.store(true);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
     loadingScreenThread->detach();
 }
