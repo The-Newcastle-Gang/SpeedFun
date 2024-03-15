@@ -206,6 +206,7 @@ void GameplayState::CreateLoadingScreenThread() {
 
     shouldLoadScreen.store(false);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
+    loadingScreenThread->detach();
 }
 
 void GameplayState::AddCanvasElement(const std::string& layerName, bool blocking) {
@@ -314,6 +315,8 @@ void GameplayState::OnExit() {
     
     delete networkThread;
     networkThread = nullptr;
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
     lua_close(L);
 }
 
