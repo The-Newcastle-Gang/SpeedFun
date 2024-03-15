@@ -102,3 +102,13 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
     g->GetTransform()
         .SetScale(dimensions);
 }
+
+void Replicated::AddSpeedUpBlockToLevel(GameObject* g, GameWorld& world) {
+    world.AddGameObject(g, true);
+    auto volume = new AABBVolume(Vector3(5, 0.25, 10));
+    g->SetBoundingVolume((CollisionVolume*)volume);
+
+    g->GetTransform()
+        .SetScale(Vector3(10, 0.5, 20))
+        .SetPosition(Vector3(-107, 5, -15));
+}
