@@ -25,7 +25,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     timerBarShader      = resources->GetShader("timerBar");
     timerBoxShader      = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
-
+    biggerDebugFont = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
 }
 
 GameplayState::~GameplayState() {
@@ -587,10 +587,15 @@ void GameplayState::InitEndScreen(Vector4 color) {
 
     medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
 
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
     auto finalTime = canvas->AddElement("FinishedLevelLayer")
         .SetColor({ 1,1,1,1 })
         .CenterSprite()
-        .SetText(TextData());
+        .SetText(textData);
+    //.textData.font = biggerDebugFont.get();
+
 
     finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
     // Disable player controls
@@ -873,11 +878,11 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         float timeToScroll = finalTime / 1.5f;
         float timeRatio = (finalTimeScroll / finalTime);
         finalTimeScroll = std::clamp(finalTimeScroll + dt * timeToScroll, 0.0f, finalTime);
-        
         element.textData.text = std::format("{:.2f}", finalTimeScroll);
-        element.textData.fontSize = textSize;
+        element.textData.fontSize = textSize * 0.33f;
+
         element.AlignCenter();
-        element.AlignMiddle(-16 * textSize);
+        element.AlignMiddle(-24 * textSize * 0.33f);
         element.textData.color = Vector4(1.0f, 1.0f, 1.0f, 0.10f);
         if (finalTimeScroll == finalTime) {
             medalAnimationStage = TIMER_SHAKE;
@@ -891,9 +896,9 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         finalTimeShake = std::clamp(finalTimeShake - dt, 0.0f, 1.0f);
         finaltimeShrink = std::clamp(finaltimeShrink - dt * 4.5f, 0.0f, 1.0f);
         textSize = 2.5f - 0.5f * cos( PI/2 * (finaltimeShrink));
-        element.textData.fontSize = textSize;
+        element.textData.fontSize = textSize * 0.33f;
         element.AlignCenter(randomX);
-        element.AlignMiddle(-16 * textSize + randomY);
+        element.AlignMiddle(-24 * textSize * 0.33f + randomY);
         if (finalTimeShake == 0.0f) {
             medalAnimationStage = MEDAL;
         }

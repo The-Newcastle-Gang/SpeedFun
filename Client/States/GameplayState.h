@@ -223,7 +223,7 @@ namespace NCL {
             float finaltimeShrink = 1.0f;
             float finalTimeShake = 0.0f;
             MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
-
+            std::unique_ptr<Font> biggerDebugFont;
             DebugMode* debugger;
             bool displayDebugger = false;
         };

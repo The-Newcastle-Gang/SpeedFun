@@ -115,6 +115,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
+    
 
     sceneColorTexture = CreateHDRTexture();
     sceneDepthTexture = CreateDepthTexture();
