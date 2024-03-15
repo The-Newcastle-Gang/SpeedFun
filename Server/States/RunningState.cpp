@@ -244,6 +244,7 @@ void RunningState::CreatePlayers() {
         playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
+        currentPlayer++;
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
         player->GetPhysicsObject()->SetInverseMass(2.0f);
