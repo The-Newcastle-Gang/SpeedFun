@@ -22,8 +22,9 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     playerblipImage = "playerBlip.png";
 
-    timerBarShader = resources->GetShader("timerBar");
-    timerBoxShader = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    timerBarShader      = resources->GetShader("timerBar");
+    timerBoxShader      = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
 
 }
 
@@ -575,7 +576,9 @@ void GameplayState::InitEndScreen(Vector4 color) {
         .SetColor(color - Vector4(0,0,0,1))
         .SetAbsoluteSize({ 320,320 })
         .CenterSprite()
-        .SetTransformTranslation(Vector2(25, 50));
+        .SetTransformTranslation(Vector2(25, 50))
+        .SetShader(medalShineShader);
+
     medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
 
     auto finalTime = canvas->AddElement("FinishedLevelLayer")

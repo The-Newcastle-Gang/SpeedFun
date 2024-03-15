@@ -210,6 +210,9 @@ namespace NCL {
                 TIMER_SHAKE,
                 MEDAL
             };
+
+            ShaderBase *medalShineShader;
+
             std::string GetMedalImage();
             void UpdateMedalSprite(Element& element, float dt);
             void UpdateFinalTimeTally(Element& element, float dt);
