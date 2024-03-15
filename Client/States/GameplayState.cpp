@@ -314,6 +314,7 @@ void GameplayState::OnExit() {
     
     delete networkThread;
     networkThread = nullptr;
+    lua_close(L);
 }
 
 void GameplayState::ManageLoading(float dt) {
