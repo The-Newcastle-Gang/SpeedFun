@@ -111,6 +111,8 @@ namespace NCL {
 
             void SetTriggerTypePositions();
 
+            void CancelGrapple(int id);
+
         };
     }
 }
