@@ -569,13 +569,17 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+    levelManager->TryReadLevel("level 2");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
     auto lightList  = levelManager->GetLevelReader()->GetPointLights();
+
+    auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
+    auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
+    auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -610,6 +614,28 @@ void GameplayState::InitLevel() {
         AddPointLight(l);
     }
 
+    for (auto& x : speedUpList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,1.0f, 1.0f });
+    }
+
+    for (auto& x : trapBlockList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f, 0.0f, 1.0f });
+    }
+
+    SetRaycastEnemy();
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -725,4 +751,15 @@ void GameplayState::AssignPlayer(int netObject) {
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     auto progress = playerCurPos - startPos;
     return progress.Length()/levelLen;
+}
+
+void GameplayState::SetRaycastEnemy() {
+    auto raycastEnemy = new GameObject();
+    auto x = new PrimitiveGameObject();
+    x->position = Vector3(-75, 6, 0);
+    x->colliderExtents = Vector3(1, 1, 1);
+    x->dimensions = Vector3(1, 1, 1);
+    x->shouldNetwork = true;
+    replicated->AddBlockToLevel(raycastEnemy, *world, x);
+    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
 }

@@ -169,6 +169,76 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         springPrimitives.emplace_back(temp);
     }
 
+    for (auto& item : jData["speedBlockList"].items()) {
+        auto temp = new PrimitiveGameObject();
+        temp->meshName = item.value()["mesh"];
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        temp->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        temp->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        temp->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        temp->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        temp->shouldNetwork = item.value()["shouldNetwork"];
+        temp->colliderRadius = item.value()["colliderRadius"];
+        temp->inverseMass = item.value()["inverseMass"];
+        temp->physicsType = item.value()["physicType"];
+
+        speedupBlockPrimitives.emplace_back(temp);
+    }
+
+    for (auto& item : jData["bridgeList"].items()) {
+        auto temp = new PrimitiveGameObject();
+        temp->meshName = item.value()["mesh"];
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        temp->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        temp->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        temp->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        temp->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        temp->shouldNetwork = item.value()["shouldNetwork"];
+        temp->colliderRadius = item.value()["colliderRadius"];
+        temp->inverseMass = item.value()["inverseMass"];
+        temp->physicsType = item.value()["physicType"];
+
+        temp->shouldNetwork = true;
+
+        bridgePrimitives.emplace_back(temp);
+    }
+
+    for (auto& item : jData["trapBlockList"].items()) {
+        auto temp = new PrimitiveGameObject();
+        temp->meshName = item.value()["mesh"];
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        temp->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        temp->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        temp->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        temp->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        temp->shouldNetwork = item.value()["shouldNetwork"];
+        temp->colliderRadius = item.value()["colliderRadius"];
+        temp->inverseMass = item.value()["inverseMass"];
+        temp->physicsType = item.value()["physicType"];
+
+        temp->shouldNetwork = true;
+
+        trapBlockPrimitives.emplace_back(temp);
+    }
+
     for (auto& item : jData["pointLights"].items()) {
         PointLightInfo newLight;
         auto& colour = item.value()["colour"];
