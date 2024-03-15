@@ -116,6 +116,8 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
             continue;
         }
 
+        if (!i->GetPhysicsObject()) continue;
+
         if (!(i->GetPhysicsObject()->GetLayer() & layerMask))continue;
 
         RayCollision thisCollision;

@@ -6,7 +6,7 @@
 #include "Debug.h"
 using namespace NCL::CSC8503;
 
-GameObject::GameObject(std::string objectName)	{
+GameObject::GameObject(std::string objectName) : OnActiveSet(onActiveSet)	{
     name			= objectName;
     worldID			= -1;
     isActive		= true;

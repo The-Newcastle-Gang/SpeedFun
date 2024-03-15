@@ -50,7 +50,7 @@ Matrix3::Matrix3(const Matrix4 &m4) {
 
 	array[1][0] = m4.array[1][0];
 	array[1][1] = m4.array[1][1];
-	array[2][2] = m4.array[2][2];
+	array[1][2] = m4.array[1][2];
 
 	array[2][0] = m4.array[2][0];
 	array[2][1] = m4.array[2][1];
@@ -188,6 +188,7 @@ Vector3 Matrix3::ToEuler() const {
 			psi = phi + delta;
 		}
 
+        // Yaw, Pitch, Roll
 		return Vector3(Maths::RadiansToDegrees(psi), Maths::RadiansToDegrees(theta), Maths::RadiansToDegrees(phi));
 	}
 }
@@ -271,4 +272,27 @@ Vector3 Matrix3::operator*(const Vector3 &v) const {
 	vec.z = v.x*array[0][2] + v.y*array[1][2] + v.z*array[2][2];
 
 	return vec;
+}
+
+Matrix3 Matrix3::LookAt(const Vector3 &from, const Vector3 &at, const Vector3 &up) {
+    Matrix3 m;
+    Vector3 f = (at - from);
+    f.Normalise();
+
+    Vector3 s = Vector3::Cross(up, f).Normalised();
+    Vector3 u = Vector3::Cross(f,s).Normalised();
+
+    m.array[0][0] = s.x;
+    m.array[0][1] = s.y;
+    m.array[0][2] = s.z;
+
+    m.array[1][0] = u.x;
+    m.array[1][1] = u.y;
+    m.array[1][2]  = u.z;
+
+    m.array[2][0]  = f.x;
+    m.array[2][1]  = f.y;
+    m.array[2][2]  = f.z;
+
+    return m;
 };

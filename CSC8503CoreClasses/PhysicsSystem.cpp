@@ -312,6 +312,7 @@ void PhysicsSystem::LoadStaticAndDynamicLists() {
     std::vector<GameObject*>::const_iterator last;
     gameWorld.GetObjectIterators(first, last);
     for (auto i = first; i != last; ++i) {
+        if (!(*i)->GetPhysicsObject()) continue;
         CollisionLayer layer = (*i)->GetPhysicsObject()->GetLayer();
         switch (layer)
         {
