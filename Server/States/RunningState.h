@@ -137,6 +137,7 @@ namespace NCL {
             void SetTestFloor();
             void SetTriggerTypePositions();
             void CreateGrapples();
+            void SetAllGrapplesInactive();
             void SetNetworkActive(GameObject *g, bool isActive);
             void GrappleEnd(GameObject *player);
             void GrappleUpdate(GameObject *player, Vector3 position);

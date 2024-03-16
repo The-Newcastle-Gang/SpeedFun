@@ -140,6 +140,7 @@ void RunningState::WaitForPlayersLoaded() {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
+    SetAllGrapplesInactive();
 }
 
 void RunningState::Update(float dt) {
@@ -231,8 +232,14 @@ void RunningState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
-        SetNetworkActive(g, false);
+        //SetNetworkActive(g, false);
         grapples[i] = g;
+    }
+}
+
+void RunningState::SetAllGrapplesInactive() {
+    for (auto& g : grapples) {
+        SetNetworkActive(g, false);
     }
 }
 
@@ -298,6 +305,7 @@ void RunningState::CreatePlayers() {
         playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
+        playerObjects[currentPlayer - 1] = player;
         currentPlayer++;
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
@@ -314,7 +322,6 @@ void RunningState::CreatePlayers() {
         playerComponent->GrappleUpdate.connect<&RunningState::GrappleUpdate>(this);
         player->AddComponent((Component*)playerComponent);
 
-        playerObjects[index] = player;
     }
 }
 
