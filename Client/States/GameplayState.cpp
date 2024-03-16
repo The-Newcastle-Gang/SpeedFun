@@ -259,7 +259,6 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
     std::cout << state << "\n";
     totalDTElapsed += dt;
-    ResetCameraAnimation();
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -271,6 +270,8 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
 
     world->GetMainCamera()->UpdateCamera(dt);
     world->UpdateWorld(dt);
+
+    ResetCameraAnimation();
 
     ReadNetworkPackets();
 
