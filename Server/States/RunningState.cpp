@@ -44,7 +44,7 @@ void RunningState::SendLevelToClients(int level) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(level);
-    serverBase->CallRemoteAll(Replicated::RemoteClientCalls::Load_Level, &data);
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::Load_Level, &data));
 }
 
 void RunningState::WaitUntilClientsInGameplay() {
