@@ -82,6 +82,8 @@ int main() {
 
         w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
+        std::cout << "Window updating" << "\n";
+
         if(!debugMode){
             client->Update(dt);
         }

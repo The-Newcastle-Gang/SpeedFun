@@ -4,7 +4,9 @@
 
 #include "Resources.h"
 
-MeshGeometry *Resources::GetMesh(const std::string& name, const std::string& type) {
+MeshGeometry *Resources::GetMesh(const std::string& name, const std::string& type, bool FromThread) {
+    if (AssertLock(FromThread)) return nullptr;
+
     if (meshes.find(name) == meshes.end()) {
         std::unique_ptr<MeshGeometry> mesh;
         if (name.substr(name.size() - 3) == "obj") {
@@ -19,7 +21,9 @@ MeshGeometry *Resources::GetMesh(const std::string& name, const std::string& typ
     return meshes[name].get();
 }
 
-ShaderBase *Resources::GetShader(const std::string& name) {
+ShaderBase *Resources::GetShader(const std::string& name,bool FromThread) {
+    if (AssertLock(FromThread)) return nullptr;
+
     if (shaders.find(name) == shaders.end()) {
         auto shader = std::unique_ptr<ShaderBase>(renderer->LoadShader(name + std::string(".vert"), name + std::string(".frag")));
         shaders.insert(std::make_pair(name, std::move(shader)));
@@ -29,7 +33,9 @@ ShaderBase *Resources::GetShader(const std::string& name) {
     return shaders[name].get();
 }
 
-TextureBase *Resources::GetTexture(const string &name) {
+TextureBase *Resources::GetTexture(const string &name, bool FromThread) {
+    if (AssertLock(FromThread)) return nullptr;
+
     if(textures.find(name)== textures.end()){
         auto texture = std::unique_ptr<TextureBase>(renderer->LoadTexture(name));
         textures.insert(std::make_pair(name, std::move(texture)));
@@ -39,7 +45,9 @@ TextureBase *Resources::GetTexture(const string &name) {
     return textures[name].get();
 }
 
-MeshAnimation *Resources::GetAnimation(const std::string& name) {
+MeshAnimation *Resources::GetAnimation(const std::string& name, bool FromThread) {
+    if (AssertLock(FromThread)) return nullptr;
+
     if (animations.find(name) == animations.end()) {
         auto animation = std::unique_ptr<MeshAnimation>(new MeshAnimation(name));
         animations.insert(std::make_pair(name, std::move(animation)));
@@ -49,13 +57,69 @@ MeshAnimation *Resources::GetAnimation(const std::string& name) {
     return animations[name].get();
 }
 
-MeshMaterial* Resources::GetMeshMaterial(const std::string& name) {
+MeshMaterial* Resources::GetMeshMaterial(const std::string& name, bool FromThread) {
+    if (AssertLock(FromThread)) return nullptr;
+
     if (meshMaterials.find(name) == meshMaterials.end()) {
         auto meshMaterial = std::unique_ptr<MeshMaterial>(new MeshMaterial(name));
         meshMaterial->LoadTextures();
         meshMaterials.insert(std::make_pair(name, std::move(meshMaterial)));
         return meshMaterials[name].get();
     }
-
     return meshMaterials[name].get();
+}
+
+bool Resources::AssertLock(bool fromThread) {
+    if (resourceLock && !fromThread) {
+        std::cerr << "Can't load while thread is running" << std::endl;
+        return true;
+    }
+
+    return false;
+}
+
+std::atomic<bool>* Resources::StartResourceThread() {
+    std::thread thread(&Resources::UpdateResourceThread, this);
+    thread.detach();
+    resourceLock.store(true);
+    return &resourceLock;
+}
+
+void Resources::UpdateResourceThread() {
+    renderer->UseSecondThread();
+
+    while (!jobs.empty()) {
+        Job job = jobs.back();
+
+        if (job.DataType == "MeshMaterial") {
+            GetMeshMaterial(job.DataName, true);
+        }
+
+        else if (job.DataType == "Mesh") {
+            GetMesh(job.DataName, "weird", true);
+        }
+
+        else if (job.DataType == "Shader") {
+            GetShader(job.DataName, true);
+        }
+
+        else if (job.DataType == "Texture") {
+            GetTexture(job.DataName, true);
+        }
+
+        else if (job.DataType == "Animation") {
+            GetAnimation(job.DataName, true);
+        }
+
+        else {
+            std::cerr << "Error: Couldn't find type for job" << std::endl;
+        }
+
+        jobs.pop();
+    }
+    resourceLock.store(false);
+}
+
+void Resources::ThreadedLoadData(const string &dataType, const string &dataName) {
+    jobs.push({dataType, dataName});
 }

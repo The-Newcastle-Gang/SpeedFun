@@ -5,6 +5,12 @@ using namespace CSC8503;
 
 # define PI 3.141592f
 
+
+void SimpleColorUpdate(Element& element, float dt) {
+    auto currentColor = element.GetColor();
+    element.SetColor({currentColor.x - dt*0.02f,currentColor.y - dt*0.01f,currentColor.z - dt*0.005f,1.0});
+}
+
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas, SoundManager* pSoundManager) : State() {
     renderer = pRenderer;
     world = pGameworld;
@@ -41,7 +47,6 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
@@ -119,17 +124,17 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
-
-    renderer->SetPointLights(world->GetPointLights());
-    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 void GameplayState::InitialiseAssets() {
 
-    InitWorld();
+    auto &e = canvas->AddElement().SetAbsoluteSize({100, 50}).AlignMiddle();
+    e.SetColor({1,1,1,1});
+    e.OnUpdate.connect<SimpleColorUpdate>();
+
+    Preload();
     InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
-    FinishLoading();
 }
 void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
@@ -184,15 +189,18 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::READY) {
         delete loadSoundThread;
+        loadSoundThread = nullptr;
         finishedLoading = LoadingStates::READY;
     }
 }
 
 void GameplayState::Update(float dt) {
-    if (finishedLoading != LoadingStates::READY) {
+    if (!FinishLoading() || finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
+        renderer->SlimRender();
         return;
     }
+
     bool countdownOver = levelManager->UpdateCountdown(dt); 
     float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
 
@@ -497,11 +505,21 @@ void GameplayState::SendInputData() {
     networkData->outgoingInput.Push(input);
 }
 
-void GameplayState::FinishLoading() {
-    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+
+bool GameplayState::FinishLoading() {
+
+    if (worldHasLoaded == LoadingStates::LOADED) {
+        return true;
     }
+
+    if (*threadLocked) {
+        return false;
+    }
+
+    InitWorld();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+    return true;
 
 }
 
@@ -515,12 +533,33 @@ void GameplayState::InitCamera() {
     cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
 }
 
+void GameplayState::Preload() {
+    std::cout << "Queueing thread loads" << std::endl;
+
+    resources->ThreadedLoadData("Mesh", "Player.msh");
+    resources->ThreadedLoadData("Animation", "Player_FastRun.anm");
+    resources->ThreadedLoadData("Animation", "Player_RightStrafe.anm");
+    resources->ThreadedLoadData("Animation", "Player_LeftStrafe.anm");
+    resources->ThreadedLoadData("Animation", "Player_RunBack.anm");
+    resources->ThreadedLoadData("Animation", "Player_Idle.anm");
+    resources->ThreadedLoadData("Animation", "Player_Fall.anm");
+    resources->ThreadedLoadData("Animation", "Player_Grapple.anm");
+    resources->ThreadedLoadData("MeshMaterial", "Player.mat");
+    threadLocked = resources->StartResourceThread();
+}
+
 void GameplayState::InitWorld() {
+
     InitLevel();
     // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
     CreateChains();
+
+    renderer->SetPointLights(world->GetPointLights());
+    renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+
+
     worldHasLoaded = LoadingStates::LOADED;
 }
 

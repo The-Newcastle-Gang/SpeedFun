@@ -71,6 +71,7 @@ namespace NCL {
             std::unique_ptr<LevelManager> levelManager;
 
             std::string medalImage;
+            std::atomic<bool>* threadLocked;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -111,7 +112,7 @@ namespace NCL {
             void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 
             void ManageLoading(float dt);
-            void FinishLoading();
+            bool FinishLoading();
             std::thread* loadWorldThread;
             std::thread* loadSoundThread;
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
@@ -188,6 +189,8 @@ namespace NCL {
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
 
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
+
+            void Preload();
         };
     }
 }

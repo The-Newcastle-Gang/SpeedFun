@@ -51,6 +51,8 @@ namespace NCL {
             MeshGeometry *LoadOBJMesh(const string &name);
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
+            void SlimRender();
+
 
         protected:
             void NewRenderLines();
@@ -183,6 +185,7 @@ namespace NCL {
             int speedLineDir;
 
             void ApplyFXAA();
+
         };
     }
 }

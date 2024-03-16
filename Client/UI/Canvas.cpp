@@ -123,5 +123,9 @@ CanvasLayer& Canvas::GetLayer(const std::string& layerName) {
     return layers[layerName];
 }
 
+std::string Canvas::GetActiveLayer() {
+    return "main";
+}
+
 
 

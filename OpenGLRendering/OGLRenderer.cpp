@@ -347,6 +347,15 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	//to get a pointer to the function that will create our OpenGL 3.2 context...
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 	renderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
+    // Attempt to make second context for multithreaded loading.
+    alternateRenderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
+    BOOL error = wglShareLists(renderContext, alternateRenderContext);
+    if(error == FALSE)
+    {
+        std::cout << "death" << std::endl;
+        wglDeleteContext(alternateRenderContext);
+    }
+
 
 	// Check for the context, and try to make it the current rendering context
 	if (!renderContext || !wglMakeCurrent(deviceContext, renderContext)) {
@@ -374,6 +383,10 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 
 	w.SetRenderer(this);
+}
+
+void OGLRenderer::UseSecondThread() {
+    wglMakeCurrent(deviceContext, alternateRenderContext);
 }
 
 void OGLRenderer::DestroyWithWin32() {

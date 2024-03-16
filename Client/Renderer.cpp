@@ -322,6 +322,18 @@ void GameTechRenderer::RenderFrame() {
     RenderUI();
 }
 
+void GameTechRenderer::SlimRender() {
+    uTime += 0.01f;
+    uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glClearColor(0, 0, 0, 0);
+    RenderUI();
+    SwapBuffers();
+}
+
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glDepthFunc(GL_LEQUAL);

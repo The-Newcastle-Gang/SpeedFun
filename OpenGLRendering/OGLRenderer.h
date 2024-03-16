@@ -66,7 +66,9 @@ namespace NCL {
 			//virtual Matrix4 SetupDebugLineMatrix()	const;
 			//virtual Matrix4 SetupDebugStringMatrix()const;
 
-		protected:			
+            void UseSecondThread();
+
+        protected:
 			void BeginFrame()	override;
 			void RenderFrame()	override;
 			void EndFrame()		override;
@@ -83,11 +85,14 @@ namespace NCL {
             void BindMeshMaterial(MeshMaterial* m);
 			void DrawBoundMesh(int subLayer = 0, int numInstances = 1);
             void DrawBoundAnimation(int layerCount);
+
 #ifdef _WIN32
 			void InitWithWin32(Window& w);
 			void DestroyWithWin32();
 			HDC		deviceContext;		//...Device context?
-			HGLRC	renderContext;		//Permanent Rendering Context		
+			HGLRC	renderContext;		//Permanent Rendering Context
+            HGLRC   alternateRenderContext;
+
 #endif
 		private:
 			//struct DebugString {
@@ -117,6 +122,6 @@ namespace NCL {
 
 			bool initState;
 			bool forceValidDebugState;
-		};
+        };
 	}
 }

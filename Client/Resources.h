@@ -9,19 +9,31 @@
 #include "MeshAnimation.h"
 #include "MeshMaterial.h"
 #include "Renderer.h"
+#include <queue>
 
 using namespace NCL;
 using namespace CSC8503;
 
 class Resources {
 public:
-    Resources(GameTechRenderer* pRenderer) : renderer(pRenderer) {}
+    Resources(GameTechRenderer* pRenderer) : renderer(pRenderer) {
+        shouldThread = false;
+        resourceLock.store(false);
+    }
 
-    MeshGeometry *GetMesh(const string &name, const std::string &type = "mesh");
-    ShaderBase *GetShader(const string &name);
-    TextureBase *GetTexture(const string &name);
-    MeshAnimation *GetAnimation(const string &name);
-    MeshMaterial *GetMeshMaterial(const string &name);
+    MeshGeometry *GetMesh(const string &name, const std::string &type = "mesh", bool FromThread = false);
+    ShaderBase *GetShader(const string &name, bool FromThread = false);
+    TextureBase *GetTexture(const string &name, bool FromThread = false);
+    MeshAnimation *GetAnimation(const string &name, bool FromThread = false);
+    MeshMaterial *GetMeshMaterial(const string &name, bool FromThread = false);
+    void ThreadedLoadData(const string &dataType, const string &dataName);
+
+    bool IsLocked() {
+        return resourceLock;
+    }
+
+    std::atomic<bool>* StartResourceThread();
+    void UpdateResourceThread();
 
 private:
     GameTechRenderer* renderer;
@@ -30,6 +42,17 @@ private:
     std::unordered_map<std::string, std::unique_ptr<MeshAnimation>> animations;
     std::unordered_map<std::string, std::unique_ptr<MeshMaterial>> meshMaterials;
     std::unordered_map<std::string, std::unique_ptr<TextureBase>> textures;
+
+    struct Job {
+        std::string DataType;
+        std::string DataName;
+    };
+
+    std::queue<Job> jobs;
+    std::atomic<bool> shouldThread;
+    std::atomic<bool> resourceLock;
+
+    bool AssertLock(bool fromThread);
 };
 
 
