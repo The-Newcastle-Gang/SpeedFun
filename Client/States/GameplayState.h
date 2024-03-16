@@ -190,7 +190,7 @@ namespace NCL {
             Element *timeBarTimerBox;
             Element *timerText;
             ShaderBase *timerBarShader;
-            ShaderBase *timerBoxShader;
+            ShaderBase *fireShader;
 
             const int timerTopOffset = 32;
             const int timerBarHeight = 28;

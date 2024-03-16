@@ -23,7 +23,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
-    timerBoxShader      = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
 }
@@ -161,7 +161,7 @@ void GameplayState::InitPlayerBlip(int id) {
         .SetAbsoluteSize({ 60,60 })
         .CenterSprite()
         .SetTexture(resources->GetTexture("firemask.jpg"))
-        .SetShader(timerBoxShader)
+        .SetShader(fireShader)
         .SetId("blip_" + std::to_string(id));
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
