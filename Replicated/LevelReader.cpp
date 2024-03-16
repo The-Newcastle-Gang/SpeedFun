@@ -14,6 +14,42 @@ LevelReader::~LevelReader(){
 
 }
 
+void LevelReader::Clear() { //we need to free all the memory so we dont leak
+    for (auto& i : primGOList) {
+        delete i;
+        i = nullptr;
+    }
+    primGOList.clear();
+
+    for (auto& i : oscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    oscillatorPrimitives.clear();
+
+    for (auto& i : harmfulOscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    harmfulOscillatorPrimitives.clear();
+
+    for (auto& i : springPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    springPrimitives.clear();
+
+    pointLights.clear();
+
+    for (auto& i : groundCubes) {
+        delete i;
+        i = nullptr;
+    }
+    groundCubes.clear();
+
+    checkPointPositions.clear();
+}
+
 void LevelReader::LoadLevelNameMap() {
     int counter = 0;
     for (const auto& entry : std::filesystem::directory_iterator(Assets::LEVELDIR)) {
