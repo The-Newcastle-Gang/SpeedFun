@@ -30,8 +30,8 @@ public:
     float GetElapsedTime() { return elapsedTime; }
 
     float GetFinalTime() const            { return finalTime; }
-    Medal GetCurrentMedal() const         { return currentMedal; }
-    NCL::Maths::Vector4 GetCurrentMedalColour() const { return currentMedalColour; }
+    Medal GetCurrentMedal() { CalculateMedal(); return currentMedal; } //we need to 
+    NCL::Maths::Vector4 GetCurrentMedalColour() { CalculateMedal(); return currentMedalColour; }
 
     void ResumeTimer(){ currentState = StageTimer::Running; }
     void PauseTimer() { currentState = StageTimer::Paused;  }
