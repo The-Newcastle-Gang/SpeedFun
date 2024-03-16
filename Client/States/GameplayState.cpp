@@ -369,11 +369,12 @@ void GameplayState::ReadNetworkFunctions() {
                         .SetAbsoluteSize({60,60})
                         .AlignCenter()
                         .AlignLeft();
-                // Disable player controls
-                // Clear the world
-                //ClearLevel();
-                // Loading screen
-                // Load the next level
+
+                float speedVisualModifier = 0;
+                renderer->SetSpeedLineAmount(speedVisualModifier);
+                world->GetMainCamera()->SetFieldOfVision(defaultFOV + speedVisualModifier * 30.0f);
+
+                soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
 
             } break;
 
@@ -428,6 +429,8 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::All_Players_Finished): {
                 state = GameplayStateEnums::END_OF_LEVEL;
+                soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
+
                 //show a scoreboard?
             }
             break;

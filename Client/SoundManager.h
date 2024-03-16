@@ -37,7 +37,7 @@ namespace NCL {
             }
 
         protected:
-
+            
             std::vector<std::string> soundFileNames;
             std::unordered_map<std::string, Sound*> sounds;
             std::vector<std::string> songFileNames;
