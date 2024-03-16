@@ -190,7 +190,7 @@ void GameplayState::OnExit() {
 
     shouldShutDown.store(true);
     networkThread->join();
-    
+
     delete networkThread;
     networkThread = nullptr;
 }
@@ -198,7 +198,6 @@ void GameplayState::OnExit() {
 void GameplayState::ManageLoading(float dt) {
 
     if (loadingTime > 0.1f) {
-        std::cout << ".\n";
         loadingTime = 0.0f;
     }
     loadingTime += dt;
@@ -258,6 +257,9 @@ void GameplayState::UpdateCountdown(float dt){
 void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
     totalDTElapsed += dt;
+    UpdateGrapples();
+
+    Window::GetWindow()->ShowOSPointer(false);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -290,6 +292,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
         }
         Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
     }
+
     renderer->Render();
     Debug::UpdateRenderables(dt);
 }
@@ -398,7 +401,6 @@ void GameplayState::ReadNetworkFunctions() {
                 HandleGrappleEvent(eventType);
             } break;
 
-
             case(Replicated::Player_Velocity_Call): {
                 if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
 
@@ -411,6 +413,12 @@ void GameplayState::ReadNetworkFunctions() {
             }
             break;
 
+            case(Replicated::SetNetworkActive): {
+                int networkObjectId = handler.Unpack<int>();
+                bool isActive = handler.Unpack<bool>();
+                auto targetObject = world->GetObjectByNetworkId(networkObjectId);
+                targetObject->SetActive(isActive);
+            } break;
             case(Replicated::Player_Animation_Call): {
                 if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
 
@@ -487,8 +495,31 @@ void GameplayState::ResetCameraAnimation() {
     strafeSpeed = 0.0f;
 }
 
+GameObject* GameplayState::CreateChainLink() {
+    auto g = new GameObject("chain");
+    world->AddGameObject(g, false);
+    g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
+    g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->SetActive(false);
+    return g;
+}
+
+void GameplayState::CreateChains() {
+    for (int i=0; i < chainLinkCount * Replicated::PLAYERCOUNT; i++) {
+        chains[i] = CreateChainLink();
+        //chains[i]->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, 90 * (i % 2)));
+    }
+}
+
+void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(GameObject&, int)>& opFunction) {
+    for (int i = 0; i < chainLinkCount; i++) {
+        int chainLinkIndex = grappleIndex * chainLinkCount + i;
+        opFunction(*chains[chainLinkIndex], i);
+    }
+}
+
 void GameplayState::WalkCamera(float dt) {
-    
+
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         soundManager->SM_PlaySound("footsteps.wav");
@@ -519,7 +550,7 @@ void GameplayState::HandleGrappleEvent(int event) {
 }
 
 void GameplayState::LandCamera(float dt) {
-    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() + 
+    world->GetMainCamera()->SetOffsetPosition(world->GetMainCamera()->GetOffsetPosition() +
                                               Vector3(0, -landBobAmount * sin(PI - PI * sin(PI /2 - landTimer/2)) / landFallMax * landIntensity, 0));
     landTimer = std::clamp(landTimer - dt * landAnimationSpeed, 0.0f, PI);
 }
@@ -546,7 +577,7 @@ void GameplayState::SendInputData() {
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::E)) {
+    if (Window::GetMouse()->ButtonPressed(MouseButtons::LEFT)) {
         (*networkData).outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::PlayerGrapple, nullptr));
     }
 
@@ -587,8 +618,10 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel(levelManager->GetLevel()); //just to test, this value will be read from the server
+    InitLevel(levelManager->GetLevel());
     CreatePlayers();
+    CreateGrapples();
+    CreateChains();
     renderer->SetPointLights(world->GetPointLights());
 
     worldHasLoaded = LoadingStates::LOADED;
@@ -632,6 +665,7 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
     }
 }
@@ -647,7 +681,7 @@ void GameplayState::InitLevel(int level) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
+//        temp->GetRenderObject()->SetColour({0.0f, 0.65f, 0.90f, 1.0f});
 
     }
 
@@ -664,7 +698,7 @@ void GameplayState::InitLevel(int level) {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
-
+    
     for (auto& x : springList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
@@ -677,6 +711,53 @@ void GameplayState::InitLevel(int level) {
     }
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
+
+}
+
+void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
+    int id = gameObject.GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+    if (!isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
+        chainLink.SetActive(false);
+    });
+
+    if (isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
+        chainLink.SetActive(true);
+    });
+}
+
+void GameplayState::UpdateGrapples() {
+    for (GameObject* grapple: grapples) {
+
+
+        int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+        auto playerObject = world->GetNetworkObject(grapple->GetNetworkObject()->GetNetworkId() - Replicated::PLAYERCOUNT)->GetParent();
+        if (!chains[id * chainLinkCount]->IsActive()) continue;
+
+        const Vector3 &playerPos = playerObject->GetTransform().GetPosition() + Matrix3(playerObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET;
+        const Vector3 &grapplePos = grapple->GetTransform().GetPosition();
+
+        Vector3 chainVector = (grapplePos - playerPos).Normalised() * Replicated::GRAPPLEDISTANCE / chainSize / 4;
+        auto rotation = Matrix3::LookAt(playerPos, grapplePos, Vector3(0, 1, 0));
+
+        OperateOnChains(id, [=](GameObject& chainLink, int chainIndex) {
+            float chainTValue = (float)chainIndex / (float)chainLinkCount;
+            Vector3 linkVector = chainVector * chainTValue;
+            Vector3 adjustment = linkVector.LengthSquared() < (grapplePos - playerPos).LengthSquared() ? linkVector : grapplePos - playerPos;
+            chainLink.GetTransform()
+                .SetPosition(playerPos + adjustment)
+                .SetOrientation(Quaternion(rotation).Normalised() * Quaternion::EulerAnglesToQuaternion(0, 0, 90 * (chainIndex % 2)));
+        });
+    }
+}
+
+void GameplayState::CreateGrapples() {
+    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
+        auto g = new GameObject();
+        replicated->AddGrapplesToWorld(g, *world, i);
+        g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+        g->OnActiveSet.connect<&GameplayState::OnGrappleToggle>(this);
+        grapples[i] = g;
+    }
 }
 
 void GameplayState::SetTestSprings() {

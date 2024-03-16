@@ -6,6 +6,16 @@
 namespace NCL {
 	namespace CSC8503 {
 
+        struct SortSweepStruct {
+            float* xPos;
+            bool isUpper;
+            GameObject* gameObject;
+
+            bool operator<(SortSweepStruct const& other) const {
+                return *xPos < *(other.xPos);
+            }
+        };
+
 		class PhysicsSystem	{
 		public:
 			PhysicsSystem(GameWorld& g);
@@ -28,6 +38,8 @@ namespace NCL {
 			void SetDebugDrawingCollision(bool b) {
 				isDebugDrawingCollision = b;
 			}
+            void InitialiseSortAndSweepStructs();
+
 
 			bool GetDebugDrawingCollision() {
 				return isDebugDrawingCollision;
@@ -46,8 +58,17 @@ namespace NCL {
 
 		protected:
 			void BasicCollisionDetection();
-			void BroadPhase();
 			void NarrowPhase();
+
+            void UpdateObjectSortSweepBounds();
+
+            void SetupBounds(GameObject* g);
+
+            void LoadStaticAndDynamicLists();
+
+            void SortAndSweep();
+
+            void SortAndSweepInsertionSort();
 
 			void ClearForces();
 
@@ -57,7 +78,6 @@ namespace NCL {
 			void UpdateConstraints(float dt);
 
 			void UpdateCollisionList();
-			void UpdateObjectAABBs();
 
             void SetupPhysicsMaterials();
 
@@ -81,32 +101,38 @@ namespace NCL {
 			bool useBroadPhase		    = true;
             bool shouldClear = false;
 			int numCollisionFrames	    = 5;
-      float velocityThreshold    = 8.0f;
+            float velocityThreshold    = 8.0f;
 
 
-      std::unordered_map<std::string, PhysicsMaterial*> physicsMaterials;
+            std::vector<GameObject*> staticObjects;
+            std::vector<GameObject*> dynamicObjects;
+            std::vector<SortSweepStruct> sortAndSweepData;
 
-      std::unordered_map<int, bool> layerMatrix =
-      { {DEFAULT_LAYER | DEFAULT_LAYER,true},
-          {DEFAULT_LAYER | PLAYER_LAYER,true},
-          {DEFAULT_LAYER | STATIC_LAYER,true},
-          {DEFAULT_LAYER | TRIGGER_LAYER,true},
-          {DEFAULT_LAYER | GRAPPLE_LAYER,true},
+            std::unordered_map<std::string, PhysicsMaterial*> physicsMaterials;
 
-          {PLAYER_LAYER | PLAYER_LAYER,true},
-          {PLAYER_LAYER | STATIC_LAYER,true},
-          {PLAYER_LAYER | TRIGGER_LAYER,true},
-          {PLAYER_LAYER | GRAPPLE_LAYER,true},
+            std::unordered_map<int, bool> layerMatrix =
+              { {DYNAMIC_LAYER | DYNAMIC_LAYER,true},
+                  {DYNAMIC_LAYER | PLAYER_LAYER,true},
+                  {DYNAMIC_LAYER | STATIC_LAYER,true},
+                  {DYNAMIC_LAYER | TRIGGER_LAYER,true},
+                  {DYNAMIC_LAYER | OSCILLATOR_LAYER,true},
 
-          {STATIC_LAYER | STATIC_LAYER,false},
-          {STATIC_LAYER | TRIGGER_LAYER,false},
-          {STATIC_LAYER | GRAPPLE_LAYER,true},
 
-          {TRIGGER_LAYER | TRIGGER_LAYER,false},
-          {TRIGGER_LAYER | GRAPPLE_LAYER,false},
+                  {PLAYER_LAYER | PLAYER_LAYER,true},
+                  {PLAYER_LAYER | STATIC_LAYER,true},
+                  {PLAYER_LAYER | TRIGGER_LAYER,true},
+                  {PLAYER_LAYER | OSCILLATOR_LAYER,true},
 
-          {GRAPPLE_LAYER | GRAPPLE_LAYER,false}
-      };
+                  {STATIC_LAYER | STATIC_LAYER,false},
+                  {STATIC_LAYER | TRIGGER_LAYER,false},
+                  {STATIC_LAYER | OSCILLATOR_LAYER,false},
+
+                  {TRIGGER_LAYER | TRIGGER_LAYER,false},
+                  {TRIGGER_LAYER | OSCILLATOR_LAYER,false},
+
+                  {OSCILLATOR_LAYER | OSCILLATOR_LAYER,false},
+
+              };
 
 		};
 	}

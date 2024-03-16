@@ -10,6 +10,7 @@
 #include "GameObject.h"
 #include "PhysicsObject.h"
 #include "GameWorld.h"
+#include "Replicated.h"
 
 #include <functional>
 
@@ -53,9 +54,34 @@ public:
         bool isFalling = false;
     };
 
+    entt::sink<entt::sigh<void(GameObject*, Vector3)>> GrappleStart;
+    entt::sink<entt::sigh<void(GameObject*)>> GrappleEnd;
+    entt::sink<entt::sigh<void(GameObject*, Vector3 position)>> GrappleUpdate;
+
+
     PlayerAnimationCallData playerAnimationCallData;
 
     void ToggleDebug() { debugEnabled = !debugEnabled; }
+
+    struct GrappleInfo {
+        Ray grappleRay;
+        float travelDistance;
+        float travelSpeed;
+        float maxDistance;
+
+        void SetActive(bool active) {
+            isActive = active;
+        }
+
+        bool GetActive() {
+            return isActive;
+        }
+    private:
+        bool isActive;
+    } grappleProjectileInfo;
+
+    void LeaveGrappleState() { SwitchToState(&air); }
+
 private:
     GameWorld* world;
 
@@ -79,22 +105,6 @@ private:
     float fallApex = 0.0f;
     bool isFalling = false;
 
-    struct GrappleInfo {
-        Ray grappleRay;
-        float travelDistance;
-        float travelSpeed;
-        float maxDistance;
-
-        void SetActive(bool active) {
-            isActive = active;
-        }
-
-        bool GetActive() {
-            return isActive;
-        }
-    private:
-        bool isActive;
-    } grappleProjectileInfo;
 
     Vector3 grapplePoint;
 
@@ -107,6 +117,10 @@ private:
     Vector3 rightAxis;
     Vector2 inputDirection;
     Quaternion playerRotation;
+
+    entt::sigh<void(GameObject*, Vector3)> onGrappleStart;
+    entt::sigh<void(GameObject*)> onGrappleEnd;
+    entt::sigh<void(GameObject*, Vector3 position)> onGrappleUpdate;
 
     bool GroundCheck();
     void StartInAir();

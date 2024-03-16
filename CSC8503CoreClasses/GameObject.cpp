@@ -6,7 +6,7 @@
 #include "Debug.h"
 using namespace NCL::CSC8503;
 
-GameObject::GameObject(std::string objectName)	{
+GameObject::GameObject(std::string objectName) : OnActiveSet(onActiveSet)	{
     name			= objectName;
     worldID			= -1;
     isActive		= true;
@@ -55,6 +55,18 @@ void GameObject::UpdateBroadphaseAABB() {
         Vector3 halfSizes = ((OBBVolume&)*boundingVolume).GetHalfDimensions();
         broadphaseAABB = mat * halfSizes;
     }
+}
+
+void GameObject::SetBroadXHalfDim(float halfDim) {
+    broadXHalfDim = halfDim;
+}
+
+void GameObject::UpdateBroadphaseXBounds() {
+    if (!boundingVolume) {
+        return;
+    }
+    broadXLowerBound = transform.GetPosition().x - broadXHalfDim;
+    broadXUpperBound = transform.GetPosition().x + broadXHalfDim;
 }
 
 void GameObject::DrawCollision()
