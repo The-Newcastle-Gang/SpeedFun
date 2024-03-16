@@ -257,7 +257,6 @@ void GameplayState::UpdateCountdown(float dt){
 
 void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
-    std::cout << state << "\n";
     totalDTElapsed += dt;
 
     if (firstPersonPosition) {

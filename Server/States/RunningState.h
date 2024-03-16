@@ -92,7 +92,6 @@ namespace NCL {
             std::unordered_map<int, bool> playersFinished;
             std::unordered_map<int, float> playerTimes;
 
-            bool isGameInProgress = false;
             bool hasAllPlayersFinished = false;
 
             void ResetLevelInfo();

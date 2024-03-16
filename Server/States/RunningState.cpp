@@ -1,7 +1,4 @@
 #include "RunningState.h"
-#include "RunningState.h"
-#include "RunningState.h"
-#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -54,19 +51,16 @@ void RunningState::WaitUntilClientsInGameplay() {
 }
 
 void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as it gets rid of stuff, needs to be done after update;
-    isGameInProgress = false;
     ResetLevelInfo();
     world->ClearAndErase(); //free the memory too so we dont leak
     physics->Clear();
     SendLevelToClients(level);
     LoadLevel(level);
     world->StartWorld();
-    isGameInProgress = true;
 }
 
 void RunningState::ResetLevelInfo() {
     hasAllPlayersFinished = false;
-    isGameInProgress = false;
     numPlayersLoaded = 0;
     for (std::pair<int, bool> info : playersFinished) {
         playersFinished[info.first] = false;
