@@ -31,7 +31,6 @@ namespace NCL {
 
             void Clear();
             void ClearAndErase();
-            void ClearAndEraseWithoutPlayers();
 
             void AddGameObject(GameObject* o, bool isNetworked);
             void RemoveGameObject(GameObject* o, bool andDelete = false);

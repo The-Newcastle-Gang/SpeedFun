@@ -41,17 +41,6 @@ void GameWorld::ClearAndErase() {
     Clear();
 }
 
-void GameWorld::ClearAndEraseWithoutPlayers() {
-    for (auto& i : gameObjects) {
-        if (i->GetTag() == PLAYER)continue;
-        delete i;
-    }
-    for (auto& i : constraints) {
-        delete i;
-    }
-    Clear();
-}
-
 void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
     gameObjects.emplace_back(o);
     o->SetWorldID(worldIDCounter++);
