@@ -16,15 +16,15 @@ void main() {
         noiseTexture *= texture(tex, uv);
     }
     
-    float dissolveValue = sin(uTime);
+    float dissolveValue = sin(uTime* 0.5);
     float burnSize      = 0.04;
-    vec4  burnColor     = vec4(0.84, 0.0, 0.34, 1.0);
+    vec4  burnColor     = vec4(0.33, 0.33, 0.33, 1.0);
 
     float burnStep = burnSize * step(0.001, dissolveValue) * step(dissolveValue, 0.999);
     float threshold = smoothstep( noiseTexture.x - burnStep,noiseTexture.x, dissolveValue);
     float border = smoothstep( noiseTexture.x, burnStep+noiseTexture.x, dissolveValue);
 
-    vec4 backColor = vec4(0.0, 0.0, 0.0, 1.0);
+    vec4 backColor = uiColor;
     backColor.a *= threshold;
     backColor.rgb = mix(burnColor.rgb, backColor.rgb, border);
 

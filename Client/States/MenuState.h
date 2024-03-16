@@ -101,6 +101,12 @@ namespace NCL {
 
             void InitSplashScreen();
             void UpdateSplashScreen(Element &e, float dt);
+
+            void RunMenuTimer(float dt);
+            void SetTimer(float s){ timerDuration = s;}
+            float timerDuration;
+            bool timerElapsed;
+            bool timerRunning;
         };
     }
 }

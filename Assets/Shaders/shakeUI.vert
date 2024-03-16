@@ -11,8 +11,12 @@ uniform vec2 positionAbs;
 
 uniform float uTime;
 
-float rand(vec2 uv){
-    return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
+float rand(float n){return fract(sin(n) * 43758.5453123);}
+
+float noise(float p){
+	float fl = floor(p);
+  float fc = fract(p);
+	return mix(rand(fl), rand(fl + 1.0), fc);
 }
 
 void main()
@@ -26,7 +30,7 @@ void main()
     vec4 finalPos = projection * vec4(newVertex.xy, 0.0, 1.0);
 
     mat4 tmat = mat4(
-        1,  0.1*sin(uTime), 0,0,
+        1,  sin(noise(noise(uTime))), 0,0,
         0, 1, 0,0,
         0, 0, 1,0,
         0,0,0,1

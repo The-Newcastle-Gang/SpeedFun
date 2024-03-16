@@ -282,10 +282,10 @@ blockingCanvas = {
     splash = {
         {
             color = COLORS.menuBackground,
-            rSize =Vector2:new(1, 1)
+            rSize =Vector2:new(1, 1),
         },
         {
-            color = COLORS.red,
+            color = COLORS.menuBackground,
             aSize = Vector2:new(100,50),
             align = {
                 AlignTo("middle", 0),
@@ -293,7 +293,7 @@ blockingCanvas = {
             },
             tags = {"splash"},
             id= "splash"
-        }
+        },
     },
     multiplayer = {
         {

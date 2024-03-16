@@ -13,9 +13,13 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     canvas = pCanvas;
     hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
     titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
-    dissolveShader = renderer->LoadShader("shakeUI.vert", "defaultUI.frag");
+    dissolveShader = renderer->LoadShader("defaultUI.vert", "dissolveUI.frag");
     activeText = -1;
     textLimit = 15;
+
+    timerDuration = 0.0f;
+    timerElapsed = false;
+    timerRunning = false;
 
 }
 
@@ -301,15 +305,21 @@ void MenuState::InitCanvas() {
     }
     //TODO: ASK IDEAL PLACE TO KEEP THIS IN
 
-    InitSplashScreen();
-    ShowSplashScreen();
+//    InitSplashScreen();
+//    ShowSplashScreen();
 
 }
 
 void MenuState::InitSplashScreen(){
+    timerDuration = 4.0f;
+    timerRunning  = true;
+
     auto& e = canvas->GetElementById("splash", "splash");
-    e.SetShader(dissolveShader);
+    e.SetShader(dissolveShader)
+    .SetTexture(renderer->LoadTexture("noise.png"));
     e.OnUpdate.connect<&MenuState::UpdateSplashScreen>(this);
+
+
 }
 
 void MenuState::OnEnter() {
@@ -386,10 +396,14 @@ void MenuState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+    RunMenuTimer(dt);
 }
 
 void MenuState::UpdateSplashScreen(Element& e, float dt){
-
+    if(timerElapsed){
+        canvas->PopActiveLayer();
+        canvas->PushActiveLayer("main");
+    }
 }
 
 void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
@@ -410,4 +424,13 @@ void MenuState::OnExit() {
     canvas->Reset();
     soundManager->SM_UnloadSoundList();
     lua_close(L);
+}
+
+void MenuState::RunMenuTimer(float dt){
+    std::cerr<<timerElapsed << "\n";
+    if(!timerRunning){
+        return;
+    }
+    timerDuration -=dt;
+    timerElapsed = timerDuration <=0.0f;
 }
