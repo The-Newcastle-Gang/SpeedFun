@@ -215,6 +215,9 @@ namespace NCL {
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
 
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
+
+
+            int packetCountTest = 0;
         };
     }
 }

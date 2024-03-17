@@ -140,7 +140,7 @@ void RunningState::WaitForPlayersLoaded() {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
-    SetAllGrapplesInactive();
+    //SetAllGrapplesInactive();
 }
 
 void RunningState::Update(float dt) {
@@ -300,9 +300,9 @@ void RunningState::CreatePlayers() {
     int currentPlayer = 1;
 
     Vector3 thisPlayerStartPos;
-    for (auto& pair : playerInfo) {
+    for(int i=0;i<Replicated::PLAYERCOUNT;i++){
         thisPlayerStartPos = startPos + Vector3(0,0,1) * GetDirectionFromPlayerNumber(currentPlayer) * GetMagnitudeFromPlayerNumber(currentPlayer)* playerSeperation;
-        playerAnimationInfo[pair.first] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
+        playerAnimationInfo[i] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
         playerObjects[currentPlayer - 1] = player;
@@ -353,7 +353,7 @@ void RunningState::EndTriggerVolFunc(int id){
         numPlayersFinished += playerFinished.second ? 1 : 0;
     }
 
-    if (numPlayersFinished == playerObjects.size()) {
+    if (numPlayersFinished == numPlayersLoaded) {
         hasAllPlayersFinished = true;
     }
     if (!hasAllPlayersFinished)return;
