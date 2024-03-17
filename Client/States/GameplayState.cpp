@@ -29,7 +29,10 @@ GameplayState::~GameplayState() {
     networkThread = nullptr;
 
     delete debugger;
+    debugger = nullptr;
+
     delete loadSoundThread;
+    loadSoundThread = nullptr;
 }
 
 
@@ -137,6 +140,7 @@ void GameplayState::WaitForServerLevel() {
 }
 
 void GameplayState::OnNewLevel() {
+    firstPersonPosition = nullptr;
     if(&canvas->GetLayer("FinishedLevelLayer") == canvas->GetActiveLayer())canvas->PopActiveLayer(); //pop the ui if its still there
     world->ClearAndErase();
     networkData->incomingState.Clear();

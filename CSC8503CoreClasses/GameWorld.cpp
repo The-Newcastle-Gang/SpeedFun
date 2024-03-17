@@ -34,9 +34,11 @@ void GameWorld::Clear() {
 void GameWorld::ClearAndErase() {
     for (auto& i : gameObjects) {
         delete i;
+        i = nullptr;
     }
     for (auto& i : constraints) {
         delete i;
+        i = nullptr;
     }
     Clear();
 }
@@ -56,6 +58,7 @@ void GameWorld::RemoveGameObject(GameObject* o, bool andDelete) {
     gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), o), gameObjects.end());
     if (andDelete) {
         delete o;
+        o = nullptr;
     }
     worldStateCounter++;
 }
@@ -76,6 +79,7 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 
 void GameWorld::UpdateWorld(float dt) {
 
+    std::cout << gameObjects.size()<<"\n";
     for (GameObject* g : gameObjects) {
         if (g->GetAnimatorObject()) {
             g->GetAnimatorObject()->UpdateAnimation(dt);
@@ -159,6 +163,7 @@ void GameWorld::RemoveConstraint(Constraint* c, bool andDelete) {
     constraints.erase(std::remove(constraints.begin(), constraints.end(), c), constraints.end());
     if (andDelete) {
         delete c;
+        c = nullptr;
     }
 }
 

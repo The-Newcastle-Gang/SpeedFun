@@ -28,6 +28,7 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 PhysicsSystem::~PhysicsSystem()	{
     for (auto pair : physicsMaterials) {
         delete pair.second;
+        pair.second = nullptr;
     }
 }
 

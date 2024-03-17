@@ -201,7 +201,6 @@ namespace NCL {
 
             GameplayStateEnums::ClientState state = GameplayStateEnums::END_OF_LEVEL;
 
-            bool hasThisClientFinished = false;
             bool isUpdating = false;
             bool shouldMoveToNewLevel = false;
 

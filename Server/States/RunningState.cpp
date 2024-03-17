@@ -140,6 +140,7 @@ void RunningState::WaitForPlayersLoaded() {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
+    std::cout << "TEST\n";
     //SetAllGrapplesInactive();
 }
 
@@ -192,6 +193,7 @@ void RunningState::UpdateInEndOfLevel(float dt) {
         MoveToNewLevel(levelManager->GetAndSetNextLevel());
         shouldMoveToNewLevel = false;
         state = RunningStateEnums::COUNTDOWN;
+        return;
     }
     ReadNetworkFunctions();
     physics->Update(dt);
