@@ -99,10 +99,15 @@ struct Diagnostics {
 
     Diagnostics() {
         gameTimer = new GameTimer();
+        averagePacketTime = 0;
+        maxPacketTime = 0;
+        minPacketTime = 0;
+        packetCount = 0;
     }
 
     ~Diagnostics() {
         delete gameTimer;
+        gameTimer = nullptr;
     }
 };
 

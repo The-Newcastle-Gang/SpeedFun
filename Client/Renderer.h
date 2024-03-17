@@ -46,6 +46,8 @@ namespace NCL {
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
             void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
 
+            void ClearActiveObjects();
+
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             MeshGeometry *LoadOBJMesh(const string &name);

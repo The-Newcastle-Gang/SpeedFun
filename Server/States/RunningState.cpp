@@ -140,7 +140,6 @@ void RunningState::WaitForPlayersLoaded() {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
-    std::cout << "TEST\n";
     //SetAllGrapplesInactive();
 }
 

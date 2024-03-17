@@ -7,7 +7,7 @@
 
 
 Replicated::Replicated() {
-
+    levelReader = nullptr;
 }
 
 int Replicated::GetCurrentLevelLen(){

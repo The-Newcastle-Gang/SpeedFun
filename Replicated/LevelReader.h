@@ -15,15 +15,15 @@ using namespace CSC8503;
 
 struct PrimitiveGameObject {
 public:
-    std::string     meshName;
-    Vector3         dimensions;
+    std::string     meshName = "";
+    Vector3         dimensions = Vector3(0,0,0);
     Quaternion      rotation;
-    Vector3         position;
-    float           inverseMass;
-    std::string     physicsType;
-    Vector3         colliderExtents;
-    float           colliderRadius;
-    bool            shouldNetwork;
+    Vector3         position = Vector3(0,0,0);
+    float           inverseMass = 0;
+    std::string     physicsType = "";
+    Vector3         colliderExtents = Vector3(0,0,0);
+    float           colliderRadius = 0;
+    bool            shouldNetwork = false;
 
 };
 

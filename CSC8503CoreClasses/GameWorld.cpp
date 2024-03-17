@@ -49,7 +49,7 @@ void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
     worldStateCounter++;
 
     if (isNetworked) {
-        o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));\
+        o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));
         networkObjects.push_back(o->GetNetworkObject());
     }
 }
@@ -78,8 +78,6 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 }
 
 void GameWorld::UpdateWorld(float dt) {
-
-    std::cout << gameObjects.size()<<"\n";
     for (GameObject* g : gameObjects) {
         if (g->GetAnimatorObject()) {
             g->GetAnimatorObject()->UpdateAnimation(dt);
@@ -93,13 +91,13 @@ void GameWorld::UpdateWorld(float dt) {
 	std::default_random_engine e(seed);
 
 
-    if (shuffleObjects) {
-        std::shuffle(gameObjects.begin(), gameObjects.end(), e);
-    }
+    //if (shuffleObjects) {
+    //    std::shuffle(gameObjects.begin(), gameObjects.end(), e);
+    //}
 
-    if (shuffleConstraints) {
-        std::shuffle(constraints.begin(), constraints.end(), e);
-    }
+    //if (shuffleConstraints) {
+    //    std::shuffle(constraints.begin(), constraints.end(), e);
+    //}
 }
 
 void GameWorld::UpdateWorldPhysics(float dt) {
@@ -108,6 +106,13 @@ void GameWorld::UpdateWorldPhysics(float dt) {
 
 void GameWorld::StartWorld() {
 	for (GameObject* gameObject : gameObjects)gameObject->Start();
+    if (gameObjects.size() > 2000) {
+        std::cout << "CLIENT: " << gameObjects.size() - 2000 << "\n";
+    }
+    else {
+        std::cout << "SERVER: " << gameObjects.size()<< "\n";
+
+    }
 }
 
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject, GameObject* ignoreThis,int layerMask) const {

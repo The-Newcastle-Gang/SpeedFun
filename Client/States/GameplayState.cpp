@@ -57,13 +57,13 @@ void GameplayState::ClearLevel()
 
 void GameplayState::InitCrossHeir(){
     //crossheir
-    auto crossHeirVert = canvas->AddElement()
+    auto& crossHeirVert = canvas->AddElement()
             .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({15,3})
             .AlignCenter()
             .AlignMiddle();
 
-    auto crossHeirHoriz = canvas->AddElement()
+    auto& crossHeirHoriz = canvas->AddElement()
             .SetColor({1.0,1.0,1.0,1.0})
             .SetAbsoluteSize({3,15})
             .AlignCenter()
@@ -141,7 +141,10 @@ void GameplayState::WaitForServerLevel() {
 
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
-    if(&canvas->GetLayer("FinishedLevelLayer") == canvas->GetActiveLayer())canvas->PopActiveLayer(); //pop the ui if its still there
+    if (&canvas->GetLayer("FinishedLevelLayer") && &canvas->GetLayer("FinishedLevelLayer") == canvas->GetActiveLayer()) {//pop the ui if its still there
+        canvas->PopActiveLayer();
+    }
+    renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
     levelManager->Reset();
