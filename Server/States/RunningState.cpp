@@ -197,6 +197,7 @@ void RunningState::UpdateInEndOfLevel(float dt) {
         return;
     }
     ReadNetworkFunctions();
+    world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
 
