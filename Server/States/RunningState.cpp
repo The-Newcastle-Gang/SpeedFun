@@ -52,6 +52,8 @@ void RunningState::WaitUntilClientsInGameplay() {
 }
 
 void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as it gets rid of stuff, needs to be done after update;
+    networkData->incomingInput.Clear();
+    networkData->incomingFunctions.Clear();
     ResetLevelInfo();
     world->ClearAndErase(); //free the memory too so we dont leak
     physics->Clear();
