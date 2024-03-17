@@ -40,9 +40,8 @@ void main() {
     vec4 stepInner = step(0.4, greyscaleFlame);
     vec4 stepOpacity  = step(0.1, greyscaleFlame);
     
-
-    //#CB1143
-    vec4 outerColor = vec4(0.796,0.067,0.263, 1);
+    // vec4 outerColor = vec4(0.796,0.067,0.263, 1);
+    vec4 outerColor = uiColor;
     vec4 outerFlame = outerColor * (1.0-stepInner);
 
     vec4 innerColor = vec4(1.,0.51,0.059,1);

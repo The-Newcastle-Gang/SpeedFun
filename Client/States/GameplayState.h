@@ -193,8 +193,13 @@ namespace NCL {
             ShaderBase *fireShader;
 
             const int timerTopOffset = 32;
-            const int timerBarHeight = 28;
-            const int timerBoxWidth = 96;
+            const int timerBarHeight = 10;
+            const int timerBoxWidth = 10;
+
+            const int timerEndBoxY = 60;
+            const int timerEndBoxX = 60;
+            const float timerEndBoxYoff = 0.6f;
+
             const int timerBarOutline = 3;
             float timerRatio = 0.0f;
             Vector4 timerBarColor = { Replicated::PLATINUM };

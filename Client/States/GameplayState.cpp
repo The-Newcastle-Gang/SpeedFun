@@ -25,7 +25,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     timerBarShader      = resources->GetShader("timerBar");
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
-    biggerDebugFont = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
+    biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
 }
 
 GameplayState::~GameplayState() {
@@ -66,7 +66,6 @@ void GameplayState::InitCrossHeir(){
 
 void GameplayState::InitTimerBar(){
     //timer Bar
-    int outlineSize = timerBarOutline;
     if (baseClient->IsSinglePlayer())
     {
         Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
@@ -90,11 +89,11 @@ void GameplayState::InitTimerBar(){
     }
     int backTimerBarWidth = (baseClient->IsSinglePlayer()) ? 800 : timerBoxWidth;
 
-    auto backTimer = canvas->AddElement()
+    auto timerOutline = canvas->AddElement()
         .SetColor({ 0,0,0,1 })
-        .SetAbsoluteSize({ backTimerBarWidth + outlineSize*2, timerBarHeight + outlineSize*2 })
+        .SetAbsoluteSize({ backTimerBarWidth + timerBarOutline*2, timerBarHeight + timerBarOutline*2 })
         .AlignCenter()
-        .AlignTop(timerTopOffset - outlineSize);
+        .AlignTop(timerTopOffset - timerBarOutline);
 
     if (baseClient->IsSinglePlayer())
     {
@@ -106,19 +105,24 @@ void GameplayState::InitTimerBar(){
             .SetShader(timerBarShader);
         timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
     }
+
+    //this is the box behind the timer number
     timeBarTimerBox = &canvas->AddElement()
-            .SetColor({0.05,0,0,1})
-            .SetAbsoluteSize({ timerBoxWidth, timerBarHeight })
+            .SetColor({1,1,1,1})
+            .SetAbsoluteSize({ timerEndBoxX , timerEndBoxY})
             .AlignCenter(baseClient->IsSinglePlayer() ? 400 : 0)
-            .AlignTop(timerTopOffset);
+            .SetShader(fireShader)
+            .SetTexture(resources->GetTexture("firemask.jpg"))
+            .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
+
     if (baseClient->IsSinglePlayer()) {
         timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
     }
     
     
-
+    //this is the timer text me thinks
     timerText = &canvas->AddElement()
-        .SetColor({ 0,0,0,1 })
+        .SetColor({ 1,1,1,1 })
         .AlignCenter(400)
         .AlignTop(timerTopOffset - 8)
         .SetText(TextData());
@@ -895,14 +899,15 @@ void GameplayState::UpdateCrosshair(Element& element, float dt) {
 void GameplayState::UpdateTimerUI(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
 
-    element.SetAbsoluteSize({ (int)round((800 - 96) * timerRatio), timerBarHeight });
+    element.SetAbsoluteSize({ (int)round((800 - 20) * timerRatio), timerBarHeight });
     element.SetColor(timerBarColor);
 }
 
 void GameplayState::UpdateTimerBox(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
     float positionRatio = timerRatio;
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio));
+    element.AlignCenter((int)round(-400 + 30 / 2 + (800 - 30) * positionRatio))
+    .SetColor(timerBarColor);
 }
 
 void GameplayState::UpdateTimerText(Element& element, float dt) {
@@ -918,7 +923,7 @@ void GameplayState::UpdateTimerText(Element& element, float dt) {
         randomY = 0;
         positionRatio = 0.5;
     }
-    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96 / 2 + 8 + randomX));
+//    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96 / 2 + 8 + randomX));
     element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
 
     timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
