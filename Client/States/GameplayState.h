@@ -202,7 +202,6 @@ namespace NCL {
 
             GameplayStateEnums::ClientState state = GameplayStateEnums::END_OF_LEVEL;
 
-            bool isUpdating = false;
             bool shouldMoveToNewLevel = false;
 
             void CreateGrapples();
