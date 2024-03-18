@@ -4,6 +4,54 @@
 using namespace NCL;
 using namespace CSC8503;
 
+Camera* DebugMode::currentCam;
+
+static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
+static int ProcessorsNum;
+static HANDLE self;
+
+
+void DebugMode::SetDebugCam(Camera *cam) {
+        currentCam = cam;
+}
+
+void DebugMode::InitDebugInfo() {
+    SYSTEM_INFO sysInfo;
+    FILETIME ftime, fsys, fuser;
+
+    GetSystemInfo(&sysInfo);
+    ProcessorsNum = sysInfo.dwNumberOfProcessors;
+
+    GetSystemTimeAsFileTime(&ftime);
+    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+
+    self = GetCurrentProcess();
+    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+}
+
+double DebugMode::GetCurrentCPUVal(){
+    FILETIME ftime, fsys, fuser;
+    ULARGE_INTEGER now, sys, user;
+    double percent;
+
+    GetSystemTimeAsFileTime(&ftime);
+    memcpy(&now, &ftime, sizeof(FILETIME));
+
+    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+    memcpy(&sys, &fsys, sizeof(FILETIME));
+    memcpy(&user, &fuser, sizeof(FILETIME));
+    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+              (user.QuadPart - lastUserCPU.QuadPart);
+    percent /= (now.QuadPart - lastCPU.QuadPart);
+    percent /= ProcessorsNum;
+    lastCPU = now;
+    lastUserCPU = user;
+    lastSysCPU = sys;
+    return percent * 100;
+}
+
 
 void DebugMode::UpdateDebugMode(float dt)
 {
@@ -12,6 +60,7 @@ void DebugMode::UpdateDebugMode(float dt)
 	DisplayCameraInfo();
     DisplayCollisionInfo();
 }
+
 
 void DebugMode::DisplayFPSCount(float dt)
 {
@@ -33,7 +82,8 @@ void DebugMode::DisplayMemoryUsage()
 	DWORDLONG physMemoryUsed = (memoryStatus.ullTotalPhys - memoryStatus.ullAvailPhys) / 1024;
 	Debug::Print("Physical memory used: " + std::to_string(physMemoryUsed) + " KB (" + std::to_string(physMemoryUsed / (1024 * 1024)) + " GB)", Vector2(3, 20), Debug::RED);
 	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailPhys / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 25), Debug::GREEN);
-
+//    Debug::Print(std::to_string(foo), Vector2(50,50), Debug::RED);
+    std::cout << GetCurrentCPUVal() << std::endl;
 }
 
 void DebugMode::DisplayCameraInfo()
@@ -49,5 +99,6 @@ void DebugMode::DisplayCameraInfo()
 
 //display COllision volumes
 void DebugMode::DisplayCollisionInfo(){
-    Debug::Print("Collisions hehe", Vector2(50,50), Debug::GREEN);
+//    Debug::Print("Collisions hehe", Vector2(50,50), Debug::GREEN);
 }
+

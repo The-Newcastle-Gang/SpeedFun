@@ -26,6 +26,10 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
+
+    DebugMode::SetDebugCam(world->GetMainCamera());
+    DebugMode::InitDebugInfo();
+
 }
 
 GameplayState::~GameplayState() {
@@ -36,7 +40,6 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-    delete debugger;
     delete loadSoundThread;
     delete medalShineShader;
 }
@@ -191,7 +194,6 @@ void GameplayState::OnEnter() {
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
-    debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 
     renderer->SetPointLights(world->GetPointLights());
@@ -294,7 +296,7 @@ void GameplayState::Update(float dt) {
     ReadNetworkPackets();
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {

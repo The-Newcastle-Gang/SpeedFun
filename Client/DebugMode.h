@@ -2,6 +2,9 @@
 #include "Vector2.h"
 #include "Debug.h"
 #include "GameplayState.h"
+#include "windows.h"
+#include "TCHAR.h"
+#include "pdh.h"
 
 
 namespace NCL {
@@ -9,21 +12,20 @@ namespace NCL {
 		class DebugMode
 		{
 		public:
-
-			DebugMode(Camera* cam)
-			{
-				currentCam = cam;
-			}
-
-			void UpdateDebugMode(float dt);
+            static void SetDebugCam(Camera* cam);
+			static void UpdateDebugMode(float dt);
+            static void InitDebugInfo();
 		protected:
-			void DisplayFPSCount(float dt);
-			void DisplayCollisionInfo();
-			void DisplayMemoryUsage();
-			void DisplayFeatureCosts();
-			void DisplayCameraInfo();
+			static void DisplayFPSCount(float dt);
+			static void DisplayCollisionInfo();
+			static void DisplayMemoryUsage();
+			static void DisplayFeatureCosts();
+			static void DisplayCameraInfo();
 
-			Camera* currentCam;
-		};
+			static Camera* currentCam;
+
+            static double GetCurrentCPUVal();
+            static double foo;
+        };
 	}
 }
