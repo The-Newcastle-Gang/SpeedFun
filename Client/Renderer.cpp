@@ -26,6 +26,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
+    cheeseTexture = (OGLTexture*)LoadTexture("cheeseTex.jpg");
     postProcessBase = new OGLShader("post.vert", "post.frag");
     fxaaShader = new OGLShader("post.vert", "fxaa.frag");
 
@@ -130,6 +131,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
+    
 
     sceneColorTexture = CreateHDRTexture();
     sceneDepthTexture = CreateDepthTexture();
@@ -489,6 +491,7 @@ void GameTechRenderer::RenderUI() {
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
             auto absPos = e.GetAbsolutePosition();
+            auto transformation = e.GetTransform();
             auto relSize = e.GetRelativeSize();
             auto absSize = e.GetAbsoluteSize();
 
@@ -507,6 +510,7 @@ void GameTechRenderer::RenderUI() {
             auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
 
             glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "model"), 1, false, (float*)transformation.GetMatrix().array);
             glUniform4fv(glGetUniformLocation(activeShader->GetProgramID(), "uiColor"), 1, colorAddress);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
@@ -514,10 +518,15 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
             glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "cheeseTexture"), 2);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
+
+
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, cheeseTexture->GetObjectID());
 
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);

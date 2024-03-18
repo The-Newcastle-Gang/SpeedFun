@@ -4,8 +4,6 @@
 
 #include "Replicated.h"
 
-
-
 Replicated::Replicated() {
 
 }

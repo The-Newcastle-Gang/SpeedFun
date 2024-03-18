@@ -34,10 +34,13 @@ namespace NCL {
             Diagnostics packetsSent{};
             Diagnostics updateCalled{};
 
+            void SetSinglePlayer(bool b) { isSinglePlayer = b; }
+            bool IsSinglePlayer() { return isSinglePlayer; }
+
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
-
+            bool isSinglePlayer = true;
             void UpdateDiagnostics(Diagnostics &d);
 
 
