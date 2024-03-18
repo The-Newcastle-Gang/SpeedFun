@@ -114,6 +114,7 @@ namespace NCL {
             void DeathTriggerVolFunc(int id);
             void DeathTriggerVolEndFunc(int id);
 
+            void SendMedalValues();
             void SendWorldToClient();
             void SendMedalToClient(int id);
 
@@ -124,9 +125,9 @@ namespace NCL {
             void AddTriggersToLevel();
             void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
-            void UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo);
-            void UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo);
-            void UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo);
+            void UpdatePlayerGameInfo();
+            void UpdateGameTimerInfo();
+            void UpdatePlayerPositionsInfo();
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
             void ResetAllPlayerMoveInputs();
             void ResetPlayerMoveInputs(GameObject* playerObject);

@@ -528,6 +528,13 @@ void GameplayState::ReadNetworkFunctions() {
                 }
             }
             break; 
+
+            case(Replicated::SendMedalValues): {
+                auto medals = handler.Unpack<Vector3>();
+                for (int i = 0; i < 3; i++)medalTimes[i] = medals[i];
+                timeElapsed = 0;
+            }
+            break;
             
             case(Replicated::SetNetworkActive): {
                 int networkObjectId = handler.Unpack<int>();
@@ -535,6 +542,7 @@ void GameplayState::ReadNetworkFunctions() {
                 auto targetObject = world->GetObjectByNetworkId(networkObjectId);
                 targetObject->SetActive(isActive);
             } break;
+
             case(Replicated::Player_Animation_Call): {
                 if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
 

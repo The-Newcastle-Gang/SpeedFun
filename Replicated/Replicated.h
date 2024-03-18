@@ -43,6 +43,7 @@ public:
         GameInfo_PlayerPositions,
         SetNetworkActive,
         ToggleGrapple,
+        SendMedalValues,
 };
 
 

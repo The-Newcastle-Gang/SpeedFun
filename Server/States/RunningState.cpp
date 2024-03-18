@@ -124,8 +124,9 @@ void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
-        UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
+        UpdatePlayerGameInfo();
     }
+
 }
 
 void RunningState::OnExit() {
@@ -169,6 +170,8 @@ void RunningState::UpdateInCountdown(float dt) {
     WaitForPlayersLoaded();
     if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
         Tick(dt);
+        SendMedalValues();
+        UpdatePlayerGameInfo();
     }
     if (levelManager->UpdateCountdown(dt)) {
         state = RunningStateEnums::GAMEPLAY;
@@ -581,13 +584,12 @@ void RunningState::ResetPlayerMoveInputs(GameObject* playerObject) {
     }
 }
 
-void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
-    UpdateGameTimerInfo(player, inputInfo);
-    UpdatePlayerPositionsInfo(player, inputInfo);
+void RunningState::UpdatePlayerGameInfo() {
+    UpdateGameTimerInfo();
+    UpdatePlayerPositionsInfo();
 }
 
-void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo) {
-    auto id = GetIdFromPlayerObject(player);
+void RunningState::UpdateGameTimerInfo() {
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(levelManager->GetElapsedTime());
@@ -597,11 +599,10 @@ void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& in
 
     int medalID = (int)levelManager->GetCurrentMedal();
     handler.Pack(medalID);
-    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::GameInfo_Timer, &data));
 }
 
-void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo) {
-    auto id = GetIdFromPlayerObject(player);
+void RunningState::UpdatePlayerPositionsInfo() {
     FunctionData data;
     DataHandler handler(&data);
 
@@ -613,7 +614,7 @@ void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPack
         handler.Pack(playerPosition);
     }
     handler.Pack(-999);
-    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_PlayerPositions, &data)));
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::GameInfo_PlayerPositions, &data));
 }
 
 void RunningState::ApplyPlayerMovement() {
@@ -702,6 +703,17 @@ void RunningState::CancelGrapple(int id)
         playerMovement->grappleProjectileInfo.travelDistance = 0;
         playerMovement->LeaveGrappleState();
     }
+}
+
+void RunningState::SendMedalValues() {
+    Vector3 medals;
+    FunctionData data;
+    DataHandler handler(&data);
+    medals[0] = levelManager->GetPlatinumTime();
+    medals[1] = levelManager->GetGoldTime();
+    medals[2] = levelManager->GetSilverTime();
+    handler.Pack(medals);
+    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SendMedalValues, &data));
 }
 
 void RunningState::SetTestSprings() {
