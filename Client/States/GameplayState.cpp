@@ -580,6 +580,9 @@ void GameplayState::InitLevel() {
     auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
     auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
     auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
+    auto rayEnemyList = levelManager->GetLevelReader()->GetRayEnemyPrimitiveList();
+    auto rayenemyTriList = levelManager->GetLevelReader()->GetRayTriggerPrimitiveList();
+    auto bridgeTriList = levelManager->GetLevelReader()->GetBridgeTriggerPrimitiveList();
 
     for(auto &x : plist){
         auto temp = new GameObject();
@@ -635,7 +638,27 @@ void GameplayState::InitLevel() {
         temp->GetRenderObject()->SetColour({ 1.0f, 0.5f, 0.0f, 1.0f });
     }
 
-    SetRaycastEnemy();
+    for (auto& x : rayEnemyList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f, 0.0f, 1.0f });
+    }
+
+    for (auto& x : rayenemyTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f, 0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f, 0.0f, 1.0f });
+    }
+
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -753,13 +776,4 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return progress.Length()/levelLen;
 }
 
-void GameplayState::SetRaycastEnemy() {
-    auto raycastEnemy = new GameObject();
-    auto x = new PrimitiveGameObject();
-    x->position = Vector3(-75, 6, 0);
-    x->colliderExtents = Vector3(1, 1, 1);
-    x->dimensions = Vector3(1, 1, 1);
-    x->shouldNetwork = true;
-    replicated->AddBlockToLevel(raycastEnemy, *world, x);
-    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
-}
+

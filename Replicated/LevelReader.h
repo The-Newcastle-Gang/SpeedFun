@@ -72,6 +72,10 @@ public:
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetSpeedupBlockPrimitiveList() const { return speedupBlockPrimitives; }
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetBridgePrimitiveList() const { return bridgePrimitives; }
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetTrapBlockPrimitiveList() const { return trapBlockPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetRayEnemyPrimitiveList() const { return rayEnemyPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetRayTriggerPrimitiveList() const { return rayenemytriggerPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetBridgeTriggerPrimitiveList() const { return bridgetriggerPrimitives; }
+
 
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
@@ -90,6 +94,9 @@ protected:
     std::vector<PrimitiveGameObject*> speedupBlockPrimitives;
     std::vector<PrimitiveGameObject*> bridgePrimitives;
     std::vector<PrimitiveGameObject*> trapBlockPrimitives;
+    std::vector<PrimitiveGameObject*> rayEnemyPrimitives;
+    std::vector<PrimitiveGameObject*> rayenemytriggerPrimitives;
+    std::vector<PrimitiveGameObject*> bridgetriggerPrimitives;
 
     std::vector<GroundCubePrimitive*> groundCubes;
 

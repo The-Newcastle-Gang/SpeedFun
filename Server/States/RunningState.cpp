@@ -443,6 +443,9 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
     auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
     auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
+    auto rayEnemyList = levelManager->GetLevelReader()->GetRayEnemyPrimitiveList();
+    auto rayenemyTriList = levelManager->GetLevelReader()->GetRayTriggerPrimitiveList();
+    auto bridgeTriList = levelManager->GetLevelReader()->GetBridgeTriggerPrimitiveList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -505,9 +508,8 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
 
-        TestBridge* ts = new TestBridge(g);
-        g->AddComponent(ts);
-        SetBridge(ts);
+        ib = new TestBridge(g);
+        g->AddComponent(ib);
     }
 
     for (auto& x : trapBlockList) {
@@ -520,8 +522,41 @@ void RunningState::BuildLevel(const std::string &levelName)
         TrapBlock* tbs = new TrapBlock(g);
         g->AddComponent(tbs);
     }
+    
 
-    SetRayEnemy();
+    for (auto& x : rayEnemyList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        re = new RayEnemyFollow(g);
+        g->AddComponent(re);
+    }
+
+    for (auto& x : rayenemyTriList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        RayEnemyShoot* ret = new RayEnemyShoot(g);
+        g->AddComponent(ret);
+        ret->SetFollowComponent(re);
+    }
+
+    for (auto& x : bridgeTriList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+        BridgeTrigger* bt = new BridgeTrigger(g);
+        g->AddComponent(bt);
+        bt->SetBridgeTrigger(ib);
+    }
 
 }
 
@@ -596,45 +631,3 @@ void RunningState::SetNetworkActive(GameObject *g, bool isActive) {
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SetNetworkActive, &data));
 }
 
-void RunningState::SetBridge(TestBridge* theBridge) {
-
-    auto bridgeTrigger = new GameObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(1, 1, 1), bridgeTrigger, *world);
-    bridgeTrigger->SetPhysicsObject(new PhysicsObject(&bridgeTrigger->GetTransform(), bridgeTrigger->GetBoundingVolume(), physics->GetPhysMat("Default")));
-    bridgeTrigger->GetPhysicsObject()->SetInverseMass(0.0f);
-    bridgeTrigger->GetTransform().SetPosition(Vector3(-75, 6, 5));
-    bridgeTrigger->GetPhysicsObject()->SetIsTriggerVolume(true);
-    BridgeTrigger* briTriggerComp = new BridgeTrigger(bridgeTrigger);
-    bridgeTrigger->AddComponent(briTriggerComp);
-    Debug::DrawAABBLines(Vector3(-75, 6, 5), Vector3(1, 1, 1), Debug::MAGENTA, 1000.0f);
-    briTriggerComp->SetBridgeTrigger(theBridge);
-
-}
-
-void RunningState::SetRayEnemy() {
-
-    auto rayenemyFollow = new GameObject();
-    auto x = new PrimitiveGameObject();
-    x->position = Vector3(-75, 6, 0);
-    x->colliderExtents = Vector3(1, 1, 1);
-    x->dimensions = Vector3(1, 1, 1);
-    x->shouldNetwork = true;
-    replicated->AddBlockToLevel(rayenemyFollow, *world, x);
-
-    rayenemyFollow->SetPhysicsObject(new PhysicsObject(&rayenemyFollow->GetTransform(), rayenemyFollow->GetBoundingVolume(), new PhysicsMaterial()));
-    rayenemyFollow->GetPhysicsObject()->SetInverseMass(0.0f);
-    RayEnemyFollow* followComp = new RayEnemyFollow(rayenemyFollow);
-    rayenemyFollow->AddComponent(followComp);
-
-    auto rayenemyShoot = new GameObject();
-    replicated->AddTriggerVolumeToWorld(Vector3(10, 10, 20), rayenemyShoot, *world);
-    rayenemyShoot->SetPhysicsObject(new PhysicsObject(&rayenemyShoot->GetTransform(), rayenemyShoot->GetBoundingVolume(), physics->GetPhysMat("Default")));
-    rayenemyShoot->GetPhysicsObject()->SetInverseMass(0.0f);
-    rayenemyShoot->GetTransform().SetPosition(Vector3(-75, 5, 0));
-    rayenemyShoot->GetPhysicsObject()->SetIsTriggerVolume(true);
-    RayEnemyShoot* shootComp = new RayEnemyShoot(rayenemyShoot);
-    rayenemyShoot->AddComponent(shootComp);
-    Debug::DrawAABBLines(Vector3(-75, 5, 0), Vector3(5, 5, 10), Debug::MAGENTA, 1000.0f);
-
-    shootComp->SetFollowComponent(followComp);
-}

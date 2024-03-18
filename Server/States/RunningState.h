@@ -115,8 +115,8 @@ namespace NCL {
             void GrappleStart(GameObject *player, Vector3 direction);
             void CancelGrapple(int id);
 
-            void SetBridge(TestBridge* theBridge);
-            void SetRayEnemy();
+            RayEnemyFollow* re;
+            TestBridge* ib;
         };
     }
 }
