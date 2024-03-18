@@ -80,8 +80,8 @@ void main(void)	{
   	vec4 lavaColorEnd     =  vec4(0.99, 0.35, 0.0, 1.0);
 	
 	float worldY = IN.worldPos.y;
-	if(worldY >= lavaHeight) {
-		float maxHeight = 2.5;
+	if(worldY >= lavaHeight && IN.normal.y < 0.9) {
+		float maxHeight = 1.5;
 		float distance = 1.0 - clamp(worldY - lavaHeight, 0.0, maxHeight) / maxHeight;
 		//int colourThreasholds = 8;
     	//distance = floor(distance * colourThreasholds) / colourThreasholds;
