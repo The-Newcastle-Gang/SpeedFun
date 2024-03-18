@@ -743,7 +743,7 @@ void GameplayState::AddLava(Vector3 position){
     auto LavaQuad = new GameObject();
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
-    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("QuadSequel.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
+    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
