@@ -24,6 +24,7 @@ PlayerMovement::PlayerMovement(GameObject *g, GameWorld *w) : GrappleStart(onGra
     grappleProjectileInfo.SetActive(false);
 
     maxHorizontalVelocity = 7.0f;
+    maxVerticalVelocity = 20.0f;
 
     rightAxis = Vector3();
     inputDirection = Vector2();
@@ -83,7 +84,8 @@ void PlayerMovement::OnGrappleStart() {
 }
 
 void PlayerMovement::OnGrappleUpdate(float dt) {
-    static float grappleSpeed = 5000.0f;
+    //static float grappleSpeed = 5000.0f;
+    static Vector3 grappleSpeed(5000.0f,4200.0f,5000.0f);
 
     onGrappleUpdate.publish(gameObject, grapplePoint);
 
@@ -104,6 +106,7 @@ void PlayerMovement::StartInAir() {
     static float airJumpVelocity = 0.0f;
     static float airDragFactor = 0.5f;
     static float airMaxHorizontalVelocity = 20.0f;
+    static float airMaxVerticalVelocity = 20.0f;
 
     playerAnimationCallData.inAir = true;
 
@@ -112,6 +115,8 @@ void PlayerMovement::StartInAir() {
     jumpVelocity = airJumpVelocity;
     dragFactor = airDragFactor;
     maxHorizontalVelocity = airMaxHorizontalVelocity;
+    maxVerticalVelocity = airMaxVerticalVelocity;
+
     cameraAnimationCalls.isGrounded = false;
 }
 
@@ -150,6 +155,7 @@ void PlayerMovement::StartGround() {
     static float groundJumpVelocity = 7.0f;
     static float groundDragFactor = 8.5f;
     static float groundMaxHorizontalVelocity = 20.0f;
+    static float groundMaxVerticalVelocity = 20.0f;
 
     playerAnimationCallData.inAir = false;
 
@@ -157,6 +163,7 @@ void PlayerMovement::StartGround() {
     jumpVelocity = groundJumpVelocity;
     dragFactor = groundDragFactor;
     maxHorizontalVelocity = groundMaxHorizontalVelocity;
+    maxVerticalVelocity = groundMaxVerticalVelocity;
 
     hasCoyoteExpired = false;
 
@@ -201,10 +208,16 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
     // Clamp max speed
     Vector3 linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity();
     auto horizontalVel = Vector2(linearVel.x, linearVel.z);
+    auto verticalVel = linearVel.y;
 
     if (horizontalVel.Length() > maxHorizontalVelocity) {
         auto newHorizontalVel = horizontalVel.Normalised() * maxHorizontalVelocity;
         gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(newHorizontalVel.x, linearVel.y, newHorizontalVel.y));
+        linearVel = gameObject->GetPhysicsObject()->GetLinearVelocity(); //we changed it
+
+    }
+    if (verticalVel > maxVerticalVelocity) {
+        gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(linearVel.x, maxVerticalVelocity, linearVel.z));
     }
 }
 
