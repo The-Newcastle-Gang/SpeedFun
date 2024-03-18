@@ -4,11 +4,6 @@
 
 #include "Replicated.h"
 
-constexpr Vector4 Replicated::PLATINUM = Vector4(0.941f, 0.918f, 0.839f, 1.0f);
-constexpr Vector4 Replicated::GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
-constexpr Vector4 Replicated::SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
-constexpr Vector4 Replicated::BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
-
 Replicated::Replicated() {
 
 }
