@@ -10,6 +10,7 @@ void DebugMode::UpdateDebugMode(float dt)
 	DisplayFPSCount(dt);
 	DisplayMemoryUsage();
 	DisplayCameraInfo();
+    DisplayCollisionInfo();
 }
 
 void DebugMode::DisplayFPSCount(float dt)
@@ -44,4 +45,9 @@ void DebugMode::DisplayCameraInfo()
 	Debug::Print("Roll: " + std::to_string(currentCam->GetRoll()), Vector2(75, 15), Debug::WHITE);
 	Debug::Print("Pitch: " + std::to_string(currentCam->GetPitch()), Vector2(75, 10), Debug::WHITE);
 	Debug::Print("Yaw: " + std::to_string(currentCam->GetYaw()), Vector2(75, 5), Debug::WHITE);
+}
+
+//display COllision volumes
+void DebugMode::DisplayCollisionInfo(){
+    Debug::Print("Collisions hehe", Vector2(50,50), Debug::GREEN);
 }
