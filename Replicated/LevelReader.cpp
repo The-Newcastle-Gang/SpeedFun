@@ -132,6 +132,43 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         harmfulOscillatorPrimitives.emplace_back(temp);
     }
 
+        for (auto& item : jData["harmOscList"].items()) {
+        auto temp = new SwingingPrimitive();
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        temp->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        temp->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        temp->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        temp->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        temp->shouldNetwork = item.value()["shouldNetwork"];
+        temp->colliderRadius = item.value()["colliderRadius"];
+        temp->inverseMass = item.value()["inverseMass"];
+        temp->physicsType = item.value()["physicType"];
+
+        temp->meshName = item.value()["mesh"];
+        temp->timePeriod = (float)item.value()["timePeriod"];
+        temp->distance = (float)item.value()["dist"];
+        temp->cooldown = (float)item.value()["cooldown"];
+        temp->waitDelay = (float)item.value()["waitDelay"];
+
+        auto& dimref = item.value()["dimensions"];
+        auto& posi = item.value()["position"];
+        auto& dir = item.value()["direction"];
+
+        temp->dimensions = Vector3(dimref["x"], dimref["y"], dimref["z"]);
+        temp->position = Vector3(posi["x"], posi["y"], posi["z"] * -1);
+        temp->direction = Vector3(dir["x"], dir["y"], dir["z"] * -1);
+
+        temp->shouldNetwork = true;
+
+        swingingPrimitives.emplace_back(temp);
+    }
+
     for (auto& item : jData["pointLights"].items()) {
         PointLightInfo newLight;
         auto& colour = item.value()["colour"];

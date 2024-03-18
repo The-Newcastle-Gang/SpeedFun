@@ -124,7 +124,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("adamtest");
     CreatePlayers();
     AddTriggersToLevel();
 }
@@ -398,6 +398,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
 
     for(auto& x: plist){
         auto g = new GameObject();
@@ -431,15 +432,17 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(dO);
     }
 
-    // TEST SWINGING OBJECT
-    auto g = new GameObject();
-    replicated->AddTestObjectToLevel(g, *world, { 5, 5, 5 }, { 0, 10, 0 });
-    g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
-    g->GetPhysicsObject()->SetInverseMass(0.0f);
-    g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
+    for (auto& x : swingpList)
+    {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(DEFAULT_LAYER);
 
-    Swinging* swing = new Swinging(g, 5, 3, 0.3, 6, false, false);
-    g->AddComponent(swing);
+        Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
+        g->AddComponent(swing);
+    }
 
     //SetTestSprings(); 
     //SetTestFloor();
