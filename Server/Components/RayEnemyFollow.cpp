@@ -19,7 +19,6 @@ void RayEnemyFollow::Update(float dt) {
         float transDegree = (atan2(enemyDir.x, enemyDir.z)) * 180.0f / PI;
         enemyOrientation = Quaternion::EulerAnglesToQuaternion(0.0f, transDegree, 0.0f);
         gameObject->GetTransform().SetOrientation(enemyOrientation); //make the enemy will keep facing the player
-        //std::cout << gameObject->GetTransform().GetOrientation()<<"\n";
     }
 }
 

@@ -67,7 +67,6 @@ namespace NCL {
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
             void SetTestFloor();
-            void SetRaycastEnemy();
 
             std::unique_ptr<LevelManager> levelManager;
 
