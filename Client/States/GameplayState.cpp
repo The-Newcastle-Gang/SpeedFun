@@ -113,16 +113,7 @@ void GameplayState::InitTimerBar(){
             .AlignLeft(40)
             .AlignBottom(40);
 
-
-
-
-
-
-
-
-
-
-
+    
 //    //timer Bar
 //    if (isSinglePlayer)
 //    {
