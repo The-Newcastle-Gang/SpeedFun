@@ -178,17 +178,13 @@ namespace NCL {
             float CalculateCompletion(Vector3 cp);
             void AddLava( Vector3 pos );
             void AddEndPortal ( Vector3 pos );
-            Element* timeBar;
             int PlayerBlip;
 
-            float CalculateCompletion(Vector3 cp);
             float timeElapsed;
             int currentMedal = 4;
             float timerMedalShakeTimer = 0.0f;
             float medalTimes[3] = { -1.0f, -1.0f, -1.0f };
 
-
-            int PlayerBlip;
             void InitPlayerBlip(int id);
             std::unordered_map<std::string, Vector3> playerPositions;
 
