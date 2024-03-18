@@ -38,6 +38,7 @@ GameplayState::~GameplayState() {
 
     delete debugger;
     delete loadSoundThread;
+    delete medalShineShader;
 }
 
 
@@ -729,12 +730,6 @@ void GameplayState::InitLevel() {
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
-    // TEST SWINGING OBJECT ON THE CLIENT
-    //auto swingingTemp = new GameObject();
-    //replicated->AddSwingingBlock(swingingTemp, *world);
-    //swingingTemp->SetRenderObject(new RenderObject(&swingingTemp->GetTransform(), resources->GetMesh("Sphere.msh"), nullptr, nullptr));
-
-    SetTestSprings();
 
 }
 
@@ -912,20 +907,18 @@ void GameplayState::UpdateTimerBox(Element& element, float dt) {
 
 void GameplayState::UpdateTimerText(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
-    float positionRatio = timerRatio;
     element.textData.text = std::format("{:.2f}", timeElapsed);
     element.textData.fontSize = 0.5f;
 
     int randomX = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
     int randomY = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    if (isSinglePlayer) {
+    if (!isSinglePlayer) {
         randomX = 0;
         randomY = 0;
-        positionRatio = 0.5;
     }
-//    element.AlignCenter((int)round(-400 + 96 / 2 + (800 - 96) * positionRatio - 96 / 2 + 8 + randomX));
+    element.AlignCenter(400 + randomX);
     element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
-
+    
     timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
 }
 
