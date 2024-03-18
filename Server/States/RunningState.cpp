@@ -488,7 +488,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
         g->AddComponent(swing);
