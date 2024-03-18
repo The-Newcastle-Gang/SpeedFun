@@ -151,8 +151,8 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         temp->physicsType = item.value()["physicType"];
 
         temp->meshName = item.value()["mesh"];
-
-            temp->timePeriod = (float)item.value()["timePeriod"];
+        
+        temp->timePeriod = (float)item.value()["timePeriod"];
         temp->cooldown = (float)item.value()["cooldown"];
         temp->waitDelay = (float)item.value()["waitDelay"];
         temp->radius = (float)item.value()["radius"];
