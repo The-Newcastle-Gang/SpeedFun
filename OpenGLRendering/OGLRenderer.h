@@ -62,7 +62,8 @@ namespace NCL {
 
 			void DrawString(const std::string& text, const Vector2&pos, const Vector4& colour = Vector4(0.75f, 0.75f, 0.75f,1), float size = 20.0f );
 			void DrawLine(const Vector3& start, const Vector3& end, const Vector4& colour);
-			void UseSecondThread();
+			void UseAlternateRenderContext();
+			void UseMainRenderContext();
 
 			//virtual Matrix4 SetupDebugLineMatrix()	const;
 			//virtual Matrix4 SetupDebugStringMatrix()const;
@@ -89,10 +90,10 @@ namespace NCL {
 			void DestroyWithWin32();
 			HDC		deviceContext;				//...Device context?
 			HGLRC	renderContext;				//Permanent Rendering Context		
-			HGLRC	alternateRenderContext;		//Permanent Rendering Context		
+			HGLRC	alternateRenderContext;		//Alt Rendering Context		
 #endif
 		private:
-			//struct DebugString {
+			//struct DebugString {s
 			//	Maths::Vector4 colour;
 			//	Maths::Vector2	pos;
 			//	float			size;

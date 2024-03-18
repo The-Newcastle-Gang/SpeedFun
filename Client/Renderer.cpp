@@ -272,16 +272,11 @@ void GameTechRenderer::RenderLoadingScreenFrame() {
 
     glEnable(GL_CULL_FACE);
     glClearColor(1, 1, 1, 0);
-    BuildObjectList();
-    SortObjectList();
-    // RenderTitle or some shit
-    //InitUIQuad();
-    RenderCamera();
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    NewRenderText();
+    RenderCamera();
     RenderUI();
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);

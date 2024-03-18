@@ -1,3 +1,4 @@
+#include "OGLRenderer.h"
 /*
 Part of Newcastle University's Game Engineering source code.
 
@@ -384,8 +385,20 @@ void OGLRenderer::InitWithWin32(Window& w) {
 }
 
 
-void OGLRenderer::UseSecondThread() {
-	wglMakeCurrent(deviceContext, alternateRenderContext);
+void OGLRenderer::UseAlternateRenderContext() {
+
+	if (!wglMakeCurrent(deviceContext, alternateRenderContext)) {	// Try To Activate The Rendering Context
+		std::cout << __FUNCTION__ << " Cannot set alternate context!" << std::endl;
+		wglDeleteContext(alternateRenderContext);
+		return;
+	}
+
+	//wglMakeCurrent(deviceContext, alternateRenderContext);
+	std::cout << "Alternate context set!\n";
+}
+
+void OGLRenderer::UseMainRenderContext() {
+	wglMakeCurrent(deviceContext, renderContext);
 }
 
 void OGLRenderer::DestroyWithWin32() {

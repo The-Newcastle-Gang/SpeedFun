@@ -40,6 +40,7 @@ GameplayState::~GameplayState() {
 
 void GameplayState::InitCanvas(){
     shouldLoadScreen.store(false);
+    renderer->UseMainRenderContext();
 
     canvas->Reset();
         InitCrossHeir();
@@ -108,14 +109,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
     }
 }
 
-void GameplayState::LoadingScreenTUpdate() {
 
-    while (shouldLoadScreen) {
-        std::cout << "Loading!\n";
-        renderer->RenderLoadingScreen();
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    }
-}
 
 void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
@@ -135,7 +129,6 @@ void GameplayState::InitialiseAssets() {
     totalThingsToLoad = soundsToLoad.size();
     InitWorld();
     InitCamera();
-    
 
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
@@ -163,124 +156,27 @@ void GameplayState::CreateNetworkThread() {
 
 void GameplayState::CreateLoadingScreenThread() {
     canvas->Reset();
-
-    //InitLua();
-    //lua_getglobal(L, "canvas");
-    //lua_pushnil(L);
-    //while (lua_next(L, -2)) {
-    //    auto layerName = lua_tostring(L, -2);
-    //    lua_pushnil(L);
-    //    while (lua_next(L, -2)) {
-    //        AddCanvasElement(layerName, false);
-    //        lua_pop(L, 1);
-    //    }
-    //    lua_pop(L, 1);
-    //}
-    
-    canvas->CreateNewLayer("Loading");
-    canvas->PushActiveLayer("Loading");
-    canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
-    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
-    renderer->RenderLoadingScreen();
-
-    canvas->CreateNewLayer("Loading2");
-    canvas->PushActiveLayer("Loading2");
-    canvas->AddImageElement("LoadingText.png", "Loading2").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
-    canvas->AddImageElement("Circle.png", "Loading2").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignLeft(500);
-    renderer->RenderLoadingScreen();
     
     shouldLoadScreen.store(true);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
     loadingScreenThread->detach();
 }
 
-void GameplayState::AddCanvasElement(const std::string& layerName, bool blocking) {
+void GameplayState::LoadingScreenTUpdate() {
+    //renderer->UseMainRenderContext();
+    renderer->UseAlternateRenderContext();
+    canvas->Reset();
 
-    if (layerName != "main" && !canvas->DoesLayerExist(layerName)) {
-        canvas->CreateNewLayer(layerName, blocking);
-    }
+    canvas->CreateNewLayer("Loading", false);
+    canvas->PushActiveLayer("Loading");
+    canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
+    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
 
-    std::string image = getStringField(L, "image");
 
-    auto& element = image.empty() ? canvas->AddElement(layerName)
-        : canvas->AddImageElement(image, layerName);
-
-    element.SetAbsoluteSize(getVec2Field(L, "aSize"))
-        .SetRelativeSize(getVec2Field(L, "rSize"))
-        .SetAbsolutePosition(getVec2Field(L, "aPos"))
-        .SetRelativePosition(getVec2Field(L, "rPos"))
-        .SetColor(getVec4Field(L, "color"))
-        .SetZIndex(getIntField(L, "zIndex"));
-
-    AlignCanvasElement(element);
-
-    TextData text;
-    getTableField(L, "text");
-
-    text.text = getStringField(L, "text");
-    text.defaultText = text.text;
-    text.color = getVec4Field(L, "color");
-    text.SetFont(menuFont.get());
-    text.fontSize = (float)getNumberField(L, "size");
-
-    element.SetText(text);
-    lua_pop(L, 1); // text
-
-    std::unordered_set<std::string> tags;
-    getTableField(L, "tags");
-    lua_pushnil(L);
-    while (lua_next(L, -2)) {
-        tags.insert(lua_tostring(L, -1));
-        lua_pop(L, 1);
-    }
-
-    lua_pop(L, 1); // tags
-
-    std::string id = getStringField(L, "id");
-
-    element.AddTags(tags);
-    element.SetId(id);
-}
-
-void GameplayState::AlignCanvasElement(Element& element) {
-    getTableField(L, "align");
-    lua_pushnil(L);
-
-    while (lua_next(L, -2)) {
-        auto direction = getStringField(L, "to");
-        auto padding = getIntField(L, "padding");
-        if (!strcmp(direction, "top")) {
-            element.AlignTop(padding);
-        }
-        else if (!strcmp(direction, "middle")) {
-            element.AlignMiddle(padding);
-        }
-        else if (!strcmp(direction, "bottom")) {
-            element.AlignBottom(padding);
-        }
-        else if (!strcmp(direction, "left")) {
-            element.AlignLeft(padding);
-        }
-        else if (!strcmp(direction, "center")) {
-            element.AlignCenter(padding);
-        }
-        else if (!strcmp(direction, "right")) {
-            element.AlignRight(padding);
-        }
-        lua_pop(L, 1);
-    }
-
-    lua_pop(L, 1); // align
-}
-
-void GameplayState::InitLua() {
-    L = luaL_newstate();
-    luaL_openlibs(L);
-
-    auto status = luaL_dofile(L, (Assets::DATADIR + "LoadingScreen.lua").c_str());
-
-    if (status) {
-        std::cerr << "LUA CRIES OUT IN PAIN: " << lua_tostring(L, -1);
+    while (shouldLoadScreen) {
+        std::cout << "Loading!\n";
+        renderer->RenderLoadingScreen();
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 }
 
@@ -302,7 +198,6 @@ void GameplayState::OnExit() {
     networkThread = nullptr;
     delete loadingScreenThread;
     loadingScreenThread = nullptr;
-    lua_close(L);
 }
 
 void GameplayState::ManageLoading(float dt) {
