@@ -347,6 +347,14 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 	renderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
 
+	alternateRenderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
+	BOOL error = wglShareLists(renderContext, alternateRenderContext);
+	if (error == FALSE)
+	{
+		std::cout << "death" << std::endl;
+		wglDeleteContext(alternateRenderContext);
+	}
+
 	// Check for the context, and try to make it the current rendering context
 	if (!renderContext || !wglMakeCurrent(deviceContext, renderContext)) {
 		std::cout << __FUNCTION__ <<" Cannot set OpenGL 3 context!" << std::endl;	//It's all gone wrong!
@@ -373,6 +381,11 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 
 	w.SetRenderer(this);
+}
+
+
+void OGLRenderer::UseSecondThread() {
+	wglMakeCurrent(deviceContext, alternateRenderContext);
 }
 
 void OGLRenderer::DestroyWithWin32() {
