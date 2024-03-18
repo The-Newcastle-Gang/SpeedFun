@@ -349,6 +349,7 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
+    ResetPlayerMoveInputs(playerObjects[id]); //reset the last input from the player so they dont keep moving
     playersFinished[id] = true;
     playerTimes[id] = levelManager->GetCurrentStageTime();
     SendMedalToClient(id);
@@ -554,6 +555,19 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         handler.Pack(playerMovement->cameraAnimationCalls.grapplingEvent);
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
+    }
+}
+
+void RunningState::ResetAllPlayerMoveInputs() {
+    for (auto& pair : playerObjects) {
+        ResetPlayerMoveInputs(pair.second);
+    }
+}
+
+void RunningState::ResetPlayerMoveInputs(GameObject* playerObject) {
+    PlayerMovement* pm = nullptr;
+    if (playerObject->TryGetComponent<PlayerMovement>(pm)) {
+        pm->ResetMovementInput();
     }
 }
 
