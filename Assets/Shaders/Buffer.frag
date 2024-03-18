@@ -81,7 +81,7 @@ void main(void)	{
 	
 	float worldY = IN.worldPos.y;
 	if(worldY >= lavaHeight && IN.normal.y < 0.9) {
-		float maxHeight = 1.5;
+		float maxHeight = 2.5;
 		float distance = 1.0 - clamp(worldY - lavaHeight, 0.0, maxHeight) / maxHeight;
 		//int colourThreasholds = 8;
     	//distance = floor(distance * colourThreasholds) / colourThreasholds;
