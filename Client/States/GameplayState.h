@@ -189,7 +189,6 @@ namespace NCL {
             Element *timeBar;
             Element *timeBarTimerBoxBack;
             Element *timeBarTimerBox;
-            Element *timerText;
             ShaderBase *timerBarShader;
             ShaderBase *fireShader;
 
@@ -238,6 +237,7 @@ namespace NCL {
             float finalTimeShake = 0.0f;
             MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
             std::unique_ptr<Font> biggerDebugFont;
+            std::unique_ptr<Font> HUDFont;
             DebugMode* debugger;
             bool displayDebugger = false;
 

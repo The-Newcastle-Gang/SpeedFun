@@ -19,6 +19,7 @@ struct TextData {
         defaultText = "";
         fontSize = 1.0f;
         font = nullptr;
+        textShader = nullptr;
     }
 
     void SetFont(Font* f) {
@@ -33,6 +34,7 @@ struct TextData {
     Vector4 color;
     std::string text;
     std::string defaultText;
+    OGLShader* textShader;
     float fontSize;
 };
 

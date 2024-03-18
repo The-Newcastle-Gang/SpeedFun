@@ -26,6 +26,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
+    HUDFont             = std::unique_ptr(renderer->LoadFont("ClashDisplay-Bold.otf", 64));
+
 }
 
 GameplayState::~GameplayState() {
@@ -66,68 +68,123 @@ void GameplayState::InitCrossHeir(){
 }
 
 void GameplayState::InitTimerBar(){
-    //timer Bar
-    if (isSinglePlayer)
-    {
-        Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
-        for (int i = 0; i < 3; i++) {
 
-            timerNubs[i] = &canvas->AddElement()
-                .SetColor(colours[i])
-                .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-                .AlignTop(timerTopOffset - 11)
-                .SetId("nub_" + std::to_string(i));
+    auto &backgroundBar = canvas->AddImageElement("hud/timerBar.png")
+            .SetAbsoluteSize({904, 87})
+            .AlignLeft(20)
+            .AlignTop(20);
 
-            medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f} });
-            timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
-        }
+    auto &timerTextBackground = canvas->AddImageElement("hud/timerTextBackground.png")
+            .SetAbsoluteSize({202, 112})
+            .AlignRight(20)
+            .AlignTop(20);
 
-        auto platNub = canvas->AddElement()
-            .SetColor(Replicated::PLATINUM)
-            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
-            .AlignTop(timerTopOffset - 11);
-    }
-    int backTimerBarWidth = (isSinglePlayer) ? 800 : timerBoxWidth;
+    TextData textBack;
+    textBack.font = HUDFont.get();
+    textBack.fontSize = 1.0;
+    textBack.text = "Test";
+    textBack.color = Vector4(0.0, 0.0, 0.0, 1.0);
 
-    auto timerOutline = canvas->AddElement()
-        .SetColor({ 0,0,0,1 })
-        .SetAbsoluteSize({ backTimerBarWidth + timerBarOutline*2, timerBarHeight + timerBarOutline*2 })
-        .AlignCenter()
-        .AlignTop(timerTopOffset - timerBarOutline);
+    auto &timerTextBack = canvas->AddElement()
+            .SetColor(Vector4(0,0,0,0))
+            .SetText(textBack)
+            .SetAbsoluteSize({202, 100})
+            .AlignRight(15)
+            .AlignTop(6);
 
-    if (isSinglePlayer)
-    {
-        timeBar = &canvas->AddElement()
-            .SetColor(Replicated::PLATINUM)
-            .SetAbsoluteSize({ 800, timerBarHeight })
-            .AlignCenter()
-            .AlignTop(timerTopOffset)
-            .SetShader(timerBarShader);
-        timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
-    }
+    timerTextBack.OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
 
-    //this is the box behind the timer number
-    timeBarTimerBox = &canvas->AddElement()
-            .SetColor({1,1,1,1})
-            .SetAbsoluteSize({ timerEndBoxX , timerEndBoxY})
-            .AlignCenter(isSinglePlayer ? 400 : 0)
-            .SetShader(fireShader)
-            .SetTexture(resources->GetTexture("firemask.jpg"))
-            .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
+    TextData text;
+    text.font = HUDFont.get();
+    text.fontSize = 1.0;
+    text.text = "Test";
 
-    if (isSinglePlayer) {
-        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
-    }
-    
-    
-    //this is the timer text me thinks
-    timerText = &canvas->AddElement()
-        .SetColor({ 1,1,1,1 })
-        .AlignCenter(400)
-        .AlignTop(timerTopOffset - 8)
-        .SetText(TextData());
-    timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
+    auto &timerText = canvas->AddElement()
+            .SetColor(Vector4(0,0,0,0))
+            .SetText(text)
+            .SetAbsoluteSize({202, 100})
+            .AlignRight(20)
+            .AlignTop(0);
+
+    timerText.OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
+
+    auto &tridentBar = canvas->AddImageElement("hud/tridentPath.png")
+            .SetAbsoluteSize({51, 480})
+            .AlignLeft(40)
+            .AlignBottom(40);
+
+
+
+
+
+
+
+
+
+
+
+//    //timer Bar
+//    if (isSinglePlayer)
+//    {
+//        Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
+//        for (int i = 0; i < 3; i++) {
+//
+//            timerNubs[i] = &canvas->AddElement()
+//                .SetColor(colours[i])
+//                .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+//                .AlignTop(timerTopOffset - 11)
+//                .SetId("nub_" + std::to_string(i));
+//
+//            medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f} });
+//            timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
+//        }
+//
+//        auto platNub = canvas->AddElement()
+//            .SetColor(Replicated::PLATINUM)
+//            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+//            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
+//            .AlignTop(timerTopOffset - 11);
+//    }
+//    int backTimerBarWidth = (isSinglePlayer) ? 800 : timerBoxWidth;
+//
+////    auto timerOutline = canvas->AddElement()
+////        .SetColor({ 0,0,0,1 })
+////        .SetAbsoluteSize({ backTimerBarWidth + timerBarOutline*2, timerBarHeight + timerBarOutline*2 })
+////        .AlignCenter()
+////        .AlignTop(timerTopOffset - timerBarOutline);
+//
+//    if (isSinglePlayer)
+//    {
+//        timeBar = &canvas->AddElement()
+//            .SetColor(Replicated::PLATINUM)
+//            .SetAbsoluteSize({ 800, timerBarHeight })
+//            .AlignCenter()
+//            .AlignTop(timerTopOffset)
+//            .SetShader(timerBarShader);
+//        timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
+//    }
+//
+//    //this is the box behind the timer number
+//    timeBarTimerBox = &canvas->AddElement()
+//            .SetColor({1,1,1,1})
+//            .SetAbsoluteSize({ timerEndBoxX , timerEndBoxY})
+//            .AlignCenter(isSinglePlayer ? 400 : 0)
+//            .SetShader(fireShader)
+//            .SetTexture(resources->GetTexture("firemask.jpg"))
+//            .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
+
+//    if (isSinglePlayer) {
+//        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
+//    }
+//
+//
+//    //this is the timer text me thinks
+//    timerText = &canvas->AddElement()
+//        .SetColor({ 1,1,1,1 })
+//        .AlignCenter(400)
+//        .AlignTop(timerTopOffset - 8)
+//        .SetText(TextData());
+//    timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
 
 }
 
@@ -908,18 +965,6 @@ void GameplayState::UpdateTimerBox(Element& element, float dt) {
 void GameplayState::UpdateTimerText(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
     element.textData.text = std::format("{:.2f}", timeElapsed);
-    element.textData.fontSize = 0.5f;
-
-    int randomX = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    int randomY = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    if (!isSinglePlayer) {
-        randomX = 0;
-        randomY = 0;
-    }
-    element.AlignCenter(400 + randomX);
-    element.AlignTop(timerTopOffset + timerBarHeight / 2 + 8 + randomY);
-    
-    timerMedalShakeTimer = std::clamp(timerMedalShakeTimer - dt, 0.0f, 1.0f);
 }
 
 void GameplayState::UpdateTimerNub(Element& element, float dt) {

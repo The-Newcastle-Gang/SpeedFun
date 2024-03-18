@@ -38,7 +38,7 @@ namespace NCL {
             ShaderBase*		LoadShader(const string& vertex, const string& fragment);
             std::unique_ptr<Font> LoadFont(const string& fontName, int size = 48);
 
-            void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
+            void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color, OGLShader* shader = nullptr);
             void RenderUI();
             void CreatePostProcessQuad();
             void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }

@@ -535,7 +535,7 @@ void GameTechRenderer::RenderUI() {
             if (!e.textData.text.empty()) {
                 auto fontToUse = e.textData.font;
                 if (!fontToUse) fontToUse = debugFont.get();
-                RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color);
+                RenderText(e.textData.text, fontToUse, textX, textY, e.textData.fontSize, e.textData.color, e.textData.textShader);
             }
 
         }
@@ -1037,12 +1037,15 @@ void GameTechRenderer::SetDebugLineBufferSizes(size_t newVertCount) {
     }
 }
 
-void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color) {
+void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y, float scale, Vector3 color, OGLShader* shader) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    BindShader(font->fontShader.get());
+    BindShader(shader ? shader : font->fontShader.get());
+
+    Matrix2 blankRotation;
 
     glUniform3f(glGetUniformLocation(textShader->GetProgramID(), "textColor"), color.x, color.y, color.z);
     glUniformMatrix4fv(glGetUniformLocation(textShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+    glUniformMatrix2fv(glGetUniformLocation(textShader->GetProgramID(), "rotation"), 1, false, (float*)blankRotation.array);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(font->textVAO);
 
