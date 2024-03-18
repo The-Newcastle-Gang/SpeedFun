@@ -21,7 +21,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     debugShader  = new OGLShader("debug.vert", "debug.frag");
     shadowShader = new OGLShader("shadow.vert", "shadow.frag");
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
-    defaultShader = new OGLShader("scene.vert", "scene.frag");
+    defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
