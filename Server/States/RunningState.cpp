@@ -127,7 +127,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("wallMoment");
     // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();

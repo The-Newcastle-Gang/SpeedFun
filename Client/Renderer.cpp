@@ -653,7 +653,7 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
-
+    int lavaLocation = 0;
     float uTimeLocation = 0;
 
     //glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
@@ -699,6 +699,7 @@ void GameTechRenderer::RenderCamera() {
 
             cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
             uTimeLocation = glGetUniformLocation(shader->GetProgramID(), "u_time");
+            lavaLocation = glGetUniformLocation(shader->GetProgramID(), "lavaHeight");
 
             Vector3 camPos = gameWorld.GetMainCamera()->GetPosition();
             glUniform3fv(cameraLocation, 1, camPos.array);
@@ -709,7 +710,8 @@ void GameTechRenderer::RenderCamera() {
             glUniform1f(uTimeLocation, uTime);
             glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
             glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
-            glUniform1f(lightRadiusLocation , sunlight.lightRadius);
+            glUniform1f(lightRadiusLocation, sunlight.lightRadius);
+            glUniform1f(lavaLocation, lavaHeight);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);

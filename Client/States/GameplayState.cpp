@@ -685,7 +685,7 @@ void GameplayState::CreatePlayers() {
 }
 
 void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("newTest");
+    levelManager->TryReadLevel("wallMoment");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
@@ -1003,8 +1003,13 @@ void GameplayState::AddLava(Vector3 position){
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
+    renderer->SetLavaHeight(position.y);
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
 
+    auto PortalQwaud = new GameObject();
+    PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
+    replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
+    PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
 }

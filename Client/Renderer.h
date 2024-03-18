@@ -55,6 +55,8 @@ namespace NCL {
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
 
+            void SetLavaHeight(float f) { lavaHeight = f; }
+            float GetLavaHeight() { return lavaHeight; }
         protected:
             void NewRenderLines();
             void NewRenderText();
@@ -192,6 +194,8 @@ namespace NCL {
             int isSpeedLinesActive;
             float speedLinePercent = 0;
             int speedLineDir;
+            
+            float lavaHeight = 0.0f;
 
             void ApplyFXAA();
         };
