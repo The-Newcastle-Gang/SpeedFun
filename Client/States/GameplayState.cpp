@@ -74,6 +74,21 @@ void GameplayState::InitTimerBar(){
             .AlignLeft(20)
             .AlignTop(20);
 
+    auto &barProgress = canvas->AddImageElement("hud/timerChangeBar.png")
+            .SetAbsoluteSize({844, 52})
+            .SetColor(Replicated::PLATINUM)
+            .AlignLeft(64)
+            .AlignTop(31)
+            .SetShader(timerBarShader);
+
+    barProgress.OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
+
+    auto platNub = canvas->AddElement()
+            .SetColor(Replicated::PLATINUM)
+            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
+            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
+            .AlignTop(timerTopOffset - 11);
+
     auto &timerTextBackground = canvas->AddImageElement("hud/timerTextBackground.png")
             .SetAbsoluteSize({202, 112})
             .AlignRight(20)
@@ -82,7 +97,7 @@ void GameplayState::InitTimerBar(){
     TextData textBack;
     textBack.font = HUDFont.get();
     textBack.fontSize = 1.0;
-    textBack.text = "Test";
+    textBack.text = "0.00";
     textBack.color = Vector4(0.0, 0.0, 0.0, 1.0);
 
     auto &timerTextBack = canvas->AddElement()
@@ -97,7 +112,7 @@ void GameplayState::InitTimerBar(){
     TextData text;
     text.font = HUDFont.get();
     text.fontSize = 1.0;
-    text.text = "Test";
+    text.text = "0.00";
 
     auto &timerText = canvas->AddElement()
             .SetColor(Vector4(0,0,0,0))
@@ -941,7 +956,7 @@ void GameplayState::UpdateCrosshair(Element& element, float dt) {
 void GameplayState::UpdateTimerUI(Element& element, float dt) {
     if (medalTimes[0] == -1.0f) return;
 
-    element.SetAbsoluteSize({ (int)round((800 - 20) * timerRatio), timerBarHeight });
+    element.tweenValue1 = timerRatio;
     element.SetColor(timerBarColor);
 }
 
