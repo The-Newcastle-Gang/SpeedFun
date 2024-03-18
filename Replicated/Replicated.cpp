@@ -20,7 +20,6 @@ void Replicated::AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameO
     world.AddGameObject(g, currentPrimitive->shouldNetwork);
     auto volume = new OBBVolume(currentPrimitive->colliderExtents * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
-    std::cout << currentPrimitive->colliderExtents << "\n";
     Vector3 tempFix = (currentPrimitive->rotation).Quaternion::ToEuler();
     tempFix *= Vector3(-1,-1,1);
 
@@ -63,12 +62,25 @@ void Replicated::AddTestObjectToLevel(GameObject* g, GameWorld& world, Vector3 s
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
     constexpr float meshSize = 1.0f;
     world.AddGameObject(g, true);
-    auto volume = new CapsuleVolume(meshSize/2, meshSize/2);
+    auto volume = new CapsuleVolume(meshSize * 0.5f, meshSize * 0.5f);
     g->SetBoundingVolume((CollisionVolume*)volume);
 
     g->GetTransform()
             .SetScale(Vector3(meshSize, meshSize, meshSize))
             .SetPosition(Vector3(0 + (g->GetWorldID()%2) * 10,0,10 * (g->GetWorldID()/2)));
+}
+
+void Replicated::AddGrapplesToWorld(GameObject *g, GameWorld &world, int index) {
+    constexpr float meshSize = 1.0f;
+    world.AddGameObject(g, true);
+    auto volume = new SphereVolume(meshSize * 0.5f);
+    g->SetBoundingVolume((CollisionVolume*)volume);
+    g->GetTransform()
+        .SetScale(Vector3(meshSize, meshSize, meshSize))
+        .SetPosition(Vector3(index * 10, 10, 10));
+
+    g->SetTag(Tag::GRAPPLE);
+
 }
 
 void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world){

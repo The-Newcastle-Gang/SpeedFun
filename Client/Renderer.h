@@ -90,12 +90,15 @@ namespace NCL {
             GLuint bufferDepthTex;
             GLuint lightDiffuseTex;
             GLuint lightSpecularTex;
+            GLuint fxaaTexture;
 
             GLuint bufferFBO;
             GLuint lightFBO;
+            GLuint fxaaFBO;
 
             OGLShader* combineShader;
             OGLShader* pointLightShader;
+            OGLShader* fxaaShader;
 
             OGLShader*  debugShader;
             OGLShader*  skyboxShader;
@@ -179,6 +182,7 @@ namespace NCL {
             float speedLinePercent = 0;
             int speedLineDir;
 
+            void ApplyFXAA();
         };
     }
 }

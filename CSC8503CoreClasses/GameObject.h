@@ -1,8 +1,13 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include "AABBVolume.h"
+#include "OBBVolume.h"
+#include "CapsuleVolume.h"
+#include "SphereVolume.h"
 #include "AnimatorObject.h"
 #include "Component.h"
+#include <entt.hpp>
 
 namespace NCL::CSC8503 {
     class NetworkObject;
@@ -10,7 +15,8 @@ namespace NCL::CSC8503 {
     class PhysicsObject;
 
     enum Tag {
-        PLAYER
+        PLAYER,
+        GRAPPLE,
     };
 
     class GameObject {
@@ -43,6 +49,36 @@ namespace NCL::CSC8503 {
 
         void SetBoundingVolume(CollisionVolume* vol) {
             boundingVolume = vol;
+            float halfDim = 0.0f;
+            switch (vol->type)
+            {
+                case VolumeType::AABB: {
+                    halfDim = ((AABBVolume*)vol)->GetHalfDimensions().x;
+                    break;
+                }
+                case VolumeType::OBB: {
+                    Vector3 halfDims = ((OBBVolume*)vol)->GetHalfDimensions();
+                    halfDim = std::max(halfDims.x, halfDims.y);
+                    halfDim = std::max(halfDim, halfDims.z);
+                    break;
+                }
+                case VolumeType::Capsule: {
+                    halfDim = ((CapsuleVolume*)vol)->GetHalfHeight();
+                    break;
+                }
+                case VolumeType::Sphere: {
+                    halfDim = ((SphereVolume*)vol)->GetRadius();
+                    break;
+                }
+                default:
+                    break;
+            }
+            SetBroadXHalfDim(halfDim);
+        }
+
+        void SetActive(bool pIsActive) {
+            isActive = pIsActive;
+            onActiveSet.publish(*this, isActive);
         }
 
         const CollisionVolume* GetBoundingVolume() const {
@@ -101,6 +137,10 @@ namespace NCL::CSC8503 {
 
         void UpdateBroadphaseAABB();
 
+        void SetBroadXHalfDim(float halfDim);
+
+        void UpdateBroadphaseXBounds();
+
         void SetWorldID(int newID) {
             worldID = newID;
         }
@@ -139,7 +179,14 @@ namespace NCL::CSC8503 {
         [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
         void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
 
+        entt::sink<entt::sigh<void(GameObject&, bool)>> OnActiveSet;
+
+        float* GetXLowerBound() { return &broadXLowerBound; }
+        float* GetXUpperBound() { return &broadXUpperBound; }
+
     protected:
+
+        entt::sigh<void(GameObject&, bool)> onActiveSet;
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;
@@ -157,6 +204,12 @@ namespace NCL::CSC8503 {
         Tag tag;
 
         Vector3 broadphaseAABB;
+
+        float broadXLowerBound = 0.0f;
+        float broadXUpperBound = 0.0f;
+
+        float broadXHalfDim = 0.0f;
+
     };
 }
 

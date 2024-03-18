@@ -43,12 +43,22 @@ public:
 };
 
 struct SwingingPrimitive : public PrimitiveGameObject {
+public:
     float timePeriod;
     float cooldown;
     float waitDelay;
     float radius;
     bool changeAxis;
     bool changeDirection;
+};
+
+struct SpringPrimitive : public PrimitiveGameObject {
+public:
+    float           force;
+    Vector3         direction;
+    float           activeTime;
+    bool           isContinuous;
+    float           continuousForce;
 };
 
 class LevelReader {
@@ -65,6 +75,7 @@ public:
     [[nodiscard]] std::vector<OscillatorPrimitive*> GetOscillatorPList() const { return oscillatorPrimitives; }
     [[nodiscard]] std::vector<OscillatorPrimitive*> GetHarmfulOscillatorPList() const { return harmfulOscillatorPrimitives; }
     [[nodiscard]] std::vector<SwingingPrimitive*> GetSwingingPList() const { return swingingPrimitives; }
+    [[nodiscard]] std::vector<SpringPrimitive*> GetSpringPList() const { return springPrimitives; }
     [[nodiscard]] std::vector<PointLightInfo> GetPointLights() const { return pointLights; }
 
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
@@ -82,6 +93,7 @@ protected:
     std::vector<OscillatorPrimitive*> oscillatorPrimitives;
     std::vector<OscillatorPrimitive*> harmfulOscillatorPrimitives;
     std::vector<SwingingPrimitive*> swingingPrimitives;
+    std::vector<SpringPrimitive*> springPrimitives;
     std::vector<PointLightInfo> pointLights;
 
     std::vector<GroundCubePrimitive*> groundCubes;
