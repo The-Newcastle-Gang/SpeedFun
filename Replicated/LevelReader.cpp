@@ -132,7 +132,7 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         harmfulOscillatorPrimitives.emplace_back(temp);
     }
 
-        for (auto& item : jData["harmOscList"].items()) {
+    for (auto& item : jData["swingingList"].items()) {
         auto temp = new SwingingPrimitive();
 
         auto& curPosRef = item.value()["position"];
@@ -152,9 +152,11 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
 
         temp->meshName = item.value()["mesh"];
         temp->timePeriod = (float)item.value()["timePeriod"];
-        temp->distance = (float)item.value()["dist"];
         temp->cooldown = (float)item.value()["cooldown"];
         temp->waitDelay = (float)item.value()["waitDelay"];
+        temp->radius = (float)item.value()["radius"];
+        temp->changeAxis = item.value()["changeAxis"];
+        temp->changeDirection = item.value()["changeDirection"];
 
         auto& dimref = item.value()["dimensions"];
         auto& posi = item.value()["position"];
@@ -162,7 +164,6 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
 
         temp->dimensions = Vector3(dimref["x"], dimref["y"], dimref["z"]);
         temp->position = Vector3(posi["x"], posi["y"], posi["z"] * -1);
-        temp->direction = Vector3(dir["x"], dir["y"], dir["z"] * -1);
 
         temp->shouldNetwork = true;
 
