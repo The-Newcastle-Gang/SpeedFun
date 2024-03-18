@@ -22,6 +22,11 @@ public:
 
     void StartStageTimer();
     void EndStageTimer();
+    float GetElapsedTime() { return stageTimer->GetElapsedTime(); }
+    float GetPlatinumTime() { return stageTimer->GetPlatinumTime(); }
+    float GetGoldTime() { return stageTimer->GetGoldTime(); }
+    float GetSilverTime() { return stageTimer->GetSilverTime(); }
+    Medal GetCurrentMedal() { return stageTimer->GetCurrentMedal(stageTimer->GetElapsedTime()); }
 
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
