@@ -28,6 +28,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
     cheeseTexture = (OGLTexture*)LoadTexture("cheeseTex.jpg");
     postProcessBase = new OGLShader("post.vert", "post.frag");
+    fxaaShader = new OGLShader("post.vert", "fxaa.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -50,12 +51,24 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     glGenFramebuffers(1, &shadowFBO);
     glGenFramebuffers(1, &lightFBO);
     glGenFramebuffers(1, &bufferFBO);
+    glGenFramebuffers(1, &fxaaFBO);
 
     GenerateScreenTexture(bufferColourTex, false);
     GenerateScreenTexture(bufferNormalTex, false);
     GenerateScreenTexture(lightDiffuseTex, false);
     GenerateScreenTexture(lightSpecularTex, false);
     GenerateScreenTexture(bufferDepthTex, true);
+
+    glGenTextures(1, &fxaaTexture);
+    glBindTexture(GL_TEXTURE_2D, fxaaTexture);
+    // we are downscaling an HDR color buffer, so we need a float texture format
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F,
+                 (int)windowWidth, (int)windowHeight,
+                 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -65,6 +78,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
 	glDrawBuffer(GL_NONE);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, fxaaFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fxaaTexture, 0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
@@ -298,6 +314,7 @@ void GameTechRenderer::RenderFrame() {
     RenderDeferredLighting();
     CombineBuffers();
     ApplyPostProcessing();
+    ApplyFXAA();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -740,12 +757,12 @@ void GameTechRenderer::RenderCamera() {
 void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
 {
     float screenAspect = (float)windowWidth / (float)windowHeight;
+    glBindFramebuffer(GL_FRAMEBUFFER, fxaaFBO);
+    glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     BindShader(postProcessBase);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sceneColorTexture);
@@ -776,6 +793,27 @@ void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
+}
+
+void GameTechRenderer::ApplyFXAA() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    BindShader(fxaaShader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fxaaTexture);
+    glBindVertexArray(quadVAO);
+
+    int widthLocation = glGetUniformLocation(fxaaShader->GetProgramID(), "width");
+    int heightLocation = glGetUniformLocation(fxaaShader->GetProgramID(), "height");
+
+    glUniform1f(widthLocation, windowWidth);
+    glUniform1f(heightLocation, windowHeight);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glDisable(GL_FRAMEBUFFER_SRGB);
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {

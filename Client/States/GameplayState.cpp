@@ -245,7 +245,6 @@ void GameplayState::OnExit() {
 void GameplayState::ManageLoading(float dt) {
 
     if (loadingTime > 0.1f) {
-        std::cout << ".\n";
         loadingTime = 0.0f;
     }
     loadingTime += dt;
