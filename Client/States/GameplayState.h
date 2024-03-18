@@ -77,6 +77,7 @@ namespace NCL {
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
+            void InitEndCanvas();
 
             void UpdateCountdown(float dt);
             void UpdateAndRenderWorld(float dt);
@@ -85,6 +86,7 @@ namespace NCL {
             void UpdateEndOfLevel(float dt);
             bool hasReachedEnd = false;
             void InitEndScreen(Vector4 color);
+            int endMedalElementIndex;
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -270,6 +272,14 @@ namespace NCL {
             void UpdateGrapples();
 
             GameObject *CreateChainLink();
+
+            void ResetEndScreenAnimTimers() {
+                medalTimer = 0.0f;
+                finalTime = 0.0f;
+                finalTimeScroll = 0.0f;
+                finaltimeShrink = 1.0f;
+                finalTimeShake = 0.0f;
+            }
 
             void CreateChains();
 

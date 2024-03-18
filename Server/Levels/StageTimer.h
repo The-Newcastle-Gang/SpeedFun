@@ -36,7 +36,6 @@ public:
     void ResumeTimer(){ currentState = StageTimer::Running; }
     void PauseTimer() { currentState = StageTimer::Paused;  }
 
-    float GetElapsedTime() { return elapsedTime; }
     float GetPlatinumTime() { return platinumTime; }
     float GetGoldTime() { return goldTime; }
     float GetSilverTime() { return silverTime; }

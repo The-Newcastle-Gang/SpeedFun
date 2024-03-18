@@ -56,9 +56,43 @@ void GameplayState::InitCanvas(){
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
 
+    InitEndCanvas();
+
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+}
+
+void GameplayState::InitEndCanvas() {
+    canvas->CreateNewLayer("FinishedLevelLayer");
+
+    canvas->AddElement("FinishedLevelLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    auto endMedalElement = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+        .SetColor(Vector4(0, 0, 0, 0))
+        .SetAbsoluteSize({ 320,320 })
+        .CenterSprite()
+        .SetTransformTranslation(Vector2(25, 50))
+        .SetShader(medalShineShader);
+
+    endMedalElement.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
+    endMedalElementIndex = endMedalElement.GetIndex();
+
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto finalTime = canvas->AddElement("FinishedLevelLayer")
+        .SetColor({ 1,1,1,1 })
+        .CenterSprite()
+        .SetText(textData);
+    //.textData.font = biggerDebugFont.get();
+
+
+    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
 }
 
 void GameplayState::ClearLevel()
@@ -216,6 +250,7 @@ void GameplayState::WaitForServerLevel() {
 
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
+    hasReachedEnd = false;
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
@@ -562,6 +597,7 @@ void GameplayState::OnEndReached(DataHandler& handler)
     int networkId = handler.Unpack<int>();
     int medal = handler.Unpack<int>();
     Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+    medalColour.w = 0.0f;
     if (!hasReachedEnd) InitEndScreen(medalColour);
     if (state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
     float speedVisualModifier = 0;
@@ -752,44 +788,19 @@ void GameplayState::InitWorld() {
     worldHasLoaded = LoadingStates::LOADED;
 }
 
-void GameplayState::InitEndScreen(Vector4 color) {
+void GameplayState::InitEndScreen(Vector4 color) { // should be renamed
     hasReachedEnd = true;
+    ResetEndScreenAnimTimers();
     finalTime = timeElapsed;
     medalAnimationStage = MedalAnimationStages::TIMER_SCROLL;
-    canvas->CreateNewLayer("FinishedLevelLayer");
     canvas->PushActiveLayer("FinishedLevelLayer");
-
-    canvas->AddElement("FinishedLevelLayer")
-        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
-        .SetAbsoluteSize({ 2000,2000 })
-        .AlignCenter()
-        .AlignMiddle();
-
-    auto medal = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-        .SetColor(color - Vector4(0,0,0,1))
-        .SetAbsoluteSize({ 320,320 })
-        .CenterSprite()
-        .SetTransformTranslation(Vector2(25, 50))
-        .SetShader(medalShineShader);
-
-    medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
-
-
-    TextData textData;
-    textData.font = biggerDebugFont.get();
-    auto finalTime = canvas->AddElement("FinishedLevelLayer")
-        .SetColor({ 1,1,1,1 })
-        .CenterSprite()
-        .SetText(textData);
-    //.textData.font = biggerDebugFont.get();
-
-
-    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
+    canvas->GetElementByIndex(endMedalElementIndex, "FinishedLevelLayer").SetColor(color);
     // Disable player controls
     // Clear the world
     // Loading screen
     // Load the next level
 }
+
 [[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
@@ -990,42 +1001,6 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
-void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
-    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
-    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
-    if (!playerAnimator)return;
-
-    switch (state) {
-    case Replicated::IDLE: {
-        playerAnimator->TransitionAnimation("Idle", 0.1f);
-        break;
-    }
-    case Replicated::JUMP: {
-        playerAnimator->TransitionAnimation("Jump", 0.1f);
-        break;
-    }
-    case Replicated::FALLING: {
-        playerAnimator->TransitionAnimation("Fall", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_FORWARD: {
-        playerAnimator->TransitionAnimation("Run", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_BACK: {
-        playerAnimator->TransitionAnimation("RunBack", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_LEFT: {
-        playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
-        break;
-    }
-    case Replicated::RUNNING_RIGHT: {
-        playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
-        break;
-    }
-    }
-}
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
