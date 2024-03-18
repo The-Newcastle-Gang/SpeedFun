@@ -1,6 +1,5 @@
 #include "RunningState.h"
-#include "RunningState.h"
-#include "RunningState.h"
+
 using namespace NCL;
 using namespace CSC8503;
 
