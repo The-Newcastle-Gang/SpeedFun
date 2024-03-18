@@ -10,6 +10,8 @@ static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int ProcessorsNum;
 static HANDLE self;
 
+double DebugMode::OurCurrentUsage = 0.0;
+
 
 void DebugMode::SetDebugCam(Camera *cam) {
         currentCam = cam;
@@ -55,6 +57,7 @@ double DebugMode::GetCurrentCPUVal(){
 
 void DebugMode::UpdateDebugMode(float dt)
 {
+    OurCurrentUsage = GetCurrentCPUVal(); //somehow ignore the 0s??
 	DisplayFPSCount(dt);
 	DisplayMemoryUsage();
 	DisplayCameraInfo();
@@ -82,8 +85,11 @@ void DebugMode::DisplayMemoryUsage()
 	DWORDLONG physMemoryUsed = (memoryStatus.ullTotalPhys - memoryStatus.ullAvailPhys) / 1024;
 	Debug::Print("Physical memory used: " + std::to_string(physMemoryUsed) + " KB (" + std::to_string(physMemoryUsed / (1024 * 1024)) + " GB)", Vector2(3, 20), Debug::RED);
 	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailPhys / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 25), Debug::GREEN);
-//    Debug::Print(std::to_string(foo), Vector2(50,50), Debug::RED);
-    std::cout << GetCurrentCPUVal() << std::endl;
+
+    // TODO: CPU USED BY OUR CURRENT PROCESS
+    if(OurCurrentUsage > 0){
+        std::cout << OurCurrentUsage << std::endl;
+    }
 }
 
 void DebugMode::DisplayCameraInfo()

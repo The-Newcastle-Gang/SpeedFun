@@ -25,7 +25,7 @@ namespace NCL {
 			static Camera* currentCam;
 
             static double GetCurrentCPUVal();
-            static double foo;
+            static double OurCurrentUsage;
         };
 	}
 }
