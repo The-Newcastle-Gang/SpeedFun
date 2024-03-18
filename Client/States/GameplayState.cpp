@@ -51,10 +51,10 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+    InitPauseScreen();
 }
 
 void GameplayState::InitCrossHeir(){
@@ -161,6 +161,16 @@ void GameplayState::InitLevelMap(){
     */
 }
 
+void GameplayState::InitPauseScreen() {
+    canvas->CreateNewLayer("PauseLayer");
+    
+    auto backing = canvas->AddElement("PauseLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+}
+
 void GameplayState::InitPlayerBlip(int id) {
     auto& playerElement = canvas->AddImageElement(playerblipImage)
         .SetColor({ 0.5,0.0,0.,1 })
@@ -172,6 +182,7 @@ void GameplayState::InitPlayerBlip(int id) {
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
+
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -552,9 +563,15 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN) && isSinglePlayer) {
-        networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
-        isPaused = !isPaused;
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
+        if (isSinglePlayer && !hasReachedEnd)
+        {
+            networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+            isPaused = !isPaused;
+            renderer->SetSpeedActive(!isPaused);
+            if (isPaused) canvas->PushActiveLayer("PauseLayer");
+            else canvas->PopActiveLayer();
+        }
     }
 
     if (isPaused) return;

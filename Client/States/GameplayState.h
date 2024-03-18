@@ -59,6 +59,8 @@ namespace NCL {
 
             void ResetCameraToForwards();
 
+            void InitPauseScreen();
+
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
