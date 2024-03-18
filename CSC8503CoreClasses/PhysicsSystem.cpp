@@ -17,7 +17,7 @@ using namespace CSC8503;
 
 PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 	applyGravity	= true;
-	useBroadPhase	= true;	
+	useBroadPhase	= false;	
 	dTOffset		= 0.0f;
 	globalDamping	= 0.995f;
 	SetGravity(Vector3(0.0f, -13.0f, 0.0f));
@@ -312,6 +312,7 @@ void PhysicsSystem::LoadStaticAndDynamicLists() {
     std::vector<GameObject*>::const_iterator last;
     gameWorld.GetObjectIterators(first, last);
     for (auto i = first; i != last; ++i) {
+        if (!(*i)->GetPhysicsObject()) continue;
         CollisionLayer layer = (*i)->GetPhysicsObject()->GetLayer();
         switch (layer)
         {
