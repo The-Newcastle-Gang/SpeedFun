@@ -141,9 +141,7 @@ void GameplayState::WaitForServerLevel() {
 
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
-    if (&canvas->GetLayer("FinishedLevelLayer") && &canvas->GetLayer("FinishedLevelLayer") == canvas->GetActiveLayer()) {//pop the ui if its still there
-        canvas->PopActiveLayer();
-    }
+    canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
@@ -366,25 +364,7 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::EndReached): {
-                int networkId = handler.Unpack<int>();
-                int medal = handler.Unpack<int>();
-                Vector4 medalColour = handler.Unpack<Maths::Vector4>();
-                if(state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
-
-                canvas->CreateNewLayer("FinishedLevelLayer");
-                canvas->PushActiveLayer("FinishedLevelLayer");
-
-                canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-                        .SetColor(medalColour)
-                        .SetAbsoluteSize({60,60})
-                        .AlignCenter()
-                        .AlignLeft();
-
-                float speedVisualModifier = 0;
-                renderer->SetSpeedLineAmount(speedVisualModifier);
-                world->GetMainCamera()->SetFieldOfVision(defaultFOV + speedVisualModifier * 30.0f);
-
-                soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
+                OnEndReached(handler);
 
             } break;
 
@@ -451,6 +431,29 @@ void GameplayState::ReadNetworkFunctions() {
             break;
         }
     }
+}
+
+void GameplayState::OnEndReached(DataHandler& handler)
+{
+    int networkId = handler.Unpack<int>();
+    int medal = handler.Unpack<int>();
+    Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+    if (state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
+
+    canvas->CreateNewLayer("FinishedLevelLayer");
+    canvas->PushActiveLayer("FinishedLevelLayer");
+
+    canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+        .SetColor(medalColour)
+        .SetAbsoluteSize({ 60,60 })
+        .AlignCenter()
+        .AlignLeft();
+
+    float speedVisualModifier = 0;
+    renderer->SetSpeedLineAmount(speedVisualModifier);
+    world->GetMainCamera()->SetFieldOfVision(defaultFOV + speedVisualModifier * 30.0f);
+
+    soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
 }
 
 void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {

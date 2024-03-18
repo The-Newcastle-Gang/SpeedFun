@@ -145,6 +145,7 @@ namespace NCL {
 
             void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
+            void OnEndReached(DataHandler& handler);
             void ReadNetworkPackets();
 
             void CreateRock();
