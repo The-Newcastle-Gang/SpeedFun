@@ -4,14 +4,17 @@
 using namespace NCL;
 using namespace CSC8503;
 
+//odered timevalues -> {level generation on client
+std::vector<float> DebugMode::timeValues = {0,0,0,0};
 Camera* DebugMode::currentCam;
+double  DebugMode::OurCurrentUsage = 0.0;
+std::chrono::steady_clock::time_point DebugMode::start;
+std::chrono::steady_clock::time_point DebugMode::end;
 
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int ProcessorsNum;
+
 static HANDLE self;
-
-double DebugMode::OurCurrentUsage = 0.0;
-
 
 void DebugMode::SetDebugCam(Camera *cam) {
         currentCam = cam;
@@ -31,6 +34,8 @@ void DebugMode::InitDebugInfo() {
     GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
     memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
     memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+
+    StartCostClock();
 }
 
 double DebugMode::GetCurrentCPUVal(){
@@ -87,13 +92,16 @@ void DebugMode::DisplayMemoryUsage()
 	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailPhys / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 25), Debug::GREEN);
 
     // TODO: CPU USED BY OUR CURRENT PROCESS
-    if(OurCurrentUsage > 0){
-        std::cout << OurCurrentUsage << std::endl;
-    }
+//    if(OurCurrentUsage > 0){
+//        std::cout << OurCurrentUsage << std::endl;
+//    }
+
+    Debug::Print("Level generation: " + std::to_string(timeValues[0]), Vector2(3, 90), Debug::MAGENTA);
+    Debug::Print("Phys Update: " + std::to_string(timeValues[0]), Vector2(3, 90), Debug::MAGENTA);
+
 }
 
-void DebugMode::DisplayCameraInfo()
-{
+void DebugMode::DisplayCameraInfo(){
 	Debug::Print("Camera info:", Vector2(75, 35), Debug::WHITE);
 	Debug::Print("X: " + std::to_string(currentCam->GetPosition().x), Vector2(75, 30), Debug::WHITE);
 	Debug::Print("Y: " + std::to_string(currentCam->GetPosition().y), Vector2(75, 25), Debug::WHITE);
@@ -105,6 +113,14 @@ void DebugMode::DisplayCameraInfo()
 
 //display COllision volumes
 void DebugMode::DisplayCollisionInfo(){
-//    Debug::Print("Collisions hehe", Vector2(50,50), Debug::GREEN);
+
 }
 
+void DebugMode::StartCostClock(){
+    start= std::chrono::steady_clock::now();
+}
+
+void DebugMode::EndCostClock(int idx){
+    end = std::chrono::steady_clock::now();
+    timeValues[idx] = std::chrono::duration<float>(end - start).count();
+}

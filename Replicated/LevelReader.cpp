@@ -50,7 +50,7 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         tempGOPrimitive->colliderExtents    = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
         tempGOPrimitive->rotation           = Quaternion((float)curRot["x"], (float)curRot["y"],(float)curRot["z"],(float)curRot["w"]);
         tempGOPrimitive->shouldNetwork      = item.value()["shouldNetwork"];
-        tempGOPrimitive->colliderRadius     = item.value()["colliderRadius"];
+            tempGOPrimitive->colliderRadius     = item.value()["colliderRadius"];
         tempGOPrimitive->inverseMass        = item.value()["inverseMass"];
         tempGOPrimitive->physicsType        = item.value()["physicType"];
 
