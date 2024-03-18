@@ -109,6 +109,7 @@ namespace NCL {
             GLuint		skyboxTex;
 
             OGLTexture* noiseTexture;
+            OGLTexture* cheeseTexture;
 
             //shadow mapping things
             OGLShader*	shadowShader;
@@ -117,6 +118,7 @@ namespace NCL {
             Matrix4     shadowMatrix;
 
             std::unique_ptr<Font> debugFont;
+            
             std::shared_ptr<OGLShader> textShader;
 
             // Ortho for UI

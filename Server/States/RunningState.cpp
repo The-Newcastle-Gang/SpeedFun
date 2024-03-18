@@ -124,6 +124,7 @@ void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
+        UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
     }
 }
 
@@ -556,6 +557,15 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
     }
+
+    if (playerMovement->uiAnimationData.grapplingAvailability != -1) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->uiAnimationData.grapplingAvailability);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_GrappleAvailable, &data)));
+        playerMovement->uiAnimationData.grapplingAvailability = -1;
+    }
 }
 
 void RunningState::ResetAllPlayerMoveInputs() {
@@ -569,6 +579,41 @@ void RunningState::ResetPlayerMoveInputs(GameObject* playerObject) {
     if (playerObject->TryGetComponent<PlayerMovement>(pm)) {
         pm->ResetMovementInput();
     }
+}
+
+void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
+    UpdateGameTimerInfo(player, inputInfo);
+    UpdatePlayerPositionsInfo(player, inputInfo);
+}
+
+void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(levelManager->GetElapsedTime());
+    handler.Pack(levelManager->GetPlatinumTime());
+    handler.Pack(levelManager->GetGoldTime());
+    handler.Pack(levelManager->GetSilverTime());
+
+    int medalID = (int)levelManager->GetCurrentMedal();
+    handler.Pack(medalID);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
+}
+
+void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+
+    for (auto players : playerObjects)
+    {
+        int playerID = players.first;
+        Vector3 playerPosition = players.second->GetTransform().GetPosition();
+        handler.Pack(playerID);
+        handler.Pack(playerPosition);
+    }
+    handler.Pack(-999);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_PlayerPositions, &data)));
 }
 
 void RunningState::ApplyPlayerMovement() {

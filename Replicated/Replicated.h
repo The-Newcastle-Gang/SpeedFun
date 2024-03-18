@@ -33,14 +33,18 @@ public:
         EndReached,
         All_Players_Finished,
         Grapple_Event,
-        Player_Velocity_Call,
         Player_Animation_Call,
         Death_Event,
         Death_Event_End,
         Stage_Start,
+        Player_Velocity_Call,
+        GameInfo_Timer,
+        GameInfo_GrappleAvailable,
+        GameInfo_PlayerPositions,
         SetNetworkActive,
         ToggleGrapple,
 };
+
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
@@ -52,6 +56,13 @@ public:
         PlayerGrapple,
         PlayerDebug
     };
+
+
+    static constexpr Vector4 PLATINUM = Vector4(0.941f, 0.918f, 0.839f, 1.0f);
+    static constexpr Vector4 GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
+    static constexpr Vector4 SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
+    static constexpr Vector4 BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
+
 
     enum PlayerAnimationStates {
         RUNNING_FORWARD,
@@ -68,6 +79,7 @@ public:
         int networkID = 0;
         PlayerAnimationStates state = IDLE;
     };
+
 
     Replicated();
     int GetCurrentLevelLen();

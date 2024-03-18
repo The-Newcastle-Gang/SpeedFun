@@ -262,7 +262,7 @@ void PlayerMovement::Grapple() {
     Vector3 lookDirection = playerRotation.Normalised() * Vector3(0, 0, -1);
     grappleProjectileInfo.grappleRay = Ray(gameObject->GetTransform().GetPosition() + Matrix3(gameObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET, lookDirection);
     grappleProjectileInfo.travelDistance = 0;
-
+    uiAnimationData.grapplingAvailability = 0;
     grappleProjectileInfo.SetActive(true);
     onGrappleStart.publish(gameObject, lookDirection);
 }
@@ -279,6 +279,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
             grapplePoint = tempGrapplePoint;
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
+            uiAnimationData.grapplingAvailability = 1;
             return;
         }
     }
@@ -289,6 +290,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
     onGrappleUpdate.publish(gameObject, grappleProjectileInfo.grappleRay.GetPosition() + dir);
     if (grappleProjectileInfo.travelDistance >= grappleProjectileInfo.maxDistance) {
         grappleProjectileInfo.SetActive(false);
+        uiAnimationData.grapplingAvailability = 1;
         // This is terrible why did I code the grapple projectile like this.
         onGrappleEnd.publish(gameObject);
     }
