@@ -66,7 +66,7 @@ void GameplayState::InitCrossHeir(){
 
 void GameplayState::InitTimerBar(){
     //timer Bar
-    if (baseClient->IsSinglePlayer())
+    if (isSinglePlayer)
     {
         Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
         for (int i = 0; i < 3; i++) {
@@ -87,7 +87,7 @@ void GameplayState::InitTimerBar(){
             .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
             .AlignTop(timerTopOffset - 11);
     }
-    int backTimerBarWidth = (baseClient->IsSinglePlayer()) ? 800 : timerBoxWidth;
+    int backTimerBarWidth = (isSinglePlayer) ? 800 : timerBoxWidth;
 
     auto timerOutline = canvas->AddElement()
         .SetColor({ 0,0,0,1 })
@@ -95,7 +95,7 @@ void GameplayState::InitTimerBar(){
         .AlignCenter()
         .AlignTop(timerTopOffset - timerBarOutline);
 
-    if (baseClient->IsSinglePlayer())
+    if (isSinglePlayer)
     {
         timeBar = &canvas->AddElement()
             .SetColor(Replicated::PLATINUM)
@@ -110,12 +110,12 @@ void GameplayState::InitTimerBar(){
     timeBarTimerBox = &canvas->AddElement()
             .SetColor({1,1,1,1})
             .SetAbsoluteSize({ timerEndBoxX , timerEndBoxY})
-            .AlignCenter(baseClient->IsSinglePlayer() ? 400 : 0)
+            .AlignCenter(isSinglePlayer ? 400 : 0)
             .SetShader(fireShader)
             .SetTexture(resources->GetTexture("firemask.jpg"))
             .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
 
-    if (baseClient->IsSinglePlayer()) {
+    if (isSinglePlayer) {
         timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
     }
     
@@ -185,6 +185,7 @@ void GameplayState::OnEnter() {
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
+    isSinglePlayer = baseClient->IsSinglePlayer();
     CreateNetworkThread();
     InitialiseAssets();
     Window::GetWindow()->LockMouseToWindow(true);
@@ -917,7 +918,7 @@ void GameplayState::UpdateTimerText(Element& element, float dt) {
 
     int randomX = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
     int randomY = (int)round((-0.5f + (float)(rand()) / (float)(RAND_MAX)) * timerMedalShakeTimer * 4);
-    if (!baseClient->IsSinglePlayer()) {
+    if (isSinglePlayer) {
         randomX = 0;
         randomY = 0;
         positionRatio = 0.5;

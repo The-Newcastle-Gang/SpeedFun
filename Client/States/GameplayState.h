@@ -121,6 +121,7 @@ namespace NCL {
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            bool isSinglePlayer;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;
