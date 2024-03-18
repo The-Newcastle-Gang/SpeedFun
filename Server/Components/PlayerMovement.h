@@ -112,6 +112,8 @@ private:
     bool isFalling = false;
 
 
+    GameObject* grappledObject;
+    Vector3 deltaGrappledObject;
     Vector3 grapplePoint;
 
     MovementState ground;
