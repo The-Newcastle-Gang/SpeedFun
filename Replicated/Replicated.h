@@ -40,7 +40,7 @@ public:
         GameInfo_GrappleAvailable,
         GameInfo_PlayerPositions,
         SetNetworkActive,
-        ToggleGrapple,
+        ToggleGrapple
 };
 
 
@@ -50,7 +50,8 @@ public:
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
-        PlayerDebug
+        PlayerDebug,
+        Pause
     };
 
 

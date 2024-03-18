@@ -63,6 +63,8 @@ namespace NCL {
             std::array<GameObject *, Replicated::PLAYERCOUNT> grapples;
             std::atomic<bool> shouldClose;
 
+            bool isPaused = false;
+
             float packetTimer;
             int sceneSnapshotId;
 

@@ -80,6 +80,9 @@ void RunningState::ReadNetworkFunctions() {
                 playerMovement->ToggleDebug();
             }
         }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::Pause) {
+            isPaused = !isPaused;
+        }
     }
 }
 
@@ -110,6 +113,7 @@ void RunningState::Update(float dt) {
     }
     ReadNetworkFunctions();
     ReadNetworkPackets();
+    if (isPaused) return;
     UpdatePlayerAnimations();
     if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
         Tick(dt);

@@ -24,6 +24,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timerBarShader      = resources->GetShader("timerBar");
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
 }
@@ -275,21 +276,23 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     if(countdownOver)SendInputData();
     ReadNetworkFunctions();
-    UpdateGrapples();
-
-    Window::GetWindow()->ShowOSPointer(false);
-    //Window::GetWindow()->LockMouseToWindow(true);
-
-    if (firstPersonPosition) {
-        world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+    if (!isPaused)
+    {
+        UpdateGrapples();
+        Window::GetWindow()->ShowOSPointer(false);
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        }
+        WalkCamera(dt);
+        if (jumpTimer > 0) JumpCamera(dt);
+        if (landTimer > 0) LandCamera(dt);
+        StrafeCamera(dt);
+        world->GetMainCamera()->UpdateCamera(dt);
+        if (countdownOver)world->UpdateWorld(dt);
     }
-    WalkCamera(dt);
-    if (jumpTimer > 0) JumpCamera(dt);
-    if (landTimer > 0) LandCamera(dt);
-    StrafeCamera(dt);
 
-    world->GetMainCamera()->UpdateCamera(dt);
-    if(countdownOver)world->UpdateWorld(dt);
+    
+    
 
     ReadNetworkPackets();
 
@@ -549,6 +552,12 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN) && isSinglePlayer) {
+        networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+        isPaused = !isPaused;
+    }
+
+    if (isPaused) return;
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
