@@ -169,6 +169,24 @@ void GameplayState::InitPauseScreen() {
         .SetAbsoluteSize({ 2000,2000 })
         .AlignCenter()
         .AlignMiddle();
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    textData.fontSize = 1.0f;
+    textData.text = "RESUME";
+    textData.color = { 0.5,0.5,0.5,1 };
+    auto resumeText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 500,100})
+        .AlignCenter()
+        .AlignMiddle()
+        .SetText(textData);
+
+    resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    resumeText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    resumeText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+    //resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverSelect>(this);
+
 }
 
 void GameplayState::InitPlayerBlip(int id) {
@@ -287,10 +305,11 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     if(countdownOver)SendInputData();
     ReadNetworkFunctions();
+    Window::GetWindow()->ShowOSPointer(isPaused);
     if (!isPaused)
     {
         UpdateGrapples();
-        Window::GetWindow()->ShowOSPointer(false);
+        
         if (firstPersonPosition) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
@@ -566,11 +585,7 @@ void GameplayState::SendInputData() {
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
         if (isSinglePlayer && !hasReachedEnd)
         {
-            networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
-            isPaused = !isPaused;
-            renderer->SetSpeedActive(!isPaused);
-            if (isPaused) canvas->PushActiveLayer("PauseLayer");
-            else canvas->PopActiveLayer();
+            TogglePause();
         }
     }
 
@@ -600,6 +615,14 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
     rotationDirection = input.playerDirection.x == 0 ? rotationDirection : (input.playerDirection.x > 0 ? -1 : 1);
     networkData->outgoingInput.Push(input);
+}
+
+void GameplayState::TogglePause() {
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+    isPaused = !isPaused;
+    renderer->SetSpeedActive(!isPaused);
+    if (isPaused) canvas->PushActiveLayer("PauseLayer");
+    else canvas->PopActiveLayer();
 }
 
 void GameplayState::FinishLoading() {
@@ -1009,4 +1032,17 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     break;
     }
     
+}
+
+void GameplayState::OnPauseHoverEnter(Element &element) {
+
+    element.textData.color = { 1,1,1,1 };
+}
+void GameplayState::OnPauseHoverExit(Element& element) {
+
+    element.textData.color = { 0.5,0.5,0.5,1 };
+}
+
+void GameplayState::OnPauseClick(Element& element) {
+    TogglePause();
 }

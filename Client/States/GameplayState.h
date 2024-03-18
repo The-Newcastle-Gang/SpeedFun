@@ -59,7 +59,12 @@ namespace NCL {
 
             void ResetCameraToForwards();
 
+            int pauseSelected;
             void InitPauseScreen();
+            void OnPauseHoverEnter(Element& element);
+            void OnPauseHoverExit(Element& element);
+            void OnPauseClick(Element& element);
+            void TogglePause();
 
             void InitCrossHeir();
             void InitTimerBar();
