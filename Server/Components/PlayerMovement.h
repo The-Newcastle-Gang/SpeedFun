@@ -61,6 +61,12 @@ public:
 
     PlayerAnimationCallData playerAnimationCallData;
 
+    struct UIAnimationData {
+        int grapplingAvailability = -1;
+    };
+
+    UIAnimationData uiAnimationData;
+
     void ToggleDebug() { debugEnabled = !debugEnabled; }
 
     struct GrappleInfo {
@@ -101,11 +107,14 @@ private:
     float jumpVelocity;
     float dragFactor;
     float maxHorizontalVelocity;
+    float maxVerticalVelocity;
     int jumpQueued;
     float fallApex = 0.0f;
     bool isFalling = false;
 
 
+    GameObject* grappledObject;
+    Vector3 deltaGrappledObject;
     Vector3 grapplePoint;
 
     MovementState ground;

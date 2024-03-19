@@ -18,5 +18,6 @@ void main()
     newVertex.x = newVertex.x + positionRel.x + positionAbs.x;
     newVertex.y = newVertex.y + positionRel.y + positionAbs.y;
     gl_Position = projection * model * vec4(newVertex.xy, 0.0, 1.0);
-    TexCoords = vertex.zw;
+    newVertex.y = newVertex.y * 32;
+    TexCoords = newVertex.xy * 0.001;
 }
