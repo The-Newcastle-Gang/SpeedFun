@@ -13,7 +13,7 @@ add_library(server
         Components/DamagingObstacle.cpp
         Levels/StageTimer.cpp
         Levels/LevelManager.cpp
-)
+        Components/PlayerRespawner.h)
 
 target_include_directories(server PUBLIC
         ../NCLCoreClasses

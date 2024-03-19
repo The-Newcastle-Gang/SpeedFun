@@ -1,4 +1,5 @@
 #include "TriggerVolumeObject.h"
+#include "Components/PlayerRespawner.h"
 
 using namespace NCL::CSC8503;
 
@@ -25,10 +26,16 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
                 break;
 
             case TriggerType::Death:
-                otherObject->GetPhysicsObject()->ClearForces();
-                otherObject->GetPhysicsObject()->ClearVelocity();
-                otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
-                triggerSignalDeathVol.publish(GetPlayerId(otherObject));
+                //otherObject->GetPhysicsObject()->ClearForces();
+                //otherObject->GetPhysicsObject()->ClearVelocity();
+                //otherObject->GetTransform().SetPosition(otherObject->GetCurrentCheckPointPos());
+
+                PlayerRespawner* pr;
+                if (otherObject->TryGetComponent<PlayerRespawner>(pr)) {
+                    pr->RespawnPlayer(GetPlayerId(otherObject));
+                }
+                //triggerSignalDeathVol.publish(GetPlayerId(otherObject));
+
                 break;
 
             case TriggerType::CheckPoint:

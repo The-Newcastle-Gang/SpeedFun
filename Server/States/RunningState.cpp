@@ -1,6 +1,6 @@
 #include "RunningState.h"
-#include "RunningState.h"
-#include "RunningState.h"
+#include <functional>
+
 using namespace NCL;
 using namespace CSC8503;
 
@@ -225,6 +225,10 @@ void RunningState::CreatePlayers() {
         playerComponent->GrappleEnd.connect<&RunningState::GrappleEnd>(this);
         playerComponent->GrappleUpdate.connect<&RunningState::GrappleUpdate>(this);
         player->AddComponent((Component*)playerComponent);
+
+        player->AddComponent(new PlayerRespawner(player, 
+            [this](int id) {this->DeathTriggerVolFunc(id); } //this was a workaround to avoid changing how the triggers work
+        ));
 
         playerObjects[index] = player;
     }
@@ -511,7 +515,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
-        DamagingObstacle* dO = new DamagingObstacle(g);
+        DamagingObstacle* dO = new DamagingObstacle(g, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
         g->AddComponent(oo);
         g->AddComponent(dO);
     }

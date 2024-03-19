@@ -11,6 +11,7 @@
 #include "DamagingObstacle.h"
 #include "Levels/LevelManager.h"
 #include "ObjectOscillator.h"
+#include "PlayerRespawner.h"
 #include "Spring.h"
 
 #include <iostream>
