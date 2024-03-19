@@ -100,9 +100,7 @@ int ParticleSystem::FindUnusedParticle() {
 	return 0;
 }
 void ParticleSystem::DrawParticles() {
-
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * 4 * sizeof(GLfloat), NULL, GL_STREAM_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, particlesCount * sizeof(GLfloat) * 4, positionData);
 
 	glEnableVertexAttribArray(0);
