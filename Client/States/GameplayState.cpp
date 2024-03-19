@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -66,6 +67,7 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    shouldLoadScreen.store(false);
 
     InitEndCanvas();
 
@@ -242,6 +244,7 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     isSinglePlayer = baseClient->IsSinglePlayer();
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     InitialiseAssets();
 
@@ -306,6 +309,18 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+    shouldLoadScreen.store(true);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
+    loadingScreenThread->detach();
+}
+
+void GameplayState::LoadingScreenUpdate() {
+    while (shouldLoadScreen) {
+        std::cout << "\nLoadingScreen!\n";
+    }
+}
+
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
@@ -320,6 +335,9 @@ void GameplayState::OnExit() {
 
     delete networkThread;
     networkThread = nullptr;
+
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
