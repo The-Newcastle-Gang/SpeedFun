@@ -46,27 +46,27 @@ Win32Window::Win32Window(const std::string& title, int sizeX, int sizeY, bool fu
 		}
 	}
 
-	if(fullScreen) {
-		DEVMODE dmScreenSettings;								// Device Mode
-		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
+//	if(fullScreen) {
+//		DEVMODE dmScreenSettings;								// Device Mode
+//		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));	// Makes Sure Memory's Cleared
+//
+//		dmScreenSettings.dmSize=sizeof(dmScreenSettings);		// Size Of The Devmode Structure
+//		dmScreenSettings.dmPelsWidth		= sizeX;			// Selected Screen Width
+//		dmScreenSettings.dmPelsHeight		= sizeY;			// Selected Screen Height
+//		dmScreenSettings.dmBitsPerPel		= 32;				// Selected Bits Per Pixel
+//		dmScreenSettings.dmDisplayFrequency = 60;
+//		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
+//
+//		if(ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)	{
+//			std::cout << __FUNCTION__ << " Failed to switch to fullscreen!\n";
+//			return;
+//		}
+//	}
 
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);		// Size Of The Devmode Structure
-		dmScreenSettings.dmPelsWidth		= sizeX;			// Selected Screen Width
-		dmScreenSettings.dmPelsHeight		= sizeY;			// Selected Screen Height
-		dmScreenSettings.dmBitsPerPel		= 32;				// Selected Bits Per Pixel
-		dmScreenSettings.dmDisplayFrequency = 60;
-		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY;
-
-		if(ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)	{
-			std::cout << __FUNCTION__ << " Failed to switch to fullscreen!\n";
-			return;
-		}
-	}
-
-	windowHandle = CreateWindowEx(fullScreen ? WS_EX_TOPMOST : NULL,
+	windowHandle = CreateWindowEx(NULL,
 	WINDOWCLASS,    // name of the window class
 	title.c_str(),   // title of the window
-	fullScreen ? WS_POPUP|WS_VISIBLE : WS_OVERLAPPEDWINDOW|WS_POPUP|WS_VISIBLE|WS_SYSMENU|WS_MAXIMIZEBOX|WS_MINIMIZEBOX,    // window style
+	fullScreen ? WS_POPUP | WS_VISIBLE | WS_MAXIMIZE : WS_OVERLAPPEDWINDOW|WS_POPUP|WS_VISIBLE|WS_SYSMENU|WS_MAXIMIZEBOX|WS_MINIMIZEBOX,    // window style
 						(int)position.x,	// x-position of the window
                         (int)position.y,	// y-position of the window
                         (int)size.x,		// width of the window

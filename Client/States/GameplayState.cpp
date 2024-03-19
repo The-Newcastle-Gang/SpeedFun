@@ -205,12 +205,12 @@ void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
 void GameplayState::InitLevelMap(){
     //map bar
 
-    auto& levelBar = canvas->AddElement()
-            .SetColor({0,0,0,1})
-            .SetAbsoluteSize({6, 300})
-            .CenterSprite()
-            .SetTransformTranslation(Vector2(98,50));
-    
+//    auto& levelBar = canvas->AddElement()
+//            .SetColor({0,0,0,1})
+//            .SetAbsoluteSize({6, 300})
+//            .CenterSprite()
+//            .SetTransformTranslation(Vector2(98,50));
+//
 
     /*
     auto& playerElement = canvas->AddImageElement(playerblipImage)
