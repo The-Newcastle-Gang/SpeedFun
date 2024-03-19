@@ -87,7 +87,7 @@ void Replicated::AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, Game
 
 void Replicated::AddRaycastEnemy(GameObject* g, GameWorld& world, const Vector3 position){
     constexpr float meshSize = 1.0f;
-    world.AddGameObject(g, true);
+    world.AddGameObject(g, false);
     auto volume = new AABBVolume(Vector3(meshSize, meshSize, meshSize));
     g->GetTransform()
         .SetScale(Vector3(meshSize, meshSize, meshSize))

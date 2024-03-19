@@ -558,7 +558,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     //SetTestSprings(); 
     //SetTestFloor();
     //AddTriggersToLevel();
-    AddRayEnemyShoot();
+    //AddRayEnemyShoot();
 }
 
 void RunningState::AddRayEnemyShoot() {
