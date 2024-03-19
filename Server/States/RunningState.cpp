@@ -144,7 +144,6 @@ void RunningState::WaitForPlayersLoaded() {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
-    //SetAllGrapplesInactive();
 }
 
 void RunningState::Update(float dt) {
@@ -240,7 +239,6 @@ void RunningState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
-        //SetNetworkActive(g, false);
         grapples[i] = g;
     }
 }
@@ -298,7 +296,7 @@ int GetDirectionFromPlayerNumber(int num) {
 }
 
 int GetMagnitudeFromPlayerNumber(int num) {
-    return num < 3 ? 1 : 3;
+    return num < 3 ? 1 : 3; // Uses player number to adjust how far from other players.
 }
 
 void RunningState::CreatePlayers() {

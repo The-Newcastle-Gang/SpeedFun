@@ -106,13 +106,6 @@ void GameWorld::UpdateWorldPhysics(float dt) {
 
 void GameWorld::StartWorld() {
 	for (GameObject* gameObject : gameObjects)gameObject->Start();
-    if (gameObjects.size() > 2000) {
-        std::cout << "CLIENT: " << gameObjects.size() - 2000 << "\n";
-    }
-    else {
-        std::cout << "SERVER: " << gameObjects.size()<< "\n";
-
-    }
 }
 
 bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject, GameObject* ignoreThis,int layerMask) const {
