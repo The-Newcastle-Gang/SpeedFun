@@ -33,7 +33,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_chainthrow.wav",
         "sfx_walk.wav",
         "sfx_walk2.wav",
-        "sfx_timetally.wav"};
+        "sfx_timetally.wav",
+        "sfx_timeshake.wav" };
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -1021,9 +1022,10 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
             soundManager->SM_PlaySound("sfx_timetally.wav");
             float pitchIncrease = 1.0f + 0.5 * (finalTimeScroll / finalTime);
             soundManager->SM_SetSoundPitch("sfx_timetally.wav", pitchIncrease);
-            finalTimeSoundRepeat = 0.05f;
+            finalTimeSoundRepeat = 0.07f;
         }
         if (finalTimeScroll == finalTime) {
+            soundManager->SM_PlaySound("sfx_timeshake.wav");
             medalAnimationStage = TIMER_SHAKE;
             finalTimeShake = 1.0f;
         }
