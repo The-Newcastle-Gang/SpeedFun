@@ -266,7 +266,7 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
-        //soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
