@@ -14,7 +14,9 @@ ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHig
 	this->timeBetween = timeBetweenBursts;
 	this->rngRange = Vector3(rngHigher.x-rngLower.x, rngHigher.y - rngLower.y, rngHigher.z - rngLower.z) ;
 
+    glGenVertexArrays(1, &particleVAO);
 	//particles.resize(maxParticles);
+    glBindVertexArray(particleVAO);
 	glGenBuffers(1, &vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -23,6 +25,20 @@ ParticleSystem::ParticleSystem(Vector3 startPos,Vector3 rngLower, Vector3 rngHig
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 4 * MAX_PARTICLES *sizeof(GLfloat), NULL, GL_STREAM_DRAW);
 
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    glVertexAttribDivisor(0, 0);
+    glVertexAttribDivisor(1, 1);
+
+    glBindVertexArray(0);
+
+
 	positionData = new GLfloat[MAX_PARTICLES * 4];
 }
 
@@ -30,6 +46,7 @@ ParticleSystem::~ParticleSystem(){
 	delete[] positionData;
 	glDeleteBuffers(1,&vertexBuffer);
 	glDeleteBuffers(1,&positionBuffer);
+    glDeleteVertexArrays(1, &particleVAO);
 	delete texture;
 }
 
@@ -100,23 +117,10 @@ int ParticleSystem::FindUnusedParticle() {
 	return 0;
 }
 void ParticleSystem::DrawParticles() {
+    glBindVertexArray(particleVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, particlesCount * sizeof(GLfloat) * 4, positionData);
 
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-	glVertexAttribDivisor(0, 0);
-	glVertexAttribDivisor(1, 1);
-
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particlesCount);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
 
 }

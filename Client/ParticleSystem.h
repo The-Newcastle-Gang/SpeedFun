@@ -48,6 +48,7 @@ namespace NCL
 			TextureBase* texture;
 			GLuint positionBuffer;
 			GLuint vertexBuffer; //Used to send vertex positions of a square to shader
+            GLuint particleVAO;
 			GLfloat* positionData;
 			OGLShader* shader;
 			GLfloat vertices[12] = { -0.5f, -0.5f, 0.0f,0.5f, -0.5f, 0.0f,-0.5f, 0.5f, 0.0f,0.5f, 0.5f, 0.0f };
