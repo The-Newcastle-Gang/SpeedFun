@@ -136,6 +136,7 @@ namespace NCL {
             void ResetCameraAnimation();
 
             void WalkCamera(float dt);
+            std::vector<std::string> walkSounds;
             float groundedMovementSpeed = 0.0f;
             float currentGroundSpeed = 0.0f;
             float walkTimer = 0.0f;
@@ -143,6 +144,7 @@ namespace NCL {
             const float bobAmount = 0.1f;
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
+            float walkSoundTimerMultiplier = 0.85f;
 
             Vector3 playerVelocity;
 

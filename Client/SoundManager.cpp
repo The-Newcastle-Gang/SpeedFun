@@ -48,6 +48,11 @@ void SoundManager::SM_SetSoundVolume(std::string soundName, float volume) {
 	SetSoundVolume(*sounds[soundName], volume);
 }
 
+void SoundManager::SM_SetSoundPitch(std::string soundName, float pitch) {
+	if (!SM_IsSoundReady(soundName)) return;
+	SetSoundPitch(*sounds[soundName], pitch);
+}
+
 void SoundManager::SM_AddSongToLoad(std::string fileName) {
 	songFileNames.push_back(fileName);
 }

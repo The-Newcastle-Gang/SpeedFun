@@ -33,6 +33,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_chainthrow.wav",
         "sfx_walk.wav",
         "sfx_walk2.wav" };
+    walkSounds = { "sfx_walk2.wav" };
 }
 
 GameplayState::~GameplayState() {
@@ -354,6 +355,10 @@ void GameplayState::ReadNetworkFunctions() {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
                 landTimer = PI;
+                soundManager->SM_PlaySound("sfx_walk.wav");
+                soundManager->SM_SetSoundVolume("sfx_walk.wav", 0.5f);
+                float randomPitchMod = (float)(rand()) / (float)(RAND_MAX);
+                soundManager->SM_SetSoundPitch("sfx_walk.wav", 1.0f - randomPitchMod * 0.25f);
             } break;
 
             case(Replicated::Camera_Strafe): {
@@ -507,13 +512,18 @@ void GameplayState::WalkCamera(float dt) {
 
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
-        soundManager->SM_PlaySound("footsteps.wav");
+        
+        std::string walkSound = walkSounds[rand() % walkSounds.size()];
+        soundManager->SM_PlaySound(walkSound);
+        soundManager->SM_SetSoundVolume(walkSound, 0.25f);
+        float randomPitchMod = ((-0.5f + (float)(rand()) / (float)(RAND_MAX))) * 0.5f;
+        soundManager->SM_SetSoundPitch(walkSound, 1.0f + randomPitchMod);
         walkSoundTimer += PI;
     }
     float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, bobHeight * (groundedMovementSpeed / maxMoveSpeed), 0));
     walkTimer += dt * groundedMovementSpeed * 0.75f;
-    walkSoundTimer -= dt * groundedMovementSpeed * 0.75f;
+    walkSoundTimer -= dt * groundedMovementSpeed * walkSoundTimerMultiplier;
 }
 
 void GameplayState::JumpCamera(float dt) {

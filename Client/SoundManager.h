@@ -25,6 +25,7 @@ namespace NCL {
             bool SM_IsSoundPlaying(std::string soundName);
             void SM_LoopIfEnd(std::string soundName);
             void SM_SetSoundVolume(std::string soundName, float volume);
+            void SM_SetSoundPitch(std::string soundName, float pitch);
             bool SM_IsSoundReady(std::string soundName);
 
             void SM_AddSongsToLoad(std::vector<std::string> songs);

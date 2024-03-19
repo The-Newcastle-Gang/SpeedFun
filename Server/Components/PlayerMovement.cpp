@@ -76,6 +76,7 @@ void PlayerMovement::OnGrappleLeave() {
     playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
+    uiAnimationData.grapplingAvailability = 1;
 }
 
 void PlayerMovement::OnGrappleStart() {
@@ -296,7 +297,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
             grapplePoint = tempGrapplePoint;
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
-            uiAnimationData.grapplingAvailability = 1;
+            
 
             grappledObject = (GameObject*)collision.node;
             deltaGrappledObject = grapplePoint - grappledObject->GetTransform().GetPosition();
