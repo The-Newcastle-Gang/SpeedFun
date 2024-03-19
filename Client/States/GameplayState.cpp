@@ -201,12 +201,15 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitialiseAssets() {
+    DebugMode::StartCostClock();
 
     InitWorld();
     InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
     FinishLoading();
+
+    DebugMode::EndCostClock(0);
 }
 
 void GameplayState::InitSounds() {
@@ -688,9 +691,6 @@ void GameplayState::CreatePlayers() {
 
 void GameplayState::InitLevel() {
 
-    DebugMode::StartCostClock();
-
-
     levelManager->TryReadLevel("newTest");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
@@ -737,7 +737,7 @@ void GameplayState::InitLevel() {
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
 
-    DebugMode::EndCostClock(0);
+
 }
 
 void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {

@@ -6,6 +6,11 @@ using namespace CSC8503;
 
 //odered timevalues -> {level generation on client
 std::vector<float> DebugMode::timeValues = {0,0,0,0};
+std::vector<Vector2> DebugMode::statPositions = { Vector2(3, 90),
+                                                  Vector2(3, 85),
+                                                  Vector2(3, 80),
+                                                  Vector2(3, 75)};
+
 Camera* DebugMode::currentCam;
 double  DebugMode::OurCurrentUsage = 0.0;
 std::chrono::steady_clock::time_point DebugMode::start;
@@ -92,13 +97,13 @@ void DebugMode::DisplayMemoryUsage()
 	Debug::Print("Physical memory free: " + std::to_string(memoryStatus.ullAvailPhys / 1024) + " KB (" + std::to_string(memoryStatus.ullAvailPhys / (1024 * 1024 * 1024)) + " GB)", Vector2(3, 25), Debug::GREEN);
 
     // TODO: CPU USED BY OUR CURRENT PROCESS
-//    if(OurCurrentUsage > 0){
-//        std::cout << OurCurrentUsage << std::endl;
-//    }
+    Debug::Print("Current CPU Usage: ", statPositions[0], Debug::MAGENTA );
+    if(OurCurrentUsage > 0){
+        Debug::Print(std::to_string(OurCurrentUsage),  statPositions[0] + Vector2(20,0), Debug::MAGENTA);
+    }
 
-    Debug::Print("Level generation: " + std::to_string(timeValues[0]), Vector2(3, 90), Debug::MAGENTA);
-    Debug::Print("Phys Update: " + std::to_string(timeValues[0]), Vector2(3, 90), Debug::MAGENTA);
-
+    Debug::Print("Level generation: " + std::to_string(timeValues[0]), statPositions[1], Debug::MAGENTA);
+    Debug::Print("Phys Update: " + std::to_string(timeValues[1]), statPositions[2], Debug::MAGENTA);
 }
 
 void DebugMode::DisplayCameraInfo(){

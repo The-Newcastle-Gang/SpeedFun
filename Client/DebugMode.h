@@ -1,7 +1,7 @@
 #pragma once
 #include "Vector2.h"
 #include "Debug.h"
-#include "GameplayState.h"
+#include "Camera.h"
 #include "windows.h"
 #include "TCHAR.h"
 #include "pdh.h"
@@ -38,6 +38,8 @@ namespace NCL {
             static std::chrono::steady_clock::time_point end;
 
             static std::vector<float> timeValues;
+
+            static std::vector<Vector2> statPositions;
         };
 	}
 }

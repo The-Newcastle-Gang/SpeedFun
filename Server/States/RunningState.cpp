@@ -472,7 +472,6 @@ void RunningState::ApplyPlayerMovement() {
 
 void RunningState::BuildLevel(const std::string &levelName)
 {
-    //TODO: REDO THIS FUNCTION WITH LEVELMANAGER
     std::cout << "Level: " << levelName << " being built\n";
     levelManager->TryReadLevel(levelName);
 
