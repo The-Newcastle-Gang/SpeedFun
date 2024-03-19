@@ -127,7 +127,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("wallMoment");
     // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
@@ -486,6 +486,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
@@ -503,7 +504,26 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
+
+
         ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
+        const CollisionVolume* vol = g->GetBoundingVolume();
+        switch (vol->type) {
+            case VolumeType::AABB: {
+                oo->SetHalfHeight( ((AABBVolume*)vol)->GetHalfDimensions().y);
+                break;
+            }
+            case VolumeType::OBB: {
+                oo->SetHalfHeight(((OBBVolume*)vol)->GetHalfDimensions().y);
+                break;
+            }
+            case VolumeType::Sphere: {
+                oo->SetHalfHeight(((SphereVolume*)vol)->GetRadius());
+                break;
+            }
+        }
+
+
         g->AddComponent(oo);
     }
 
@@ -530,12 +550,27 @@ void RunningState::BuildLevel(const std::string &levelName)
         Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
         g->AddComponent(oo);
     }
+
+    for (auto& x : swingpList)
+    {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
+
+        Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
+        g->AddComponent(swing);
+    }
+
+    //SetTestSprings(); 
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
     currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
     currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
-    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
     currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {

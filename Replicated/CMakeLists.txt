@@ -12,8 +12,8 @@ add_library(replicated STATIC Replicated.cpp
 "TriggerVolumeObject.h"
 "AnimatorObject.cpp"
 "AnimatorObject.h"
-"Components/SwingingObject.h"
-"Components/SwingingObject.cpp")
+
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ../NCLCoreClasses ../CSC8503CoreClasses ../OpenGLRendering ../Server)
 target_link_libraries(${PROJECT_NAME} PUBLIC NCLCoreClasses CSC8503CoreClasses OpenGLRendering)

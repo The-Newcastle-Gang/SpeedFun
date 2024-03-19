@@ -107,11 +107,14 @@ private:
     float jumpVelocity;
     float dragFactor;
     float maxHorizontalVelocity;
+    float maxVerticalVelocity;
     int jumpQueued;
     float fallApex = 0.0f;
     bool isFalling = false;
 
 
+    GameObject* grappledObject;
+    Vector3 deltaGrappledObject;
     Vector3 grapplePoint;
 
     MovementState ground;
