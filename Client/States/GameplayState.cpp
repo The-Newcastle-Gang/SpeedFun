@@ -32,7 +32,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_chainreel.wav",
         "sfx_chainthrow.wav",
         "sfx_walk.wav",
-        "sfx_walk2.wav" };
+        "sfx_walk2.wav",
+        "sfx_timetally.wav"};
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -179,6 +180,7 @@ void GameplayState::InitPlayerBlip(int id) {
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
+
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -354,11 +356,15 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
-                landTimer = PI;
+                
                 soundManager->SM_PlaySound("sfx_walk.wav");
                 soundManager->SM_SetSoundVolume("sfx_walk.wav", 0.5f);
                 float randomPitchMod = (float)(rand()) / (float)(RAND_MAX);
                 soundManager->SM_SetSoundPitch("sfx_walk.wav", 1.0f - randomPitchMod * 0.25f);
+
+                landTimer = PI;
+                
+                
             } break;
 
             case(Replicated::Camera_Strafe): {
@@ -1009,6 +1015,14 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignCenter();
         element.AlignMiddle(-24 * textSize * 0.33f);
         element.textData.color = Vector4(1.0f, 1.0f, 1.0f, 0.10f);
+        finalTimeSoundRepeat -= dt;
+        if (finalTimeSoundRepeat <= 0) {
+
+            soundManager->SM_PlaySound("sfx_timetally.wav");
+            float pitchIncrease = 1.0f + 0.5 * (finalTimeScroll / finalTime);
+            soundManager->SM_SetSoundPitch("sfx_timetally.wav", pitchIncrease);
+            finalTimeSoundRepeat = 0.05f;
+        }
         if (finalTimeScroll == finalTime) {
             medalAnimationStage = TIMER_SHAKE;
             finalTimeShake = 1.0f;

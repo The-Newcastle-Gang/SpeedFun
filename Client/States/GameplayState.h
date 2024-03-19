@@ -244,6 +244,7 @@ namespace NCL {
             float finalTimeScroll = 0.0f;
             float finaltimeShrink = 1.0f;
             float finalTimeShake = 0.0f;
+            float finalTimeSoundRepeat = 0.0f;
             MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
             std::unique_ptr<Font> biggerDebugFont;
             DebugMode* debugger;
