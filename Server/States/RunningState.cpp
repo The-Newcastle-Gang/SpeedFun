@@ -87,6 +87,7 @@ void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
+        UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
     }
 }
 
@@ -126,7 +127,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("wallMoment");
     // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
@@ -421,8 +422,51 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
         networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket( Replicated::Grapple_Event , &data)));
         playerMovement->cameraAnimationCalls.grapplingEvent = 0;
     }
+
+    if (playerMovement->uiAnimationData.grapplingAvailability != -1) {
+        auto id = GetIdFromPlayerObject(player);
+        FunctionData data;
+        DataHandler handler(&data);
+        handler.Pack(playerMovement->uiAnimationData.grapplingAvailability);
+        networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_GrappleAvailable, &data)));
+        playerMovement->uiAnimationData.grapplingAvailability = -1;
+    }
 }
 
+void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
+    UpdateGameTimerInfo(player, inputInfo);
+    UpdatePlayerPositionsInfo(player, inputInfo);
+}
+
+void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(levelManager->GetElapsedTime());
+    handler.Pack(levelManager->GetPlatinumTime());
+    handler.Pack(levelManager->GetGoldTime());
+    handler.Pack(levelManager->GetSilverTime());
+
+    int medalID = (int)levelManager->GetCurrentMedal();
+    handler.Pack(medalID);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
+}
+
+void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
+    FunctionData data;
+    DataHandler handler(&data);
+
+    for (auto players : playerObjects)
+    {
+        int playerID = players.first;
+        Vector3 playerPosition = players.second->GetTransform().GetPosition();
+        handler.Pack(playerID);
+        handler.Pack(playerPosition);
+    }
+    handler.Pack(-999);
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_PlayerPositions, &data)));
+}
 void RunningState::ApplyPlayerMovement() {
 
 }
@@ -506,7 +550,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 void RunningState::SetTriggerTypePositions(){
     currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
     currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
-    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
     currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {

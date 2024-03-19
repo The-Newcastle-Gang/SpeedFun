@@ -63,6 +63,8 @@ namespace NCL {
             void InitTimerBar();
             void InitLevelMap();
 
+            bool hasReachedEnd = false;
+            void InitEndScreen(Vector4 color);
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -71,6 +73,8 @@ namespace NCL {
             std::unique_ptr<LevelManager> levelManager;
 
             std::string medalImage;
+            std::string crosshairImage;
+            std::string playerblipImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
@@ -117,6 +121,7 @@ namespace NCL {
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            bool isSinglePlayer;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;
@@ -167,26 +172,86 @@ namespace NCL {
 
             float levelLen;
             Vector3 startPos;
+            Vector3 endPos;
+
+            Vector3 deathPos;
             float CalculateCompletion(Vector3 cp);
-            Element* timeBar;
+            void AddLava( Vector3 pos );
+            void AddEndPortal ( Vector3 pos );
             int PlayerBlip;
 
+            float timeElapsed;
+            int currentMedal = 4;
+            float timerMedalShakeTimer = 0.0f;
+            float medalTimes[3] = { -1.0f, -1.0f, -1.0f };
+
+            void InitPlayerBlip(int id);
+            std::unordered_map<std::string, Vector3> playerPositions;
+
+            std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
+
+            Element *timerNubs[3];
+            Element *timeBar;
+            Element *timeBarTimerBoxBack;
+            Element *timeBarTimerBox;
+            Element *timerText;
+            ShaderBase *timerBarShader;
+            ShaderBase *fireShader;
+
+            const int timerTopOffset = 32;
+            const int timerBarHeight = 10;
+            const int timerBoxWidth = 10;
+
+            const int timerEndBoxY = 60;
+            const int timerEndBoxX = 60;
+            const float timerEndBoxYoff = 0.6f;
+
+            const int timerBarOutline = 3;
+            float timerRatio = 0.0f;
+            Vector4 timerBarColor = { Replicated::PLATINUM };
+
+            void InitialiseMedalNubs();
+            void UpdateTimerUI(Element& element, float dt);
+            void UpdateTimerBox(Element& element, float dt);
+            void UpdateTimerText(Element& element, float dt);
+            void UpdateTimerNub(Element& element, float dt);
             void UpdatePlayerBlip(Element &element, float dt);
 
-            std::string GetMedalImage();
+            Element* crosshair;
+            void UpdateCrosshair(Element& element, float dt);
+            float crossHairRotation = 45.0f;
+            float currentCHRotation = 0.0f;
+            int rotationDirection = 1.0f;
+            float crossHairScale = 1.0f;
 
+            enum MedalAnimationStages {
+                START,
+                TIMER_SCROLL,
+                TIMER_SHAKE,
+                MEDAL
+            };
+
+            ShaderBase *medalShineShader;
+
+            std::string GetMedalImage();
+            void UpdateMedalSprite(Element& element, float dt);
+            void UpdateFinalTimeTally(Element& element, float dt);
+            float medalTimer = 0.0f;
+            float finalTime = 0.0f;
+            float finalTimeScroll = 0.0f;
+            float finaltimeShrink = 1.0f;
+            float finalTimeShake = 0.0f;
+            MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
+            std::unique_ptr<Font> biggerDebugFont;
             DebugMode* debugger;
             bool displayDebugger = false;
 
+            void RenderFlairObjects();
             void CreateGrapples();
             void UpdateGrapples();
-
             GameObject *CreateChainLink();
-
             void CreateChains();
-
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
-
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
         };
     }

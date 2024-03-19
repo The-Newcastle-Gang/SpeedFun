@@ -10,6 +10,7 @@
 #include "Vector2.h"
 #include "Font.h"
 #include "Frustum.h"
+#include "GameWorld.h"
 
 #include "Assets.h"
 #include "Element.h"
@@ -41,6 +42,8 @@ namespace NCL {
             void RenderText(string text, Font* font, float x, float y, float scale, Vector3 color);
             void RenderUI();
             void CreatePostProcessQuad();
+            void CreateQuad();
+            void RenderQuad();
             void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }
 
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
@@ -52,6 +55,8 @@ namespace NCL {
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
 
+            void SetLavaHeight(float f) { lavaHeight = f; }
+            float GetLavaHeight() { return lavaHeight; }
         protected:
             void NewRenderLines();
             void NewRenderText();
@@ -107,6 +112,7 @@ namespace NCL {
             GLuint		skyboxTex;
 
             OGLTexture* noiseTexture;
+            OGLTexture* cheeseTexture;
 
             //shadow mapping things
             OGLShader*	shadowShader;
@@ -115,6 +121,7 @@ namespace NCL {
             Matrix4     shadowMatrix;
 
             std::unique_ptr<Font> debugFont;
+            
             std::shared_ptr<OGLShader> textShader;
 
             // Ortho for UI
@@ -167,6 +174,12 @@ namespace NCL {
 
             void InitUIQuad();
 
+
+            OGLMesh*    LQuad;
+            OGLShader*  LShader;
+            float u_time;
+
+
             void RenderRayMap();
 
             void InitRayMarching();
@@ -181,6 +194,8 @@ namespace NCL {
             int isSpeedLinesActive;
             float speedLinePercent = 0;
             int speedLineDir;
+            
+            float lavaHeight = 0.0f;
 
             void ApplyFXAA();
         };
