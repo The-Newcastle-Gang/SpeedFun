@@ -71,6 +71,8 @@ void PlayerMovement::SwitchToState(MovementState* state) {
 
 void PlayerMovement::OnGrappleLeave() {
     onGrappleEnd.publish(gameObject);
+    grappledObject = nullptr;
+    deltaGrappledObject = { 0,0,0 };
     playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
@@ -88,6 +90,8 @@ void PlayerMovement::OnGrappleUpdate(float dt) {
     static Vector3 grappleSpeed(5000.0f,4200.0f,5000.0f);
 
     onGrappleUpdate.publish(gameObject, grapplePoint);
+
+    grapplePoint = grappledObject->GetTransform().GetPosition() + deltaGrappledObject; //move the grapple point based on where the object has moved
 
     Vector3 delta = grapplePoint - gameObject->GetTransform().GetPosition();
 
@@ -293,6 +297,9 @@ void PlayerMovement::UpdateGrapple(float dt) {
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
             uiAnimationData.grapplingAvailability = 1;
+
+            grappledObject = (GameObject*)collision.node;
+            deltaGrappledObject = grapplePoint - grappledObject->GetTransform().GetPosition();
             return;
         }
     }
