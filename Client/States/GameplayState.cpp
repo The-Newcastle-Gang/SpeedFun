@@ -34,7 +34,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_walk.wav",
         "sfx_walk2.wav",
         "sfx_timetally.wav",
-        "sfx_timeshake.wav" };
+        "sfx_timeshake.wav",
+        "sfx_medal.wav" };
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -992,13 +993,16 @@ void GameplayState::UpdateMedalSprite(Element& element, float dt) {
     if (medalAnimationStage != MedalAnimationStages::MEDAL) return;
     Vector4 currentColor = element.GetColor();
     float spinAmount = 360.0f * 2.0f;
-    float timeToTake =  0.5f;
+    float timeToTake =  0.2f;
     float scaleFactor = 1.0f / (spinAmount)*medalTimer;
     element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, scaleFactor));
     medalTimer = std::clamp(medalTimer + dt * (spinAmount) / timeToTake, 0.0f, spinAmount);
 
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
     element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
+    if (medalTimer == spinAmount) {
+        medalAnimationStage = MedalAnimationStages::FINISHED;
+    }
 }
 
 void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
@@ -1042,6 +1046,7 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignMiddle(-24 * textSize * 0.33f + randomY);
         if (finalTimeShake == 0.0f) {
             medalAnimationStage = MEDAL;
+            soundManager->SM_PlaySound("sfx_medal.wav");
         }
     }
     break;

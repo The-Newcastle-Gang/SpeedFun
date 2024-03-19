@@ -231,7 +231,8 @@ namespace NCL {
                 START,
                 TIMER_SCROLL,
                 TIMER_SHAKE,
-                MEDAL
+                MEDAL,
+                FINISHED
             };
 
             ShaderBase *medalShineShader;
