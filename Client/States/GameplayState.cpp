@@ -331,7 +331,6 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
-        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -376,9 +375,13 @@ void GameplayState::UpdateCountdown(float dt){
     }
     UpdateAndRenderWorld(dt);
 
+
     bool countdownOver = levelManager->UpdateCountdown(dt);
     float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
-    if (countdownOver) state = GameplayStateEnums::PLAYING;
+    if (countdownOver) {
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        state = GameplayStateEnums::PLAYING;
+    }
 }
 
 void GameplayState::UpdateAndRenderWorld(float dt) {
@@ -1130,6 +1133,7 @@ void GameplayState::UpdateMedalSprite(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
     element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
     if (medalTimer == spinAmount) {
+        element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, 1));
         medalAnimationStage = MedalAnimationStages::FINISHED;
     }
 }
