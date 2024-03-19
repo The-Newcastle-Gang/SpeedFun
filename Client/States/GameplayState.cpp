@@ -26,6 +26,13 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
+    soundEffects = { "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" , 
+        "sfx_chainhook.wav",
+        "sfx_chainready.wav",
+        "sfx_chainreel.wav",
+        "sfx_chainthrow.wav",
+        "sfx_walk.wav",
+        "sfx_walk2.wav" };
 }
 
 GameplayState::~GameplayState() {
@@ -214,7 +221,8 @@ void GameplayState::InitSounds() {
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
+    soundEffects.push_back(songToPlay);
+    soundManager->SM_AddSoundsToLoad(soundEffects);
     soundManager->SM_LoadSoundList();
 
     // Probably should be made atomic though probably doesn't matter.
@@ -253,7 +261,7 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
-        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        //soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -275,7 +283,7 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     if(countdownOver)SendInputData();
     ReadNetworkFunctions();
-    UpdateGrapples();
+    UpdateGrapples(dt);
 
     Window::GetWindow()->ShowOSPointer(false);
     //Window::GetWindow()->LockMouseToWindow(true);
@@ -432,10 +440,12 @@ void GameplayState::ReadNetworkFunctions() {
                     crossHairRotation = 45.0f * rotationDirection;
                     currentCHRotation = crossHairRotation;
                     crossHairScale = 1.25f;
+                    soundManager->SM_PlaySound("sfx_chainready.wav");
                 }
                 else {
                     crossHairRotation = 0.0f;
                     crossHairScale = 1.15f;
+                    soundManager->SM_PlaySound("sfx_chainthrow.wav");
                 }
             } 
             break;
@@ -459,7 +469,6 @@ void GameplayState::ReadNetworkFunctions() {
         }
     }
 }
-
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
@@ -516,6 +525,7 @@ void GameplayState::HandleGrappleEvent(int event) {
     switch (event) {
         case 1: {
             isGrappling = true;
+            soundManager->SM_PlaySound("sfx_chainhook.wav");
             break;
         }
         case 2: {
@@ -757,7 +767,21 @@ void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
     });
 }
 
-void GameplayState::UpdateGrapples() {
+void GameplayState::UpdateGrapples(float dt) {
+    if (isGrappling) {
+        grappleContVolume = std::clamp(grappleContVolume + dt * 1.5f, 0.0f, 1.0f);
+    }
+    else {
+        grappleContVolume = std::clamp(grappleContVolume - dt * 1.5f, 0.0f, 1.0f);
+    }
+    if (!soundManager->SM_IsSoundPlaying("sfx_chainreel.wav") && grappleContVolume > 0.0f) {
+        soundManager->SM_PlaySound("sfx_chainreel.wav");
+        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
+    }
+    if(soundManager->SM_IsSoundPlaying("sfx_chainreel.wav")) {
+        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
+    }
+
     for (GameObject* grapple: grapples) {
 
 

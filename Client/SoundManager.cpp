@@ -43,6 +43,11 @@ void SoundManager::SM_LoopIfEnd(std::string soundName) {
 	if (!SM_IsSoundPlaying(soundName)) SM_PlaySound(soundName);
 }
 
+void SoundManager::SM_SetSoundVolume(std::string soundName, float volume) {
+	if (!SM_IsSoundReady(soundName)) return;
+	SetSoundVolume(*sounds[soundName], volume);
+}
+
 void SoundManager::SM_AddSongToLoad(std::string fileName) {
 	songFileNames.push_back(fileName);
 }

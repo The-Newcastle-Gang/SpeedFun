@@ -81,6 +81,7 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+            std::vector<std::string> soundEffects;
             SoundManager* soundManager;
             GameWorld* world;
             // DO NOT USE THIS POINTER or suffer a null pointer exception.
@@ -248,7 +249,8 @@ namespace NCL {
 
             void RenderFlairObjects();
             void CreateGrapples();
-            void UpdateGrapples();
+            void UpdateGrapples(float dt);
+            float grappleContVolume = 0.0f;
             GameObject *CreateChainLink();
             void CreateChains();
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
