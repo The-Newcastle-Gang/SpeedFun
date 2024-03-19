@@ -856,6 +856,7 @@ void GameplayState::InitLevel(int level) {
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
     auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
@@ -880,8 +881,15 @@ void GameplayState::InitLevel(int level) {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
-    
     for (auto& x : springList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+
+    for (auto& x : swingpList)
+    {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
@@ -891,10 +899,15 @@ void GameplayState::InitLevel(int level) {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
+
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
 
+    deathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
+    endPos = levelManager->GetLevelReader()->GetEndPosition();
+    
+    RenderFlairObjects();
 }
 
 void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
@@ -941,6 +954,7 @@ void GameplayState::CreateGrapples() {
         g->OnActiveSet.connect<&GameplayState::OnGrappleToggle>(this);
         grapples[i] = g;
     }
+
 }
 
 void GameplayState::SetTestSprings() {
@@ -1111,4 +1125,28 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     break;
     }
     
+}
+
+void GameplayState::RenderFlairObjects(){
+    Vector3 lavaPos = deathPos ;
+
+    AddLava(lavaPos + Vector3(0, 5, 0));
+    AddEndPortal(endPos);
+
+}
+
+void GameplayState::AddLava(Vector3 position){
+    auto LavaQuad = new GameObject();
+    LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
+    replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
+    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
+    renderer->SetLavaHeight(position.y);
+}
+
+void GameplayState::AddEndPortal(Vector3 position){
+
+    auto PortalQwaud = new GameObject();
+    PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
+    replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
+    PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
 }

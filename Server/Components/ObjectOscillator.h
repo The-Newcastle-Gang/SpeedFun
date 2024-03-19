@@ -18,6 +18,8 @@ public:
     void OnCollisionEnd(GameObject* other)override;
     void PhysicsUpdate(float dt)override;
 
+    void SetHalfHeight(float halfHeight) { this->halfHeight = halfHeight; }
+
 private:
 
     void UpdateOscillation(float dt);
@@ -40,6 +42,8 @@ private:
     float frequency = 1.0f;
 
     State state = RUNNING;
+
+    float halfHeight = 1.0f;
 
     std::unordered_map<GameObject*,bool> objectsOnPlatform; //means we only add to the map once per player.
 };

@@ -87,10 +87,9 @@ public:
 
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
-    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
+    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position, bool shouldNetwork);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
-    void AddSwingingBlock(GameObject* g, GameWorld& world);
 
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
