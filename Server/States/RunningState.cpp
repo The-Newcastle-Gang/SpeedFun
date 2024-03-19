@@ -127,7 +127,7 @@ void RunningState::Update(float dt) {
 }
 
 void RunningState::LoadLevel() {
-    BuildLevel("newTest");
+    BuildLevel("wallMoment");
     // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
@@ -531,7 +531,7 @@ void RunningState::BuildLevel(const std::string &levelName)
 void RunningState::SetTriggerTypePositions(){
     currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
     currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
-    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
     currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {
