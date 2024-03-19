@@ -18,14 +18,14 @@ void RayEnemyShoot::EnemyShoot(float dt) {
 }
 
 void RayEnemyShoot::OnCollisionEnter(GameObject* otherObject) {
-	if (otherObject->GetIsPlayerBool()) {
+	if (otherObject->GetTag() == Tag::PLAYER) {
 		std::cout << "Enter the warning area!!!" << std::endl;
 		goShoot = true;
 	}
 }
 
 void RayEnemyShoot::OnCollisionEnd(GameObject* otherObject) {
-	if (otherObject->GetIsPlayerBool()) {
+	if (otherObject->GetTag() == Tag::PLAYER) {
 		std::cout << "Leave the warning area" << std::endl;
 		goShoot = false;
 	}
