@@ -105,8 +105,8 @@ void PlayerMovement::StartInAir() {
     static float airRunSpeed = 1000.0f;
     static float airJumpVelocity = 0.0f;
     static float airDragFactor = 0.5f;
-    static float airMaxHorizontalVelocity = 20.0f;
-    static float airMaxVerticalVelocity = 20.0f;
+    static const float airMaxHorizontalVelocity = 20.0f;
+    static const float airMaxVerticalVelocity = 20.0f;
 
     playerAnimationCallData.inAir = true;
 
