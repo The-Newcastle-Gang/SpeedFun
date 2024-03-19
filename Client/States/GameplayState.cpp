@@ -870,8 +870,8 @@ void GameplayState::CreatePlayers() {
         playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
-        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
-        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.3f,0));
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
