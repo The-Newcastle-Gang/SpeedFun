@@ -349,7 +349,6 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 	
 	renderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
-
 	alternateRenderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
 	BOOL error = wglShareLists(renderContext, alternateRenderContext);
 	if (error == FALSE)
@@ -365,8 +364,6 @@ void OGLRenderer::InitWithWin32(Window& w) {
 		wglDeleteContext(tempContext);
 		return;
 	}
-
-	wglMakeCurrent(deviceContext, renderContext);
 
 	wglDeleteContext(tempContext);	//We don't need the temporary context any more!
 

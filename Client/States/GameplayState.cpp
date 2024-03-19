@@ -41,10 +41,16 @@ GameplayState::~GameplayState() {
 void GameplayState::InitCanvas(){
     shouldLoadScreen.store(false);
     //loadingScreenThread->join();
-    renderer->ShareRenderContextLists();
+    //renderer->ShareRenderContextLists();
+    std::cout << "InitCanvas: Popping start\n";
+    canvas->PopActiveLayer();
+    canvas->Reset();
+    std::cout << "InitCanvas: Popping end\n";
     renderer->UseMainRenderContext();
 
     canvas->Reset();
+    canvas->CreateNewLayer("UILayer", false);
+    canvas->PushActiveLayer("UILayer");
         InitCrossHeir();
         InitTimerBar();
         InitLevelMap();
@@ -159,7 +165,7 @@ void GameplayState::CreateNetworkThread() {
 void GameplayState::CreateLoadingScreenThread() {
     canvas->Reset();
     renderer->UseAlternateRenderContext();
-    renderer->ShareRenderContextLists();
+    //renderer->ShareRenderContextLists();
 
     shouldLoadScreen.store(true);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
@@ -168,21 +174,24 @@ void GameplayState::CreateLoadingScreenThread() {
 
 void GameplayState::LoadingScreenTUpdate() {
     renderer->UseMainRenderContext();
-    renderer->ShareRenderContextLists();
-    //renderer->UseAlternateRenderContext();
+    //renderer->ShareRenderContextLists();
+    //renderer->UseAlternateRenderContext();    
 
     canvas->CreateNewLayer("Loading", false);
     canvas->PushActiveLayer("Loading");
     canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
     canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(300).SetShader(titleShader);
 
-
     while (shouldLoadScreen) {
         std::cout << "Loading!\n";
-        //renderer->Render(); // Causes the program to crash when attempting to render the shadowmap
+        //renderer->Render(); // Causes the program to crash when attempting to render the shadowmap, specifically when drawing the bound mesh.
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+    std::cout << "LSThread: Popping start\n";
+    canvas->PopActiveLayer();
+    canvas->Reset();
+    std::cout << "LSThread: Popping end\n";
     //renderer->UseAlternateRenderContext();
     //renderer->MakeCurrentContextNull();
 }
