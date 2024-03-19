@@ -59,12 +59,11 @@ void ObjectOscillator::PhysicsUpdate(float dt) {
         }
         break;
     }
-    running:
+
     case ObjectOscillator::RUNNING: {
         UpdateOscillation(dt);
         break;
     }
-
     default:
         break;
     }

@@ -1,6 +1,4 @@
 #include "RunningState.h"
-#include "RunningState.h"
-#include "RunningState.h"
 using namespace NCL;
 using namespace CSC8503;
 
@@ -482,6 +480,7 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
+    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
@@ -545,6 +544,21 @@ void RunningState::BuildLevel(const std::string &levelName)
         Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
         g->AddComponent(oo);
     }
+
+    for (auto& x : swingpList)
+    {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
+
+        Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
+        g->AddComponent(swing);
+    }
+
+    //SetTestSprings(); 
+    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){

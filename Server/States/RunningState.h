@@ -7,10 +7,10 @@
 #include "ServerThread.h"
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
-#include "Components/SwingingObject.h"
 #include "DamagingObstacle.h"
 #include "Levels/LevelManager.h"
 #include "ObjectOscillator.h"
+#include "Swinging.h"
 #include "Spring.h"
 
 #include <iostream>
