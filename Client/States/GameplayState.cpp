@@ -40,6 +40,8 @@ GameplayState::~GameplayState() {
 
 void GameplayState::InitCanvas(){
     shouldLoadScreen.store(false);
+    //loadingScreenThread->join();
+    renderer->ShareRenderContextLists();
     renderer->UseMainRenderContext();
 
     canvas->Reset();
@@ -156,28 +158,33 @@ void GameplayState::CreateNetworkThread() {
 
 void GameplayState::CreateLoadingScreenThread() {
     canvas->Reset();
-    
+    renderer->UseAlternateRenderContext();
+    renderer->ShareRenderContextLists();
+
     shouldLoadScreen.store(true);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenTUpdate, this);
     loadingScreenThread->detach();
 }
 
 void GameplayState::LoadingScreenTUpdate() {
-    //renderer->UseMainRenderContext();
-    renderer->UseAlternateRenderContext();
-    canvas->Reset();
+    renderer->UseMainRenderContext();
+    renderer->ShareRenderContextLists();
+    //renderer->UseAlternateRenderContext();
 
     canvas->CreateNewLayer("Loading", false);
     canvas->PushActiveLayer("Loading");
     canvas->AddImageElement("LoadingText.png", "Loading").SetAbsoluteSize({ 500,500 }).AlignTop().AlignCenter();
-    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(100);
+    canvas->AddImageElement("Circle.png", "Loading").SetAbsoluteSize({ 100,100 }).AlignMiddle().AlignRight(300).SetShader(titleShader);
 
 
     while (shouldLoadScreen) {
         std::cout << "Loading!\n";
+        //renderer->Render(); // Causes the program to crash when attempting to render the shadowmap
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+    //renderer->UseAlternateRenderContext();
+    //renderer->MakeCurrentContextNull();
 }
 
 

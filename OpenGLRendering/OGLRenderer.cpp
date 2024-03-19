@@ -1,4 +1,5 @@
 #include "OGLRenderer.h"
+#include "OGLRenderer.h"
 /*
 Part of Newcastle University's Game Engineering source code.
 
@@ -346,6 +347,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	//Everywhere else in the Renderers, we use function pointers provided by GLEW...but we can't initialise GLEW yet! So we have to use the 'Wiggle' API
 	//to get a pointer to the function that will create our OpenGL 3.2 context...
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	
 	renderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
 
 	alternateRenderContext = wglCreateContextAttribsARB(deviceContext, 0, attribs);
@@ -363,6 +365,8 @@ void OGLRenderer::InitWithWin32(Window& w) {
 		wglDeleteContext(tempContext);
 		return;
 	}
+
+	wglMakeCurrent(deviceContext, renderContext);
 
 	wglDeleteContext(tempContext);	//We don't need the temporary context any more!
 
@@ -397,8 +401,23 @@ void OGLRenderer::UseAlternateRenderContext() {
 	std::cout << "Alternate context set!\n";
 }
 
+void OGLRenderer::MakeCurrentContextNull() {
+
+	wglMakeCurrent(nullptr, nullptr);
+}
+
 void OGLRenderer::UseMainRenderContext() {
 	wglMakeCurrent(deviceContext, renderContext);
+}
+
+void OGLRenderer::ShareRenderContextLists() {
+
+	BOOL error = wglShareLists(alternateRenderContext, renderContext);
+	if (error == FALSE)
+	{
+		std::cout << "Sharing lists between alt and main rendering context didn't work!" << std::endl;
+		wglDeleteContext(alternateRenderContext);
+	}
 }
 
 void OGLRenderer::DestroyWithWin32() {

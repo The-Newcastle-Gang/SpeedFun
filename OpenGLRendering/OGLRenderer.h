@@ -63,7 +63,9 @@ namespace NCL {
 			void DrawString(const std::string& text, const Vector2&pos, const Vector4& colour = Vector4(0.75f, 0.75f, 0.75f,1), float size = 20.0f );
 			void DrawLine(const Vector3& start, const Vector3& end, const Vector4& colour);
 			void UseAlternateRenderContext();
+			void MakeCurrentContextNull();
 			void UseMainRenderContext();
+			void ShareRenderContextLists();
 
 			//virtual Matrix4 SetupDebugLineMatrix()	const;
 			//virtual Matrix4 SetupDebugStringMatrix()const;
