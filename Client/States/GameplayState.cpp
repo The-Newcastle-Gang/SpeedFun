@@ -136,7 +136,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    lavaParticles = new ParticleSystem(deathPos, { -100, 0, -100 }, { 300, 1, 100 }, 15, 3.4f, 5, 0.5f, 1.25f, resources->GetTexture("Noise.png"));
+    lavaParticles = new ParticleSystem(deathPos, { -100, 0, -100 }, { 300, 1, 100 }, 35, 3.4f, 5, 0.5f, 1.25f, resources->GetTexture("Noise.png"));
     particleSystems.push_back(lavaParticles);
 
     
