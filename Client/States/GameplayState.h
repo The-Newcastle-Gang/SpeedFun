@@ -64,7 +64,11 @@ namespace NCL {
             void OnPauseHoverEnter(Element& element);
             void OnPauseHoverExit(Element& element);
             void OnPauseClick(Element& element);
+            void UpdatePauseFlame(Element& element, float dt);
             void TogglePause();
+            int selectedPause = 0;
+            float flameToXGap = 300.0f;
+            float flameToY = 75.0f;
 
             void InitCrossHeir();
             void InitTimerBar();

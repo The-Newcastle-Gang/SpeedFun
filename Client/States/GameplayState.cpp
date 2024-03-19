@@ -179,14 +179,40 @@ void GameplayState::InitPauseScreen() {
         .SetColor({ 1,1,1,0 })
         .SetAbsoluteSize({ 500,100})
         .AlignCenter()
-        .AlignMiddle()
+        .AlignMiddle(75)
+        .SetId("Resume")
         .SetText(textData);
 
     resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
     resumeText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
     resumeText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+
+    textData.text = "EXIT";
+    auto exitText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 350,100 })
+        .AlignCenter()
+        .AlignMiddle(-75)
+        .SetId("Exit")
+        .SetText(textData);
+    exitText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    exitText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    exitText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
     //resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverSelect>(this);
 
+    for (int i = 0; i < 2; i++)
+    {
+        auto& playerElement = canvas->AddImageElement(playerblipImage, "PauseLayer")
+            .SetColor({ 0.5,0.0,0.,1 })
+            .SetAbsoluteSize({ 125,125 })
+            .AlignCenter()
+            .AlignMiddle()
+            .SetTexture(resources->GetTexture("firemask.jpg"))
+            .SetShader(fireShader)
+            .SetId("pauseflame_" + std::to_string(i));
+
+        playerElement.OnUpdate.connect<&GameplayState::UpdatePauseFlame>(this);
+    }
 }
 
 void GameplayState::InitPlayerBlip(int id) {
@@ -1037,6 +1063,13 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
 void GameplayState::OnPauseHoverEnter(Element &element) {
 
     element.textData.color = { 1,1,1,1 };
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        selectedPause = 0;
+    }
+    if (elementID == "Exit") {
+        selectedPause = 1;
+    }
 }
 void GameplayState::OnPauseHoverExit(Element& element) {
 
@@ -1044,5 +1077,33 @@ void GameplayState::OnPauseHoverExit(Element& element) {
 }
 
 void GameplayState::OnPauseClick(Element& element) {
-    TogglePause();
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        TogglePause();
+    }
+    
+}
+
+void GameplayState::UpdatePauseFlame(Element& element, float dt) {
+    float direction = -1.0f;
+    if (element.GetId() == "pauseflame_1") direction = 1.0f;
+    float setToX = 0;
+    float setToY = 0;
+    switch (selectedPause)
+    {
+    case(0):
+        setToX = 300.0f;
+        setToY = 75.0f;
+        break;
+
+    case(1):
+        setToX = 225.0f;
+        setToY = -75.0f;
+        break;
+    }
+    flameToXGap = flameToXGap * 0.9f + setToX * 0.1f;
+    flameToY = flameToY * 0.9f + setToY * 0.1f;
+    element.AlignCenter((int)round(flameToXGap * direction));
+    element.AlignMiddle((int)round(flameToY) + 25);
+
 }
