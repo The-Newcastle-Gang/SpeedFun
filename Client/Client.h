@@ -25,7 +25,7 @@
 #include "ClientNetworkData.h"
 #include "Canvas.h"
 #include "Resources.h"
-
+#include "SoundManager.h"
 #include <iostream>
 #include <memory>
 #include <array>
@@ -37,18 +37,21 @@ using namespace CSC8503;
 
 class Client{
 public:
-    Client();
+    Client(std::atomic<bool> &shouldStart);
+    ~Client();
     void Update(float dt);
 
 private:
 
-    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;
     std::unique_ptr<GameClient> baseClient;
+    std::unique_ptr<StateMachine> stateManager;
     std::unique_ptr<Canvas> canvas;
     std::unique_ptr<Resources> resources;
+    std::unique_ptr<SoundManager> soundManager;
+    std::atomic<bool> &serverStart;
     void InitStateManager();
 };
 

@@ -6,12 +6,20 @@
 #include "CollisionDetection.h"
 #include "QuadTree.h"
 #include "NetworkObject.h"
+#include "PhysicsObject.h"
+
 namespace NCL {
         class Camera;
         using Maths::Ray;
     namespace CSC8503 {
         class GameObject;
         class Constraint;
+
+        struct PointLightInfo {
+            Vector4		lightColour;
+            float		lightRadius;
+            Vector3		lightPosition;
+        };
 
         typedef std::function<void(GameObject*)> GameObjectFunc;
         typedef std::vector<GameObject*>::const_iterator GameObjectIterator;
@@ -42,7 +50,7 @@ namespace NCL {
                 shuffleObjects = state;
             }
 
-            bool Raycast(Ray& r, RayCollision& closestCollision, bool closestObject = false, GameObject* ignore = nullptr) const;
+            bool Raycast(Ray& r, RayCollision& closestCollision, bool closestObject = false, GameObject* ignore = nullptr, int layerMask = ~MAX_LAYER) const;
 
 			virtual void UpdateWorld(float dt);
 			virtual void StartWorld();
@@ -78,6 +86,12 @@ namespace NCL {
                 return networkObjects.end();
             }
 
+            void AddPointLightToWorld(PointLightInfo pointLight) {
+                pointLights.push_back(pointLight);
+            }
+
+            std::vector<PointLightInfo>* GetPointLights() { return &pointLights; }
+
         protected:
             std::vector<GameObject*> gameObjects;
             std::vector<Constraint*> constraints;
@@ -93,6 +107,7 @@ namespace NCL {
 
             int networkIdCounter;
 
+            std::vector<PointLightInfo> pointLights;
 
         };
     }

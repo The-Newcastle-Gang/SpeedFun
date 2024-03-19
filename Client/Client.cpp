@@ -5,24 +5,27 @@
 #include "Client.h"
 #include "../CSC8503CoreClasses/Debug.h"
 
-
-Client::Client() {
+Client::Client(std::atomic<bool> &shouldStart) : serverStart(shouldStart), baseClient(std::make_unique<GameClient>()), stateManager(std::make_unique<StateMachine>()) {
     NetworkBase::Initialise();
+    soundManager = std::make_unique<SoundManager>();
 
-    stateManager = std::make_unique<StateMachine>();
     world = std::make_unique<GameWorld>();
     canvas = std::make_unique<Canvas>();
     renderer = std::make_unique<GameTechRenderer>(*world, *canvas);
-    baseClient = std::make_unique<GameClient>();
     resources = std::make_unique<Resources>(renderer.get());
 
+    
     InitStateManager();
+}
+
+Client::~Client() {
+    std::cout << "Client shutting down" << std::endl;
 }
 
 void Client::InitStateManager() {
 
-    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get());
-    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get());
+    auto clientMenu = new MenuState(renderer.get(), world.get(), baseClient.get(), canvas.get(), soundManager.get(), serverStart);
+    auto clientGameplay = new GameplayState(renderer.get(), world.get(), baseClient.get(), resources.get(), canvas.get(), soundManager.get());
 
     auto menuToGameplay = new StateTransition(clientMenu, clientGameplay, [=]()->bool {
         return clientMenu->CheckConnected();

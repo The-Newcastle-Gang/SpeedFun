@@ -1,44 +1,85 @@
 #pragma once
 #include "Transform.h"
 #include "CollisionVolume.h"
+#include "AABBVolume.h"
+#include "OBBVolume.h"
+#include "CapsuleVolume.h"
+#include "SphereVolume.h"
+#include "AnimatorObject.h"
 #include "Component.h"
+#include <entt.hpp>
 
 namespace NCL::CSC8503 {
     class NetworkObject;
     class RenderObject;
     class PhysicsObject;
 
-	class GameObject{
-	public:
-		GameObject(std::string name = "");
-		~GameObject();
+    enum Tag {
+        PLAYER,
+        GRAPPLE,
+    };
 
-		virtual void Update(float dt) { UpdateAllComponents(dt);}
-		virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
-		virtual void Start() { StartAllComponents(); }
+    class GameObject {
+    public:
+        GameObject(std::string name = "");
+        ~GameObject();
 
-		virtual void OnCollisionBegin(GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionEnter(otherObject);
-		}
+        virtual void Update(float dt) { UpdateAllComponents(dt); }
+        virtual void PhysicsUpdate(float dt) { PhysicsUpdateAllComponents(dt); }
+        virtual void Start() { StartAllComponents(); }
 
-		virtual void OnCollisionEnd(GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionEnd(otherObject);
-		}
+        virtual void OnCollisionBegin(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionEnter(otherObject);
+        }
 
-		virtual void OnCollisionStay(const GameObject* otherObject) {
-			for (Component* component : components)component->OnCollisionStay(otherObject);
-		}
+        virtual void OnCollisionEnd(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionEnd(otherObject);
+        }
 
-		void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
+        virtual void OnCollisionStay(GameObject* otherObject) {
+            for (Component* component : components)component->OnCollisionStay(otherObject);
+        }
 
-		void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
+        void UpdateAllComponents(float dt) { for (Component* component : components)component->Update(dt); }
 
-		void StartAllComponents() { for (Component* component : components)component->Start(); }
+        void PhysicsUpdateAllComponents(float fixedTime) { for (Component* component : components)component->PhysicsUpdate(fixedTime); }
+
+        void StartAllComponents() { for (Component* component : components)component->Start(); }
 
 
-		void SetBoundingVolume(CollisionVolume* vol) {
-			boundingVolume = vol;
-		}
+        void SetBoundingVolume(CollisionVolume* vol) {
+            boundingVolume = vol;
+            float halfDim = 0.0f;
+            switch (vol->type)
+            {
+                case VolumeType::AABB: {
+                    halfDim = ((AABBVolume*)vol)->GetHalfDimensions().x;
+                    break;
+                }
+                case VolumeType::OBB: {
+                    Vector3 halfDims = ((OBBVolume*)vol)->GetHalfDimensions();
+                    halfDim = std::max(halfDims.x, halfDims.y);
+                    halfDim = std::max(halfDim, halfDims.z);
+                    break;
+                }
+                case VolumeType::Capsule: {
+                    halfDim = ((CapsuleVolume*)vol)->GetHalfHeight();
+                    break;
+                }
+                case VolumeType::Sphere: {
+                    halfDim = ((SphereVolume*)vol)->GetRadius();
+                    break;
+                }
+                default:
+                    break;
+            }
+            SetBroadXHalfDim(halfDim);
+        }
+
+        void SetActive(bool pIsActive) {
+            isActive = pIsActive;
+            onActiveSet.publish(*this, isActive);
+        }
 
         const CollisionVolume* GetBoundingVolume() const {
             return boundingVolume;
@@ -50,6 +91,10 @@ namespace NCL::CSC8503 {
 
         Transform& GetTransform() {
             return transform;
+        }
+
+        Transform* GetTransformPointer() {
+            return &transform;
         }
 
         RenderObject* GetRenderObject() const {
@@ -64,6 +109,10 @@ namespace NCL::CSC8503 {
             return networkObject;
         }
 
+        AnimatorObject* GetAnimatorObject() const {
+            return animatorObject;
+        }
+
         void SetRenderObject(RenderObject* newObject) {
             renderObject = newObject;
         }
@@ -76,68 +125,91 @@ namespace NCL::CSC8503 {
             networkObject = newObject;
         }
 
+        void SetAnimatorObject(AnimatorObject* newObject) {
+            animatorObject = newObject;
+        }
+
         const std::string& GetName() const {
             return name;
         }
 
-        bool GetBroadphaseAABB(Vector3&outsize) const;
+        bool GetBroadphaseAABB(Vector3& outsize) const;
 
         void UpdateBroadphaseAABB();
+
+        void SetBroadXHalfDim(float halfDim);
+
+        void UpdateBroadphaseXBounds();
 
         void SetWorldID(int newID) {
             worldID = newID;
         }
-    
-        //virtual void OnCollisionBegin(GameObject* otherObject) {
-        //    //std::cout << "OnCollisionBegin event occured!\n";
-        //}
 
-        //virtual void OnCollisionEnd(GameObject* otherObject) {
-        //    //std::cout << "OnCollisionEnd event occured!\n";
-        //}
-
-		template <typename T>
-		bool TryGetComponent(T*& returnPointer) {
-			for (Component* component : components) {
-				T* typeCast = dynamic_cast<T*>(component);
-				if (typeCast) {
-					returnPointer = typeCast;
-					return true;
-				}
-			}
-			return false;
-		}
-
-		void AddComponent(Component* component) {
-			components.push_back(component);
-		}
-
-		std::vector<Component*> components;
-
-		Transform transform;
-        
-        int GetWorldID() const {
-          return worldID;
+        template <typename T>
+        bool TryGetComponent(T*& returnPointer) {
+            for (Component* component : components) {
+                T* typeCast = dynamic_cast<T*>(component);
+                if (typeCast) {
+                    returnPointer = typeCast;
+                    return true;
+                }
+            }
+            return false;
         }
+
+        void AddComponent(Component* component) {
+            components.push_back(component);
+            SetHasComponent(true);
+        }
+
+        std::vector<Component*> components;
+
+        Transform transform;
+
+        int GetWorldID() const { return worldID; }
+
+        const Tag GetTag() { return tag; }
+        void SetTag(Tag t) { tag = t; }
+
+        const bool GetHasComponent() { return hasComponent; }
+        void SetHasComponent(bool b) { hasComponent = b; }
 
         void DrawCollision();
 
-        [[nodiscard]] bool GetIsPlayerBool() const { return isPlayer; }
-        void SetIsPlayerBool(bool b) { isPlayer = b;  }
+        [[nodiscard]] Vector3 GetCurrentCheckPointPos() const { return checkPointPos; }
+        void SetCurrentCheckPointPos(Vector3 v) { checkPointPos = v;  }
+
+        entt::sink<entt::sigh<void(GameObject&, bool)>> OnActiveSet;
+
+        float* GetXLowerBound() { return &broadXLowerBound; }
+        float* GetXUpperBound() { return &broadXUpperBound; }
 
     protected:
+
+        entt::sigh<void(GameObject&, bool)> onActiveSet;
 
         CollisionVolume*	boundingVolume;
         PhysicsObject*		physicsObject;
         RenderObject*		renderObject;
         NetworkObject*		networkObject;
+        AnimatorObject*		    animatorObject;
+
+        Vector3 checkPointPos;
 
         bool		isActive;
-        bool        isPlayer;
+        bool        hasComponent;
         int			worldID;
         std::string	name;
 
+        Tag tag;
+
         Vector3 broadphaseAABB;
+
+        float broadXLowerBound = 0.0f;
+        float broadXUpperBound = 0.0f;
+
+        float broadXHalfDim = 0.0f;
+
     };
 }
 

@@ -1,5 +1,4 @@
 #pragma once
-
 namespace NCL::CSC8503 {
 	class GameObject;
 	class GameWorld;
@@ -15,7 +14,7 @@ namespace NCL::CSC8503 {
 		virtual void PhysicsUpdate(float fixedTime) {};
 		virtual void Start() {};
 		virtual void OnCollisionEnter(GameObject* otherObject) {};
-		virtual void OnCollisionStay(const GameObject* otherObject) {};
+		virtual void OnCollisionStay(GameObject* otherObject) {};
 		virtual void OnCollisionEnd(GameObject* otherObject) {};
 
 	protected:

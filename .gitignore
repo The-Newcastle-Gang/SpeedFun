@@ -9,3 +9,6 @@
 /.idea
 /cmake-build-debug-visual-studio
 /release
+/cmake-build-debug/
+cmake-build-release/
+.cache

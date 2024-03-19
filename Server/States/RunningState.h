@@ -8,6 +8,11 @@
 #include "TriggerVolumeObject.h"
 #include "PlayerMovement.h"
 #include "RayEnemyShoot/RayEnemyShoot.h"
+#include "DamagingObstacle.h"
+#include "Levels/LevelManager.h"
+#include "ObjectOscillator.h"
+#include "Swinging.h"
+#include "Spring.h"
 
 #include <iostream>
 #include <thread>
@@ -42,27 +47,40 @@ namespace NCL {
             std::unique_ptr<PhysicsSystem> physics;
             std::unique_ptr<GameWorld> world;
             std::unique_ptr<ServerNetworkData> networkData;
+            std::unique_ptr<LevelManager> levelManager;
 
             std::thread* networkThread;
 
             std::unordered_map<int, PlayerInfo> playerInfo;
+            std::unordered_map<int, Replicated::PlayerAnimationStates> playerAnimationInfo;
 
             std::vector<std::pair<TriggerVolumeObject::TriggerType, Vector3>> triggersVector;
             LevelReader* levelReader;
             Vector3 currentLevelStartPos;
             Vector3 currentLevelEndPos;
             Vector3 currentLevelDeathPos;
+            std::vector<Vector3> currentLevelCheckPointPositions;
+
+            std::array<GameObject *, Replicated::PLAYERCOUNT> grapples;
+            std::atomic<bool> shouldClose;
 
             float packetTimer;
             int sceneSnapshotId;
 
             int playerTestId = -1;
 
+            int numPlayersLoaded = 0;
             std::unordered_map<int, GameObject*> playerObjects;
+            bool isGameInProgress = false;
 
             void LoadLevel();
             void BuildLevel(const std::string &levelName);
             void CreatePlayers();
+
+            void StartTriggerVolFunc(int id);
+            void EndTriggerVolFunc(int id);
+            void DeathTriggerVolFunc(int id);
+            void DeathTriggerVolEndFunc(int id);
 
             void SendWorldToClient();
 
@@ -71,19 +89,33 @@ namespace NCL {
             void Tick(float dt);
             void AssignPlayer(int peerId, GameObject *object);
             void AddTriggersToLevel();
+            void SortTriggerInfoByType(TriggerVolumeObject::TriggerType &triggerType, Vector4 &colour, Vector3 &dimensions);
 
+            void UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo);
+            void UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo);
+            void UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo);
             void UpdatePlayerMovement(GameObject *player, const InputPacket& inputInfo);
-            static void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
+            void ThreadUpdate(GameServer* server, ServerNetworkData *networkData);
+
 
             void CreateNetworkThread();
-
             void ReadNetworkFunctions();
-
             void ReadNetworkPackets();
-
             void ApplyPlayerMovement();
 
             void AddRayEnemyShoot();
+            void UpdatePlayerAnimations();
+            void SetPlayerAnimation(Replicated::PlayerAnimationStates state, GameObject* object);
+            void SendPlayerAnimationCall(Replicated::PlayerAnimationStates state, GameObject* object);
+            void SetTestSprings();
+            void SetTestFloor();
+            void SetTriggerTypePositions();
+            void CreateGrapples();
+            void SetNetworkActive(GameObject *g, bool isActive);
+            void GrappleEnd(GameObject *player);
+            void GrappleUpdate(GameObject *player, Vector3 position);
+            void GrappleStart(GameObject *player, Vector3 direction);
+            void CancelGrapple(int id);
         };
     }
 }

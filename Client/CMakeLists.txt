@@ -16,7 +16,8 @@ add_library(client
         UI/Element.cpp
         UI/CanvasLayer.cpp
         TweenManager.cpp
-)
+        DebugMode.cpp
+        SoundManager.cpp)
 
 target_include_directories(client PUBLIC
         ../NCLCoreClasses
@@ -30,6 +31,7 @@ target_include_directories(client PUBLIC
         ./UI
         ../raudio/src
         ../NotLua
+        ../Server/Levels
 )
 
 target_link_libraries(client PUBLIC
@@ -66,6 +68,5 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE
         "../NCLCoreClasses/Matrix2.h"
         "../NCLCoreClasses/Matrix3.h"
         "../NCLCoreClasses/Matrix4.h"
-
         "../NCLCoreClasses/GameTimer.h"
 )

@@ -18,7 +18,6 @@ public:
         queue.push(value);
     }
 
-    // [[nodiscard]] basically means a value should be returned
     [[nodiscard]] T Pop() {
         std::lock_guard<std::mutex> lock(mutex);
         auto value = queue.front();

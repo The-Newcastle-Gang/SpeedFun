@@ -12,14 +12,18 @@
 #include "entt.hpp"
 #include "Window.h"
 #include "TextData.h"
+#include "Transform.h"
 
 using namespace NCL;
+using namespace NCL::CSC8503;
 
 class Element {
 public:
     Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
+        transform = Transform();
+        transform.SetPosition(Vector3(0, 0, 0)).SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, 0)).SetScale(Vector3(1, 1, 1));
         texture = nullptr;
         shader = nullptr;
         hoverTimer = 0;
@@ -30,6 +34,8 @@ public:
         extendLowerX = 0;
         extendLowerY = 0;
         extendUpperY = 0;
+        tweenValue1 = 1;
+        tweenValue2 = 1;
         isFocused = false;
     }
 
@@ -37,6 +43,10 @@ public:
         return dimensions;
     }
 
+    [[nodiscard]] Transform& GetTransform() {
+        return transform;
+    }
+    
     [[nodiscard]] Vector4 GetColor() const {
         return color;
     }
@@ -69,6 +79,14 @@ public:
 
     Element& SetAbsolutePosition(Vector2Int v) {
         dimensions.absolutePosition = v;
+        return *this;
+    }
+
+    Element& SetTransformTranslation(Vector2 v) {
+        
+        Vector2 screenSize = Vector2(Window::GetWindow()->GetScreenSize().x, Window::GetWindow()->GetScreenSize().y);
+        Vector2 screenPos = screenSize * 0.01 * v;
+        transform.SetPosition(Vector3(screenPos.x, screenPos.y, 0));
         return *this;
     }
 
@@ -115,9 +133,16 @@ public:
         return *this;
     }
 
-    Element& AlignCenter(int padding = 0) {
-        dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
-        dimensions.absolutePosition.x = -dimensions.absoluteSize.x / 2 + padding;
+    // If you want to manipulate sprites like a normal person, you can use this.
+    Element& CenterSprite() {
+        AlignCenter(0, false);
+        AlignMiddle(0, false);
+        return *this;
+    }
+
+    Element& AlignCenter(int padding = 0, bool reposition = true) {
+        if (reposition) dimensions.relativePosition.x = 0.5f - dimensions.relativeSize.x  / 2;
+        dimensions.absolutePosition.x = - dimensions.absoluteSize.x / 2 + padding;
         return *this;
     }
 
@@ -127,9 +152,9 @@ public:
         return *this;
     }
 
-    Element& AlignMiddle(int padding = 0) {
-        dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
-        dimensions.absolutePosition.y = -dimensions.absoluteSize.y / 2 + padding;
+    Element& AlignMiddle(int padding = 0, bool reposition = true) {
+        if (reposition) dimensions.relativePosition.y = 0.5f - dimensions.relativeSize.y  / 2;
+        dimensions.absolutePosition.y = - dimensions.absoluteSize.y / 2 + padding;
         return *this;
     }
 
@@ -200,9 +225,12 @@ public:
     entt::sink<entt::sigh<void(Element&)>> OnFocusExit;
 
     TextData textData;
+    float tweenValue1;
+    float tweenValue2;
 private:
     UIDim dimensions;
     Vector4 color;
+    Transform transform;
     TextureBase* texture;
     ShaderBase* shader;
     std::string id;

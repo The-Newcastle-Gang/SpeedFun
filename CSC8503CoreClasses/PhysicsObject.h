@@ -8,6 +8,15 @@ namespace NCL {
 	namespace CSC8503 {
 		class Transform;
 
+        enum CollisionLayer {
+            DYNAMIC_LAYER = 1,
+            PLAYER_LAYER = 2,
+            TRIGGER_LAYER = 4,
+            STATIC_LAYER = 8,
+            OSCILLATOR_LAYER = 16,
+            MAX_LAYER = 32
+        };
+
         //make sure 0.0f< e < 1.0f
         struct PhysicsMaterial {
             float e = 0.8f;
@@ -32,6 +41,8 @@ namespace NCL {
 		public:
 			PhysicsObject(Transform* parentTransform, const CollisionVolume* parentVolume, PhysicsMaterial* physMat);
 			~PhysicsObject();
+
+            const CollisionVolume* GetCollisionVolume()const {return volume;}
 
 			Vector3 GetLinearVelocity() const {
 				return linearVelocity;
@@ -68,6 +79,7 @@ namespace NCL {
 
 
 			void ClearForces();
+			void ClearVelocity();
 
 			void SetLinearVelocity(const Vector3& v) {
 				linearVelocity = v;
@@ -120,6 +132,10 @@ namespace NCL {
 
             void SetForce(const Vector3 &forceSet);
 
+            CollisionLayer GetLayer() const { return layer; }
+
+            void SetLayer(CollisionLayer l) { layer = l; }
+
 		protected:
 			const CollisionVolume* volume;
 			Transform*		transform;
@@ -138,7 +154,9 @@ namespace NCL {
 			Vector3 inverseInertia;
 			Matrix3 inverseInteriaTensor;
 
-            bool isTrigger = false;
+            CollisionLayer layer =  DYNAMIC_LAYER;
+
+            bool isTrigger;
 		};
 	}
 }

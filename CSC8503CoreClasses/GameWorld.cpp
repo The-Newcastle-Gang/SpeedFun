@@ -2,8 +2,8 @@
 #include "GameObject.h"
 #include "Constraint.h"
 #include "CollisionDetection.h"
+#include "AnimatorObject.h"
 #include "Camera.h"
-
 
 using namespace NCL;
 using namespace NCL::CSC8503;
@@ -74,11 +74,18 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 
 void GameWorld::UpdateWorld(float dt) {
 
+    for (GameObject* g : gameObjects) {
+        if (g->GetAnimatorObject()) {
+            g->GetAnimatorObject()->UpdateAnimation(dt);
+        }
+    }
+
 	for (GameObject* gameObject : gameObjects)gameObject->Update(dt);
 
 	auto rng = std::default_random_engine{};
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine e(seed);
+
 
     if (shuffleObjects) {
         std::shuffle(gameObjects.begin(), gameObjects.end(), e);
@@ -97,7 +104,7 @@ void GameWorld::StartWorld() {
 	for (GameObject* gameObject : gameObjects)gameObject->Start();
 }
 
-bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject, GameObject* ignoreThis) const {
+bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObject, GameObject* ignoreThis,int layerMask) const {
     //The simplest raycast just goes through each object and sees if there's a collision
     RayCollision collision;
 
@@ -108,6 +115,10 @@ bool GameWorld::Raycast(Ray& r, RayCollision& closestCollision, bool closestObje
         if (i == ignoreThis) {
             continue;
         }
+
+        if (!i->GetPhysicsObject()) continue;
+
+        if (!(i->GetPhysicsObject()->GetLayer() & layerMask))continue;
 
         RayCollision thisCollision;
         if (CollisionDetection::RayIntersection(r, *i, thisCollision)) {

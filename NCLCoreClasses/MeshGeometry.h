@@ -9,6 +9,7 @@ https://research.ncl.ac.uk/game/
 #pragma once
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Vector3.h"
 
@@ -26,6 +27,7 @@ namespace NCL {
 	namespace Rendering {
 		class RendererBase;
 	}
+    class MeshAnimation;
 	using namespace Maths;
 
 	enum GeometryPrimitive {
@@ -104,6 +106,19 @@ namespace NCL {
 			return &subMeshes[i];
 		}
 
+        MeshAnimation* GetAnimation(std::string animationName) {
+            if (animations.find(animationName) != animations.end()) {
+                return animations[animationName];
+            }
+            return nullptr;
+        }
+
+        std::map<std::string, MeshAnimation*>* GetAnimationMap() { return &animations; }
+
+        void AddAnimationToMesh(std::string name, MeshAnimation* anim) {
+            animations[name] = anim;
+        }
+
 		void AddSubMesh(int startIndex, int indexCount, int baseVertex) {
 			SubMesh m;
 			m.base = baseVertex;
@@ -128,6 +143,8 @@ namespace NCL {
 		void SetInverseBindPose(std::vector<Matrix4>& newMats);
 		void CalculateInverseBindPose();
 
+        bool GetBindPoseState(int subMesh, SubMeshPoses& pose) const;
+
 
 
 		bool GetTriangle(unsigned int i, Vector3& a, Vector3& b, Vector3& c) const;
@@ -151,6 +168,9 @@ namespace NCL {
 
 		const vector<unsigned int>& GetIndexData()			const { return indices;		}
 
+        int* GetBindPoseIndices() {
+            return bindPoseIndices.data();
+        }
 
 		void SetVertexPositions(const vector<Vector3>& newVerts);
 		void SetVertexTextureCoords(const vector<Vector2>& newTex);
@@ -213,5 +233,6 @@ namespace NCL {
 
 		std::vector<int>			bindPoseIndices; //New!
 		std::vector<SubMeshPoses>	bindPoseStates;  //New!
-    };
+    std::map<std::string, MeshAnimation*> animations;
+	};
 }

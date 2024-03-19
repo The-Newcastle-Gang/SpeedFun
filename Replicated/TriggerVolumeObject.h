@@ -6,10 +6,14 @@
 #define GITIGNORE_TRIGGERVOLUMEOBJECT_H
 
 #include "GameObject.h"
-#include <iostream>
+#include "PhysicsObject.h"
+#include "Vector4.h"
+#include "entt.hpp"
 
 using namespace NCL;
 using namespace CSC8503;
+
+typedef entt::sigh<void(int)> TriggerSignal;
 
 class TriggerVolumeObject : public GameObject {
 public:
@@ -17,17 +21,29 @@ public:
         Start = 1,
         End = 2,
         Death = 4,
+        CheckPoint = 8,
     };
 
-    TriggerVolumeObject(TriggerType triggerEnum) { triggerType = triggerEnum; }
+    TriggerVolumeObject(TriggerType triggerEnum, std::function<int(GameObject*)> idGetter);
 
     virtual void OnCollisionBegin(GameObject* otherObject);
     virtual void OnCollisionEnd(GameObject* otherObject);
 
+    entt::sink<TriggerSignal> TriggerSink;
+    entt::sink<TriggerSignal> TriggerSinkStartVol;
+    entt::sink<TriggerSignal> TriggerSinkEndVol;
+    entt::sink<TriggerSignal> TriggerSinkDeathVol;
+    entt::sink<TriggerSignal> TriggerSinkDeathVolEnd;
+
 private:
     TriggerType triggerType;
+    TriggerSignal triggerSignalStartVol;
+    TriggerSignal triggerSignal;
+    TriggerSignal triggerSignalEndVol;
+    TriggerSignal triggerSignalDeathVol;
+    TriggerSignal triggerSignalDeathVolEnd;
 
+    std::function<int(GameObject*)> GetPlayerId;
 };
-
 
 #endif //GITIGNORE_TRIGGERVOLUMEOBJECT_H

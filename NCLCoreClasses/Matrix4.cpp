@@ -78,6 +78,14 @@ void Matrix4::ToZero()	{
 	}
 }
 
+void Matrix4::ToIdentity() {
+    ToZero();
+    array[0][0] = 1.0f;
+    array[1][1] = 1.0f;
+    array[2][2] = 1.0f;
+    array[3][3] = 1.0f;
+}
+
 Vector3 Matrix4::GetPositionVector() const{
 	return Vector3(array[3][0] ,array[3][1] ,array[3][2] );
 }
@@ -136,11 +144,11 @@ Matrix4 Matrix4::BuildViewMatrix(const Vector3& from, const Vector3& lookingAt, 
 
 	Matrix4 m;
 
-	Vector3 f = (lookingAt - from);
+	Vector3 f = (from - lookingAt);
 	f.Normalise();
 
-	Vector3 s = Vector3::Cross(f,up).Normalised();
-	Vector3 u = Vector3::Cross(s,f).Normalised();
+	Vector3 s = Vector3::Cross(up,f).Normalised();
+	Vector3 u = Vector3::Cross(f,s).Normalised();
 
 	m.array[0][0] = s.x;
 	m.array[1][0] = s.y;
@@ -150,9 +158,9 @@ Matrix4 Matrix4::BuildViewMatrix(const Vector3& from, const Vector3& lookingAt, 
 	m.array[1][1] = u.y;
 	m.array[2][1]  = u.z;
 
-	m.array[0][2]  = -f.x;
-	m.array[1][2]  = -f.y;
-	m.array[2][2]  = -f.z;
+	m.array[0][2]  = f.x;
+	m.array[1][2]  = f.y;
+	m.array[2][2]  = f.z;
 
 	return m*r;
 }

@@ -13,7 +13,7 @@ namespace NCL {
     namespace CSC8503 {
         class GameObject;
         class GameClient : public NetworkBase{
-            typedef entt::sigh<void()> ConnectionH;;
+            typedef entt::sigh<void()> ConnectionH;
         public:
             GameClient();
             ~GameClient();
@@ -34,10 +34,13 @@ namespace NCL {
             Diagnostics packetsSent{};
             Diagnostics updateCalled{};
 
+            void SetSinglePlayer(bool b) { isSinglePlayer = b; }
+            bool IsSinglePlayer() { return isSinglePlayer; }
+
         protected:
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
-
+            bool isSinglePlayer = true;
             void UpdateDiagnostics(Diagnostics &d);
 
 
