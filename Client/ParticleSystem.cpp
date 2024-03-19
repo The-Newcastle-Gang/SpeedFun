@@ -121,6 +121,4 @@ void ParticleSystem::DrawParticles() {
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 
-
-
 }

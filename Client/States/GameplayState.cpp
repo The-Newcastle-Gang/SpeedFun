@@ -222,7 +222,7 @@ void GameplayState::OnEnter() {
 }
 
 void GameplayState::InitialiseAssets() {
-
+    LoadParticleSystems();
     InitWorld();
     InitCamera();
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
@@ -769,10 +769,6 @@ void GameplayState::InitLevel() {
     endPos = levelManager->GetLevelReader()->GetEndPosition();
     
     RenderFlairObjects();
-
-    LoadParticleSystems();
-
-
 }
 
 void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
