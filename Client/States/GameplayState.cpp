@@ -26,6 +26,17 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
+    soundEffects = { "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" , 
+        "sfx_chainhook.wav",
+        "sfx_chainready.wav",
+        "sfx_chainreel.wav",
+        "sfx_chainthrow.wav",
+        "sfx_walk.wav",
+        "sfx_walk2.wav",
+        "sfx_timetally.wav",
+        "sfx_timeshake.wav",
+        "sfx_medal.wav" };
+    walkSounds = { "sfx_walk2.wav" };
 }
 
 GameplayState::~GameplayState() {
@@ -171,6 +182,7 @@ void GameplayState::InitPlayerBlip(int id) {
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
+
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -214,7 +226,8 @@ void GameplayState::InitSounds() {
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
+    soundEffects.push_back(songToPlay);
+    soundManager->SM_AddSoundsToLoad(soundEffects);
     soundManager->SM_LoadSoundList();
 
     // Probably should be made atomic though probably doesn't matter.
@@ -275,7 +288,7 @@ void GameplayState::Update(float dt) {
     ResetCameraAnimation();
     if(countdownOver)SendInputData();
     ReadNetworkFunctions();
-    UpdateGrapples();
+    UpdateGrapples(dt);
 
     Window::GetWindow()->ShowOSPointer(false);
     //Window::GetWindow()->LockMouseToWindow(true);
@@ -345,7 +358,15 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
+                
+                soundManager->SM_PlaySound("sfx_walk.wav");
+                soundManager->SM_SetSoundVolume("sfx_walk.wav", 0.5f);
+                float randomPitchMod = (float)(rand()) / (float)(RAND_MAX);
+                soundManager->SM_SetSoundPitch("sfx_walk.wav", 1.0f - randomPitchMod * 0.25f);
+
                 landTimer = PI;
+                
+                
             } break;
 
             case(Replicated::Camera_Strafe): {
@@ -432,10 +453,12 @@ void GameplayState::ReadNetworkFunctions() {
                     crossHairRotation = 45.0f * rotationDirection;
                     currentCHRotation = crossHairRotation;
                     crossHairScale = 1.25f;
+                    soundManager->SM_PlaySound("sfx_chainready.wav");
                 }
                 else {
                     crossHairRotation = 0.0f;
                     crossHairScale = 1.15f;
+                    soundManager->SM_PlaySound("sfx_chainthrow.wav");
                 }
             } 
             break;
@@ -459,7 +482,6 @@ void GameplayState::ReadNetworkFunctions() {
         }
     }
 }
-
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
@@ -498,13 +520,18 @@ void GameplayState::WalkCamera(float dt) {
 
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
-        soundManager->SM_PlaySound("footsteps.wav");
+        
+        std::string walkSound = walkSounds[rand() % walkSounds.size()];
+        soundManager->SM_PlaySound(walkSound);
+        soundManager->SM_SetSoundVolume(walkSound, 0.25f);
+        float randomPitchMod = ((-0.5f + (float)(rand()) / (float)(RAND_MAX))) * 0.5f;
+        soundManager->SM_SetSoundPitch(walkSound, 1.0f + randomPitchMod);
         walkSoundTimer += PI;
     }
     float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, bobHeight * (groundedMovementSpeed / maxMoveSpeed), 0));
     walkTimer += dt * groundedMovementSpeed * 0.75f;
-    walkSoundTimer -= dt * groundedMovementSpeed * 0.75f;
+    walkSoundTimer -= dt * groundedMovementSpeed * walkSoundTimerMultiplier;
 }
 
 void GameplayState::JumpCamera(float dt) {
@@ -516,6 +543,7 @@ void GameplayState::HandleGrappleEvent(int event) {
     switch (event) {
         case 1: {
             isGrappling = true;
+            soundManager->SM_PlaySound("sfx_chainhook.wav");
             break;
         }
         case 2: {
@@ -757,7 +785,21 @@ void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
     });
 }
 
-void GameplayState::UpdateGrapples() {
+void GameplayState::UpdateGrapples(float dt) {
+    if (isGrappling) {
+        grappleContVolume = std::clamp(grappleContVolume + dt * 1.5f, 0.0f, 1.0f);
+    }
+    else {
+        grappleContVolume = std::clamp(grappleContVolume - dt * 1.5f, 0.0f, 1.0f);
+    }
+    if (!soundManager->SM_IsSoundPlaying("sfx_chainreel.wav") && grappleContVolume > 0.0f) {
+        soundManager->SM_PlaySound("sfx_chainreel.wav");
+        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
+    }
+    if(soundManager->SM_IsSoundPlaying("sfx_chainreel.wav")) {
+        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
+    }
+
     for (GameObject* grapple: grapples) {
 
 
@@ -951,13 +993,16 @@ void GameplayState::UpdateMedalSprite(Element& element, float dt) {
     if (medalAnimationStage != MedalAnimationStages::MEDAL) return;
     Vector4 currentColor = element.GetColor();
     float spinAmount = 360.0f * 2.0f;
-    float timeToTake =  0.5f;
+    float timeToTake =  0.2f;
     float scaleFactor = 1.0f / (spinAmount)*medalTimer;
     element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, scaleFactor));
     medalTimer = std::clamp(medalTimer + dt * (spinAmount) / timeToTake, 0.0f, spinAmount);
 
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
     element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
+    if (medalTimer == spinAmount) {
+        medalAnimationStage = MedalAnimationStages::FINISHED;
+    }
 }
 
 void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
@@ -975,7 +1020,16 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignCenter();
         element.AlignMiddle(-24 * textSize * 0.33f);
         element.textData.color = Vector4(1.0f, 1.0f, 1.0f, 0.10f);
+        finalTimeSoundRepeat -= dt;
+        if (finalTimeSoundRepeat <= 0) {
+
+            soundManager->SM_PlaySound("sfx_timetally.wav");
+            float pitchIncrease = 1.0f + 0.5 * (finalTimeScroll / finalTime);
+            soundManager->SM_SetSoundPitch("sfx_timetally.wav", pitchIncrease);
+            finalTimeSoundRepeat = 0.07f;
+        }
         if (finalTimeScroll == finalTime) {
+            soundManager->SM_PlaySound("sfx_timeshake.wav");
             medalAnimationStage = TIMER_SHAKE;
             finalTimeShake = 1.0f;
         }
@@ -992,6 +1046,7 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignMiddle(-24 * textSize * 0.33f + randomY);
         if (finalTimeShake == 0.0f) {
             medalAnimationStage = MEDAL;
+            soundManager->SM_PlaySound("sfx_medal.wav");
         }
     }
     break;
