@@ -360,6 +360,7 @@ void GameTechRenderer::FillDiffuseBuffer() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
+    RenderParticles();
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
@@ -790,7 +791,6 @@ void GameTechRenderer::RenderCamera() {
     }
     //test if ogl error
     glDisable(GL_BLEND);
-    RenderParticles();
 }
 
 
