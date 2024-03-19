@@ -66,6 +66,7 @@ namespace NCL {
             void CreateNetworkThread();
 
             void CreateLoadingScreenThread();
+            void CreateLoadingScreenCanvas();
             void LoadingScreenUpdate();
 
             void InitLevel(int level);

@@ -67,8 +67,9 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-    shouldLoadScreen.store(false);
-
+    //shouldLoadScreen.store(false);
+    //loadingScreenThread->join();
+    canvas->Reset();
     InitEndCanvas();
 
     InitCrossHeir();
@@ -249,9 +250,9 @@ void GameplayState::OnEnter() {
     InitialiseAssets();
 
     debugger = new DebugMode(world->GetMainCamera());
-    InitCanvas();
 
     WaitForServerLevel(); //wait until server tells us what level to load
+    InitCanvas();
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
@@ -310,14 +311,47 @@ void GameplayState::CreateNetworkThread() {
 }
 
 void GameplayState::CreateLoadingScreenThread() {
+
+    CreateLoadingScreenCanvas();
+
     shouldLoadScreen.store(true);
     loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
     loadingScreenThread->detach();
 }
 
+void GameplayState::CreateLoadingScreenCanvas() {
+
+    const int loadingScreens = 2;
+    std::string loading = "LoadingScreen";
+
+    for (int i = 1; i <= loadingScreens; i++) {
+        canvas->CreateNewLayer(loading + std::to_string(i), false);
+        canvas->PushActiveLayer(loading + std::to_string(i));
+        canvas->AddElement().AlignBottom().AlignLeft().SetRelativeSize({ 1,1 }).SetColor({ 1,0,1,1 });
+
+        switch (i) {
+        case 1:
+            canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignMiddle().AlignCenter().SetAbsoluteSize({ 50,50 });
+            renderer->RenderLoadingScreen();
+
+            break;
+        case 2:
+            canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignMiddle().AlignCenter().SetAbsoluteSize({ 500,500 });
+            renderer->RenderLoadingScreen();
+
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "\nLoadingScreen!\n";
+        std::cout << "LoadingScreen!\n";
+        renderer->RenderLoadingScreen();
+        //renderer->Render();
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }
 
@@ -822,6 +856,7 @@ void GameplayState::SendInputData() {
 void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
+    shouldLoadScreen.store(false);
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }

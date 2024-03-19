@@ -80,6 +80,10 @@ void OGLRenderer::RenderFrame()		{
 
 }
 
+void OGLRenderer::RenderLSFrame() {
+
+}
+
 void OGLRenderer::EndFrame()		{
 }
 
