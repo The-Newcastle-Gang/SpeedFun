@@ -15,6 +15,7 @@
 #include "ClientThread.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "ParticleSystem.h"
 #include "DebugMode.h"
 #include "SoundManager.h"
 #include "AnimatorObject.h"
@@ -215,6 +216,12 @@ namespace NCL {
             void UpdateTimerBox(Element& element, float dt);
             void UpdateTimerText(Element& element, float dt);
             void UpdateTimerNub(Element& element, float dt);
+
+            ParticleSystem* lavaParticles;
+            vector<ParticleSystem*> particleSystems;
+            void LoadParticleSystems();
+            void UpdateParticleSystems(float dt);
+
             void UpdatePlayerBlip(Element &element, float dt);
 
             Element* crosshair;

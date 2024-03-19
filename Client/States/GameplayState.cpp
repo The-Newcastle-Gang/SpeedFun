@@ -1,4 +1,6 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -29,6 +31,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete lavaParticles;
 
     shouldShutDown.store(true);
     networkThread->join();
@@ -129,6 +132,26 @@ void GameplayState::InitTimerBar(){
         .SetText(TextData());
     timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
 
+}
+
+void GameplayState::LoadParticleSystems()
+{
+    lavaParticles = new ParticleSystem({ 0, 0, 0 }, { -100, 0, -100 }, { 300, 1, 100 }, 15, 3.4f, 5, 0.5f, 1.25f, resources->GetTexture("Noise.png"));
+    particleSystems.push_back(lavaParticles);
+
+    
+
+
+    renderer->PassParticleSystems(particleSystems);
+}
+
+void GameplayState::UpdateParticleSystems(float dt)
+{
+    for (auto ps : particleSystems)
+    {
+        ps->CreateNewParticles(dt);
+        ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
+    }
 }
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
@@ -292,6 +315,9 @@ void GameplayState::Update(float dt) {
     if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
+
+    // particle updates
+    UpdateParticleSystems(dt);
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
     if (displayDebugger) debugger->UpdateDebugMode(dt);
@@ -467,7 +493,7 @@ std::string GameplayState::GetMedalImage(){
 }
 
 void GameplayState::ResetCameraAnimation() {
-    currentGroundSpeed = 0.0f;
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
     strafeSpeed = 0.0f;
 }
 
@@ -495,7 +521,8 @@ void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(G
 }
 
 void GameplayState::WalkCamera(float dt) {
-
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         soundManager->SM_PlaySound("footsteps.wav");
@@ -743,6 +770,8 @@ void GameplayState::InitLevel() {
     
     RenderFlairObjects();
 
+    LoadParticleSystems();
+
 
 }
 
@@ -819,6 +848,7 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+
 }
 
 void GameplayState::AddPointLight(PointLightInfo light) {
