@@ -724,7 +724,7 @@ void GameplayState::InitLevel() {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
-
+    
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
