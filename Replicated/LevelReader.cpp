@@ -7,11 +7,62 @@ using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
 LevelReader::LevelReader(){
-
+    LoadLevelNameMap();
 }
 
 LevelReader::~LevelReader(){
 
+}
+
+void LevelReader::Clear() { //we need to free all the memory so we dont leak
+    for (auto& i : primGOList) {
+        delete i;
+        i = nullptr;
+    }
+    primGOList.clear();
+
+    for (auto& i : oscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    oscillatorPrimitives.clear();
+
+    for (auto& i : harmfulOscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    harmfulOscillatorPrimitives.clear();
+
+    for (auto& i : springPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    springPrimitives.clear();
+
+    pointLights.clear();
+
+    for (auto& i : groundCubes) {
+        delete i;
+        i = nullptr;
+    }
+    groundCubes.clear();
+
+    checkPointPositions.clear();
+}
+
+void LevelReader::LoadLevelNameMap() {
+    int counter = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(Assets::LEVELDIR)) {
+        std::string name {entry.path().filename().string()};
+
+        //remove filename
+        size_t last = name.find_last_of(".");
+        if (last != std::string::npos) name = name.substr(0, last);
+
+        levelIDToLevelNameMap[counter] = name;
+        std::cout << name << std::endl;
+        counter++;
+    }
 }
 
 bool LevelReader::HasReadLevel(const std::string &levelSource) {

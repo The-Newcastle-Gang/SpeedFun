@@ -20,13 +20,19 @@ GameObject::GameObject(std::string objectName) : OnActiveSet(onActiveSet)	{
 
 GameObject::~GameObject()	{
     delete boundingVolume;
+    boundingVolume = nullptr;
     delete physicsObject;
+    physicsObject = nullptr;
     delete renderObject;
+    renderObject = nullptr;
     delete animatorObject;
+    animatorObject = nullptr;
     delete networkObject;
+    networkObject = nullptr;
 
 	for (Component* c : components) {
 		delete c;
+        c = nullptr;
 	}
 }
 

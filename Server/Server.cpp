@@ -25,7 +25,11 @@ void Server::InitStateMachine() {
     stateManager->AddState(running);
 
     stateManager->AddTransition(new StateTransition(waitingPlayers, running, [=]()->bool {
-        return waitingPlayers->CheckPlayersReady();
+        if (waitingPlayers->CheckPlayersReady()) {
+            running->SetSelectedLevel(waitingPlayers->GetSelectedLevel());
+            return true;
+        }
+        return false;
     }));
 }
 

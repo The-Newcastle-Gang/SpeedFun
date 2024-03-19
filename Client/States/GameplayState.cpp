@@ -48,8 +48,13 @@ GameplayState::~GameplayState() {
     networkThread = nullptr;
 
     delete debugger;
+    debugger = nullptr;
+
     delete loadSoundThread;
+    loadSoundThread = nullptr;
+
     delete medalShineShader;
+    medalShineShader = nullptr;
 }
 
 
@@ -62,14 +67,52 @@ void GameplayState::InitCanvas(){
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
 
+    InitEndCanvas();
+
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
 }
 
+void GameplayState::InitEndCanvas() {
+    canvas->CreateNewLayer("FinishedLevelLayer");
+
+    canvas->AddElement("FinishedLevelLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    auto endMedalElement = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+        .SetColor(Vector4(0, 0, 0, 0))
+        .SetAbsoluteSize({ 320,320 })
+        .CenterSprite()
+        .SetTransformTranslation(Vector2(25, 50))
+        .SetShader(medalShineShader);
+
+    endMedalElement.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
+    endMedalElementIndex = endMedalElement.GetIndex();
+
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto finalTime = canvas->AddElement("FinishedLevelLayer")
+        .SetColor({ 1,1,1,1 })
+        .CenterSprite()
+        .SetText(textData);
+    //.textData.font = biggerDebugFont.get();
+
+
+    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
+}
+
+void GameplayState::ClearLevel()
+{
+    world->ClearAndErase();
+}
+
 void GameplayState::InitCrossHeir(){
     //crossheir
-
     crosshair = &canvas->AddImageElement(crosshairImage)
         .SetAbsoluteSize({ 32, 32 })
         .CenterSprite();
@@ -201,22 +244,44 @@ void GameplayState::OnEnter() {
     isSinglePlayer = baseClient->IsSinglePlayer();
     CreateNetworkThread();
     InitialiseAssets();
-    Window::GetWindow()->LockMouseToWindow(true);
-    Window::GetWindow()->ShowOSPointer(false);
+
     debugger = new DebugMode(world->GetMainCamera());
     InitCanvas();
 
-    renderer->SetPointLights(world->GetPointLights());
+    WaitForServerLevel(); //wait until server tells us what level to load
+
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 
-void GameplayState::InitialiseAssets() {
+void GameplayState::WaitForServerLevel() {
+    while (!levelManager->GetHasReceivedLevel()) {
+        ReadNetworkFunctions();
+        //wait till the server tells us what level to load
+    }
+}
 
-    InitWorld();
-    InitCamera();
+void GameplayState::OnNewLevel() {
+    firstPersonPosition = nullptr;
+    hasReachedEnd = false;
+    canvas->PopActiveLayer(); //pop end of level UI
+    renderer->ClearActiveObjects();
+    world->ClearAndErase();
+    networkData->incomingState.Clear();
+    levelManager->Reset();
+    finishedLoading = LoadingStates::NOT_LOADED;
+    worldHasLoaded = LoadingStates::NOT_LOADED;
+    InitCurrentLevel();
+    FinishLoading();
+
+}
+void GameplayState::InitialiseAssets() {
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
-    FinishLoading();
+}
+
+void GameplayState::InitCurrentLevel() {
+    InitWorld();
+    InitCamera();
 }
 
 void GameplayState::InitSounds() {
@@ -266,32 +331,65 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
-        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
     if (soundHasLoaded == LoadingStates::READY) {
-        delete loadSoundThread;
+        if (loadSoundThread) {
+            delete loadSoundThread;
+            loadSoundThread = nullptr;
+        }
         finishedLoading = LoadingStates::READY;
     }
 }
 
 void GameplayState::Update(float dt) {
+    switch (state) {
+        case GameplayStateEnums::END_OF_LEVEL:{
+            UpdateEndOfLevel(dt);
+            break;
+        }
+
+        case GameplayStateEnums::PLAYING: {
+            UpdatePlaying(dt);
+            break;
+        }
+
+        case GameplayStateEnums::COUNTDOWN:{
+            UpdateCountdown(dt);
+            break;
+        }
+
+        case GameplayStateEnums::PLAYER_COMPLETED: {
+            UpdatePlayerCompleted(dt);
+            break;
+        }
+
+    }
+}
+
+void GameplayState::UpdateCountdown(float dt){
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
     }
-    bool countdownOver = levelManager->UpdateCountdown(dt); 
-    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+    UpdateAndRenderWorld(dt);
 
-    totalDTElapsed += dt;
-    ResetCameraAnimation();
-    if(countdownOver)SendInputData();
+
+    bool countdownOver = levelManager->UpdateCountdown(dt);
+    float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
+    if (countdownOver) {
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
+        state = GameplayStateEnums::PLAYING;
+    }
+}
+
+void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
+    totalDTElapsed += dt;
     UpdateGrapples(dt);
 
     Window::GetWindow()->ShowOSPointer(false);
-    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -302,7 +400,9 @@ void GameplayState::Update(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    if(countdownOver)world->UpdateWorld(dt);
+    world->UpdateWorld(dt);
+
+    ResetCameraAnimation();
 
     ReadNetworkPackets();
 
@@ -325,10 +425,27 @@ void GameplayState::Update(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
+}
 
-    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
-        ResetCameraToForwards();
+void GameplayState::UpdatePlaying(float dt){
+    SendInputData();
+    UpdateAndRenderWorld(dt);
+}
+
+void GameplayState::UpdatePlayerCompleted(float dt)
+{
+    UpdateAndRenderWorld(dt);
+}
+
+void GameplayState::UpdateEndOfLevel(float dt)
+{
+    if (shouldMoveToNewLevel) {
+        OnNewLevel();
+        shouldMoveToNewLevel = false;
+        Window::GetWindow()->ShowOSPointer(false);
+        state = GameplayStateEnums::COUNTDOWN;
     }
+    UpdateAndRenderWorld(dt);
 }
 
 void GameplayState::ResetCameraToForwards() {
@@ -380,10 +497,7 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::EndReached): {
-                int networkId = handler.Unpack<int>();
-                int medal = handler.Unpack<int>();
-                Vector4 medalColour = handler.Unpack<Maths::Vector4>();
-                if (!hasReachedEnd) InitEndScreen(medalColour);
+                OnEndReached(handler);
 
             } break;
 
@@ -401,11 +515,15 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::Grapple_Event): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
             } break;
 
             case(Replicated::Player_Velocity_Call): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
@@ -434,6 +552,13 @@ void GameplayState::ReadNetworkFunctions() {
                 }
             }
             break; 
+
+            case(Replicated::SendMedalValues): {
+                auto medals = handler.Unpack<Vector3>();
+                for (int i = 0; i < 3; i++)medalTimes[i] = medals[i];
+                timeElapsed = 0;
+            }
+            break;
             
             case(Replicated::SetNetworkActive): {
                 int networkObjectId = handler.Unpack<int>();
@@ -441,11 +566,30 @@ void GameplayState::ReadNetworkFunctions() {
                 auto targetObject = world->GetObjectByNetworkId(networkObjectId);
                 targetObject->SetActive(isActive);
             } break;
+
             case(Replicated::Player_Animation_Call): {
+                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
+
                 Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
                 UpdatePlayerAnimation(data.networkID, data.state);
             }
             break;
+
+            case(Replicated::Load_Level): {
+                int level = handler.Unpack<int>();
+                levelManager->SetHasReceivedLevel(true);
+                levelManager->ChangeLevel(level);
+                shouldMoveToNewLevel = true;
+            }
+            break;
+
+            case(Replicated::All_Players_Finished): {
+                state = GameplayStateEnums::END_OF_LEVEL;
+                soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
+
+                //show a scoreboard?
+                }
+                break;
 
             case(Replicated::GameInfo_GrappleAvailable): {
                 int eventType = handler.Unpack<int>();
@@ -478,6 +622,59 @@ void GameplayState::ReadNetworkFunctions() {
                     playerPositions[unpackFlagID] = position;
                 }
             }
+        }
+    }
+}
+
+void GameplayState::OnEndReached(DataHandler& handler)
+{
+    int networkId = handler.Unpack<int>();
+    int medal = handler.Unpack<int>();
+    Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+    medalColour.w = 0.0f;
+    if (!hasReachedEnd) InitEndScreen(medalColour);
+    if (state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
+    float speedVisualModifier = 0;
+    renderer->SetSpeedLineAmount(speedVisualModifier);
+    world->GetMainCamera()->SetFieldOfVision(defaultFOV + speedVisualModifier * 30.0f);
+
+    soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
+}
+
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
+    if (!playerObject)return;
+
+    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
+
+    switch (state) {
+        case Replicated::IDLE: {
+            playerAnimator->TransitionAnimation("Idle", 0.1f);
+            break;
+        }
+        case Replicated::JUMP: {
+            playerAnimator->TransitionAnimation("Jump", 0.1f);
+            break;
+        }
+        case Replicated::FALLING: {
+            playerAnimator->TransitionAnimation("Fall", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_FORWARD: {
+            playerAnimator->TransitionAnimation("Run", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_BACK: {
+            playerAnimator->TransitionAnimation("RunBack", 0.1f);
+            break;
+        }
+        case Replicated::RUNNING_LEFT: {
+            playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
+            break;
+        }
+        case Replicated::RUNNING_RIGHT: {
+            playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
             break;
         }
     }
@@ -605,11 +802,10 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
-
 }
 
 void GameplayState::InitCamera() {
@@ -623,52 +819,28 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel();
-    // Change the order of these functions and the program will explode.
+    InitLevel(levelManager->GetLevel());
     CreatePlayers();
     CreateGrapples();
     CreateChains();
+    renderer->SetPointLights(world->GetPointLights());
+
     worldHasLoaded = LoadingStates::LOADED;
 }
 
-void GameplayState::InitEndScreen(Vector4 color) {
+void GameplayState::InitEndScreen(Vector4 color) { // should be renamed
     hasReachedEnd = true;
+    ResetEndScreenAnimTimers();
     finalTime = timeElapsed;
     medalAnimationStage = MedalAnimationStages::TIMER_SCROLL;
-    canvas->CreateNewLayer("FinishedLevelLayer");
     canvas->PushActiveLayer("FinishedLevelLayer");
-
-    canvas->AddElement("FinishedLevelLayer")
-        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
-        .SetAbsoluteSize({ 2000,2000 })
-        .AlignCenter()
-        .AlignMiddle();
-
-    auto medal = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-        .SetColor(color - Vector4(0,0,0,1))
-        .SetAbsoluteSize({ 320,320 })
-        .CenterSprite()
-        .SetTransformTranslation(Vector2(25, 50))
-        .SetShader(medalShineShader);
-
-    medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
-
-
-    TextData textData;
-    textData.font = biggerDebugFont.get();
-    auto finalTime = canvas->AddElement("FinishedLevelLayer")
-        .SetColor({ 1,1,1,1 })
-        .CenterSprite()
-        .SetText(textData);
-    //.textData.font = biggerDebugFont.get();
-
-
-    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
+    canvas->GetElementByIndex(endMedalElementIndex, "FinishedLevelLayer").SetColor(color);
     // Disable player controls
     // Clear the world
     // Loading screen
     // Load the next level
 }
+
 [[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
@@ -712,9 +884,7 @@ void GameplayState::CreatePlayers() {
     }
 }
 
-void GameplayState::InitLevel() {
-    levelManager->TryReadLevel("wallMoment");
-
+void GameplayState::InitLevel(int level) {
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
@@ -761,7 +931,7 @@ void GameplayState::InitLevel() {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
-    
+
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
@@ -770,8 +940,6 @@ void GameplayState::InitLevel() {
     endPos = levelManager->GetLevelReader()->GetEndPosition();
     
     RenderFlairObjects();
-
-
 }
 
 void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
@@ -901,42 +1069,6 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
-void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
-    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
-    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
-    if (!playerAnimator)return;
-
-    switch (state) {
-    case Replicated::IDLE: {
-        playerAnimator->TransitionAnimation("Idle", 0.1f);
-        break;
-    }
-    case Replicated::JUMP: {
-        playerAnimator->TransitionAnimation("Jump", 0.1f);
-        break;
-    }
-    case Replicated::FALLING: {
-        playerAnimator->TransitionAnimation("Fall", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_FORWARD: {
-        playerAnimator->TransitionAnimation("Run", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_BACK: {
-        playerAnimator->TransitionAnimation("RunBack", 0.1f);
-        break;
-    }
-    case Replicated::RUNNING_LEFT: {
-        playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
-        break;
-    }
-    case Replicated::RUNNING_RIGHT: {
-        playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
-        break;
-    }
-    }
-}
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
@@ -1001,6 +1133,7 @@ void GameplayState::UpdateMedalSprite(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
     element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
     if (medalTimer == spinAmount) {
+        element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, 1));
         medalAnimationStage = MedalAnimationStages::FINISHED;
     }
 }

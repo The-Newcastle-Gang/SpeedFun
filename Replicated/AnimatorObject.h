@@ -17,7 +17,9 @@ class AnimatorObject {
     };
 
 public:
-    AnimatorObject(std::map<std::string, MeshAnimation*>* a) { animations = a;  currentAnimation = nullptr; queuedAnimation = nullptr;};
+    AnimatorObject(std::map<std::string, MeshAnimation*>* a) {
+        animations = a;  currentAnimation = nullptr; queuedAnimation = nullptr; midPoseAnimation = nullptr; state = NONE;
+    };
     ~AnimatorObject() {};
     void SetAnimation(MeshAnimation* newAnimation);
     void SetAnimation(std::string animationName);
@@ -69,6 +71,7 @@ public:
                 return std::clamp((transitionTimer - transitionTime * 0.5f) / (transitionTime*0.5f), 0.0f, 1.0f);
             }
         }
+        return 0;
     }
 private:
     MeshAnimationInfo animationInfo;

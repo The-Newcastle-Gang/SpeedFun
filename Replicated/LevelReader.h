@@ -15,15 +15,15 @@ using namespace CSC8503;
 
 struct PrimitiveGameObject {
 public:
-    std::string     meshName;
-    Vector3         dimensions;
+    std::string     meshName = "";
+    Vector3         dimensions = Vector3(0,0,0);
     Quaternion      rotation;
-    Vector3         position;
-    float           inverseMass;
-    std::string     physicsType;
-    Vector3         colliderExtents;
-    float           colliderRadius;
-    bool            shouldNetwork;
+    Vector3         position = Vector3(0,0,0);
+    float           inverseMass = 0;
+    std::string     physicsType = "";
+    Vector3         colliderExtents = Vector3(0,0,0);
+    float           colliderRadius = 0;
+    bool            shouldNetwork = false;
 
 };
 
@@ -69,6 +69,10 @@ public:
 
 	Vector3 GetStartPosition() const { return startPosition; }
 	Vector3 GetEndPosition() const { return endPosition; }
+
+    std::string GetLevelName(int id) { return levelIDToLevelNameMap[id]; }
+    void LoadLevelNameMap();
+
     [[nodiscard]] Vector3 GetDeathBoxPosition() const { return deathBoxPosition; } //TODO: rename this to deathPlane
 
     [[nodiscard]] std::vector<PrimitiveGameObject*> GetPrimitiveList() const { return primGOList; }
@@ -84,6 +88,10 @@ public:
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
 
+    int GetNumberOfLevels() { return levelIDToLevelNameMap.size(); }
+
+    void Clear();
+
 protected:
 	Vector3 startPosition;
 	Vector3 endPosition;
@@ -97,5 +105,8 @@ protected:
     std::vector<PointLightInfo> pointLights;
 
     std::vector<GroundCubePrimitive*> groundCubes;
+
+    std::unordered_map<int, std::string> levelIDToLevelNameMap;
+
 
 };

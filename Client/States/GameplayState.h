@@ -34,6 +34,15 @@ namespace NCL {
             READY
         };
 
+        namespace GameplayStateEnums {
+            enum ClientState {
+                COUNTDOWN,
+                PLAYING,
+                PLAYER_COMPLETED,
+                END_OF_LEVEL
+            };
+        }
+
         class GameplayState : public State
         {
         public:
@@ -47,24 +56,37 @@ namespace NCL {
             bool IsDisconnected();
 
         protected:
+            void OnNewLevel();
+            void WaitForServerLevel();
             void InitialiseAssets();
             void InitCamera();
             void InitWorld();
+            void InitCurrentLevel();
             void InitSounds();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
-            void InitLevel();
+            void InitLevel(int level);
             void InitCanvas();
+
+            void ClearLevel();
+            void LoadNextLevel();
 
             void ResetCameraToForwards();
 
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
+            void InitEndCanvas();
 
+            void UpdateCountdown(float dt);
+            void UpdateAndRenderWorld(float dt);
+            void UpdatePlaying(float dt);
+            void UpdatePlayerCompleted(float dt);
+            void UpdateEndOfLevel(float dt);
             bool hasReachedEnd = false;
             void InitEndScreen(Vector4 color);
+            int endMedalElementIndex;
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -130,6 +152,7 @@ namespace NCL {
 
             void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
+            void OnEndReached(DataHandler& handler);
             void ReadNetworkPackets();
 
             void CreateRock();
@@ -251,11 +274,24 @@ namespace NCL {
             DebugMode* debugger;
             bool displayDebugger = false;
 
+            GameplayStateEnums::ClientState state = GameplayStateEnums::END_OF_LEVEL;
+
+            bool shouldMoveToNewLevel = false;
+
             void RenderFlairObjects();
             void CreateGrapples();
             void UpdateGrapples(float dt);
             float grappleContVolume = 0.0f;
             GameObject *CreateChainLink();
+
+            void ResetEndScreenAnimTimers() {
+                medalTimer = 0.0f;
+                finalTime = 0.0f;
+                finalTimeScroll = 0.0f;
+                finaltimeShrink = 1.0f;
+                finalTimeShake = 0.0f;
+            }
+
             void CreateChains();
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
             void OnGrappleToggle(GameObject &gameObject, bool isActive);

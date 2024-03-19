@@ -24,6 +24,7 @@ class PlayerMovement : public Component {
 public:
     PlayerMovement(GameObject* g, GameWorld* w);
     void UpdateInputs(Vector3 pRightAxis, Vector2 pInputDirection, Quaternion pPlayerRotation);
+    void ResetMovementInput() { inputDirection = { 0,0 }; }
     void PhysicsUpdate(float fixedTime) override;
     void Update(float dt) override;
 

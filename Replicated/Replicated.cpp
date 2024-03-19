@@ -5,7 +5,7 @@
 #include "Replicated.h"
 
 Replicated::Replicated() {
-
+    levelReader = nullptr;
 }
 
 int Replicated::GetCurrentLevelLen(){
