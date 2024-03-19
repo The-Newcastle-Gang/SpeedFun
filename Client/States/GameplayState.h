@@ -103,6 +103,7 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+            std::vector<std::string> soundEffects;
             SoundManager* soundManager;
             GameWorld* world;
             // DO NOT USE THIS POINTER or suffer a null pointer exception.
@@ -158,6 +159,7 @@ namespace NCL {
             void ResetCameraAnimation();
 
             void WalkCamera(float dt);
+            std::vector<std::string> walkSounds;
             float groundedMovementSpeed = 0.0f;
             float currentGroundSpeed = 0.0f;
             float walkTimer = 0.0f;
@@ -165,6 +167,7 @@ namespace NCL {
             const float bobAmount = 0.1f;
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
+            float walkSoundTimerMultiplier = 0.85f;
 
             Vector3 playerVelocity;
 
@@ -251,7 +254,8 @@ namespace NCL {
                 START,
                 TIMER_SCROLL,
                 TIMER_SHAKE,
-                MEDAL
+                MEDAL,
+                FINISHED
             };
 
             ShaderBase *medalShineShader;
@@ -264,6 +268,7 @@ namespace NCL {
             float finalTimeScroll = 0.0f;
             float finaltimeShrink = 1.0f;
             float finalTimeShake = 0.0f;
+            float finalTimeSoundRepeat = 0.0f;
             MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
             std::unique_ptr<Font> biggerDebugFont;
             DebugMode* debugger;
@@ -275,7 +280,8 @@ namespace NCL {
 
             void RenderFlairObjects();
             void CreateGrapples();
-            void UpdateGrapples();
+            void UpdateGrapples(float dt);
+            float grappleContVolume = 0.0f;
             GameObject *CreateChainLink();
 
             void ResetEndScreenAnimTimers() {
