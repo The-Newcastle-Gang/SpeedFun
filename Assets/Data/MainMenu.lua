@@ -73,7 +73,7 @@ end
 
 local COLORS = {
     translucent = Vector4:newRGB(255, 244, 255, 200);
-    inactive = Vector4:newRGB(40, 40, 40, 255),
+    inactive = Vector4:newRGB(255, 255, 255, 255),
     active = Vector4:new(1.0, 1.0, 1.0, 1.0),
     transparent = Vector4:new(0.0, 0.0, 0.0, 0.0),
     main = Vector4:newRGB(120, 10, 10, 255),
@@ -199,25 +199,25 @@ canvas = {
             },
             id = "Multiplayer",
         },
-        {
-            image = "hellMain/Options.png",
-            color = COLORS.inactive,
-            aSize = Vector2:new(99, 25),
-            align = {
-                AlignTo("top", 285 + mainSpace * 2),
-                AlignTo("center", 0),
-            },
-            tags = {
-                "option",
-            },
-            id = "Options",
-        },
+        --{
+        --    image = "hellMain/Options.png",
+        --    color = COLORS.inactive,
+        --    aSize = Vector2:new(99, 25),
+        --    align = {
+        --        AlignTo("top", 285 + mainSpace * 2),
+        --        AlignTo("center", 0),
+        --    },
+        --    tags = {
+        --        "option",
+        --    },
+        --    id = "Options",
+        --},
         {
             image = "hellMain/Exit.png",
             color = COLORS.inactive,
             aSize = Vector2:new(48, 20),
             align = {
-                AlignTo("top", 285 + mainSpace * 3),
+                AlignTo("top", 285 + mainSpace * 2),
                 AlignTo("center", 0),
             },
             tags = {
@@ -235,6 +235,33 @@ canvas = {
             },
             id = "HoverBox",
         },
+        {
+          color = COLORS.white,
+          image = "hellMain/gversion.png",
+          aSize = Vector2:new(50, 10),
+          align = {
+              AlignTo("bottom", 50),
+              AlignTo("left", 20)
+          },
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/name.png",
+            aSize = Vector2:new(158,20),
+            align = {
+                AlignTo("bottom", 30),
+                AlignTo("left", 20)
+            },
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/engine.png",
+            aSize = Vector2:new(100, 17),
+            align = {
+                AlignTo("bottom" ,30),
+                AlignTo("right", 20)
+            },
+        }
     },
     lobby = {
         {
@@ -290,6 +317,13 @@ blockingCanvas = {
             color = COLORS.menuBackground,
             rSize = Vector2:new(1, 1),
 
+        },
+        {
+            color = COLORS.white,
+            rSize = Vector2:new(1,1),
+            tags ={
+                "menuScroll"
+            }
         },
         {
             image = "hellMain/Hell.png",
