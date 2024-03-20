@@ -20,6 +20,7 @@ using namespace NCL::CSC8503;
 class Element {
 public:
     Element(int ind) : OnMouseHover(mouseHover), OnMouseUp(mouseUp), OnMouseDown(mouseDown), OnMouseEnter(mouseEnter), OnMouseExit(mouseExit), OnMouseHold(mouseHold), OnUpdate(update), OnFocusExit(focusExit), OnFocus(focus) {
+        isActive = true;
         dimensions = UIDim();
         color = Vector4(1.0, 1.0, 1.0, 1.0);
         transform = Transform();
@@ -38,7 +39,9 @@ public:
         tweenValue2 = 1;
         isFocused = false;
     }
-
+    [[nodiscard]] bool IsActive() const {
+        return isActive;
+    }
     [[nodiscard]] UIDim GetDimensions() const {
         return dimensions;
     }
@@ -70,6 +73,11 @@ public:
 
     [[nodiscard]] int GetIndex() const {
         return index;
+    }
+
+    Element& SetActive(bool b) {
+        isActive = b;
+        return *this;
     }
 
     Element& SetText(const TextData& data) {
@@ -228,6 +236,7 @@ public:
     float tweenValue1;
     float tweenValue2;
 private:
+    bool isActive;
     UIDim dimensions;
     Vector4 color;
     Transform transform;

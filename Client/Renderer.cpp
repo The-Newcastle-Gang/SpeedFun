@@ -140,8 +140,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     // move to own function.
     InitUIQuad();
-    //InitRayMarching();
+    u_time = 0.0f;
 
+    //InitRayMarching();
     CreatePostProcessQuad();
     // SpeedLines
     uTime = 0.0f;
@@ -433,7 +434,6 @@ void GameTechRenderer::CombineBuffers() {
     glEnable(GL_CULL_FACE);
 
     glDepthMask(true);
-
 }
 
 void GameTechRenderer::InitRayMarching() {
@@ -478,6 +478,7 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
+            if (!e.IsActive()) continue;
             auto activeShader = defaultUIShader;
             if (!e.GetShader()) {
                 BindShader(defaultUIShader);
@@ -486,7 +487,6 @@ void GameTechRenderer::RenderUI() {
                 BindShader(e.GetShader());
                 activeShader = (OGLShader*)(e.GetShader());
             }
-
             auto color = e.GetColor();
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
@@ -524,9 +524,9 @@ void GameTechRenderer::RenderUI() {
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
 
+
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, cheeseTexture->GetObjectID());
-
 
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -540,6 +540,10 @@ void GameTechRenderer::RenderUI() {
 
         }
     }
+}
+
+void GameTechRenderer::ClearActiveObjects() {
+    activeObjects.clear();
 }
 
 void GameTechRenderer::BuildObjectList() {
@@ -651,9 +655,13 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
+    int lavaLocation = 0;
+    float uTimeLocation = 0;
+
     //glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
     //glClearColor(0.0, 0.0, 0.0, 0.0);
     //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 
     //TODO - PUT IN FUNCTION
     glActiveTexture(GL_TEXTURE0+1);
@@ -692,6 +700,8 @@ void GameTechRenderer::RenderCamera() {
             lightRadiusLocation = glGetUniformLocation(shader->GetProgramID(), "lightRadius");
 
             cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
+            uTimeLocation = glGetUniformLocation(shader->GetProgramID(), "u_time");
+            lavaLocation = glGetUniformLocation(shader->GetProgramID(), "lavaHeight");
 
             Vector3 camPos = gameWorld.GetMainCamera()->GetPosition();
             glUniform3fv(cameraLocation, 1, camPos.array);
@@ -699,9 +709,11 @@ void GameTechRenderer::RenderCamera() {
             glUniformMatrix4fv(projLocation, 1, false, (float *) &projMatrix);
             glUniformMatrix4fv(viewLocation, 1, false, (float *) &viewMatrix);
 
+            glUniform1f(uTimeLocation, uTime);
             glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
             glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
-            glUniform1f(lightRadiusLocation , sunlight.lightRadius);
+            glUniform1f(lightRadiusLocation, sunlight.lightRadius);
+            glUniform1f(lavaLocation, lavaHeight);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);
@@ -752,6 +764,8 @@ void GameTechRenderer::RenderCamera() {
             }
         }
     }
+    //test if ogl error
+    glDisable(GL_BLEND);
 }
 
 void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
@@ -773,13 +787,13 @@ void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
     auto& camera = *gameWorld.GetMainCamera();
 
     Matrix4 invVP = CollisionDetection::GenerateInverseView(camera) * CollisionDetection::GenerateInverseProjection(screenAspect, camera.GetFieldOfVision(), camera.GetNearPlane(), camera.GetFarPlane());
-    int invLocation     = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
-    int lightLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
-    int depthLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
-    int timeLoc         = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
-    int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
-    int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
-    int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
+    int invLocation         = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
+    int lightLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
+    int depthLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    int timeLoc             = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
+    int speedBoolLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
+    int speedLineDirLoc     = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
+    int speedLineAmountLoc  = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&sunlight.lightPosition);

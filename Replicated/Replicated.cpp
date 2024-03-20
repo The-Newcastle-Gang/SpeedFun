@@ -5,7 +5,7 @@
 #include "Replicated.h"
 
 Replicated::Replicated() {
-
+    levelReader = nullptr;
 }
 
 int Replicated::GetCurrentLevelLen(){
@@ -45,28 +45,15 @@ void Replicated::AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos) 
         .SetPosition(currentPrimitive->position);
 }
 
-void Replicated::AddTestObjectToLevel(GameObject* g, GameWorld& world, Vector3 size, Vector3 position){
+void Replicated::AddTestObjectToLevel(GameObject* g, GameWorld& world, Vector3 size, Vector3 position, bool shouldNetwork){
 
-    world.AddGameObject(g, true);
-    auto volume = new AABBVolume(size * 0.5f);
-    g->SetBoundingVolume((CollisionVolume*)volume);
+    world.AddGameObject(g, shouldNetwork);
 
     g->GetTransform()
         .SetScale(size)
         .SetPosition(position);
 }
 
-void Replicated::AddSwingingBlock(GameObject* g, GameWorld& world) {
-
-    world.AddGameObject(g, true);
-    auto volume = new AABBVolume(Vector3(10, 10, 10) * 0.5f);
-    g->SetBoundingVolume((CollisionVolume*)volume);
-
-    g->GetTransform()
-        // change these to match the level loader
-        .SetScale({5, 5, 5})
-        .SetPosition({1, 20, 1});
-}
 
 void Replicated::CreatePlayer(GameObject *g, GameWorld& world) {
     constexpr float meshSize = 1.0f;

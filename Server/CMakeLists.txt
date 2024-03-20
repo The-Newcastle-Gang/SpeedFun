@@ -11,9 +11,10 @@ add_library(server
         Components/Spring.cpp
         Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
+        Components/Swinging.cpp
         Levels/StageTimer.cpp
         Levels/LevelManager.cpp
-)
+        Components/PlayerRespawner.h)
 
 target_include_directories(server PUBLIC
         ../NCLCoreClasses
