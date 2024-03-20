@@ -45,6 +45,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
 GameplayState::~GameplayState() {
     delete lavaParticles;
+    particleSystems.clear();
 
     shouldShutDown.store(true);
     networkThread->join();
