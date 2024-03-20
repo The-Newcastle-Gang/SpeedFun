@@ -64,6 +64,7 @@ namespace NCL {
             void NewRenderText();
 
             void RenderFrame()	override;
+            void RenderLSFrame()	override;
 
             OGLShader*	defaultShader;
             OGLShader* defaultUIShader;
