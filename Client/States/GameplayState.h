@@ -74,6 +74,17 @@ namespace NCL {
 
             void ResetCameraToForwards();
 
+            int pauseSelected;
+            void InitPauseScreen();
+            void OnPauseHoverEnter(Element& element);
+            void OnPauseHoverExit(Element& element);
+            void OnPauseClick(Element& element);
+            void UpdatePauseFlame(Element& element, float dt);
+            void TogglePause();
+            int selectedPause = 0;
+            float flameToXGap = 300.0f;
+            float flameToY = 75.0f;
+
             float whenToStartCountdown = 3.0f;
             int countdownCurrentInt = 0;
             void InitStartScreen();
@@ -149,6 +160,7 @@ namespace NCL {
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
             bool isSinglePlayer;
+            bool isPaused = false;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;

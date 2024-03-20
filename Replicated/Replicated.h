@@ -55,7 +55,8 @@ public:
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
-        PlayerDebug
+        PlayerDebug,
+        Pause
     };
 
 

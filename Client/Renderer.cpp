@@ -478,6 +478,7 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
+            if (!e.IsActive()) continue;
             auto activeShader = defaultUIShader;
             if (!e.GetShader()) {
                 BindShader(defaultUIShader);
@@ -486,7 +487,6 @@ void GameTechRenderer::RenderUI() {
                 BindShader(e.GetShader());
                 activeShader = (OGLShader*)(e.GetShader());
             }
-
             auto color = e.GetColor();
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();

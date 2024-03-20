@@ -24,6 +24,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timerBarShader      = resources->GetShader("timerBar");
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
     soundEffects = { "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" , 
@@ -73,6 +74,7 @@ void GameplayState::InitCanvas(){
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+    InitPauseScreen();
 }
 
 void GameplayState::InitStartScreen() {
@@ -249,6 +251,60 @@ void GameplayState::InitLevelMap(){
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
     */
+}
+
+void GameplayState::InitPauseScreen() {
+    canvas->CreateNewLayer("PauseLayer");
+    
+    auto backing = canvas->AddElement("PauseLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    textData.fontSize = 1.0f;
+    textData.text = "RESUME";
+    textData.color = { 0.5,0.5,0.5,1 };
+    auto resumeText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 500,100})
+        .AlignCenter()
+        .AlignMiddle(75)
+        .SetId("Resume")
+        .SetText(textData);
+
+    resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    resumeText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    resumeText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+
+    textData.text = "EXIT";
+    auto exitText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 350,100 })
+        .AlignCenter()
+        .AlignMiddle(-75)
+        .SetId("Exit")
+        .SetText(textData);
+    exitText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    exitText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    exitText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+    //resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverSelect>(this);
+
+    for (int i = 0; i < 2; i++)
+    {
+        auto& playerElement = canvas->AddImageElement(playerblipImage, "PauseLayer")
+            .SetColor({ 0.5,0.0,0.,1 })
+            .SetAbsoluteSize({ 125,125 })
+            .AlignCenter()
+            .AlignMiddle()
+            .SetTexture(resources->GetTexture("firemask.jpg"))
+            .SetShader(fireShader)
+            .SetId("pauseflame_" + std::to_string(i));
+
+        playerElement.OnUpdate.connect<&GameplayState::UpdatePauseFlame>(this);
+    }
 }
 
 void GameplayState::InitPlayerBlip(int id) {
@@ -428,24 +484,35 @@ void GameplayState::UpdateCountdown(float dt){
 
 void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
-    totalDTElapsed += dt;
-    UpdateGrapples(dt);
 
-    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->ShowOSPointer(isPaused);
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
+    if (!isPaused)
+    {
+        UpdateGrapples(dt);
+        
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        }
+        WalkCamera(dt);
+        if (jumpTimer > 0) JumpCamera(dt);
+        if (landTimer > 0) LandCamera(dt);
+        StrafeCamera(dt);
+        world->GetMainCamera()->UpdateCamera(dt);
 
-    if (firstPersonPosition) {
-        world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        totalDTElapsed += dt;
+        UpdateGrapples(dt);
+
+        Window::GetWindow()->ShowOSPointer(false);
+
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+
+        }
+        world->UpdateWorld(dt);
     }
-    WalkCamera(dt);
-    if (jumpTimer > 0) JumpCamera(dt);
-    if (landTimer > 0) LandCamera(dt);
-    StrafeCamera(dt);
-
-    world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
-
+    
     ResetCameraAnimation();
-
     ReadNetworkPackets();
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
@@ -817,6 +884,14 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
+        if (isSinglePlayer && !hasReachedEnd)
+        {
+            TogglePause();
+        }
+    }
+
+    if (isPaused) return;
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
@@ -842,6 +917,14 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
     rotationDirection = input.playerDirection.x == 0 ? rotationDirection : (input.playerDirection.x > 0 ? -1 : 1);
     networkData->outgoingInput.Push(input);
+}
+
+void GameplayState::TogglePause() {
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+    isPaused = !isPaused;
+    renderer->SetSpeedActive(!isPaused);
+    if (isPaused) canvas->PushActiveLayer("PauseLayer");
+    else canvas->PopActiveLayer();
 }
 
 void GameplayState::FinishLoading() {
@@ -1264,6 +1347,53 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     break;
     }
     
+}
+
+void GameplayState::OnPauseHoverEnter(Element &element) {
+
+    element.textData.color = { 1,1,1,1 };
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        selectedPause = 0;
+    }
+    if (elementID == "Exit") {
+        selectedPause = 1;
+    }
+}
+void GameplayState::OnPauseHoverExit(Element& element) {
+
+    element.textData.color = { 0.5,0.5,0.5,1 };
+}
+
+void GameplayState::OnPauseClick(Element& element) {
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        TogglePause();
+    }
+    
+}
+
+void GameplayState::UpdatePauseFlame(Element& element, float dt) {
+    float direction = -1.0f;
+    if (element.GetId() == "pauseflame_1") direction = 1.0f;
+    float setToX = 0;
+    float setToY = 0;
+    switch (selectedPause)
+    {
+    case(0):
+        setToX = 300.0f;
+        setToY = 75.0f;
+        break;
+
+    case(1):
+        setToX = 225.0f;
+        setToY = -75.0f;
+        break;
+    }
+    flameToXGap = flameToXGap * 0.9f + setToX * 0.1f;
+    flameToY = flameToY * 0.9f + setToY * 0.1f;
+    element.AlignCenter((int)round(flameToXGap * direction));
+    element.AlignMiddle((int)round(flameToY) + 25);
 }
 
 void GameplayState::RenderFlairObjects(){

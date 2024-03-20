@@ -75,6 +75,7 @@ namespace NCL {
             std::array<GameObject *, Replicated::PLAYERCOUNT> grapples;
             std::atomic<bool> shouldClose;
 
+            bool isPaused = false;
             RunningStateEnums::RunningStateEnum state = RunningStateEnums::COUNTDOWN;
             float packetTimer;
             int sceneSnapshotId;
