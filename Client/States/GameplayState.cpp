@@ -66,7 +66,6 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-    displayDebugger = false;
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
@@ -299,6 +298,7 @@ void GameplayState::WaitForServerLevel() {
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
+    displayDebugger = false;
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
@@ -308,6 +308,7 @@ void GameplayState::OnNewLevel() {
     worldHasLoaded = LoadingStates::NOT_LOADED;
     InitCurrentLevel();
     FinishLoading();
+    ResetCameraToForwards();
 
 }
 
@@ -1109,7 +1110,7 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
 }
 
 void GameplayState::UpdateStartBack(Element& element, float dt) {
-    if (levelManager->GetCountdown() > 3.0f) {
+    if (levelManager->GetCountdown() > whenToStartCountdown) {
         element.SetColor({ 0,0,0,0 });
         return;
     }
@@ -1122,7 +1123,7 @@ void GameplayState::UpdateStartBack(Element& element, float dt) {
 
 void GameplayState::UpdateStartText(Element& element, float dt) {
     float endTimer = levelManager->GetCountdown();
-    if (endTimer > 3.0f) {
+    if (endTimer > whenToStartCountdown) {
         element.textData.text = "";
         return;
     }
