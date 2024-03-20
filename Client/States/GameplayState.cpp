@@ -322,7 +322,6 @@ void GameplayState::CreateLoadingScreenThread() {
 void GameplayState::CreateLoadingScreenCanvas() {
     const int loadingScreens = 2;
     Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
-    //Vector2Int lsTipTextRes = { 508, 34};
     Vector2Int lsTipTextRes = { 625, 28};
     int textBottomPadding = 35;
     int textLeftPadding = 35;
