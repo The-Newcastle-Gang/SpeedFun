@@ -17,9 +17,11 @@ add_library(server
         Components/RayEnemyShoot.cpp
         Components/TrapObject.cpp
         Components/SpeedUpBlock.cpp
+        Components/Swinging.cpp
+
         Levels/StageTimer.cpp
         Levels/LevelManager.cpp
-)
+        Components/PlayerRespawner.h)
 
 target_include_directories(server PUBLIC
         ../NCLCoreClasses

@@ -26,7 +26,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
+    cheeseTexture = (OGLTexture*)LoadTexture("cheeseTex.jpg");
     postProcessBase = new OGLShader("post.vert", "post.frag");
+    fxaaShader = new OGLShader("post.vert", "fxaa.frag");
 
 	lineCount = 0;
 	textCount = 0;
@@ -49,12 +51,24 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     glGenFramebuffers(1, &shadowFBO);
     glGenFramebuffers(1, &lightFBO);
     glGenFramebuffers(1, &bufferFBO);
+    glGenFramebuffers(1, &fxaaFBO);
 
     GenerateScreenTexture(bufferColourTex, false);
     GenerateScreenTexture(bufferNormalTex, false);
     GenerateScreenTexture(lightDiffuseTex, false);
     GenerateScreenTexture(lightSpecularTex, false);
     GenerateScreenTexture(bufferDepthTex, true);
+
+    glGenTextures(1, &fxaaTexture);
+    glBindTexture(GL_TEXTURE_2D, fxaaTexture);
+    // we are downscaling an HDR color buffer, so we need a float texture format
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F,
+                 (int)windowWidth, (int)windowHeight,
+                 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glBindTexture(GL_TEXTURE_2D, bufferDepthTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
@@ -64,6 +78,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowTex, 0);
 	glDrawBuffer(GL_NONE);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, fxaaFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fxaaTexture, 0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, bufferColourTex, 0);
@@ -114,6 +131,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
     debugFont = std::unique_ptr(LoadFont("CascadiaMono.ttf"));
+    
 
     sceneColorTexture = CreateHDRTexture();
     sceneDepthTexture = CreateDepthTexture();
@@ -122,8 +140,9 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 
     // move to own function.
     InitUIQuad();
-    //InitRayMarching();
+    u_time = 0.0f;
 
+    //InitRayMarching();
     CreatePostProcessQuad();
     // SpeedLines
     uTime = 0.0f;
@@ -296,6 +315,7 @@ void GameTechRenderer::RenderFrame() {
     RenderDeferredLighting();
     CombineBuffers();
     ApplyPostProcessing();
+    ApplyFXAA();
 	glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -414,7 +434,6 @@ void GameTechRenderer::CombineBuffers() {
     glEnable(GL_CULL_FACE);
 
     glDepthMask(true);
-
 }
 
 void GameTechRenderer::InitRayMarching() {
@@ -459,6 +478,7 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
+            if (!e.IsActive()) continue;
             auto activeShader = defaultUIShader;
             if (!e.GetShader()) {
                 BindShader(defaultUIShader);
@@ -467,11 +487,11 @@ void GameTechRenderer::RenderUI() {
                 BindShader(e.GetShader());
                 activeShader = (OGLShader*)(e.GetShader());
             }
-
             auto color = e.GetColor();
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
             auto absPos = e.GetAbsolutePosition();
+            auto transformation = e.GetTransform();
             auto relSize = e.GetRelativeSize();
             auto absSize = e.GetAbsoluteSize();
 
@@ -490,6 +510,7 @@ void GameTechRenderer::RenderUI() {
             auto textY = (relPos.y + (float)absPos.y / (float)windowHeight) * 100;
 
             glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "projection"), 1, false, (float*)uiOrthoView.array);
+            glUniformMatrix4fv(glGetUniformLocation(activeShader->GetProgramID(), "model"), 1, false, (float*)transformation.GetMatrix().array);
             glUniform4fv(glGetUniformLocation(activeShader->GetProgramID(), "uiColor"), 1, colorAddress);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionRel"), relPos.x * windowWidth, relPos.y * windowHeight);
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "positionAbs"), absPos.x, absPos.y);
@@ -497,11 +518,15 @@ void GameTechRenderer::RenderUI() {
             glUniform2f(glGetUniformLocation(activeShader->GetProgramID(), "sizeAbs"), absSize.x, absSize.y);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "tweenValue1"), e.tweenValue1);
             glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "noiseTexture"), 1);
+            glUniform1i(glGetUniformLocation(activeShader->GetProgramID(), "cheeseTexture"), 2);
             glUniform1f(glGetUniformLocation(activeShader->GetProgramID(), "uTime"), (float)Window::GetTimer()->GetTotalTimeSeconds());
 
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, noiseTexture->GetObjectID());
 
+
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, cheeseTexture->GetObjectID());
 
             glBindVertexArray(uiVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -515,6 +540,10 @@ void GameTechRenderer::RenderUI() {
 
         }
     }
+}
+
+void GameTechRenderer::ClearActiveObjects() {
+    activeObjects.clear();
 }
 
 void GameTechRenderer::BuildObjectList() {
@@ -626,9 +655,13 @@ void GameTechRenderer::RenderCamera() {
 
     int cameraLocation = 0;
 
+    int lavaLocation = 0;
+    float uTimeLocation = 0;
+
     //glBindFramebuffer(GL_FRAMEBUFFER, hdrFramebuffer);
     //glClearColor(0.0, 0.0, 0.0, 0.0);
     //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
 
     //TODO - PUT IN FUNCTION
     glActiveTexture(GL_TEXTURE0+1);
@@ -667,6 +700,8 @@ void GameTechRenderer::RenderCamera() {
             lightRadiusLocation = glGetUniformLocation(shader->GetProgramID(), "lightRadius");
 
             cameraLocation = glGetUniformLocation(shader->GetProgramID(), "cameraPos");
+            uTimeLocation = glGetUniformLocation(shader->GetProgramID(), "u_time");
+            lavaLocation = glGetUniformLocation(shader->GetProgramID(), "lavaHeight");
 
             Vector3 camPos = gameWorld.GetMainCamera()->GetPosition();
             glUniform3fv(cameraLocation, 1, camPos.array);
@@ -674,9 +709,11 @@ void GameTechRenderer::RenderCamera() {
             glUniformMatrix4fv(projLocation, 1, false, (float *) &projMatrix);
             glUniformMatrix4fv(viewLocation, 1, false, (float *) &viewMatrix);
 
+            glUniform1f(uTimeLocation, uTime);
             glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
             glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
-            glUniform1f(lightRadiusLocation , sunlight.lightRadius);
+            glUniform1f(lightRadiusLocation, sunlight.lightRadius);
+            glUniform1f(lavaLocation, lavaHeight);
 
             int shadowTexLocation = glGetUniformLocation(shader->GetProgramID(), "shadowTex");
             glUniform1i(shadowTexLocation, 1);
@@ -727,17 +764,19 @@ void GameTechRenderer::RenderCamera() {
             }
         }
     }
+    //test if ogl error
+    glDisable(GL_BLEND);
 }
 
 void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
 {
     float screenAspect = (float)windowWidth / (float)windowHeight;
+    glBindFramebuffer(GL_FRAMEBUFFER, fxaaFBO);
+    glClear(GL_COLOR_BUFFER_BIT);
     glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     BindShader(postProcessBase);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, sceneColorTexture);
@@ -748,13 +787,13 @@ void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
     auto& camera = *gameWorld.GetMainCamera();
 
     Matrix4 invVP = CollisionDetection::GenerateInverseView(camera) * CollisionDetection::GenerateInverseProjection(screenAspect, camera.GetFieldOfVision(), camera.GetNearPlane(), camera.GetFarPlane());
-    int invLocation     = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
-    int lightLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
-    int depthLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
-    int timeLoc         = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
-    int speedBoolLoc    = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
-    int speedLineDirLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
-    int speedLineAmountLoc = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
+    int invLocation         = glGetUniformLocation(postProcessBase->GetProgramID(), "invViewPersp");
+    int lightLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "lightPos");
+    int depthLoc            = glGetUniformLocation(postProcessBase->GetProgramID(), "depthBuffer");
+    int timeLoc             = glGetUniformLocation(postProcessBase->GetProgramID(), "u_time");
+    int speedBoolLoc        = glGetUniformLocation(postProcessBase->GetProgramID(), "SpeedLinesActive");
+    int speedLineDirLoc     = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineDir");
+    int speedLineAmountLoc  = glGetUniformLocation(postProcessBase->GetProgramID(), "speedLineAmount");
 
     glUniformMatrix4fv(invLocation, 1, false, (float*)&invVP);
     glUniform3fv(lightLoc, 1, (float*)&sunlight.lightPosition);
@@ -768,6 +807,27 @@ void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
+}
+
+void GameTechRenderer::ApplyFXAA() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
+    BindShader(fxaaShader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, fxaaTexture);
+    glBindVertexArray(quadVAO);
+
+    int widthLocation = glGetUniformLocation(fxaaShader->GetProgramID(), "width");
+    int heightLocation = glGetUniformLocation(fxaaShader->GetProgramID(), "height");
+
+    glUniform1f(widthLocation, windowWidth);
+    glUniform1f(heightLocation, windowHeight);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glDisable(GL_FRAMEBUFFER_SRGB);
 }
 
 MeshGeometry* GameTechRenderer::LoadMesh(const string& name) {
