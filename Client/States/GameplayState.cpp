@@ -1178,7 +1178,6 @@ bool GameplayState::IsDisconnected() {
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
-    player->SetActive(true);
     delete player->GetRenderObject();
     player->SetRenderObject(nullptr);
 

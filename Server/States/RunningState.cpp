@@ -258,7 +258,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
-    object->SetActive(true);
+    SetNetworkActive(object, true);
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
