@@ -571,6 +571,10 @@ void GameTechRenderer::RenderUI() {
     }
 }
 
+void GameTechRenderer::ClearActiveObjects() {
+    activeObjects.clear();
+}
+
 void GameTechRenderer::BuildObjectList() {
     activeObjects.clear();
 

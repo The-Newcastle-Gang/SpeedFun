@@ -51,6 +51,8 @@ namespace NCL {
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
             void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
 
+            void ClearActiveObjects();
+
             OGLMesh* GetUIMesh() {return UIMesh;}
 
             void PassParticleSystems(vector<ParticleSystem*> ps) { particleSystems = ps; }

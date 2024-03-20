@@ -71,6 +71,7 @@ namespace NCL {
             }
 
             GameObject* GetObjectByNetworkId(int networkId) {
+                if (networkId >= networkObjects.size())return nullptr;
                 return networkObjects[networkId]->GetParent();
             }
 

@@ -76,6 +76,7 @@ void PlayerMovement::OnGrappleLeave() {
     playerAnimationCallData.isGrappling = false;
     cameraAnimationCalls.isGrappling = false;
     cameraAnimationCalls.grapplingEvent = 2;
+    uiAnimationData.grapplingAvailability = 1;
 }
 
 void PlayerMovement::OnGrappleStart() {
@@ -296,7 +297,7 @@ void PlayerMovement::UpdateGrapple(float dt) {
             grapplePoint = tempGrapplePoint;
             FireGrapple();
             grappleProjectileInfo.SetActive(false);
-            uiAnimationData.grapplingAvailability = 1;
+            
 
             grappledObject = (GameObject*)collision.node;
             deltaGrappledObject = grapplePoint - grappledObject->GetTransform().GetPosition();
@@ -348,8 +349,11 @@ void PlayerMovement::Jump() {
     Vector3 currentVelocity = physOb->GetLinearVelocity();
     gameObject->GetTransform().SetPosition(gameObject->GetTransform().GetPosition() + Vector3{0,jumpVelocityValue *0.01f,0}); //hacky way to allow us to directly set velocity
     physOb->SetLinearVelocity(currentVelocity + Vector3{ 0, 1, 0 } *jumpVelocityValue);
-    if(activeState!=&air) cameraAnimationCalls.jump = true;
-    SwitchToState(&air);
+    if (activeState != &air)
+    {
+        cameraAnimationCalls.jump = true;
+        SwitchToState(&air);
+    }
 
 
 }
