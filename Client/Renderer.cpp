@@ -669,6 +669,9 @@ void GameTechRenderer::RenderCamera() {
 
     for (const RenderObject* i : activeObjects) {
 
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_FALSE);
+        }
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
@@ -762,6 +765,9 @@ void GameTechRenderer::RenderCamera() {
             for (int i = 0; i < layerCount; ++i) {
                 DrawBoundMesh(i);
             }
+        }
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_TRUE);
         }
     }
     //test if ogl error
