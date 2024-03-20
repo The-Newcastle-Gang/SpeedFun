@@ -55,7 +55,6 @@ void GameplayState::InitCanvas(){
 
     InitCrossHeir();
     InitTimerBar();
-    InitLevelMap();
 }
 
 void GameplayState::InitCrossHeir(){
@@ -68,7 +67,6 @@ void GameplayState::InitCrossHeir(){
 }
 
 void GameplayState::InitTimerBar(){
-
     auto &backgroundBar = canvas->AddImageElement("hud/timerBar.png")
             .SetAbsoluteSize({904, 87})
             .AlignLeft(20)
@@ -82,12 +80,6 @@ void GameplayState::InitTimerBar(){
             .SetShader(timerBarShader);
 
     barProgress.OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
-
-    auto platNub = canvas->AddElement()
-            .SetColor(Replicated::PLATINUM)
-            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
-            .AlignTop(timerTopOffset - 11);
 
     auto &timerTextBackground = canvas->AddImageElement("hud/timerTextBackground.png")
             .SetAbsoluteSize({202, 112})
@@ -124,109 +116,24 @@ void GameplayState::InitTimerBar(){
     timerText.OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
 
     auto &tridentBar = canvas->AddImageElement("hud/tridentPath.png")
-            .SetAbsoluteSize({51, 480})
+            .SetAbsoluteSize({50, 480})
             .AlignLeft(40)
             .AlignBottom(40);
-
-//    //timer Bar
-//    if (isSinglePlayer)
-//    {
-//        Vector4 colours[3] = { Replicated::GOLD, Replicated::SILVER, Replicated::BRONZE };
-//        for (int i = 0; i < 3; i++) {
-//
-//            timerNubs[i] = &canvas->AddElement()
-//                .SetColor(colours[i])
-//                .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-//                .AlignTop(timerTopOffset - 11)
-//                .SetId("nub_" + std::to_string(i));
-//
-//            medalTimeRatios.insert({ timerNubs[i]->GetId(), {i, -1.0f} });
-//            timerNubs[i]->OnUpdate.connect<&GameplayState::UpdateTimerNub>(this);
-//        }
-//
-//        auto platNub = canvas->AddElement()
-//            .SetColor(Replicated::PLATINUM)
-//            .SetAbsoluteSize({ 4, timerBarHeight + 22 })
-//            .AlignCenter(-400 + (800 - timerBoxWidth) + timerBarOutline - 1)
-//            .AlignTop(timerTopOffset - 11);
-//    }
-//    int backTimerBarWidth = (isSinglePlayer) ? 800 : timerBoxWidth;
-//
-////    auto timerOutline = canvas->AddElement()
-////        .SetColor({ 0,0,0,1 })
-////        .SetAbsoluteSize({ backTimerBarWidth + timerBarOutline*2, timerBarHeight + timerBarOutline*2 })
-////        .AlignCenter()
-////        .AlignTop(timerTopOffset - timerBarOutline);
-//
-//    if (isSinglePlayer)
-//    {
-//        timeBar = &canvas->AddElement()
-//            .SetColor(Replicated::PLATINUM)
-//            .SetAbsoluteSize({ 800, timerBarHeight })
-//            .AlignCenter()
-//            .AlignTop(timerTopOffset)
-//            .SetShader(timerBarShader);
-//        timeBar->OnUpdate.connect<&GameplayState::UpdateTimerUI>(this);
-//    }
-//
-//    //this is the box behind the timer number
-//    timeBarTimerBox = &canvas->AddElement()
-//            .SetColor({1,1,1,1})
-//            .SetAbsoluteSize({ timerEndBoxX , timerEndBoxY})
-//            .AlignCenter(isSinglePlayer ? 400 : 0)
-//            .SetShader(fireShader)
-//            .SetTexture(resources->GetTexture("firemask.jpg"))
-//            .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
-
-//    if (isSinglePlayer) {
-//        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
-//    }
-//
-//
-//    //this is the timer text me thinks
-//    timerText = &canvas->AddElement()
-//        .SetColor({ 1,1,1,1 })
-//        .AlignCenter(400)
-//        .AlignTop(timerTopOffset - 8)
-//        .SetText(TextData());
-//    timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
-
 }
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     if (!firstPersonPosition) return;
-    float tVal = CalculateCompletion(playerPositions[element.GetId()]);
-    tVal = std::clamp(tVal, 0.0f, 1.0f);
-    tVal = tVal * 300 - 150;
+    float tVal = std::clamp(CalculateCompletion(playerPositions[element.GetId()]), 0.0f, 1.0f);
+    float tridentYSize = 480;
 
-    element.GetTransform().SetPosition(Vector3(round(Window::GetWindow()->GetScreenSize().x * 0.98f), round(Window::GetWindow()->GetScreenSize().y / 2 + tVal),0));
-}
-
-void GameplayState::InitLevelMap(){
-    //map bar
-
-//    auto& levelBar = canvas->AddElement()
-//            .SetColor({0,0,0,1})
-//            .SetAbsoluteSize({6, 300})
-//            .CenterSprite()
-//            .SetTransformTranslation(Vector2(98,50));
-//
-
-    /*
-    auto& playerElement = canvas->AddImageElement(playerblipImage)
-            .SetColor({0.5,0.0,0.,1})
-            .SetAbsoluteSize({30,30})
-            .CenterSprite();
-
-    playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
-    */
+    element.AlignLeft(40)
+        .AlignBottom(40 + tridentYSize * tVal);
 }
 
 void GameplayState::InitPlayerBlip(int id) {
     auto& playerElement = canvas->AddImageElement(playerblipImage)
         .SetColor({ 0.5,0.0,0.,1 })
-        .SetAbsoluteSize({ 60,60 })
-        .CenterSprite()
+        .SetAbsoluteSize({ 50,50 })
         .SetTexture(resources->GetTexture("firemask.jpg"))
         .SetShader(fireShader)
         .SetId("blip_" + std::to_string(id));
@@ -330,7 +237,7 @@ void GameplayState::Update(float dt) {
         ManageLoading(dt);
         return;
     }
-    bool countdownOver = levelManager->UpdateCountdown(dt); 
+    bool countdownOver = levelManager->UpdateCountdown(dt);
     float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
 
     totalDTElapsed += dt;
@@ -465,7 +372,7 @@ void GameplayState::ReadNetworkFunctions() {
                     medalTimes[i] = recievedTime;
                 }
                 timerRatio = 1 - std::clamp(timeElapsed, 0.0f, medalTimes[2]) / medalTimes[2];
-                
+
                 int recievedMedal = handler.Unpack<int>();
                 if (currentMedal != recievedMedal) {
                     timerMedalShakeTimer = 1.0f;
@@ -474,8 +381,8 @@ void GameplayState::ReadNetworkFunctions() {
                     timerBarColor = colours[ currentMedal ];
                 }
             }
-            break; 
-            
+            break;
+
             case(Replicated::SetNetworkActive): {
                 int networkObjectId = handler.Unpack<int>();
                 bool isActive = handler.Unpack<bool>();
@@ -499,7 +406,7 @@ void GameplayState::ReadNetworkFunctions() {
                     crossHairRotation = 0.0f;
                     crossHairScale = 1.15f;
                 }
-            } 
+            }
             break;
 
             case(Replicated::GameInfo_PlayerPositions): {
@@ -639,7 +546,7 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) {
     }
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
@@ -674,7 +581,7 @@ void GameplayState::InitEndScreen(Vector4 color) {
 
     canvas->AddElement("FinishedLevelLayer")
         .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
-        .SetAbsoluteSize({ 2000,2000 })
+        .SetRelativeSize({1.0, 1.0})
         .AlignCenter()
         .AlignMiddle();
 
@@ -776,14 +683,14 @@ void GameplayState::InitLevel() {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
-    
+
     for (auto& x : springList) {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
     }
-    
+
     for (auto& l : lightList) {
         AddPointLight(l);
     }
@@ -983,7 +890,7 @@ void GameplayState::UpdateTimerNub(Element& element, float dt) {
 }
 
 void GameplayState::UpdateMedalSprite(Element& element, float dt) {
-    
+
     if (medalAnimationStage != MedalAnimationStages::MEDAL) return;
     Vector4 currentColor = element.GetColor();
     float spinAmount = 360.0f * 2.0f;
@@ -1001,7 +908,7 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     switch (medalAnimationStage)
     {
     case(MedalAnimationStages::TIMER_SCROLL): {
-        
+
         float timeToScroll = finalTime / 1.5f;
         float timeRatio = (finalTimeScroll / finalTime);
         finalTimeScroll = std::clamp(finalTimeScroll + dt * timeToScroll, 0.0f, finalTime);
@@ -1032,5 +939,5 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     }
     break;
     }
-    
+
 }

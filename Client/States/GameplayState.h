@@ -61,7 +61,6 @@ namespace NCL {
 
             void InitCrossHeir();
             void InitTimerBar();
-            void InitLevelMap();
 
             bool hasReachedEnd = false;
             void InitEndScreen(Vector4 color);

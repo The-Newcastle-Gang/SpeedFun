@@ -251,7 +251,6 @@ private:
     int zIndex;
     bool isFocused;
 
-
     int somethingElse = 0;
     int index;
     float hoverTimer;
