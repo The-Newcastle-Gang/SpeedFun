@@ -17,6 +17,7 @@ namespace NCL::CSC8503 {
     enum Tag {
         PLAYER,
         GRAPPLE,
+        DAMAGABLE
     };
 
     class GameObject {
