@@ -44,6 +44,7 @@ public:
         SetNetworkActive,
         ToggleGrapple,
         SendMedalValues,
+        SetMenuLevel
 };
 
 

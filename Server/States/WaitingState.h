@@ -17,6 +17,7 @@ namespace NCL {
 
             void OnEnter() override;
             void OnExit() override;
+            void SendLevelSelected(int level);
             void ReceivePacket(int type, GamePacket* payload, int source) override;
             bool CheckPlayersReady();
 
