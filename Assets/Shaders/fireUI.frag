@@ -9,6 +9,7 @@ uniform vec4 uiColor;
 uniform int hasTexture;
 uniform sampler2D tex;
 uniform sampler2D noiseTexture;
+uniform sampler2D cheeseTexture;
 uniform float uTime;
 
 
