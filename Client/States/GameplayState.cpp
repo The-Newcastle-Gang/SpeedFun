@@ -43,6 +43,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete lavaParticles;
+    particleSystems.clear();
 
     shouldShutDown.store(true);
     networkThread->join();
@@ -50,8 +52,6 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-    delete debugger;
-    debugger = nullptr;
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -62,13 +62,9 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
-
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    shouldLoadScreen.store(false);
+    canvas->Reset();
+    
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
@@ -224,6 +220,26 @@ void GameplayState::InitTimerBar(){
 
 }
 
+void GameplayState::LoadParticleSystems()
+{
+    lavaParticles = new ParticleSystem(deathPos, { -150, 0, -100 }, { 300, 1, 100 }, 50, 10.0f, 3, 0.25f, 0.25f, resources->GetTexture("ember.png"));
+    particleSystems.push_back(lavaParticles);
+
+    
+
+
+    renderer->PassParticleSystems(particleSystems);
+}
+
+void GameplayState::UpdateParticleSystems(float dt)
+{
+    for (auto &ps : particleSystems)
+    {
+        ps->CreateNewParticles(dt);
+        ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
+    }
+}
+
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     if (!firstPersonPosition) return;
     float tVal = CalculateCompletion(playerPositions[element.GetId()]);
@@ -329,21 +345,23 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    DebugMode::StartCostClock();
 
     renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     isSinglePlayer = baseClient->IsSinglePlayer();
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     InitialiseAssets();
-
-    debugger = new DebugMode(world->GetMainCamera());
-    InitCanvas();
+    DebugMode::SetDebugCam(world->GetMainCamera());
+    DebugMode::InitDebugInfo();
 
     WaitForServerLevel(); //wait until server tells us what level to load
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+    DebugMode::EndCostClock(0);
 }
 
 void GameplayState::WaitForServerLevel() {
@@ -361,6 +379,7 @@ void GameplayState::OnNewLevel() {
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
+    particleSystems.clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
     worldHasLoaded = LoadingStates::NOT_LOADED;
@@ -376,6 +395,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::InitCurrentLevel() {
+    LoadParticleSystems();
     InitWorld();
     InitCamera();
 }
@@ -402,6 +422,64 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+
+    CreateLoadingScreenCanvas();
+
+    shouldLoadScreen.store(true);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
+    loadingScreenThread->detach();
+}
+
+void GameplayState::CreateLoadingScreenCanvas() {
+    const int loadingScreens = 2;
+    Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
+    Vector2Int lsTipTextRes = { 625, 28};
+    int textBottomPadding = 35;
+    int textLeftPadding = 35;
+    int imagePadding = 75;
+
+    for (int i = 1; i <= loadingScreens; i++) {
+        std::string currentlayer = "LoadingScreen" + std::to_string(i);
+        canvas->CreateNewLayer(currentlayer, false);
+        canvas->PushActiveLayer(currentlayer);
+        canvas->AddElement(currentlayer)
+            .AlignBottom()
+            .AlignLeft()
+            .SetRelativeSize({ 1,1 })
+            .SetColor({ 0,0,0,1 });
+        canvas->AddElement(currentlayer)
+            .SetAbsoluteSize({ 920,470 })
+            .AlignMiddle(imagePadding)
+            .AlignCenter();
+        canvas->AddImageElement("ScreenShot.png", currentlayer)
+                .SetAbsoluteSize({ 904,454 })
+                .AlignMiddle(imagePadding)
+                .AlignCenter();
+        canvas->AddImageElement("TipText.png", currentlayer).AlignLeft(textLeftPadding * 8).AlignBottom(textBottomPadding * 4).SetAbsoluteSize(lsTipTextRes);
+
+        switch (i) {
+        case 1:
+            canvas->AddImageElement("LS_Text1.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        case 2:
+            canvas->AddImageElement("LS_Text2.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        default:
+            break;
+        }
+        renderer->RenderLoadingScreen();
+    }
+}
+
+void GameplayState::LoadingScreenUpdate() {
+    while (shouldLoadScreen) {
+        std::cout << "LoadingScreen!" << std::endl;
+        renderer->RenderLoadingScreen();
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+}
+
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
@@ -416,6 +494,9 @@ void GameplayState::OnExit() {
 
     delete networkThread;
     networkThread = nullptr;
+
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -514,8 +595,11 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ResetCameraAnimation();
     ReadNetworkPackets();
 
+    // particle updates
+    UpdateParticleSystems(dt);
+
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
@@ -795,7 +879,7 @@ std::string GameplayState::GetMedalImage(){
 }
 
 void GameplayState::ResetCameraAnimation() {
-    currentGroundSpeed = 0.0f;
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
     strafeSpeed = 0.0f;
 }
 
@@ -823,7 +907,8 @@ void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(G
 }
 
 void GameplayState::WalkCamera(float dt) {
-
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         
@@ -930,6 +1015,8 @@ void GameplayState::TogglePause() {
 void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
+    shouldLoadScreen.store(false);
+    InitCanvas();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
@@ -1217,6 +1304,7 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+
 }
 
 void GameplayState::AddPointLight(PointLightInfo light) {
@@ -1472,6 +1560,7 @@ void GameplayState::AddLava(Vector3 position){
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
     renderer->SetLavaHeight(position.y);
+    //LavaQuad->GetRenderObject()->SetDepthTest(false);
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
@@ -1480,4 +1569,5 @@ void GameplayState::AddEndPortal(Vector3 position){
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
+    PortalQwaud->GetRenderObject()->SetDepthTest(false);
 }

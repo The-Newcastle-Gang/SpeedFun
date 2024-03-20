@@ -4,7 +4,6 @@
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
 #include "GameClient.h"
-#include "GameWorld.h"
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
@@ -15,6 +14,7 @@
 #include "ClientThread.h"
 #include "InputListener.h"
 #include "TriggerVolumeObject.h"
+#include "ParticleSystem.h"
 #include "DebugMode.h"
 #include "SoundManager.h"
 #include "AnimatorObject.h"
@@ -65,6 +65,10 @@ namespace NCL {
             void InitSounds();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
+
+            void CreateLoadingScreenThread();
+            void CreateLoadingScreenCanvas();
+            void LoadingScreenUpdate();
 
             void InitLevel(int level);
             void InitCanvas();
@@ -130,8 +134,10 @@ namespace NCL {
             std::unique_ptr<ClientNetworkData> networkData;
 
             std::thread* networkThread;
+            std::thread* loadingScreenThread;
 
             std::atomic<bool> shouldShutDown;
+            std::atomic<bool> shouldLoadScreen;
 
             Transform* firstPersonPosition;
 
@@ -261,6 +267,12 @@ namespace NCL {
             void UpdateTimerBox(Element& element, float dt);
             void UpdateTimerText(Element& element, float dt);
             void UpdateTimerNub(Element& element, float dt);
+
+            ParticleSystem* lavaParticles;
+            vector<ParticleSystem*> particleSystems;
+            void LoadParticleSystems();
+            void UpdateParticleSystems(float dt);
+
             void UpdatePlayerBlip(Element &element, float dt);
 
             Element* crosshair;
