@@ -91,10 +91,22 @@ void GameplayState::InitStartScreen() {
         .SetColor({ 1,1,1,0 })
         .SetAbsoluteSize({ 80, 100 })
         .AlignCenter()
-        .AlignMiddle()
-        .SetId("StartScreen_Text")
+        .AlignMiddle(-40)
+        .SetId("StartScreen_Countdown")
         .SetText(textData);
     countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    auto levelNameText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 0, 100 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_LevelName")
+        .SetText(textData);
+    levelNameText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    
+
 }
 
 void GameplayState::InitEndCanvas() {
@@ -1113,7 +1125,18 @@ void GameplayState::UpdateStartText(Element& element, float dt) {
         element.textData.text = "";
         return;
     }
-    element.textData.text = std::to_string((int)ceil(endTimer));
+    std::string id = element.GetId();
+    if (id == "StartScreen_Countdown") {
+        element.textData.text = std::to_string((int)ceil(endTimer));
+    }
+    else if (id == "StartScreen_LevelName") {
+        std::string levelName = levelManager->GetLevelName(levelManager->GetLevel());
+        int characters = levelName.length();
+        element.SetAbsoluteSize({ 80 * characters, 100 });
+        element.AlignMiddle(150);
+        element.AlignCenter();
+        element.textData.text = levelName;
+    }
 }
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
