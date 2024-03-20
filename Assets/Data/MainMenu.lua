@@ -137,6 +137,13 @@ canvas = {
 
         },
         {
+            color = COLORS.white,
+            rSize = Vector2:new(1,1),
+            tags ={
+                "menuScroll"
+            }
+        },
+        {
             image = "hellMain/Hell.png",
             color = COLORS.main,
             aSize = Vector2:new(309, 68),
