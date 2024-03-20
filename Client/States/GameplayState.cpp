@@ -50,8 +50,6 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-    delete debugger;
-    debugger = nullptr;
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -329,6 +327,7 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    DebugMode::StartCostClock();
 
     renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
@@ -338,12 +337,14 @@ void GameplayState::OnEnter() {
     CreateNetworkThread();
     InitialiseAssets();
 
-    debugger = new DebugMode(world->GetMainCamera());
+    DebugMode::SetDebugCam(world->GetMainCamera());
+    DebugMode::InitDebugInfo();
     InitCanvas();
 
     WaitForServerLevel(); //wait until server tells us what level to load
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+    DebugMode::EndCostClock(0);
 }
 
 void GameplayState::WaitForServerLevel() {
@@ -516,7 +517,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkPackets();
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
