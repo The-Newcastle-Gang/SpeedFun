@@ -1186,6 +1186,7 @@ void GameplayState::AssignPlayer(int netObject) {
 
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
+    player->SetActive(true);
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
