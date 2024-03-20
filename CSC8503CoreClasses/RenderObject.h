@@ -69,6 +69,13 @@ namespace NCL {
                 return animatorObject;
             }
 
+			void SetDepthTest(bool b) {
+				isDepthTestRendered = b;
+			}
+
+			bool IsDepthTested() const {
+				return isDepthTestRendered;
+			}
 
 		protected:
 			MeshGeometry*	mesh;
@@ -80,6 +87,7 @@ namespace NCL {
 			Vector4			colour;
             Vector3         meshScale;
             Vector3         meshOffset;
+			bool			isDepthTestRendered;
 		};
 	}
 }
