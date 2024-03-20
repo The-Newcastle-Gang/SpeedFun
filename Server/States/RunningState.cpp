@@ -338,6 +338,7 @@ void RunningState::CreatePlayers() {
         player->AddComponent(new PlayerRespawner(player, 
             [this](int id) {this->DeathTriggerVolFunc(id); } //this was a workaround to avoid changing how the triggers work
         ));
+        
     }
 }
 
