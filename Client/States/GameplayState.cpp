@@ -1,6 +1,4 @@
 #include "GameplayState.h"
-#include "GameplayState.h"
-#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -25,6 +23,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
+    fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
@@ -53,8 +52,6 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-    delete debugger;
-    debugger = nullptr;
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -65,18 +62,15 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
-
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    shouldLoadScreen.store(false);
+    canvas->Reset();
+    
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+    InitPauseScreen();
 }
 
 void GameplayState::InitStartScreen() {
@@ -275,6 +269,60 @@ void GameplayState::InitLevelMap(){
     */
 }
 
+void GameplayState::InitPauseScreen() {
+    canvas->CreateNewLayer("PauseLayer");
+    
+    auto backing = canvas->AddElement("PauseLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    textData.fontSize = 1.0f;
+    textData.text = "RESUME";
+    textData.color = { 0.5,0.5,0.5,1 };
+    auto resumeText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 500,100})
+        .AlignCenter()
+        .AlignMiddle(75)
+        .SetId("Resume")
+        .SetText(textData);
+
+    resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    resumeText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    resumeText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+
+    textData.text = "EXIT";
+    auto exitText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 350,100 })
+        .AlignCenter()
+        .AlignMiddle(-75)
+        .SetId("Exit")
+        .SetText(textData);
+    exitText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    exitText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    exitText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+    //resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverSelect>(this);
+
+    for (int i = 0; i < 2; i++)
+    {
+        auto& playerElement = canvas->AddImageElement(playerblipImage, "PauseLayer")
+            .SetColor({ 0.5,0.0,0.,1 })
+            .SetAbsoluteSize({ 125,125 })
+            .AlignCenter()
+            .AlignMiddle()
+            .SetTexture(resources->GetTexture("firemask.jpg"))
+            .SetShader(fireShader)
+            .SetId("pauseflame_" + std::to_string(i));
+
+        playerElement.OnUpdate.connect<&GameplayState::UpdatePauseFlame>(this);
+    }
+}
+
 void GameplayState::InitPlayerBlip(int id) {
     auto& playerElement = canvas->AddImageElement(playerblipImage)
         .SetColor({ 0.5,0.0,0.,1 })
@@ -297,21 +345,23 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    DebugMode::StartCostClock();
 
     renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     isSinglePlayer = baseClient->IsSinglePlayer();
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     InitialiseAssets();
-
-    debugger = new DebugMode(world->GetMainCamera());
-    InitCanvas();
+    DebugMode::SetDebugCam(world->GetMainCamera());
+    DebugMode::InitDebugInfo();
 
     WaitForServerLevel(); //wait until server tells us what level to load
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+    DebugMode::EndCostClock(0);
 }
 
 void GameplayState::WaitForServerLevel() {
@@ -372,6 +422,64 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+
+    CreateLoadingScreenCanvas();
+
+    shouldLoadScreen.store(true);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
+    loadingScreenThread->detach();
+}
+
+void GameplayState::CreateLoadingScreenCanvas() {
+    const int loadingScreens = 2;
+    Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
+    Vector2Int lsTipTextRes = { 625, 28};
+    int textBottomPadding = 35;
+    int textLeftPadding = 35;
+    int imagePadding = 75;
+
+    for (int i = 1; i <= loadingScreens; i++) {
+        std::string currentlayer = "LoadingScreen" + std::to_string(i);
+        canvas->CreateNewLayer(currentlayer, false);
+        canvas->PushActiveLayer(currentlayer);
+        canvas->AddElement(currentlayer)
+            .AlignBottom()
+            .AlignLeft()
+            .SetRelativeSize({ 1,1 })
+            .SetColor({ 0,0,0,1 });
+        canvas->AddElement(currentlayer)
+            .SetAbsoluteSize({ 920,470 })
+            .AlignMiddle(imagePadding)
+            .AlignCenter();
+        canvas->AddImageElement("ScreenShot.png", currentlayer)
+                .SetAbsoluteSize({ 904,454 })
+                .AlignMiddle(imagePadding)
+                .AlignCenter();
+        canvas->AddImageElement("TipText.png", currentlayer).AlignLeft(textLeftPadding * 8).AlignBottom(textBottomPadding * 4).SetAbsoluteSize(lsTipTextRes);
+
+        switch (i) {
+        case 1:
+            canvas->AddImageElement("LS_Text1.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        case 2:
+            canvas->AddImageElement("LS_Text2.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        default:
+            break;
+        }
+        renderer->RenderLoadingScreen();
+    }
+}
+
+void GameplayState::LoadingScreenUpdate() {
+    while (shouldLoadScreen) {
+        std::cout << "LoadingScreen!" << std::endl;
+        renderer->RenderLoadingScreen();
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+}
+
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
@@ -386,6 +494,9 @@ void GameplayState::OnExit() {
 
     delete networkThread;
     networkThread = nullptr;
+
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -454,31 +565,42 @@ void GameplayState::UpdateCountdown(float dt){
 
 void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
-    totalDTElapsed += dt;
-    UpdateGrapples(dt);
 
-    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->ShowOSPointer(isPaused);
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
+    if (!isPaused)
+    {
+        UpdateGrapples(dt);
+        
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        }
+        WalkCamera(dt);
+        if (jumpTimer > 0) JumpCamera(dt);
+        if (landTimer > 0) LandCamera(dt);
+        StrafeCamera(dt);
+        world->GetMainCamera()->UpdateCamera(dt);
 
-    if (firstPersonPosition) {
-        world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        totalDTElapsed += dt;
+        UpdateGrapples(dt);
+
+        Window::GetWindow()->ShowOSPointer(false);
+
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+
+        }
+        world->UpdateWorld(dt);
     }
-    WalkCamera(dt);
-    if (jumpTimer > 0) JumpCamera(dt);
-    if (landTimer > 0) LandCamera(dt);
-    StrafeCamera(dt);
-
-    world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
-
+    
     ResetCameraAnimation();
-
     ReadNetworkPackets();
 
     // particle updates
     UpdateParticleSystems(dt);
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
@@ -847,6 +969,14 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
+        if (isSinglePlayer && !hasReachedEnd)
+        {
+            TogglePause();
+        }
+    }
+
+    if (isPaused) return;
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
@@ -874,9 +1004,19 @@ void GameplayState::SendInputData() {
     networkData->outgoingInput.Push(input);
 }
 
+void GameplayState::TogglePause() {
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+    isPaused = !isPaused;
+    renderer->SetSpeedActive(!isPaused);
+    if (isPaused) canvas->PushActiveLayer("PauseLayer");
+    else canvas->PopActiveLayer();
+}
+
 void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
+    shouldLoadScreen.store(false);
+    InitCanvas();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
@@ -1297,6 +1437,53 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     
 }
 
+void GameplayState::OnPauseHoverEnter(Element &element) {
+
+    element.textData.color = { 1,1,1,1 };
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        selectedPause = 0;
+    }
+    if (elementID == "Exit") {
+        selectedPause = 1;
+    }
+}
+void GameplayState::OnPauseHoverExit(Element& element) {
+
+    element.textData.color = { 0.5,0.5,0.5,1 };
+}
+
+void GameplayState::OnPauseClick(Element& element) {
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        TogglePause();
+    }
+    
+}
+
+void GameplayState::UpdatePauseFlame(Element& element, float dt) {
+    float direction = -1.0f;
+    if (element.GetId() == "pauseflame_1") direction = 1.0f;
+    float setToX = 0;
+    float setToY = 0;
+    switch (selectedPause)
+    {
+    case(0):
+        setToX = 300.0f;
+        setToY = 75.0f;
+        break;
+
+    case(1):
+        setToX = 225.0f;
+        setToY = -75.0f;
+        break;
+    }
+    flameToXGap = flameToXGap * 0.9f + setToX * 0.1f;
+    flameToY = flameToY * 0.9f + setToY * 0.1f;
+    element.AlignCenter((int)round(flameToXGap * direction));
+    element.AlignMiddle((int)round(flameToY) + 25);
+}
+
 void GameplayState::RenderFlairObjects(){
     Vector3 lavaPos = deathPos ;
 
@@ -1311,6 +1498,7 @@ void GameplayState::AddLava(Vector3 position){
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
     renderer->SetLavaHeight(position.y);
+    //LavaQuad->GetRenderObject()->SetDepthTest(false);
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
@@ -1319,4 +1507,5 @@ void GameplayState::AddEndPortal(Vector3 position){
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
+    PortalQwaud->GetRenderObject()->SetDepthTest(false);
 }

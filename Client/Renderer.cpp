@@ -355,6 +355,21 @@ void GameTechRenderer::RenderFrame() {
     RenderUI();
 }
 
+void GameTechRenderer::RenderLSFrame() {
+    uTime += 0.01f;
+    uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glClearColor(1, 1, 1, 1);
+    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    RenderUI();
+}
+
+
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glDepthFunc(GL_LEQUAL);
@@ -509,6 +524,7 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
+            if (!e.IsActive()) continue;
             auto activeShader = defaultUIShader;
             if (!e.GetShader()) {
                 BindShader(defaultUIShader);
@@ -517,7 +533,6 @@ void GameTechRenderer::RenderUI() {
                 BindShader(e.GetShader());
                 activeShader = (OGLShader*)(e.GetShader());
             }
-
             auto color = e.GetColor();
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
@@ -700,6 +715,9 @@ void GameTechRenderer::RenderCamera() {
 
     for (const RenderObject* i : activeObjects) {
 
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_FALSE);
+        }
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
@@ -793,6 +811,9 @@ void GameTechRenderer::RenderCamera() {
             for (int i = 0; i < layerCount; ++i) {
                 DrawBoundMesh(i);
             }
+        }
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_TRUE);
         }
     }
     //test if ogl error

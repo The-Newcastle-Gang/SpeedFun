@@ -1128,7 +1128,7 @@
         continue;
       }
 
-      state = (FT_Byte)( ( newState - stateArray ) / ( 1 + maxClassID ) );
+      state = (FT_Byte)( ( newState - stateArray ) / ( 1 + maxClassID ) );s
 
       switch ( GXV_GLYPHOFFSET_FMT( statetable ) )
       {

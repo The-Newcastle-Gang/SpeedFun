@@ -4,7 +4,6 @@
 #include "PhysicsSystem.h"
 #include "GameWorld.h"
 #include "GameClient.h"
-#include "GameWorld.h"
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
@@ -67,6 +66,10 @@ namespace NCL {
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
+            void CreateLoadingScreenThread();
+            void CreateLoadingScreenCanvas();
+            void LoadingScreenUpdate();
+
             void InitLevel(int level);
             void InitCanvas();
 
@@ -74,6 +77,17 @@ namespace NCL {
             void LoadNextLevel();
 
             void ResetCameraToForwards();
+
+            int pauseSelected;
+            void InitPauseScreen();
+            void OnPauseHoverEnter(Element& element);
+            void OnPauseHoverExit(Element& element);
+            void OnPauseClick(Element& element);
+            void UpdatePauseFlame(Element& element, float dt);
+            void TogglePause();
+            int selectedPause = 0;
+            float flameToXGap = 300.0f;
+            float flameToY = 75.0f;
 
             float whenToStartCountdown = 3.0f;
             int countdownCurrentInt = 0;
@@ -120,8 +134,10 @@ namespace NCL {
             std::unique_ptr<ClientNetworkData> networkData;
 
             std::thread* networkThread;
+            std::thread* loadingScreenThread;
 
             std::atomic<bool> shouldShutDown;
+            std::atomic<bool> shouldLoadScreen;
 
             Transform* firstPersonPosition;
 
@@ -150,6 +166,7 @@ namespace NCL {
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
             bool isSinglePlayer;
+            bool isPaused = false;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;

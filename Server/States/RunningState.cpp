@@ -115,6 +115,9 @@ void RunningState::ReadNetworkFunctions() {
                 playerMovement->ToggleDebug();
             }
         }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::Pause) {
+            isPaused = !isPaused;
+        }
         else if (data.second.functionId == Replicated::RemoteServerCalls::MenuToGameplay) {
             numPlayersInGameplayState++;
         }
@@ -182,6 +185,7 @@ void RunningState::UpdateInCountdown(float dt) {
 void RunningState::UpdateInGameplay(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
+    if (isPaused) return;
     UpdatePlayerAnimations();
     world->UpdateWorld(dt);
     physics->Update(dt);
