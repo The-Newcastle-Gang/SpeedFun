@@ -23,6 +23,8 @@ void TriggerVolumeObject::OnCollisionBegin(GameObject *otherObject) {
             case TriggerType::End:
                 std::cout << "End volume\n";
                 triggerSignalEndVol.publish(GetPlayerId(otherObject));
+                otherObject->SetCurrentCheckPointPos(this->GetTransform().GetPosition());
+
                 break;
 
             case TriggerType::Death:

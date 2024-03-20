@@ -354,7 +354,8 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
-    ResetPlayerMoveInputs(playerObjects[id]); //reset the last input from the player so they dont keep moving
+    GameObject* finishedPlayer = playerObjects[id];
+    ResetPlayerMoveInputs(finishedPlayer); //reset the last input from the player so they dont keep moving
     playersFinished[id] = true;
     playerTimes[id] = levelManager->GetCurrentStageTime();
     SendMedalToClient(id);
