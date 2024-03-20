@@ -81,6 +81,7 @@ public:
     [[nodiscard]] std::vector<SwingingPrimitive*> GetSwingingPList() const { return swingingPrimitives; }
     [[nodiscard]] std::vector<SpringPrimitive*> GetSpringPList() const { return springPrimitives; }
     [[nodiscard]] std::vector<PointLightInfo> GetPointLights() const { return pointLights; }
+    [[nodiscard]] Vector3 GetMedalTimes() const { return medalTimes; }
 
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
     [[nodiscard]] std::vector<Vector3> GetCheckPointPositions() const { return checkPointPositions; }
@@ -103,6 +104,8 @@ protected:
     std::vector<SwingingPrimitive*> swingingPrimitives;
     std::vector<SpringPrimitive*> springPrimitives;
     std::vector<PointLightInfo> pointLights;
+
+    Vector3 medalTimes; //plat, gold, then silver
 
     std::vector<GroundCubePrimitive*> groundCubes;
 

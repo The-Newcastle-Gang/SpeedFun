@@ -54,6 +54,8 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
     }
     groundCubes.clear();
 
+    medalTimes = Vector3(0, 0, 0);
+
     checkPointPositions.clear();
 }
 
@@ -278,6 +280,14 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         newLight.lightRadius = (float)rad;
 
         pointLights.emplace_back(newLight);
+    }
+
+    for (auto& item : jData["medalTimes"].items()) {
+        auto& plat = item.value()["platinum"];
+        auto& gold = item.value()["gold"];
+        auto& silver = item.value()["silver"];
+
+        medalTimes = Vector3(plat, gold, silver);
     }
 
 

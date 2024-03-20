@@ -40,6 +40,12 @@ public:
     float GetGoldTime() { return goldTime; }
     float GetSilverTime() { return silverTime; }
 
+    void SetMedalValues(Vector3 medals) {
+        platinumTime = medals.x;
+        goldTime = medals.y;
+        silverTime = medals.z;
+    }
+
     Medal GetCurrentMedal(float timeValue);
 protected:
 
