@@ -465,6 +465,7 @@ void GameplayState::Update(float dt) {
 }
 
 void GameplayState::UpdateCountdown(float dt){
+
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
@@ -687,6 +688,8 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Load_Level): {
                 int level = handler.Unpack<int>();
+                numberPlayersJoined = handler.Unpack<int>();
+                numberPlayersLoaded = numberPlayersJoined;
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
                 shouldMoveToNewLevel = true;
@@ -986,7 +989,9 @@ void GameplayState::CreatePlayers() {
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
+
         replicated->CreatePlayer(player, *world);
+        if (numberPlayersJoined <= 0) player->SetActive(false);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1005,7 +1010,7 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
-
+        numberPlayersLoaded--;
     }
 }
 
