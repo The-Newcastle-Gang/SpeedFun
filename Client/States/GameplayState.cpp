@@ -825,15 +825,16 @@ void GameplayState::ReadNetworkFunctions() {
 
 
 void GameplayState::UpdatePositionRankings() {
+    if (playerPositions.size() == 0) return;
     int rankPlacement = 0;
     float selfPos = CalculateCompletion(playerPositions["blip_" + std::to_string(selfID)]);
     for (int i = 0; i < playerPositions.size(); i++) {
         if (i == selfID) continue;
-        if (selfPos < CalculateCompletion(playerPositions["blip_" + std::to_string(i)])) {
+        if (selfPos > CalculateCompletion(playerPositions["blip_" + std::to_string(i)])) {
             rankPlacement++;
         }
     }
-    switch (rankPlacement - 1) {
+    switch (rankPlacement + 1) {
     case(Medal::Gold):
         positionColor = Replicated::GOLD;
         break;
