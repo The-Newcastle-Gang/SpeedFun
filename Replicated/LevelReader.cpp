@@ -7,11 +7,108 @@ using namespace NCL::CSC8503;
 using json = nlohmann::json;
 
 LevelReader::LevelReader(){
-
+    LoadLevelNameMap();
 }
 
 LevelReader::~LevelReader(){
 
+}
+
+void LevelReader::Clear() { //we need to free all the memory so we dont leak
+    for (auto& i : primGOList) {
+        delete i;
+        i = nullptr;
+    }
+    primGOList.clear();
+
+    for (auto& i : oscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    oscillatorPrimitives.clear();
+
+    for (auto& i : harmfulOscillatorPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    harmfulOscillatorPrimitives.clear();
+
+    for (auto& i : springPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    springPrimitives.clear();
+
+    for (auto& i : swingingPrimitives)
+    {
+        delete i;
+        i = nullptr;
+    }
+    swingingPrimitives.clear();
+
+    pointLights.clear();
+
+    for (auto& i : groundCubes) {
+        delete i;
+        i = nullptr;
+    }
+    groundCubes.clear();
+
+    for (auto& i : bridgePrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    bridgePrimitives.clear();
+
+    for (auto& i : speedupBlockPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    speedupBlockPrimitives.clear();
+
+    for (auto& i : trapBlockPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    trapBlockPrimitives.clear();
+
+
+    for (auto& i : rayEnemyPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    rayEnemyPrimitives.clear();
+
+
+    for (auto& i : rayenemytriggerPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    rayenemytriggerPrimitives.clear();
+
+
+    for (auto& i : bridgetriggerPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    bridgetriggerPrimitives.clear();
+
+    checkPointPositions.clear();
+}
+
+void LevelReader::LoadLevelNameMap() {
+    int counter = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(Assets::LEVELDIR)) {
+        std::string name {entry.path().filename().string()};
+
+        //remove filename
+        size_t last = name.find_last_of(".");
+        if (last != std::string::npos) name = name.substr(0, last);
+
+        levelIDToLevelNameMap[counter] = name;
+        std::cout << name << std::endl;
+        counter++;
+    }
 }
 
 bool LevelReader::HasReadLevel(const std::string &levelSource) {
@@ -187,7 +284,6 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         temp->colliderRadius = item.value()["colliderRadius"];
         temp->inverseMass = item.value()["inverseMass"];
         temp->physicsType = item.value()["physicType"];
-
         speedupBlockPrimitives.emplace_back(temp);
     }
 
@@ -311,6 +407,30 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         temp->shouldNetwork = true;
 
         bridgetriggerPrimitives.emplace_back(temp);
+    }
+    
+    for (auto& item : jData["swingingList"].items()) {
+        auto temp = new SwingingPrimitive();
+        temp->meshName = item.value()["mesh"];
+
+        temp->timePeriod = (float)item.value()["timePeriod"];
+        temp->cooldown = (float)item.value()["cooldown"];
+        temp->waitDelay = (float)item.value()["waitDelay"];
+        temp->radius = (float)item.value()["radius"];
+        temp->changeAxis = item.value()["changeAxis"];
+        temp->changeDirection = item.value()["changeDirection"];
+
+        auto& dimref = item.value()["dimensions"];
+        auto& posi = item.value()["position"];
+        auto& dir = item.value()["direction"];
+
+        temp->dimensions = Vector3(dimref["x"], dimref["y"], dimref["z"]);
+        temp->position = Vector3(posi["x"], posi["y"], posi["z"] * -1);
+
+        temp->shouldNetwork = true;
+
+        swingingPrimitives.emplace_back(temp);
+
     }
 
     for (auto& item : jData["pointLights"].items()) {

@@ -25,29 +25,46 @@ public:
     enum RemoteClientCalls {
         AssignPlayer,
         LoadGame,
+        Load_Level,
         Camera_GroundedMove,
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
         EndReached,
+        All_Players_Finished,
         Grapple_Event,
-        Player_Velocity_Call,
         Player_Animation_Call,
         Death_Event,
         Death_Event_End,
         Stage_Start,
+        Player_Velocity_Call,
+        GameInfo_Timer,
+        GameInfo_GrappleAvailable,
+        GameInfo_PlayerPositions,
         SetNetworkActive,
         ToggleGrapple,
+        SendMedalValues,
 };
+
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
         StartGame,
+        SetLevel,
+        MenuToGameplay,
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
-        PlayerDebug
+        PlayerDebug,
+        Pause
     };
+
+
+    static constexpr Vector4 PLATINUM = Vector4(0.941f, 0.918f, 0.839f, 1.0f);
+    static constexpr Vector4 GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
+    static constexpr Vector4 SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
+    static constexpr Vector4 BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
+
 
     enum PlayerAnimationStates {
         RUNNING_FORWARD,
@@ -65,17 +82,19 @@ public:
         PlayerAnimationStates state = IDLE;
     };
 
+
     Replicated();
-    void InitLevel();
     int GetCurrentLevelLen();
+
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
-    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
+    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position, bool shouldNetwork);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
     void AddSwingingBlock(GameObject* g, GameWorld& world);
     void AddSpeedUpBlockToLevel(GameObject* g, GameWorld& world);
-    constexpr static int PLAYERCOUNT = 2;
+    
+    constexpr static int PLAYERCOUNT = 4;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
     constexpr static int BASICPACKETTYPE = 2;
@@ -95,10 +114,15 @@ struct Diagnostics {
 
     Diagnostics() {
         gameTimer = new GameTimer();
+        averagePacketTime = 0;
+        maxPacketTime = 0;
+        minPacketTime = 0;
+        packetCount = 0;
     }
 
     ~Diagnostics() {
         delete gameTimer;
+        gameTimer = nullptr;
     }
 };
 

@@ -34,6 +34,15 @@ namespace NCL {
             READY
         };
 
+        namespace GameplayStateEnums {
+            enum ClientState {
+                COUNTDOWN,
+                PLAYING,
+                PLAYER_COMPLETED,
+                END_OF_LEVEL
+            };
+        }
+
         class GameplayState : public State
         {
         public:
@@ -47,22 +56,52 @@ namespace NCL {
             bool IsDisconnected();
 
         protected:
+            void OnNewLevel();
+            void WaitForServerLevel();
             void InitialiseAssets();
             void InitCamera();
             void InitWorld();
+            void InitCurrentLevel();
             void InitSounds();
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
-            void InitLevel();
+            void InitLevel(int level);
             void InitCanvas();
+
+            void ClearLevel();
+            void LoadNextLevel();
 
             void ResetCameraToForwards();
 
+            int pauseSelected;
+            void InitPauseScreen();
+            void OnPauseHoverEnter(Element& element);
+            void OnPauseHoverExit(Element& element);
+            void OnPauseClick(Element& element);
+            void UpdatePauseFlame(Element& element, float dt);
+            void TogglePause();
+            int selectedPause = 0;
+            float flameToXGap = 300.0f;
+            float flameToY = 75.0f;
+
+            float whenToStartCountdown = 3.0f;
+            int countdownCurrentInt = 0;
+            void InitStartScreen();
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
+            void InitEndCanvas();
+            bool hasReachedEnd = false;
+            void InitEndScreen(Vector4 color);
+            int endMedalElementIndex;
 
+            void UpdateCountdown(float dt);
+            void UpdateAndRenderWorld(float dt);
+            void UpdatePlaying(float dt);
+            void UpdatePlayerCompleted(float dt);
+            void UpdateEndOfLevel(float dt);
+            
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -71,12 +110,15 @@ namespace NCL {
             std::unique_ptr<LevelManager> levelManager;
 
             std::string medalImage;
+            std::string crosshairImage;
+            std::string playerblipImage;
 
 #ifdef USEVULKAN
             GameTechVulkanRenderer* renderer;
 #else
             GameTechRenderer* renderer;
 #endif
+            std::vector<std::string> soundEffects;
             SoundManager* soundManager;
             GameWorld* world;
             // DO NOT USE THIS POINTER or suffer a null pointer exception.
@@ -117,6 +159,8 @@ namespace NCL {
             LoadingStates soundHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
+            bool isSinglePlayer;
+            bool isPaused = false;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;
@@ -124,12 +168,14 @@ namespace NCL {
 
             void ThreadUpdate(GameClient *client, ClientNetworkData *networkData);
             void ReadNetworkFunctions();
+            void OnEndReached(DataHandler& handler);
             void ReadNetworkPackets();
 
             void CreateRock();
             void ResetCameraAnimation();
 
             void WalkCamera(float dt);
+            std::vector<std::string> walkSounds;
             float groundedMovementSpeed = 0.0f;
             float currentGroundSpeed = 0.0f;
             float walkTimer = 0.0f;
@@ -137,6 +183,7 @@ namespace NCL {
             const float bobAmount = 0.1f;
             const float bobFloor = -0.015f;
             float walkSoundTimer = 0.0f;
+            float walkSoundTimerMultiplier = 0.85f;
 
             Vector3 playerVelocity;
 
@@ -167,26 +214,106 @@ namespace NCL {
 
             float levelLen;
             Vector3 startPos;
+            Vector3 endPos;
+
+            Vector3 deathPos;
             float CalculateCompletion(Vector3 cp);
-            Element* timeBar;
+            void AddLava( Vector3 pos );
+            void AddEndPortal ( Vector3 pos );
             int PlayerBlip;
 
+            float timeElapsed;
+            int currentMedal = 4;
+            float timerMedalShakeTimer = 0.0f;
+            float medalTimes[3] = { -1.0f, -1.0f, -1.0f };
+
+            void InitPlayerBlip(int id);
+            std::unordered_map<std::string, Vector3> playerPositions;
+
+            std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
+
+            Element *timerNubs[3];
+            Element *timeBar;
+            Element *timeBarTimerBoxBack;
+            Element *timeBarTimerBox;
+            Element *timerText;
+            ShaderBase *timerBarShader;
+            ShaderBase *fireShader;
+
+            const int timerTopOffset = 32;
+            const int timerBarHeight = 10;
+            const int timerBoxWidth = 10;
+
+            const int timerEndBoxY = 60;
+            const int timerEndBoxX = 60;
+            const float timerEndBoxYoff = 0.6f;
+
+            const int timerBarOutline = 3;
+            float timerRatio = 0.0f;
+            Vector4 timerBarColor = { Replicated::PLATINUM };
+
+            void UpdateStartBack(Element& element, float dt);
+            void UpdateStartText(Element& element, float dt);
+
+
+            void InitialiseMedalNubs();
+            void UpdateTimerUI(Element& element, float dt);
+            void UpdateTimerBox(Element& element, float dt);
+            void UpdateTimerText(Element& element, float dt);
+            void UpdateTimerNub(Element& element, float dt);
             void UpdatePlayerBlip(Element &element, float dt);
 
-            std::string GetMedalImage();
+            Element* crosshair;
+            void UpdateCrosshair(Element& element, float dt);
+            float crossHairRotation = 45.0f;
+            float currentCHRotation = 0.0f;
+            int rotationDirection = 1.0f;
+            float crossHairScale = 1.0f;
 
+            enum MedalAnimationStages {
+                START,
+                TIMER_SCROLL,
+                TIMER_SHAKE,
+                MEDAL,
+                FINISHED
+            };
+
+            ShaderBase *medalShineShader;
+
+            std::string GetMedalImage();
+            void UpdateMedalSprite(Element& element, float dt);
+            void UpdateFinalTimeTally(Element& element, float dt);
+            float medalTimer = 0.0f;
+            float finalTime = 0.0f;
+            float finalTimeScroll = 0.0f;
+            float finaltimeShrink = 1.0f;
+            float finalTimeShake = 0.0f;
+            float finalTimeSoundRepeat = 0.0f;
+            MedalAnimationStages medalAnimationStage = MedalAnimationStages::START;
+            std::unique_ptr<Font> biggerDebugFont;
             DebugMode* debugger;
             bool displayDebugger = false;
 
-            void CreateGrapples();
-            void UpdateGrapples();
+            GameplayStateEnums::ClientState state = GameplayStateEnums::END_OF_LEVEL;
 
+            bool shouldMoveToNewLevel = false;
+
+            void RenderFlairObjects();
+            void CreateGrapples();
+            void UpdateGrapples(float dt);
+            float grappleContVolume = 0.0f;
             GameObject *CreateChainLink();
 
+            void ResetEndScreenAnimTimers() {
+                medalTimer = 0.0f;
+                finalTime = 0.0f;
+                finalTimeScroll = 0.0f;
+                finaltimeShrink = 1.0f;
+                finalTimeShake = 0.0f;
+            }
+
             void CreateChains();
-
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
-
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
         };
     }
