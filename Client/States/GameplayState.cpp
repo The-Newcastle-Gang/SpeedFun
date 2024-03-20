@@ -327,16 +327,18 @@ void GameplayState::CreateLoadingScreenCanvas() {
     for (int i = 1; i <= loadingScreens; i++) {
         canvas->CreateNewLayer(loading + std::to_string(i), false);
         canvas->PushActiveLayer(loading + std::to_string(i));
-        canvas->AddElement().AlignBottom().AlignLeft().SetRelativeSize({ 1,1 }).SetColor({ 1,0,1,1 });
+        canvas->AddElement().AlignBottom().AlignLeft().SetRelativeSize({ 1,1 }).SetColor({ 0.1,0.1,0.1,1 });
 
         switch (i) {
         case 1:
-            canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignMiddle().AlignCenter().SetAbsoluteSize({ 50,50 });
+            canvas->AddImageElement("LS_Text1.png", loading + std::to_string(i)).AlignLeft().AlignTop().SetAbsoluteSize({500,500});
+            canvas->AddImageElement("Solaire!.jpg", loading + "1").AlignLeft().AlignBottom().SetAbsoluteSize({100,100});
             renderer->RenderLoadingScreen();
 
             break;
         case 2:
-            canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignMiddle().AlignCenter().SetAbsoluteSize({ 500,500 });
+            canvas->AddImageElement("LS_Text2.png", loading + std::to_string(i)).AlignLeft().AlignTop().SetAbsoluteSize({500,500});
+            canvas->AddImageElement("Solaire!.jpg", loading + "2").AlignRight().AlignBottom().SetAbsoluteSize({100,100});
             renderer->RenderLoadingScreen();
 
             break;
