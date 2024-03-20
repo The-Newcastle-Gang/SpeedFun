@@ -165,6 +165,8 @@ GameTechRenderer::~GameTechRenderer()	{
     delete combineShader;
     delete pointLightShader;
     delete skyboxShader;
+    delete particleShader;
+    particleSystems.clear();
 }
 
 

@@ -239,7 +239,7 @@ void GameplayState::LoadParticleSystems()
 
 void GameplayState::UpdateParticleSystems(float dt)
 {
-    for (auto ps : particleSystems)
+    for (auto &ps : particleSystems)
     {
         ps->CreateNewParticles(dt);
         ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
