@@ -54,6 +54,45 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
     }
     groundCubes.clear();
 
+    for (auto& i : bridgePrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    bridgePrimitives.clear();
+
+    for (auto& i : speedupBlockPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    speedupBlockPrimitives.clear();
+
+    for (auto& i : trapBlockPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    trapBlockPrimitives.clear();
+
+
+    for (auto& i : rayEnemyPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    rayEnemyPrimitives.clear();
+
+
+    for (auto& i : rayenemytriggerPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    rayenemytriggerPrimitives.clear();
+
+
+    for (auto& i : bridgetriggerPrimitives) {
+        delete i;
+        i = nullptr;
+    }
+    bridgetriggerPrimitives.clear();
+
     checkPointPositions.clear();
 }
 

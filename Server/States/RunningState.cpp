@@ -712,6 +712,8 @@ void RunningState::BuildLevel(const std::string &levelName)
     }
 
     for (auto& x : speedUpList) {
+        auto g = new GameObject();
+
         replicated->AddBlockToLevel(g, *world, x);
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
