@@ -66,6 +66,7 @@ void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as
 void RunningState::ResetLevelInfo() {
     hasAllPlayersFinished = false;
     numPlayersLoaded = 0;
+    numPlayerFinished = 0;
     for (std::pair<int, bool> info : playersFinished) {
         playersFinished[info.first] = false;
     }
