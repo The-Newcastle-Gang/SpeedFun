@@ -30,7 +30,7 @@ void RunningState::OnEnter() {
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
     numPlayersLoaded = 0;
-
+    numPlayerFinished = 0;
     shouldClose.store(false);
 
     CreateNetworkThread();
@@ -378,6 +378,24 @@ void RunningState::EndTriggerVolFunc(int id){
 void RunningState::SendMedalToClient(int id) {
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
+    if (serverBase->GetPlayerInfo().size() > 1) {
+        numPlayerFinished = std::clamp(numPlayerFinished + 1, 0, 3);
+        medal = numPlayerFinished;
+        switch (medal) {
+        case(Medal::Gold):
+            medalColour = Replicated::GOLD;
+            break;
+
+        case(Medal::Silver):
+            medalColour = Replicated::SILVER;
+            break;
+
+        case(Medal::Bronze):
+            medalColour = Replicated::BRONZE;
+            break;
+        }
+    }
+
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
