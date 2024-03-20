@@ -74,19 +74,21 @@ namespace NCL {
 
             void ResetCameraToForwards();
 
+            void InitStartScreen();
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
             void InitEndCanvas();
+            bool hasReachedEnd = false;
+            void InitEndScreen(Vector4 color);
+            int endMedalElementIndex;
 
             void UpdateCountdown(float dt);
             void UpdateAndRenderWorld(float dt);
             void UpdatePlaying(float dt);
             void UpdatePlayerCompleted(float dt);
             void UpdateEndOfLevel(float dt);
-            bool hasReachedEnd = false;
-            void InitEndScreen(Vector4 color);
-            int endMedalElementIndex;
+            
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -235,6 +237,8 @@ namespace NCL {
             const int timerBarOutline = 3;
             float timerRatio = 0.0f;
             Vector4 timerBarColor = { Replicated::PLATINUM };
+
+            void UpdateStartScreen(Element& element, float dt);
 
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);

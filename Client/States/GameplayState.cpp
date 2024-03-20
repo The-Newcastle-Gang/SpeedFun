@@ -66,12 +66,22 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-
+    InitStartScreen();
     InitEndCanvas();
-
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+}
+
+void GameplayState::InitStartScreen() {
+    canvas->CreateNewLayer("StartScreenLayer");
+    
+    canvas->AddElement("StartScreenLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
 }
 
 void GameplayState::InitEndCanvas() {
@@ -274,6 +284,7 @@ void GameplayState::OnNewLevel() {
     FinishLoading();
 
 }
+
 void GameplayState::InitialiseAssets() {
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
@@ -381,6 +392,7 @@ void GameplayState::UpdateCountdown(float dt){
     if (countdownOver) {
         soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         state = GameplayStateEnums::PLAYING;
+        canvas->PopActiveLayer();
     }
 }
 
@@ -441,6 +453,7 @@ void GameplayState::UpdateEndOfLevel(float dt)
 {
     if (shouldMoveToNewLevel) {
         OnNewLevel();
+        canvas->PushActiveLayer("StartScreenLayer");
         shouldMoveToNewLevel = false;
         Window::GetWindow()->ShowOSPointer(false);
         state = GameplayStateEnums::COUNTDOWN;
@@ -1069,6 +1082,9 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
+void GameplayState::UpdateStartScreen(Element& element, float dt) {
+
+}
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
