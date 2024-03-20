@@ -55,7 +55,7 @@ namespace NCL {
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
-            void PassParticleSystems(vector<ParticleSystem*> ps) { particleSystems = ps; }
+            void PassParticleSystems(std::vector<ParticleSystem*> ps) { particleSystems = ps; }
             MeshGeometry *LoadOBJMesh(const string &name);
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
