@@ -88,7 +88,7 @@ namespace NCL {
 		//Sets position in world space
 		Camera& SetPosition(const Vector3& val) { position = val + cameraOffset;  return *this; }
 
-        void SetCameraOffset(Vector3 o) {cameraOffset = o;};
+        void SetCameraOffset(Vector3 o) {cameraOffset = o;}
 
 		Vector3 GetOffsetPosition() const { return offset; }
 		

@@ -285,7 +285,7 @@ void PlayerMovement::Grapple() {
     onGrappleStart.publish(gameObject, lookDirection);
 }
 
-void PlayerMovement::UpdateGrapple(float dt) {
+void PlayerMovement::UpdateGrapple(float dt) { //i.e update the projectile before it hits something
     if (!grappleProjectileInfo.GetActive()) return;
 
     grappleProjectileInfo.travelDistance += grappleProjectileInfo.travelSpeed * dt;
@@ -294,12 +294,17 @@ void PlayerMovement::UpdateGrapple(float dt) {
     if (world->Raycast(grappleProjectileInfo.grappleRay, collision, true, gameObject, TRIGGER_LAYER ^ ~MAX_LAYER)) {
         auto tempGrapplePoint = collision.collidedAt;
         if ((grappleProjectileInfo.grappleRay.GetPosition() - tempGrapplePoint).Length() < grappleProjectileInfo.travelDistance) {
+            grappleProjectileInfo.SetActive(false);
+            GameObject* object = (GameObject*)collision.node;
+            if (object->GetTag() == DAMAGABLE)
+            {
+                OnGrappleLeave();
+                return;
+            }
             grapplePoint = tempGrapplePoint;
             FireGrapple();
-            grappleProjectileInfo.SetActive(false);
-            
 
-            grappledObject = (GameObject*)collision.node;
+            grappledObject = object;
             deltaGrappledObject = grapplePoint - grappledObject->GetTransform().GetPosition();
             return;
         }
