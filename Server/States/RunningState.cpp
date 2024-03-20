@@ -43,7 +43,7 @@ void RunningState::SendLevelToClients(int level) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(level);
-    handler.Pack(numPlayersLoaded);
+    handler.Pack(serverBase->GetPlayerInfo().size());
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::Load_Level, &data));
 }
 
