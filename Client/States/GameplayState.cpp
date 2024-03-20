@@ -35,7 +35,9 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_walk2.wav",
         "sfx_timetally.wav",
         "sfx_timeshake.wav",
-        "sfx_medal.wav" };
+        "sfx_medal.wav",
+        "sfx_countdown.wav",
+        "sfx_go.wav"};
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -66,12 +68,47 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-
+    InitStartScreen();
     InitEndCanvas();
-
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+}
+
+void GameplayState::InitStartScreen() {
+    canvas->CreateNewLayer("StartScreenLayer");
+    
+    auto startBack = canvas->AddElement("StartScreenLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.0f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_Back");
+    startBack.OnUpdate.connect<&GameplayState::UpdateStartBack>(this);
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto countdownText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 80, 100 })
+        .AlignCenter()
+        .AlignMiddle(-40)
+        .SetId("StartScreen_Countdown")
+        .SetText(textData);
+    countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    textData.fontSize = 0.5f;
+    auto levelNameText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 0, 50 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_LevelName")
+        .SetText(textData);
+    levelNameText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    
+
 }
 
 void GameplayState::InitEndCanvas() {
@@ -263,6 +300,7 @@ void GameplayState::WaitForServerLevel() {
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
+    displayDebugger = false;
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
@@ -272,8 +310,10 @@ void GameplayState::OnNewLevel() {
     worldHasLoaded = LoadingStates::NOT_LOADED;
     InitCurrentLevel();
     FinishLoading();
+    ResetCameraToForwards();
 
 }
+
 void GameplayState::InitialiseAssets() {
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
@@ -381,6 +421,8 @@ void GameplayState::UpdateCountdown(float dt){
     if (countdownOver) {
         soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         state = GameplayStateEnums::PLAYING;
+        canvas->PopActiveLayer();
+        soundManager->SM_PlaySound("sfx_go.wav");
     }
 }
 
@@ -441,6 +483,7 @@ void GameplayState::UpdateEndOfLevel(float dt)
 {
     if (shouldMoveToNewLevel) {
         OnNewLevel();
+        canvas->PushActiveLayer("StartScreenLayer");
         shouldMoveToNewLevel = false;
         Window::GetWindow()->ShowOSPointer(false);
         state = GameplayStateEnums::COUNTDOWN;
@@ -870,8 +913,8 @@ void GameplayState::CreatePlayers() {
         playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
-        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
-        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.5f,0));
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
@@ -1069,6 +1112,42 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
+void GameplayState::UpdateStartBack(Element& element, float dt) {
+    if (levelManager->GetCountdown() > whenToStartCountdown) {
+        element.SetColor({ 0,0,0,0 });
+        return;
+    }
+    float backAlpha = element.GetColor().w;
+    float targetBackAlpha = 0.75;
+    backAlpha = backAlpha * 0.9f + targetBackAlpha * 0.1f;
+    element.SetColor({ 0,0,0,backAlpha });
+
+}
+
+void GameplayState::UpdateStartText(Element& element, float dt) {
+    float endTimer = levelManager->GetCountdown();
+    if (endTimer > whenToStartCountdown) {
+        element.textData.text = "";
+        return;
+    }
+    std::string id = element.GetId();
+    if (id == "StartScreen_Countdown") {
+        if (countdownCurrentInt != (int)ceil(endTimer)) {
+            countdownCurrentInt = (int)ceil(endTimer);
+            soundManager->SM_PlaySound("sfx_countdown.wav");
+            soundManager->SM_SetSoundPitch("sfx_countdown.wav", 1.0f + (3 - countdownCurrentInt) * 0.3f);
+        }
+        element.textData.text = std::to_string((int)ceil(endTimer));
+    }
+    else if (id == "StartScreen_LevelName") {
+        std::string levelName = levelManager->GetLevelName(levelManager->GetLevel());
+        int characters = levelName.length();
+        element.SetAbsoluteSize({ 40 * characters, 50 });
+        element.AlignMiddle(150);
+        element.AlignCenter();
+        element.textData.text = levelName;
+    }
+}
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
