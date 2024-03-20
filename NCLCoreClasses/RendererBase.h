@@ -33,6 +33,14 @@ namespace NCL::Rendering {
 			SwapBuffers();
 		}
 
+		void RenderLoadingScreen() {
+			BeginFrame();
+			RenderLSFrame();
+			EndFrame();
+			SwapBuffers();
+		}
+
+
 		virtual bool SetVerticalSync(VerticalSyncState s) {
 			return false;
 		}
@@ -43,6 +51,7 @@ namespace NCL::Rendering {
 			
 		virtual void BeginFrame()	= 0;
 		virtual void RenderFrame()	= 0;
+		virtual void RenderLSFrame()= 0;
 		virtual void EndFrame()		= 0;
 		virtual void SwapBuffers()	= 0;
 		Window& hostWindow;

@@ -1,4 +1,5 @@
 #include "GameplayState.h"
+#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -60,13 +61,9 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
-
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    shouldLoadScreen.store(false);
+    canvas->Reset();
+    
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
@@ -334,12 +331,11 @@ void GameplayState::OnEnter() {
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     isSinglePlayer = baseClient->IsSinglePlayer();
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     InitialiseAssets();
-
     DebugMode::SetDebugCam(world->GetMainCamera());
     DebugMode::InitDebugInfo();
-    InitCanvas();
 
     WaitForServerLevel(); //wait until server tells us what level to load
 
@@ -403,6 +399,64 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+
+    CreateLoadingScreenCanvas();
+
+    shouldLoadScreen.store(true);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
+    loadingScreenThread->detach();
+}
+
+void GameplayState::CreateLoadingScreenCanvas() {
+    const int loadingScreens = 2;
+    Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
+    Vector2Int lsTipTextRes = { 625, 28};
+    int textBottomPadding = 35;
+    int textLeftPadding = 35;
+    int imagePadding = 75;
+
+    for (int i = 1; i <= loadingScreens; i++) {
+        std::string currentlayer = "LoadingScreen" + std::to_string(i);
+        canvas->CreateNewLayer(currentlayer, false);
+        canvas->PushActiveLayer(currentlayer);
+        canvas->AddElement(currentlayer)
+            .AlignBottom()
+            .AlignLeft()
+            .SetRelativeSize({ 1,1 })
+            .SetColor({ 0,0,0,1 });
+        canvas->AddElement(currentlayer)
+            .SetAbsoluteSize({ 920,470 })
+            .AlignMiddle(imagePadding)
+            .AlignCenter();
+        canvas->AddImageElement("ScreenShot.png", currentlayer)
+                .SetAbsoluteSize({ 904,454 })
+                .AlignMiddle(imagePadding)
+                .AlignCenter();
+        canvas->AddImageElement("TipText.png", currentlayer).AlignLeft(textLeftPadding * 8).AlignBottom(textBottomPadding * 4).SetAbsoluteSize(lsTipTextRes);
+
+        switch (i) {
+        case 1:
+            canvas->AddImageElement("LS_Text1.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        case 2:
+            canvas->AddImageElement("LS_Text2.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        default:
+            break;
+        }
+        renderer->RenderLoadingScreen();
+    }
+}
+
+void GameplayState::LoadingScreenUpdate() {
+    while (shouldLoadScreen) {
+        std::cout << "LoadingScreen!" << std::endl;
+        renderer->RenderLoadingScreen();
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+}
+
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
@@ -417,6 +471,9 @@ void GameplayState::OnExit() {
 
     delete networkThread;
     networkThread = nullptr;
+
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -931,6 +988,8 @@ void GameplayState::TogglePause() {
 void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
+    shouldLoadScreen.store(false);
+    InitCanvas();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
