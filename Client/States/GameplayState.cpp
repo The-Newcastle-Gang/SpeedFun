@@ -987,7 +987,6 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->SetActive(false);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1186,7 +1185,6 @@ void GameplayState::AssignPlayer(int netObject) {
 
     firstPersonPosition = &player->GetTransform();
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
-    player->SetActive(true);
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){

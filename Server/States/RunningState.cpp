@@ -258,7 +258,6 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
-    SetNetworkActive(object, true);
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
@@ -316,7 +315,6 @@ void RunningState::CreatePlayers() {
         thisPlayerStartPos = startPos + Vector3(0,0,1) * GetDirectionFromPlayerNumber(currentPlayer) * GetMagnitudeFromPlayerNumber(currentPlayer)* playerSeperation;
         playerAnimationInfo[i] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
-        player->SetActive(false);
         replicated->CreatePlayer(player, *world);
         playerObjects[currentPlayer - 1] = player;
         currentPlayer++;
