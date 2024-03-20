@@ -252,7 +252,7 @@ void GameplayState::OnEnter() {
     debugger = new DebugMode(world->GetMainCamera());
 
     WaitForServerLevel(); //wait until server tells us what level to load
-    InitCanvas();
+    //InitCanvas();
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
@@ -320,39 +320,50 @@ void GameplayState::CreateLoadingScreenThread() {
 }
 
 void GameplayState::CreateLoadingScreenCanvas() {
-
     const int loadingScreens = 2;
-    std::string loading = "LoadingScreen";
-    Vector2Int textRes = { 671,166 };
-    int textTopPadding = 200;
+    Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
+    //Vector2Int lsTipTextRes = { 508, 34};
+    Vector2Int lsTipTextRes = { 625, 28};
+    int textBottomPadding = 35;
+    int textLeftPadding = 35;
+    int imagePadding = 75;
 
     for (int i = 1; i <= loadingScreens; i++) {
-        canvas->CreateNewLayer(loading + std::to_string(i), false);
-        canvas->PushActiveLayer(loading + std::to_string(i));
-        canvas->AddElement(loading + std::to_string(i)).AlignBottom().AlignLeft().SetRelativeSize({1,1}).SetColor({0.1,0.1,0.1,1}).SetId("Background");
+        std::string currentlayer = "LoadingScreen" + std::to_string(i);
+        canvas->CreateNewLayer(currentlayer, false);
+        canvas->PushActiveLayer(currentlayer);
+        canvas->AddElement(currentlayer)
+            .AlignBottom()
+            .AlignLeft()
+            .SetRelativeSize({ 1,1 })
+            .SetColor({ 0,0,0,1 });
+        canvas->AddElement(currentlayer)
+            .SetAbsoluteSize({ 920,470 })
+            .AlignMiddle(imagePadding)
+            .AlignCenter();
+        canvas->AddImageElement("ScreenShot.png", currentlayer)
+                .SetAbsoluteSize({ 904,454 })
+                .AlignMiddle(imagePadding)
+                .AlignCenter();
+        canvas->AddImageElement("TipText.png", currentlayer).AlignLeft(textLeftPadding * 8).AlignBottom(textBottomPadding * 4).SetAbsoluteSize(lsTipTextRes);
 
         switch (i) {
         case 1:
-            canvas->AddImageElement("LS_Text1.png", loading + std::to_string(i)).AlignLeft().AlignTop(textTopPadding).SetAbsoluteSize(textRes).SetId("LS_Text1");
-            //canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignLeft(100).AlignBottom(100).SetAbsoluteSize({100,100}).SetId("Sol1");
-            renderer->RenderLoadingScreen();
-
+            canvas->AddImageElement("LS_Text1.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
             break;
         case 2:
-            canvas->AddImageElement("LS_Text2.png", loading + std::to_string(i)).AlignLeft().AlignTop(textTopPadding).SetAbsoluteSize(textRes).SetId("LS_Text2");
-            //canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignRight().AlignBottom().SetAbsoluteSize({100,100}).SetId("Sol2");
-            renderer->RenderLoadingScreen();
-
+            canvas->AddImageElement("LS_Text2.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
             break;
         default:
             break;
         }
+        renderer->RenderLoadingScreen();
     }
 }
 
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "LoadingScreen!\n";
+        std::cout << "LoadingScreen!" << std::endl;
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
@@ -860,6 +871,7 @@ void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
     shouldLoadScreen.store(false);
+    InitCanvas();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
