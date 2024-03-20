@@ -1280,7 +1280,7 @@ void GameplayState::AddLava(Vector3 position){
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
     renderer->SetLavaHeight(position.y);
-    LavaQuad->GetRenderObject()->SetDepthTest(false);
+    //LavaQuad->GetRenderObject()->SetDepthTest(false);
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
