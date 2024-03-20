@@ -6,6 +6,7 @@
 #include "Matrix4.h"
 #include "OGLRenderer.h"
 #include <glad/gl.h>
+#include <cstdlib>
 #define MAX_PARTICLES 1000
 
 using namespace NCL;

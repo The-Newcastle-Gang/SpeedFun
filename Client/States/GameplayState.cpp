@@ -227,7 +227,7 @@ void GameplayState::InitTimerBar(){
 
 void GameplayState::LoadParticleSystems()
 {
-    lavaParticles = new ParticleSystem(deathPos, { -100, 0, -100 }, { 300, 1, 100 }, 35, 5.5f, 3, 0.45f, 0.25f, resources->GetTexture("ember.png"));
+    lavaParticles = new ParticleSystem(deathPos, { -150, 0, -100 }, { 300, 1, 100 }, 50, 10.0f, 3, 0.25f, 0.25f, resources->GetTexture("ember.png"));
     particleSystems.push_back(lavaParticles);
 
     
@@ -328,6 +328,7 @@ void GameplayState::OnNewLevel() {
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
+    particleSystems.clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
     worldHasLoaded = LoadingStates::NOT_LOADED;
