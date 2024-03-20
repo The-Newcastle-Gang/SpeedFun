@@ -35,7 +35,9 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_walk2.wav",
         "sfx_timetally.wav",
         "sfx_timeshake.wav",
-        "sfx_medal.wav" };
+        "sfx_medal.wav",
+        "sfx_countdown.wav",
+        "sfx_go.wav"};
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -420,6 +422,7 @@ void GameplayState::UpdateCountdown(float dt){
         soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         state = GameplayStateEnums::PLAYING;
         canvas->PopActiveLayer();
+        soundManager->SM_PlaySound("sfx_go.wav");
     }
 }
 
@@ -1129,6 +1132,11 @@ void GameplayState::UpdateStartText(Element& element, float dt) {
     }
     std::string id = element.GetId();
     if (id == "StartScreen_Countdown") {
+        if (countdownCurrentInt != (int)ceil(endTimer)) {
+            countdownCurrentInt = (int)ceil(endTimer);
+            soundManager->SM_PlaySound("sfx_countdown.wav");
+            soundManager->SM_SetSoundPitch("sfx_countdown.wav", 1.0f + (3 - countdownCurrentInt) * 0.3f);
+        }
         element.textData.text = std::to_string((int)ceil(endTimer));
     }
     else if (id == "StartScreen_LevelName") {

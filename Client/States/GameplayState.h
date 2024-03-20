@@ -75,6 +75,7 @@ namespace NCL {
             void ResetCameraToForwards();
 
             float whenToStartCountdown = 3.0f;
+            int countdownCurrentInt = 0;
             void InitStartScreen();
             void InitCrossHeir();
             void InitTimerBar();
