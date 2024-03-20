@@ -374,11 +374,9 @@ void PhysicsSystem::SortAndSweep() {
     for (int i = 0; i < sortAndSweepData.size(); i++) {
         SortSweepStruct currentBound = sortAndSweepData[i];
         GameObject* currentBoundObject = currentBound.gameObject;
-		if (!currentBoundObject->IsActive()) continue;
         if (!currentBound.isUpper) {
             for (GameObject* other : currentValidObjects) {
                 if (!layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
-				if (!other->IsActive()) continue;
                 CollisionDetection::CollisionInfo info;
                 info.a = Tmin(currentBoundObject, other);
                 info.b = Tmax(currentBoundObject, other);
