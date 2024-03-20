@@ -493,6 +493,7 @@ void GameTechRenderer::RenderUI() {
     for (auto i = layers.begin() + blockingLayer; i != layers.end(); i++) {
         auto& elements = (*i)->GetElements();
         for (auto& e : elements) {
+            if (!e.IsActive()) continue;
             auto activeShader = defaultUIShader;
             if (!e.GetShader()) {
                 BindShader(defaultUIShader);
@@ -501,7 +502,6 @@ void GameTechRenderer::RenderUI() {
                 BindShader(e.GetShader());
                 activeShader = (OGLShader*)(e.GetShader());
             }
-
             auto color = e.GetColor();
             auto colorAddress = color.array;
             auto relPos = e.GetRelativePosition();
@@ -684,6 +684,9 @@ void GameTechRenderer::RenderCamera() {
 
     for (const RenderObject* i : activeObjects) {
 
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_FALSE);
+        }
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
@@ -777,6 +780,9 @@ void GameTechRenderer::RenderCamera() {
             for (int i = 0; i < layerCount; ++i) {
                 DrawBoundMesh(i);
             }
+        }
+        if (!i->IsDepthTested()) {
+            glDepthMask(GL_TRUE);
         }
     }
     //test if ogl error

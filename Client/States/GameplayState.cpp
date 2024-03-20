@@ -25,6 +25,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 
     timerBarShader      = resources->GetShader("timerBar");
     fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
+    fireShader          = renderer->LoadShader("defaultUI.vert", "fireTimer.frag");
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
     soundEffects = { "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" , 
@@ -36,7 +37,9 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
         "sfx_walk2.wav",
         "sfx_timetally.wav",
         "sfx_timeshake.wav",
-        "sfx_medal.wav" };
+        "sfx_medal.wav",
+        "sfx_countdown.wav",
+        "sfx_go.wav"};
     walkSounds = { "sfx_walk2.wav" };
 }
 
@@ -60,21 +63,51 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
-
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-    //shouldLoadScreen.store(false);
-    //loadingScreenThread->join();
+    shouldLoadScreen.store(false);
     canvas->Reset();
+    
+    InitStartScreen();
     InitEndCanvas();
-
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
+    InitPauseScreen();
+}
+
+void GameplayState::InitStartScreen() {
+    canvas->CreateNewLayer("StartScreenLayer");
+    
+    auto startBack = canvas->AddElement("StartScreenLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.0f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_Back");
+    startBack.OnUpdate.connect<&GameplayState::UpdateStartBack>(this);
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto countdownText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 80, 100 })
+        .AlignCenter()
+        .AlignMiddle(-40)
+        .SetId("StartScreen_Countdown")
+        .SetText(textData);
+    countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    textData.fontSize = 0.5f;
+    auto levelNameText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 0, 50 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_LevelName")
+        .SetText(textData);
+    levelNameText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
+
+    
+
 }
 
 void GameplayState::InitEndCanvas() {
@@ -217,6 +250,60 @@ void GameplayState::InitLevelMap(){
     */
 }
 
+void GameplayState::InitPauseScreen() {
+    canvas->CreateNewLayer("PauseLayer");
+    
+    auto backing = canvas->AddElement("PauseLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    textData.fontSize = 1.0f;
+    textData.text = "RESUME";
+    textData.color = { 0.5,0.5,0.5,1 };
+    auto resumeText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 500,100})
+        .AlignCenter()
+        .AlignMiddle(75)
+        .SetId("Resume")
+        .SetText(textData);
+
+    resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    resumeText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    resumeText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+
+    textData.text = "EXIT";
+    auto exitText = canvas->AddElement("PauseLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 350,100 })
+        .AlignCenter()
+        .AlignMiddle(-75)
+        .SetId("Exit")
+        .SetText(textData);
+    exitText.OnMouseEnter.connect<&GameplayState::OnPauseHoverEnter>(this);
+    exitText.OnMouseExit.connect<&GameplayState::OnPauseHoverExit>(this);
+    exitText.OnMouseUp.connect<&GameplayState::OnPauseClick>(this);
+    //resumeText.OnMouseEnter.connect<&GameplayState::OnPauseHoverSelect>(this);
+
+    for (int i = 0; i < 2; i++)
+    {
+        auto& playerElement = canvas->AddImageElement(playerblipImage, "PauseLayer")
+            .SetColor({ 0.5,0.0,0.,1 })
+            .SetAbsoluteSize({ 125,125 })
+            .AlignCenter()
+            .AlignMiddle()
+            .SetTexture(resources->GetTexture("firemask.jpg"))
+            .SetShader(fireShader)
+            .SetId("pauseflame_" + std::to_string(i));
+
+        playerElement.OnUpdate.connect<&GameplayState::UpdatePauseFlame>(this);
+    }
+}
+
 void GameplayState::InitPlayerBlip(int id) {
     auto& playerElement = canvas->AddImageElement(playerblipImage)
         .SetColor({ 0.5,0.0,0.,1 })
@@ -252,7 +339,6 @@ void GameplayState::OnEnter() {
     debugger = new DebugMode(world->GetMainCamera());
 
     WaitForServerLevel(); //wait until server tells us what level to load
-    //InitCanvas();
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
@@ -267,6 +353,7 @@ void GameplayState::WaitForServerLevel() {
 void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
+    displayDebugger = false;
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
@@ -276,8 +363,10 @@ void GameplayState::OnNewLevel() {
     worldHasLoaded = LoadingStates::NOT_LOADED;
     InitCurrentLevel();
     FinishLoading();
+    ResetCameraToForwards();
 
 }
+
 void GameplayState::InitialiseAssets() {
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
@@ -446,29 +535,42 @@ void GameplayState::UpdateCountdown(float dt){
     if (countdownOver) {
         soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         state = GameplayStateEnums::PLAYING;
+        canvas->PopActiveLayer();
+        soundManager->SM_PlaySound("sfx_go.wav");
     }
 }
 
 void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
-    totalDTElapsed += dt;
-    UpdateGrapples(dt);
 
-    Window::GetWindow()->ShowOSPointer(false);
+    Window::GetWindow()->ShowOSPointer(isPaused);
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
+    if (!isPaused)
+    {
+        UpdateGrapples(dt);
+        
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        }
+        WalkCamera(dt);
+        if (jumpTimer > 0) JumpCamera(dt);
+        if (landTimer > 0) LandCamera(dt);
+        StrafeCamera(dt);
+        world->GetMainCamera()->UpdateCamera(dt);
 
-    if (firstPersonPosition) {
-        world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+        totalDTElapsed += dt;
+        UpdateGrapples(dt);
+
+        Window::GetWindow()->ShowOSPointer(false);
+
+        if (firstPersonPosition) {
+            world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
+
+        }
+        world->UpdateWorld(dt);
     }
-    WalkCamera(dt);
-    if (jumpTimer > 0) JumpCamera(dt);
-    if (landTimer > 0) LandCamera(dt);
-    StrafeCamera(dt);
-
-    world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
-
+    
     ResetCameraAnimation();
-
     ReadNetworkPackets();
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
@@ -506,6 +608,7 @@ void GameplayState::UpdateEndOfLevel(float dt)
 {
     if (shouldMoveToNewLevel) {
         OnNewLevel();
+        canvas->PushActiveLayer("StartScreenLayer");
         shouldMoveToNewLevel = false;
         Window::GetWindow()->ShowOSPointer(false);
         state = GameplayStateEnums::COUNTDOWN;
@@ -839,6 +942,14 @@ void GameplayState::SendInputData() {
     InputListener::InputUpdate();
     InputPacket input;
 
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::RETURN)) {
+        if (isSinglePlayer && !hasReachedEnd)
+        {
+            TogglePause();
+        }
+    }
+
+    if (isPaused) return;
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE)){
         networkData->outgoingFunctions.Push(FunctionPacket(Replicated::PlayerJump, nullptr));
     }
@@ -864,6 +975,14 @@ void GameplayState::SendInputData() {
     input.playerDirection = InputListener::GetPlayerInput();
     rotationDirection = input.playerDirection.x == 0 ? rotationDirection : (input.playerDirection.x > 0 ? -1 : 1);
     networkData->outgoingInput.Push(input);
+}
+
+void GameplayState::TogglePause() {
+    networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
+    isPaused = !isPaused;
+    renderer->SetSpeedActive(!isPaused);
+    if (isPaused) canvas->PushActiveLayer("PauseLayer");
+    else canvas->PopActiveLayer();
 }
 
 void GameplayState::FinishLoading() {
@@ -937,8 +1056,8 @@ void GameplayState::CreatePlayers() {
         playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
-        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 0.6f);
-        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.2f,0));
+        player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
+        player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.5f,0));
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
@@ -1136,6 +1255,42 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
+void GameplayState::UpdateStartBack(Element& element, float dt) {
+    if (levelManager->GetCountdown() > whenToStartCountdown) {
+        element.SetColor({ 0,0,0,0 });
+        return;
+    }
+    float backAlpha = element.GetColor().w;
+    float targetBackAlpha = 0.75;
+    backAlpha = backAlpha * 0.9f + targetBackAlpha * 0.1f;
+    element.SetColor({ 0,0,0,backAlpha });
+
+}
+
+void GameplayState::UpdateStartText(Element& element, float dt) {
+    float endTimer = levelManager->GetCountdown();
+    if (endTimer > whenToStartCountdown) {
+        element.textData.text = "";
+        return;
+    }
+    std::string id = element.GetId();
+    if (id == "StartScreen_Countdown") {
+        if (countdownCurrentInt != (int)ceil(endTimer)) {
+            countdownCurrentInt = (int)ceil(endTimer);
+            soundManager->SM_PlaySound("sfx_countdown.wav");
+            soundManager->SM_SetSoundPitch("sfx_countdown.wav", 1.0f + (3 - countdownCurrentInt) * 0.3f);
+        }
+        element.textData.text = std::to_string((int)ceil(endTimer));
+    }
+    else if (id == "StartScreen_LevelName") {
+        std::string levelName = levelManager->GetLevelName(levelManager->GetLevel());
+        int characters = levelName.length();
+        element.SetAbsoluteSize({ 40 * characters, 50 });
+        element.AlignMiddle(150);
+        element.AlignCenter();
+        element.textData.text = levelName;
+    }
+}
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, currentCHRotation));
@@ -1254,6 +1409,53 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
     
 }
 
+void GameplayState::OnPauseHoverEnter(Element &element) {
+
+    element.textData.color = { 1,1,1,1 };
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        selectedPause = 0;
+    }
+    if (elementID == "Exit") {
+        selectedPause = 1;
+    }
+}
+void GameplayState::OnPauseHoverExit(Element& element) {
+
+    element.textData.color = { 0.5,0.5,0.5,1 };
+}
+
+void GameplayState::OnPauseClick(Element& element) {
+    std::string elementID = element.GetId();
+    if (elementID == "Resume") {
+        TogglePause();
+    }
+    
+}
+
+void GameplayState::UpdatePauseFlame(Element& element, float dt) {
+    float direction = -1.0f;
+    if (element.GetId() == "pauseflame_1") direction = 1.0f;
+    float setToX = 0;
+    float setToY = 0;
+    switch (selectedPause)
+    {
+    case(0):
+        setToX = 300.0f;
+        setToY = 75.0f;
+        break;
+
+    case(1):
+        setToX = 225.0f;
+        setToY = -75.0f;
+        break;
+    }
+    flameToXGap = flameToXGap * 0.9f + setToX * 0.1f;
+    flameToY = flameToY * 0.9f + setToY * 0.1f;
+    element.AlignCenter((int)round(flameToXGap * direction));
+    element.AlignMiddle((int)round(flameToY) + 25);
+}
+
 void GameplayState::RenderFlairObjects(){
     Vector3 lavaPos = deathPos ;
 
@@ -1268,6 +1470,7 @@ void GameplayState::AddLava(Vector3 position){
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
     renderer->SetLavaHeight(position.y);
+    //LavaQuad->GetRenderObject()->SetDepthTest(false);
 }
 
 void GameplayState::AddEndPortal(Vector3 position){
@@ -1276,4 +1479,5 @@ void GameplayState::AddEndPortal(Vector3 position){
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
+    PortalQwaud->GetRenderObject()->SetDepthTest(false);
 }

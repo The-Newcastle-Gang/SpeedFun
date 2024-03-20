@@ -85,7 +85,7 @@ Medal StageTimer::GetCurrentMedal(float timeValue) {
     {
         return Medal::Silver;
     }
-    if (timeValue > silverTime)
+    else
     {
         return Medal::Bronze;
     }

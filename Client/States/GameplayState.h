@@ -77,19 +77,34 @@ namespace NCL {
 
             void ResetCameraToForwards();
 
+            int pauseSelected;
+            void InitPauseScreen();
+            void OnPauseHoverEnter(Element& element);
+            void OnPauseHoverExit(Element& element);
+            void OnPauseClick(Element& element);
+            void UpdatePauseFlame(Element& element, float dt);
+            void TogglePause();
+            int selectedPause = 0;
+            float flameToXGap = 300.0f;
+            float flameToY = 75.0f;
+
+            float whenToStartCountdown = 3.0f;
+            int countdownCurrentInt = 0;
+            void InitStartScreen();
             void InitCrossHeir();
             void InitTimerBar();
             void InitLevelMap();
             void InitEndCanvas();
+            bool hasReachedEnd = false;
+            void InitEndScreen(Vector4 color);
+            int endMedalElementIndex;
 
             void UpdateCountdown(float dt);
             void UpdateAndRenderWorld(float dt);
             void UpdatePlaying(float dt);
             void UpdatePlayerCompleted(float dt);
             void UpdateEndOfLevel(float dt);
-            bool hasReachedEnd = false;
-            void InitEndScreen(Vector4 color);
-            int endMedalElementIndex;
+            
 
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
@@ -150,6 +165,7 @@ namespace NCL {
             LoadingStates worldHasLoaded = LoadingStates::NOT_LOADED;
             LoadingStates finishedLoading = LoadingStates::NOT_LOADED;
             bool isSinglePlayer;
+            bool isPaused = false;
             float loadingTime = 0.0f;
 
             float totalDTElapsed = 0.0f;
@@ -240,6 +256,10 @@ namespace NCL {
             const int timerBarOutline = 3;
             float timerRatio = 0.0f;
             Vector4 timerBarColor = { Replicated::PLATINUM };
+
+            void UpdateStartBack(Element& element, float dt);
+            void UpdateStartText(Element& element, float dt);
+
 
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);

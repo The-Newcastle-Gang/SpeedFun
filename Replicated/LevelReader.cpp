@@ -39,6 +39,13 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
     }
     springPrimitives.clear();
 
+    for (auto& i : swingingPrimitives)
+    {
+        delete i;
+        i = nullptr;
+    }
+    swingingPrimitives.clear();
+
     pointLights.clear();
 
     for (auto& i : groundCubes) {

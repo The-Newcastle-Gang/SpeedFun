@@ -115,6 +115,9 @@ void RunningState::ReadNetworkFunctions() {
                 playerMovement->ToggleDebug();
             }
         }
+        else if (data.second.functionId == Replicated::RemoteServerCalls::Pause) {
+            isPaused = !isPaused;
+        }
         else if (data.second.functionId == Replicated::RemoteServerCalls::MenuToGameplay) {
             numPlayersInGameplayState++;
         }
@@ -124,6 +127,7 @@ void RunningState::ReadNetworkFunctions() {
 void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
+        if (playersFinished[data.first])continue;
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
         UpdatePlayerGameInfo();
     }
@@ -181,6 +185,7 @@ void RunningState::UpdateInCountdown(float dt) {
 void RunningState::UpdateInGameplay(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
+    if (isPaused) return;
     UpdatePlayerAnimations();
     world->UpdateWorld(dt);
     physics->Update(dt);
@@ -680,6 +685,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
+        g->SetTag(DAMAGABLE);
 
         ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
         DamagingObstacle* dO = new DamagingObstacle(g, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
