@@ -134,6 +134,7 @@ namespace NCL {
             void ReadNetworkFunctions();
             void ReadNetworkPackets();
 
+            void CreateRaycastEnemy(Vector3 pos);
             void CreateRock();
             void ResetCameraAnimation();
 

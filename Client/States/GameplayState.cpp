@@ -790,8 +790,7 @@ void GameplayState::UpdateGrapples() {
         });
     }
 
-    replicated->AddRaycastEnemy(raycastEnemy, *world, Vector3(-80, 6, -7));
-    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("goose.msh"), nullptr, nullptr));
+
 }
 
 void GameplayState::CreateGrapples() {
@@ -803,6 +802,16 @@ void GameplayState::CreateGrapples() {
         grapples[i] = g;
     }
 
+}
+
+void GameplayState::CreateRaycastEnemy(Vector3 pos) {
+    replicated->AddRaycastEnemy(raycastEnemy, *world, pos);
+    MeshGeometry* enemyMesh = resources->GetMesh("Rig_Maximilian.msh");
+    enemyMesh->AddAnimationToMesh("Default", resources->GetAnimation("Max_Idle.anm"));
+    raycastEnemy->SetRenderObject(new RenderObject(&raycastEnemy->GetTransform(), resources->GetMesh("Rig_Maximilian.msh"), nullptr, nullptr));
+    raycastEnemy->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+    raycastEnemy->SetAnimatorObject(new AnimatorObject(enemyMesh->GetAnimationMap()));
+    raycastEnemy->GetAnimatorObject()->SetAnimation("Default");
 }
 
 void GameplayState::SetTestSprings() {
@@ -1033,6 +1042,8 @@ void GameplayState::AddEndPortal(Vector3 position){
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
+
+    CreateRaycastEnemy(position + Vector3(0,-5,0));
 }
 
 bool GameplayState::RaycastEnemy(float dt, Transform* playerPosition) {
