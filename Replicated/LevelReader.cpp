@@ -282,14 +282,18 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         pointLights.emplace_back(newLight);
     }
 
-    for (auto& item : jData["medalTimes"].items()) {
-        auto& plat = item.value()["platinum"];
-        auto& gold = item.value()["gold"];
-        auto& silver = item.value()["silver"];
+    auto& medalItem = jData["medalInfo"];
 
+
+    try{
+        auto& plat = medalItem["platinum"];
+        auto& gold = medalItem["gold"];
+        auto& silver = medalItem["silver"];
         medalTimes = Vector3(plat, gold, silver);
     }
-
+    catch(...){
+        medalTimes = Vector3(10, 20, 30);
+    }
 
     return true;
 }
