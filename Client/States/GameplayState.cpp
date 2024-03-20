@@ -689,7 +689,6 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Load_Level): {
                 int level = handler.Unpack<int>();
                 numberPlayersJoined = handler.Unpack<int>();
-                numberPlayersLoaded = numberPlayersJoined;
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
                 shouldMoveToNewLevel = true;
