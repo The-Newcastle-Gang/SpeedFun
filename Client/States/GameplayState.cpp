@@ -443,9 +443,10 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(isPaused);
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
     if (!isPaused)
     {
-        UpdateGrapples();
+        UpdateGrapples(dt);
         
         if (firstPersonPosition) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -455,7 +456,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
         if (landTimer > 0) LandCamera(dt);
         StrafeCamera(dt);
         world->GetMainCamera()->UpdateCamera(dt);
-        if (countdownOver)world->UpdateWorld(dt);
+
         totalDTElapsed += dt;
         UpdateGrapples(dt);
 
@@ -465,9 +466,9 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
 
         }
+        world->UpdateWorld(dt);
     }
-    world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
+    
     ResetCameraAnimation();
     ReadNetworkPackets();
 
