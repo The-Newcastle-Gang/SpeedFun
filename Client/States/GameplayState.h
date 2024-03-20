@@ -238,7 +238,6 @@ namespace NCL {
             float timerRatio = 0.0f;
             Vector4 timerBarColor = { Replicated::PLATINUM };
 
-            void UpdateStartScreen(Element& element, float dt);
             void UpdateStartBack(Element& element, float dt);
             void UpdateStartText(Element& element, float dt);
 
