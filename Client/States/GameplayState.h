@@ -239,6 +239,9 @@ namespace NCL {
             Vector4 timerBarColor = { Replicated::PLATINUM };
 
             void UpdateStartScreen(Element& element, float dt);
+            void UpdateStartBack(Element& element, float dt);
+            void UpdateStartText(Element& element, float dt);
+
 
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);

@@ -66,6 +66,7 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    displayDebugger = false;
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
@@ -76,12 +77,24 @@ void GameplayState::InitCanvas(){
 void GameplayState::InitStartScreen() {
     canvas->CreateNewLayer("StartScreenLayer");
     
-    canvas->AddElement("StartScreenLayer")
-        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+    auto startBack = canvas->AddElement("StartScreenLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.0f))
         .SetAbsoluteSize({ 2000,2000 })
         .AlignCenter()
-        .AlignMiddle();
+        .AlignMiddle()
+        .SetId("StartScreen_Back");
+    startBack.OnUpdate.connect<&GameplayState::UpdateStartBack>(this);
 
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto countdownText = canvas->AddElement("StartScreenLayer")
+        .SetColor({ 1,1,1,0 })
+        .SetAbsoluteSize({ 80, 100 })
+        .AlignCenter()
+        .AlignMiddle()
+        .SetId("StartScreen_Text")
+        .SetText(textData);
+    countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
 }
 
 void GameplayState::InitEndCanvas() {
@@ -1082,8 +1095,25 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
-void GameplayState::UpdateStartScreen(Element& element, float dt) {
+void GameplayState::UpdateStartBack(Element& element, float dt) {
+    if (levelManager->GetCountdown() > 3.0f) {
+        element.SetColor({ 0,0,0,0 });
+        return;
+    }
+    float backAlpha = element.GetColor().w;
+    float targetBackAlpha = 0.75;
+    backAlpha = backAlpha * 0.9f + targetBackAlpha * 0.1f;
+    element.SetColor({ 0,0,0,backAlpha });
 
+}
+
+void GameplayState::UpdateStartText(Element& element, float dt) {
+    float endTimer = levelManager->GetCountdown();
+    if (endTimer > 3.0f) {
+        element.textData.text = "";
+        return;
+    }
+    element.textData.text = std::to_string((int)ceil(endTimer));
 }
 
 void GameplayState::UpdateCrosshair(Element& element, float dt) {
