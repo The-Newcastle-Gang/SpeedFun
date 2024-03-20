@@ -96,9 +96,10 @@ void GameplayState::InitStartScreen() {
         .SetText(textData);
     countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
 
+    textData.fontSize = 0.5f;
     auto levelNameText = canvas->AddElement("StartScreenLayer")
         .SetColor({ 1,1,1,0 })
-        .SetAbsoluteSize({ 0, 100 })
+        .SetAbsoluteSize({ 0, 50 })
         .AlignCenter()
         .AlignMiddle()
         .SetId("StartScreen_LevelName")
@@ -1132,7 +1133,7 @@ void GameplayState::UpdateStartText(Element& element, float dt) {
     else if (id == "StartScreen_LevelName") {
         std::string levelName = levelManager->GetLevelName(levelManager->GetLevel());
         int characters = levelName.length();
-        element.SetAbsoluteSize({ 80 * characters, 100 });
+        element.SetAbsoluteSize({ 40 * characters, 50 });
         element.AlignMiddle(150);
         element.AlignCenter();
         element.textData.text = levelName;
