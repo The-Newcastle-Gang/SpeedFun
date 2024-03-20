@@ -85,6 +85,7 @@ void RunningState::ReadNetworkFunctions() {
 void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
+        if (playersFinished[data.first])continue;
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
         UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
     }
