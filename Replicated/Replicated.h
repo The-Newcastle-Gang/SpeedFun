@@ -25,11 +25,13 @@ public:
     enum RemoteClientCalls {
         AssignPlayer,
         LoadGame,
+        Load_Level,
         Camera_GroundedMove,
         Camera_Jump,
         Camera_Land,
         Camera_Strafe,
         EndReached,
+        All_Players_Finished,
         Grapple_Event,
         Player_Animation_Call,
         Death_Event,
@@ -40,13 +42,16 @@ public:
         GameInfo_GrappleAvailable,
         GameInfo_PlayerPositions,
         SetNetworkActive,
-        ToggleGrapple
+        ToggleGrapple,
+        SendMedalValues,
 };
 
 
     // In the situation where the server is the remote (Client to server)
     enum RemoteServerCalls {
         StartGame,
+        SetLevel,
+        MenuToGameplay,
         GameLoaded,
         PlayerJump,
         PlayerGrapple,
@@ -79,14 +84,13 @@ public:
 
 
     Replicated();
-    void InitLevel();
     int GetCurrentLevelLen();
+
     void AddBlockToLevel(GameObject *g, GameWorld& world, PrimitiveGameObject* cur);
     void AddSpringToLevel(GameObject* g, GameWorld& world, Vector3 pos);
-    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position);
+    void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position, bool shouldNetwork);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
-    void AddSwingingBlock(GameObject* g, GameWorld& world);
 
     constexpr static int PLAYERCOUNT = 2;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
@@ -108,10 +112,15 @@ struct Diagnostics {
 
     Diagnostics() {
         gameTimer = new GameTimer();
+        averagePacketTime = 0;
+        maxPacketTime = 0;
+        minPacketTime = 0;
+        packetCount = 0;
     }
 
     ~Diagnostics() {
         delete gameTimer;
+        gameTimer = nullptr;
     }
 };
 

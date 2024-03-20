@@ -35,6 +35,7 @@ namespace NCL::CSC8503 {
 
 		ClientPacket() {
 			size = sizeof(ClientPacket);
+            lastID = 0;
 		}
 	};
 
