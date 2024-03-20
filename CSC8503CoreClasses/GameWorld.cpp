@@ -101,7 +101,9 @@ void GameWorld::UpdateWorld(float dt) {
 }
 
 void GameWorld::UpdateWorldPhysics(float dt) {
-	for (GameObject* gameObject : gameObjects)gameObject->PhysicsUpdate(dt);
+    for (GameObject* gameObject : gameObjects) {
+        gameObject->PhysicsUpdate(dt);
+    }
 }
 
 void GameWorld::StartWorld() {
