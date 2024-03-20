@@ -1,5 +1,4 @@
 #include "GameplayState.h"
-#include "GameplayState.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -44,6 +43,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete lavaParticles;
+    particleSystems.clear();
 
     shouldShutDown.store(true);
     networkThread->join();
@@ -219,6 +220,26 @@ void GameplayState::InitTimerBar(){
 
 }
 
+void GameplayState::LoadParticleSystems()
+{
+    lavaParticles = new ParticleSystem(deathPos, { -150, 0, -100 }, { 300, 1, 100 }, 50, 10.0f, 3, 0.25f, 0.25f, resources->GetTexture("ember.png"));
+    particleSystems.push_back(lavaParticles);
+
+    
+
+
+    renderer->PassParticleSystems(particleSystems);
+}
+
+void GameplayState::UpdateParticleSystems(float dt)
+{
+    for (auto &ps : particleSystems)
+    {
+        ps->CreateNewParticles(dt);
+        ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
+    }
+}
+
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
     if (!firstPersonPosition) return;
     float tVal = CalculateCompletion(playerPositions[element.GetId()]);
@@ -358,6 +379,7 @@ void GameplayState::OnNewLevel() {
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
+    particleSystems.clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
     worldHasLoaded = LoadingStates::NOT_LOADED;
@@ -373,6 +395,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::InitCurrentLevel() {
+    LoadParticleSystems();
     InitWorld();
     InitCamera();
 }
@@ -572,6 +595,9 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     
     ResetCameraAnimation();
     ReadNetworkPackets();
+
+    // particle updates
+    UpdateParticleSystems(dt);
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
     if (displayDebugger) DebugMode::UpdateDebugMode(dt);
@@ -854,7 +880,7 @@ std::string GameplayState::GetMedalImage(){
 }
 
 void GameplayState::ResetCameraAnimation() {
-    currentGroundSpeed = 0.0f;
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
     strafeSpeed = 0.0f;
 }
 
@@ -882,7 +908,8 @@ void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(G
 }
 
 void GameplayState::WalkCamera(float dt) {
-
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         
@@ -1215,6 +1242,7 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+
 }
 
 void GameplayState::AddPointLight(PointLightInfo light) {

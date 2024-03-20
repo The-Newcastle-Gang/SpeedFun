@@ -17,6 +17,8 @@
 #include "Canvas.h"
 #include "CollisionDetection.h"
 
+#include "ParticleSystem.h"
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -53,6 +55,7 @@ namespace NCL {
 
             OGLMesh* GetUIMesh() {return UIMesh;}
 
+            void PassParticleSystems(std::vector<ParticleSystem*> ps) { particleSystems = ps; }
             MeshGeometry *LoadOBJMesh(const string &name);
 
             void SetSpeedActive(bool x){ isSpeedLinesActive = x; }
@@ -161,6 +164,11 @@ namespace NCL {
             GLuint quadVBO;
             GLuint quadVAO;
 
+
+            vector<ParticleSystem*> particleSystems;
+            OGLShader* particleShader;
+            void RenderParticles();
+
             GLuint uiVAO;
             GLuint uiVBO;
 
@@ -177,11 +185,9 @@ namespace NCL {
 
             void InitUIQuad();
 
-
             OGLMesh*    LQuad;
             OGLShader*  LShader;
             float u_time;
-
 
             void RenderRayMap();
 
