@@ -13,8 +13,6 @@ uniform vec3	cameraPos;
 
 uniform bool hasTexture;
 
-uniform float lavaHeight;
-
 in Vertex{
 	vec4 colour;
 	vec2 texCoord;
@@ -63,8 +61,6 @@ void main(void)	{
 	}
 	
 	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-
-	
 	
 	fragColour[0].rgb = albedo.rgb * 0.05f; //ambientw
 	
@@ -76,21 +72,9 @@ void main(void)	{
 	
 	fragColour[0].a = albedo.a;
 
-	vec4 lavaColorStart   =  vec4(0.99, 0.0, 0.0, 1.0);
-  	vec4 lavaColorEnd     =  vec4(0.99, 0.35, 0.0, 1.0);
-	
-	float worldY = IN.worldPos.y;
-	if(worldY >= lavaHeight && IN.normal.y < 0.9) {
-		float maxHeight = 2.5;
-		float distance = 1.0 - clamp(worldY - lavaHeight, 0.0, maxHeight) / maxHeight;
-		//int colourThreasholds = 8;
-    	//distance = floor(distance * colourThreasholds) / colourThreasholds;
-
-		vec4 lavaColor = mix(lavaColorStart, lavaColorEnd, distance);
-		
-		fragColour[0].rgb = mix(fragColour[0].rgb, lavaColor.rgb, distance);
-	}
-	
-
 	fragColour[1].rgb = IN.normal;
+
+	
+
+
 }

@@ -27,24 +27,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     medalShineShader    = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
     biggerDebugFont     = std::unique_ptr(renderer->LoadFont("CascadiaMono.ttf", 48 * 3));
 
-
     DebugMode::SetDebugCam(world->GetMainCamera());
     DebugMode::InitDebugInfo();
-
-
-    soundEffects = { "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" , 
-        "sfx_chainhook.wav",
-        "sfx_chainready.wav",
-        "sfx_chainreel.wav",
-        "sfx_chainthrow.wav",
-        "sfx_walk.wav",
-        "sfx_walk2.wav",
-        "sfx_timetally.wav",
-        "sfx_timeshake.wav",
-        "sfx_medal.wav",
-        "sfx_countdown.wav",
-        "sfx_go.wav"};
-    walkSounds = { "sfx_walk2.wav" };
 
 }
 
@@ -56,16 +40,8 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-
-    delete debugger;
-    debugger = nullptr;
-
-
     delete loadSoundThread;
-    loadSoundThread = nullptr;
-
     delete medalShineShader;
-    medalShineShader = nullptr;
 }
 
 
@@ -77,88 +53,15 @@ void GameplayState::InitCanvas(){
     //if u see this owen dont kill this
 
     // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
-    InitStartScreen();
-    InitEndCanvas();
+
     InitCrossHeir();
     InitTimerBar();
     InitLevelMap();
 }
 
-void GameplayState::InitStartScreen() {
-    canvas->CreateNewLayer("StartScreenLayer");
-    
-    auto startBack = canvas->AddElement("StartScreenLayer")
-        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.0f))
-        .SetAbsoluteSize({ 2000,2000 })
-        .AlignCenter()
-        .AlignMiddle()
-        .SetId("StartScreen_Back");
-    startBack.OnUpdate.connect<&GameplayState::UpdateStartBack>(this);
-
-    TextData textData;
-    textData.font = biggerDebugFont.get();
-    auto countdownText = canvas->AddElement("StartScreenLayer")
-        .SetColor({ 1,1,1,0 })
-        .SetAbsoluteSize({ 80, 100 })
-        .AlignCenter()
-        .AlignMiddle(-40)
-        .SetId("StartScreen_Countdown")
-        .SetText(textData);
-    countdownText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
-
-    textData.fontSize = 0.5f;
-    auto levelNameText = canvas->AddElement("StartScreenLayer")
-        .SetColor({ 1,1,1,0 })
-        .SetAbsoluteSize({ 0, 50 })
-        .AlignCenter()
-        .AlignMiddle()
-        .SetId("StartScreen_LevelName")
-        .SetText(textData);
-    levelNameText.OnUpdate.connect<&GameplayState::UpdateStartText>(this);
-
-    
-
-}
-
-void GameplayState::InitEndCanvas() {
-    canvas->CreateNewLayer("FinishedLevelLayer");
-
-    canvas->AddElement("FinishedLevelLayer")
-        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
-        .SetAbsoluteSize({ 2000,2000 })
-        .AlignCenter()
-        .AlignMiddle();
-
-    auto endMedalElement = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
-        .SetColor(Vector4(0, 0, 0, 0))
-        .SetAbsoluteSize({ 320,320 })
-        .CenterSprite()
-        .SetTransformTranslation(Vector2(25, 50))
-        .SetShader(medalShineShader);
-
-    endMedalElement.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
-    endMedalElementIndex = endMedalElement.GetIndex();
-
-
-    TextData textData;
-    textData.font = biggerDebugFont.get();
-    auto finalTime = canvas->AddElement("FinishedLevelLayer")
-        .SetColor({ 1,1,1,1 })
-        .CenterSprite()
-        .SetText(textData);
-    //.textData.font = biggerDebugFont.get();
-
-
-    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
-}
-
-void GameplayState::ClearLevel()
-{
-    world->ClearAndErase();
-}
-
 void GameplayState::InitCrossHeir(){
     //crossheir
+
     crosshair = &canvas->AddImageElement(crosshairImage)
         .SetAbsoluteSize({ 32, 32 })
         .CenterSprite();
@@ -271,7 +174,6 @@ void GameplayState::InitPlayerBlip(int id) {
 
     playerElement.OnUpdate.connect<&GameplayState::UpdatePlayerBlip>(this);
 }
-
 void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkData) {
 
     auto threadClient = ClientThread(client, networkData);
@@ -290,60 +192,24 @@ void GameplayState::OnEnter() {
     isSinglePlayer = baseClient->IsSinglePlayer();
     CreateNetworkThread();
     InitialiseAssets();
-
     Window::GetWindow()->LockMouseToWindow(true);
     Window::GetWindow()->ShowOSPointer(false);
-
     InitCanvas();
 
-    WaitForServerLevel(); //wait until server tells us what level to load
-
+    renderer->SetPointLights(world->GetPointLights());
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
 }
 
-void GameplayState::WaitForServerLevel() {
-    while (!levelManager->GetHasReceivedLevel()) {
-        ReadNetworkFunctions();
-        //wait till the server tells us what level to load
-    }
-}
-
-void GameplayState::OnNewLevel() {
-    firstPersonPosition = nullptr;
-    hasReachedEnd = false;
-    displayDebugger = false;
-    canvas->PopActiveLayer(); //pop end of level UI
-    renderer->ClearActiveObjects();
-    world->ClearAndErase();
-    networkData->incomingState.Clear();
-    levelManager->Reset();
-    finishedLoading = LoadingStates::NOT_LOADED;
-    worldHasLoaded = LoadingStates::NOT_LOADED;
-    InitCurrentLevel();
-    FinishLoading();
-    ResetCameraToForwards();
-
-}
-
 void GameplayState::InitialiseAssets() {
-
     DebugMode::StartCostClock();
 
-    loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
-    loadSoundThread->detach();
-}
-
-
-void GameplayState::InitCurrentLevel() {
     InitWorld();
     InitCamera();
-
     loadSoundThread = new std::thread(&GameplayState::InitSounds, this);
     loadSoundThread->detach();
     FinishLoading();
 
     DebugMode::EndCostClock(0);
-
 }
 
 void GameplayState::InitSounds() {
@@ -353,8 +219,7 @@ void GameplayState::InitSounds() {
     soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
-    soundEffects.push_back(songToPlay);
-    soundManager->SM_AddSoundsToLoad(soundEffects);
+    soundManager->SM_AddSoundsToLoad({ songToPlay, "footsteps.wav", "weird.wav" , "warning.wav", "Death_sound.wav" });
     soundManager->SM_LoadSoundList();
 
     // Probably should be made atomic though probably doesn't matter.
@@ -393,67 +258,32 @@ void GameplayState::ManageLoading(float dt) {
 
     if (soundHasLoaded == LoadingStates::LOADED) {
         std::cout << "\n\nSounds Have Loaded!\n\n";
+        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
         soundHasLoaded = LoadingStates::READY;
     }
 
     if (soundHasLoaded == LoadingStates::READY) {
-        if (loadSoundThread) {
-            delete loadSoundThread;
-            loadSoundThread = nullptr;
-        }
+        delete loadSoundThread;
         finishedLoading = LoadingStates::READY;
     }
 }
 
 void GameplayState::Update(float dt) {
-    switch (state) {
-        case GameplayStateEnums::END_OF_LEVEL:{
-            UpdateEndOfLevel(dt);
-            break;
-        }
-
-        case GameplayStateEnums::PLAYING: {
-            UpdatePlaying(dt);
-            break;
-        }
-
-        case GameplayStateEnums::COUNTDOWN:{
-            UpdateCountdown(dt);
-            break;
-        }
-
-        case GameplayStateEnums::PLAYER_COMPLETED: {
-            UpdatePlayerCompleted(dt);
-            break;
-        }
-
-    }
-}
-
-void GameplayState::UpdateCountdown(float dt){
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
     }
-    UpdateAndRenderWorld(dt);
-
-
-    bool countdownOver = levelManager->UpdateCountdown(dt);
+    bool countdownOver = levelManager->UpdateCountdown(dt); 
     float countdownTimer = levelManager->GetCountdown(); //this could be used to display a countdown on screen, for example.
-    if (countdownOver) {
-        soundManager->SM_PlaySound(soundManager->GetCurrentSong());
-        state = GameplayStateEnums::PLAYING;
-        canvas->PopActiveLayer();
-        soundManager->SM_PlaySound("sfx_go.wav");
-    }
-}
 
-void GameplayState::UpdateAndRenderWorld(float dt) {
-    ReadNetworkFunctions();
     totalDTElapsed += dt;
-    UpdateGrapples(dt);
+    ResetCameraAnimation();
+    if(countdownOver)SendInputData();
+    ReadNetworkFunctions();
+    UpdateGrapples();
 
     Window::GetWindow()->ShowOSPointer(false);
+    //Window::GetWindow()->LockMouseToWindow(true);
 
     if (firstPersonPosition) {
         world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
@@ -464,9 +294,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     StrafeCamera(dt);
 
     world->GetMainCamera()->UpdateCamera(dt);
-    world->UpdateWorld(dt);
-
-    ResetCameraAnimation();
+    if(countdownOver)world->UpdateWorld(dt);
 
     ReadNetworkPackets();
 
@@ -489,28 +317,10 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
 
     renderer->Render();
     Debug::UpdateRenderables(dt);
-}
 
-void GameplayState::UpdatePlaying(float dt){
-    SendInputData();
-    UpdateAndRenderWorld(dt);
-}
-
-void GameplayState::UpdatePlayerCompleted(float dt)
-{
-    UpdateAndRenderWorld(dt);
-}
-
-void GameplayState::UpdateEndOfLevel(float dt)
-{
-    if (shouldMoveToNewLevel) {
-        OnNewLevel();
-        canvas->PushActiveLayer("StartScreenLayer");
-        shouldMoveToNewLevel = false;
-        Window::GetWindow()->ShowOSPointer(false);
-        state = GameplayStateEnums::COUNTDOWN;
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::NUM7)) {
+        ResetCameraToForwards();
     }
-    UpdateAndRenderWorld(dt);
 }
 
 void GameplayState::ResetCameraToForwards() {
@@ -540,15 +350,7 @@ void GameplayState::ReadNetworkFunctions() {
             case(Replicated::Camera_Land): {
                 float grounded = handler.Unpack<float>();
                 landIntensity = std::clamp(grounded, 0.0f, landFallMax);
-                
-                soundManager->SM_PlaySound("sfx_walk.wav");
-                soundManager->SM_SetSoundVolume("sfx_walk.wav", 0.5f);
-                float randomPitchMod = (float)(rand()) / (float)(RAND_MAX);
-                soundManager->SM_SetSoundPitch("sfx_walk.wav", 1.0f - randomPitchMod * 0.25f);
-
                 landTimer = PI;
-                
-                
             } break;
 
             case(Replicated::Camera_Strafe): {
@@ -562,7 +364,10 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::EndReached): {
-                OnEndReached(handler);
+                int networkId = handler.Unpack<int>();
+                int medal = handler.Unpack<int>();
+                Vector4 medalColour = handler.Unpack<Maths::Vector4>();
+                if (!hasReachedEnd) InitEndScreen(medalColour);
 
             } break;
 
@@ -580,15 +385,11 @@ void GameplayState::ReadNetworkFunctions() {
             } break;
 
             case(Replicated::Grapple_Event): {
-                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
-
                 int eventType = handler.Unpack<int>();
                 HandleGrappleEvent(eventType);
             } break;
 
             case(Replicated::Player_Velocity_Call): {
-                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
-
                 Vector3 velocity = handler.Unpack<Vector3>();
                 playerVelocity = velocity;
                 float speed = std::max(0.0f, velocity.Length() - 10.0f);
@@ -617,13 +418,6 @@ void GameplayState::ReadNetworkFunctions() {
                 }
             }
             break; 
-
-            case(Replicated::SendMedalValues): {
-                auto medals = handler.Unpack<Vector3>();
-                for (int i = 0; i < 3; i++)medalTimes[i] = medals[i];
-                timeElapsed = 0;
-            }
-            break;
             
             case(Replicated::SetNetworkActive): {
                 int networkObjectId = handler.Unpack<int>();
@@ -631,30 +425,11 @@ void GameplayState::ReadNetworkFunctions() {
                 auto targetObject = world->GetObjectByNetworkId(networkObjectId);
                 targetObject->SetActive(isActive);
             } break;
-
             case(Replicated::Player_Animation_Call): {
-                if (shouldMoveToNewLevel)continue; //dont do this if we need to load a new level
-
                 Replicated::RemoteAnimationData data = handler.Unpack< Replicated::RemoteAnimationData>();
                 UpdatePlayerAnimation(data.networkID, data.state);
             }
             break;
-
-            case(Replicated::Load_Level): {
-                int level = handler.Unpack<int>();
-                levelManager->SetHasReceivedLevel(true);
-                levelManager->ChangeLevel(level);
-                shouldMoveToNewLevel = true;
-            }
-            break;
-
-            case(Replicated::All_Players_Finished): {
-                state = GameplayStateEnums::END_OF_LEVEL;
-                soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
-
-                //show a scoreboard?
-                }
-                break;
 
             case(Replicated::GameInfo_GrappleAvailable): {
                 int eventType = handler.Unpack<int>();
@@ -662,12 +437,10 @@ void GameplayState::ReadNetworkFunctions() {
                     crossHairRotation = 45.0f * rotationDirection;
                     currentCHRotation = crossHairRotation;
                     crossHairScale = 1.25f;
-                    soundManager->SM_PlaySound("sfx_chainready.wav");
                 }
                 else {
                     crossHairRotation = 0.0f;
                     crossHairScale = 1.15f;
-                    soundManager->SM_PlaySound("sfx_chainthrow.wav");
                 }
             } 
             break;
@@ -687,63 +460,11 @@ void GameplayState::ReadNetworkFunctions() {
                     playerPositions[unpackFlagID] = position;
                 }
             }
-        }
-    }
-}
-
-void GameplayState::OnEndReached(DataHandler& handler)
-{
-    int networkId = handler.Unpack<int>();
-    int medal = handler.Unpack<int>();
-    Vector4 medalColour = handler.Unpack<Maths::Vector4>();
-    medalColour.w = 0.0f;
-    if (!hasReachedEnd) InitEndScreen(medalColour);
-    if (state != GameplayStateEnums::END_OF_LEVEL)state = GameplayStateEnums::PLAYER_COMPLETED; //just in case the packets arrive out of order
-    float speedVisualModifier = 0;
-    renderer->SetSpeedLineAmount(speedVisualModifier);
-    world->GetMainCamera()->SetFieldOfVision(defaultFOV + speedVisualModifier * 30.0f);
-
-    soundManager->SM_StopSound(soundManager->GetCurrentSong()); //perhaps play some different music or sound effect
-}
-
-void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
-    GameObject *playerObject = world->GetObjectByNetworkId(networkID);
-    if (!playerObject)return;
-
-    AnimatorObject *playerAnimator = playerObject->GetAnimatorObject();
-    if (!playerAnimator)return;
-
-    switch (state) {
-        case Replicated::IDLE: {
-            playerAnimator->TransitionAnimation("Idle", 0.1f);
-            break;
-        }
-        case Replicated::JUMP: {
-            playerAnimator->TransitionAnimation("Jump", 0.1f);
-            break;
-        }
-        case Replicated::FALLING: {
-            playerAnimator->TransitionAnimation("Fall", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_FORWARD: {
-            playerAnimator->TransitionAnimation("Run", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_BACK: {
-            playerAnimator->TransitionAnimation("RunBack", 0.1f);
-            break;
-        }
-        case Replicated::RUNNING_LEFT: {
-            playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
-            break;
-        }
-        case Replicated::RUNNING_RIGHT: {
-            playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
             break;
         }
     }
 }
+
 
 std::string GameplayState::GetMedalImage(){
     return medalImage;
@@ -782,18 +503,13 @@ void GameplayState::WalkCamera(float dt) {
 
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
-        
-        std::string walkSound = walkSounds[rand() % walkSounds.size()];
-        soundManager->SM_PlaySound(walkSound);
-        soundManager->SM_SetSoundVolume(walkSound, 0.25f);
-        float randomPitchMod = ((-0.5f + (float)(rand()) / (float)(RAND_MAX))) * 0.5f;
-        soundManager->SM_SetSoundPitch(walkSound, 1.0f + randomPitchMod);
+        soundManager->SM_PlaySound("footsteps.wav");
         walkSoundTimer += PI;
     }
     float bobHeight = abs(bobFloor + bobAmount * sin(walkTimer));
     world->GetMainCamera()->SetOffsetPosition(Vector3(0, bobHeight * (groundedMovementSpeed / maxMoveSpeed), 0));
     walkTimer += dt * groundedMovementSpeed * 0.75f;
-    walkSoundTimer -= dt * groundedMovementSpeed * walkSoundTimerMultiplier;
+    walkSoundTimer -= dt * groundedMovementSpeed * 0.75f;
 }
 
 void GameplayState::JumpCamera(float dt) {
@@ -805,7 +521,6 @@ void GameplayState::HandleGrappleEvent(int event) {
     switch (event) {
         case 1: {
             isGrappling = true;
-            soundManager->SM_PlaySound("sfx_chainhook.wav");
             break;
         }
         case 2: {
@@ -867,10 +582,11 @@ void GameplayState::SendInputData() {
 }
 
 void GameplayState::FinishLoading() {
-    while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
+    while (worldHasLoaded != LoadingStates::LOADED || soundHasLoaded != LoadingStates::LOADED) { 
     }
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
+
 }
 
 void GameplayState::InitCamera() {
@@ -884,28 +600,52 @@ void GameplayState::InitCamera() {
 }
 
 void GameplayState::InitWorld() {
-    InitLevel(levelManager->GetLevel());
+    InitLevel();
+    // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
     CreateChains();
-    renderer->SetPointLights(world->GetPointLights());
-
     worldHasLoaded = LoadingStates::LOADED;
 }
 
-void GameplayState::InitEndScreen(Vector4 color) { // should be renamed
+void GameplayState::InitEndScreen(Vector4 color) {
     hasReachedEnd = true;
-    ResetEndScreenAnimTimers();
     finalTime = timeElapsed;
     medalAnimationStage = MedalAnimationStages::TIMER_SCROLL;
+    canvas->CreateNewLayer("FinishedLevelLayer");
     canvas->PushActiveLayer("FinishedLevelLayer");
-    canvas->GetElementByIndex(endMedalElementIndex, "FinishedLevelLayer").SetColor(color);
+
+    canvas->AddElement("FinishedLevelLayer")
+        .SetColor(Vector4(0.0f, 0.0f, 0.0f, 0.75f))
+        .SetAbsoluteSize({ 2000,2000 })
+        .AlignCenter()
+        .AlignMiddle();
+
+    auto medal = canvas->AddImageElement(GetMedalImage(), "FinishedLevelLayer")
+        .SetColor(color - Vector4(0,0,0,1))
+        .SetAbsoluteSize({ 320,320 })
+        .CenterSprite()
+        .SetTransformTranslation(Vector2(25, 50))
+        .SetShader(medalShineShader);
+
+    medal.OnUpdate.connect<&GameplayState::UpdateMedalSprite>(this);
+
+
+    TextData textData;
+    textData.font = biggerDebugFont.get();
+    auto finalTime = canvas->AddElement("FinishedLevelLayer")
+        .SetColor({ 1,1,1,1 })
+        .CenterSprite()
+        .SetText(textData);
+    //.textData.font = biggerDebugFont.get();
+
+
+    finalTime.OnUpdate.connect<&GameplayState::UpdateFinalTimeTally>(this);
     // Disable player controls
     // Clear the world
     // Loading screen
     // Load the next level
 }
-
 [[maybe_unused]]
 void GameplayState::CreateRock() {
     auto rock = new GameObject("Rock");
@@ -949,14 +689,13 @@ void GameplayState::CreatePlayers() {
     }
 }
 
+void GameplayState::InitLevel() {
 
-void GameplayState::InitLevel(int level) {
     levelManager->TryReadLevel("newTest");
 
     auto plist  = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList  = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList  = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
-    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
     auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
@@ -981,15 +720,8 @@ void GameplayState::InitLevel(int level) {
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
+    
     for (auto& x : springList) {
-        auto temp = new GameObject();
-        replicated->AddBlockToLevel(temp, *world, x);
-        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
-        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
-    }
-
-    for (auto& x : swingpList)
-    {
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
@@ -1000,15 +732,11 @@ void GameplayState::InitLevel(int level) {
         AddPointLight(l);
     }
 
+
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
-  
-
-
-    deathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
     endPos = levelManager->GetLevelReader()->GetEndPosition();
-    
-    RenderFlairObjects();
+
 
 }
 
@@ -1023,21 +751,7 @@ void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
     });
 }
 
-void GameplayState::UpdateGrapples(float dt) {
-    if (isGrappling) {
-        grappleContVolume = std::clamp(grappleContVolume + dt * 1.5f, 0.0f, 1.0f);
-    }
-    else {
-        grappleContVolume = std::clamp(grappleContVolume - dt * 1.5f, 0.0f, 1.0f);
-    }
-    if (!soundManager->SM_IsSoundPlaying("sfx_chainreel.wav") && grappleContVolume > 0.0f) {
-        soundManager->SM_PlaySound("sfx_chainreel.wav");
-        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
-    }
-    if(soundManager->SM_IsSoundPlaying("sfx_chainreel.wav")) {
-        soundManager->SM_SetSoundVolume("sfx_chainreel.wav", grappleContVolume * 0.25f);
-    }
-
+void GameplayState::UpdateGrapples() {
     for (GameObject* grapple: grapples) {
 
 
@@ -1070,7 +784,6 @@ void GameplayState::CreateGrapples() {
         g->OnActiveSet.connect<&GameplayState::OnGrappleToggle>(this);
         grapples[i] = g;
     }
-
 }
 
 void GameplayState::SetTestSprings() {
@@ -1139,40 +852,40 @@ float GameplayState::CalculateCompletion(Vector3 playerCurPos){
     return 1 - progress.Length()/levelLen;
 }
 
-void GameplayState::UpdateStartBack(Element& element, float dt) {
-    if (levelManager->GetCountdown() > whenToStartCountdown) {
-        element.SetColor({ 0,0,0,0 });
-        return;
-    }
-    float backAlpha = element.GetColor().w;
-    float targetBackAlpha = 0.75;
-    backAlpha = backAlpha * 0.9f + targetBackAlpha * 0.1f;
-    element.SetColor({ 0,0,0,backAlpha });
+void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state) {
+    GameObject* playerObject = world->GetObjectByNetworkId(networkID);
+    AnimatorObject* playerAnimator = playerObject->GetAnimatorObject();
+    if (!playerAnimator)return;
 
-}
-
-void GameplayState::UpdateStartText(Element& element, float dt) {
-    float endTimer = levelManager->GetCountdown();
-    if (endTimer > whenToStartCountdown) {
-        element.textData.text = "";
-        return;
+    switch (state) {
+    case Replicated::IDLE: {
+        playerAnimator->TransitionAnimation("Idle", 0.1f);
+        break;
     }
-    std::string id = element.GetId();
-    if (id == "StartScreen_Countdown") {
-        if (countdownCurrentInt != (int)ceil(endTimer)) {
-            countdownCurrentInt = (int)ceil(endTimer);
-            soundManager->SM_PlaySound("sfx_countdown.wav");
-            soundManager->SM_SetSoundPitch("sfx_countdown.wav", 1.0f + (3 - countdownCurrentInt) * 0.3f);
-        }
-        element.textData.text = std::to_string((int)ceil(endTimer));
+    case Replicated::JUMP: {
+        playerAnimator->TransitionAnimation("Jump", 0.1f);
+        break;
     }
-    else if (id == "StartScreen_LevelName") {
-        std::string levelName = levelManager->GetLevelName(levelManager->GetLevel());
-        int characters = levelName.length();
-        element.SetAbsoluteSize({ 40 * characters, 50 });
-        element.AlignMiddle(150);
-        element.AlignCenter();
-        element.textData.text = levelName;
+    case Replicated::FALLING: {
+        playerAnimator->TransitionAnimation("Fall", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_FORWARD: {
+        playerAnimator->TransitionAnimation("Run", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_BACK: {
+        playerAnimator->TransitionAnimation("RunBack", 0.1f);
+        break;
+    }
+    case Replicated::RUNNING_LEFT: {
+        playerAnimator->TransitionAnimationWithMidPose("LeftStrafe", 0.15f);
+        break;
+    }
+    case Replicated::RUNNING_RIGHT: {
+        playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
+        break;
+    }
     }
 }
 
@@ -1231,17 +944,13 @@ void GameplayState::UpdateMedalSprite(Element& element, float dt) {
     if (medalAnimationStage != MedalAnimationStages::MEDAL) return;
     Vector4 currentColor = element.GetColor();
     float spinAmount = 360.0f * 2.0f;
-    float timeToTake =  0.2f;
+    float timeToTake =  0.5f;
     float scaleFactor = 1.0f / (spinAmount)*medalTimer;
     element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, scaleFactor));
     medalTimer = std::clamp(medalTimer + dt * (spinAmount) / timeToTake, 0.0f, spinAmount);
 
     element.GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, medalTimer));
     element.GetTransform().SetScale(Vector3(2 - scaleFactor, 2 - scaleFactor,1));
-    if (medalTimer == spinAmount) {
-        element.SetColor(Vector4(currentColor.x, currentColor.y, currentColor.z, 1));
-        medalAnimationStage = MedalAnimationStages::FINISHED;
-    }
 }
 
 void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
@@ -1259,16 +968,7 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignCenter();
         element.AlignMiddle(-24 * textSize * 0.33f);
         element.textData.color = Vector4(1.0f, 1.0f, 1.0f, 0.10f);
-        finalTimeSoundRepeat -= dt;
-        if (finalTimeSoundRepeat <= 0) {
-
-            soundManager->SM_PlaySound("sfx_timetally.wav");
-            float pitchIncrease = 1.0f + 0.5 * (finalTimeScroll / finalTime);
-            soundManager->SM_SetSoundPitch("sfx_timetally.wav", pitchIncrease);
-            finalTimeSoundRepeat = 0.07f;
-        }
         if (finalTimeScroll == finalTime) {
-            soundManager->SM_PlaySound("sfx_timeshake.wav");
             medalAnimationStage = TIMER_SHAKE;
             finalTimeShake = 1.0f;
         }
@@ -1285,34 +985,9 @@ void GameplayState::UpdateFinalTimeTally(Element& element, float dt) {
         element.AlignMiddle(-24 * textSize * 0.33f + randomY);
         if (finalTimeShake == 0.0f) {
             medalAnimationStage = MEDAL;
-            soundManager->SM_PlaySound("sfx_medal.wav");
         }
     }
     break;
     }
     
-}
-
-void GameplayState::RenderFlairObjects(){
-    Vector3 lavaPos = deathPos ;
-
-    AddLava(lavaPos + Vector3(0, 5, 0));
-    AddEndPortal(endPos);
-
-}
-
-void GameplayState::AddLava(Vector3 position){
-    auto LavaQuad = new GameObject();
-    LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
-    replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
-    LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
-    renderer->SetLavaHeight(position.y);
-}
-
-void GameplayState::AddEndPortal(Vector3 position){
-
-    auto PortalQwaud = new GameObject();
-    PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
-    replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
-    PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));
 }

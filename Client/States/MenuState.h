@@ -22,8 +22,6 @@ namespace NCL {
             ~MenuState();
             void Update(float dt) override;
 
-            void SendLevelSelectPacket(int level);
-
             void OnEnter() override;
             void OnExit() override;
             void ReceivePacket(int type, GamePacket *payload, int source) override;

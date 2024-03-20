@@ -25,9 +25,8 @@ PhysicsSystem::PhysicsSystem(GameWorld& g) : gameWorld(g)	{
 
 
 PhysicsSystem::~PhysicsSystem()	{
-    for (auto& pair : physicsMaterials) {
+    for (auto pair : physicsMaterials) {
         delete pair.second;
-        pair.second = nullptr;
     }
 }
 
@@ -190,9 +189,6 @@ void PhysicsSystem::UpdateCollisionList() {
 			++i;
 		}
 	}
-    if (shouldClear) { //we need this in case an OnCollision method needs to clear the collision list
-        Clear();
-    }
 }
 
 void PhysicsSystem::BasicCollisionDetection() {
@@ -200,7 +196,7 @@ void PhysicsSystem::BasicCollisionDetection() {
     std::vector<GameObject*>::const_iterator last;
     gameWorld.GetObjectIterators(first, last);
 
-    for(auto& i = first; i!=last; ++i){
+    for(auto i = first; i!=last; ++i){
         if((*i)->GetPhysicsObject() == nullptr){
             continue;
         }
@@ -314,12 +310,10 @@ void PhysicsSystem::SetupBounds(GameObject* g) {
 }
 
 void PhysicsSystem::LoadStaticAndDynamicLists() {
-    staticObjects.clear();
-    dynamicObjects.clear();
     std::vector<GameObject*>::const_iterator first;
     std::vector<GameObject*>::const_iterator last;
     gameWorld.GetObjectIterators(first, last);
-    for (auto& i = first; i != last; ++i) {
+    for (auto i = first; i != last; ++i) {
         if (!(*i)->GetPhysicsObject()) continue;
         CollisionLayer layer = (*i)->GetPhysicsObject()->GetLayer();
         switch (layer)
@@ -448,7 +442,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 
 	gameWorld.GetObjectIterators(first, last);          //setting our constructors to the first and last game objects in the scene
 
-	for (auto& i = first; i != last; i++) {
+	for (auto i = first; i != last; i++) {
 
 		PhysicsObject* object = (*i)->GetPhysicsObject();     //Get the physics object from the game obj
 
@@ -499,7 +493,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 
 	gameWorld.GetObjectIterators(first, last);
 
-	for (auto& i = first; i != last; ++i) {
+	for (auto i = first; i != last; ++i) {
 		PhysicsObject* object = (*i)->GetPhysicsObject();
 
 		if (object == nullptr) {
@@ -567,7 +561,7 @@ void PhysicsSystem::UpdateConstraints(float dt) {
 	std::vector<Constraint*>::const_iterator last;
 	gameWorld.GetConstraintIterators(first, last);
 
-	for (auto& i = first; i != last; ++i) {
+	for (auto i = first; i != last; ++i) {
 		(*i)->UpdateConstraint(dt);
 	}
 }

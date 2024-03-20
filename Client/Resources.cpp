@@ -59,5 +59,3 @@ MeshMaterial* Resources::GetMeshMaterial(const std::string& name) {
 
     return meshMaterials[name].get();
 }
-
-

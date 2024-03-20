@@ -6,6 +6,7 @@ using namespace CSC8503;
 
 WaitingPlayers::WaitingPlayers(GameServer* pServerBase) : State() {
     serverBase = pServerBase;
+
 }
 
 WaitingPlayers::~WaitingPlayers() {
@@ -40,11 +41,6 @@ void WaitingPlayers::ReceivePacket(int type, GamePacket *payload, int source) {
             auto packet = reinterpret_cast<FunctionPacket*>(payload);
             if (packet->functionId == Replicated::StartGame) {
                 StartGame();
-            }
-            else if (packet->functionId == Replicated::SetLevel) {
-                DataHandler handler(&packet->data);
-                selectedLevel = handler.Unpack<int>();
-                std::cout << selectedLevel<<" SELECTED!!\n";
             }
         } break;
     }

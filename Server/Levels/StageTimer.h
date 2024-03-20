@@ -27,15 +27,14 @@ public:
     void EndTimer();
     void ResetTimer();
 
-    float GetElapsedTime() { return elapsedTime; }
-
     float GetFinalTime() const            { return finalTime; }
-    Medal GetCurrentMedal() { CalculateMedal(); return currentMedal; } //we need to 
-    NCL::Maths::Vector4 GetCurrentMedalColour() { CalculateMedal(); return currentMedalColour; }
+    Medal GetCurrentMedal() const         { return currentMedal; }
+    NCL::Maths::Vector4 GetCurrentMedalColour() const { return currentMedalColour; }
 
     void ResumeTimer(){ currentState = StageTimer::Running; }
     void PauseTimer() { currentState = StageTimer::Paused;  }
 
+    float GetElapsedTime() { return elapsedTime; }
     float GetPlatinumTime() { return platinumTime; }
     float GetGoldTime() { return goldTime; }
     float GetSilverTime() { return silverTime; }

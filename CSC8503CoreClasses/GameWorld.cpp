@@ -24,8 +24,6 @@ GameWorld::~GameWorld()	{
 void GameWorld::Clear() {
     gameObjects.clear();
     constraints.clear();
-    pointLights.clear();
-    networkObjects.clear();
     worldIDCounter		= 0;
     worldStateCounter	= 0;
     networkIdCounter    = 0;
@@ -34,11 +32,9 @@ void GameWorld::Clear() {
 void GameWorld::ClearAndErase() {
     for (auto& i : gameObjects) {
         delete i;
-        i = nullptr;
     }
     for (auto& i : constraints) {
         delete i;
-        i = nullptr;
     }
     Clear();
 }
@@ -49,7 +45,7 @@ void GameWorld::AddGameObject(GameObject* o, bool isNetworked) {
     worldStateCounter++;
 
     if (isNetworked) {
-        o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));
+        o->SetNetworkObject(new NetworkObject(*o, networkIdCounter++));\
         networkObjects.push_back(o->GetNetworkObject());
     }
 }
@@ -58,7 +54,6 @@ void GameWorld::RemoveGameObject(GameObject* o, bool andDelete) {
     gameObjects.erase(std::remove(gameObjects.begin(), gameObjects.end(), o), gameObjects.end());
     if (andDelete) {
         delete o;
-        o = nullptr;
     }
     worldStateCounter++;
 }
@@ -78,6 +73,7 @@ void GameWorld::OperateOnContents(GameObjectFunc f) {
 }
 
 void GameWorld::UpdateWorld(float dt) {
+
     for (GameObject* g : gameObjects) {
         if (g->GetAnimatorObject()) {
             g->GetAnimatorObject()->UpdateAnimation(dt);
@@ -91,13 +87,13 @@ void GameWorld::UpdateWorld(float dt) {
 	std::default_random_engine e(seed);
 
 
-    //if (shuffleObjects) {
-    //    std::shuffle(gameObjects.begin(), gameObjects.end(), e);
-    //}
+    if (shuffleObjects) {
+        std::shuffle(gameObjects.begin(), gameObjects.end(), e);
+    }
 
-    //if (shuffleConstraints) {
-    //    std::shuffle(constraints.begin(), constraints.end(), e);
-    //}
+    if (shuffleConstraints) {
+        std::shuffle(constraints.begin(), constraints.end(), e);
+    }
 }
 
 void GameWorld::UpdateWorldPhysics(float dt) {
@@ -161,7 +157,6 @@ void GameWorld::RemoveConstraint(Constraint* c, bool andDelete) {
     constraints.erase(std::remove(constraints.begin(), constraints.end(), c), constraints.end());
     if (andDelete) {
         delete c;
-        c = nullptr;
     }
 }
 

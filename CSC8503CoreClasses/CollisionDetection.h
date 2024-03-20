@@ -20,22 +20,20 @@ namespace NCL {
 	{
 	public:
 		struct ContactPoint {
-			Vector3 localA = Vector3(0, 0, 0);;
-			Vector3 localB = Vector3(0, 0, 0);
-			Vector3 normal = Vector3(0,0,0);
-			float	penetration = 0;
+			Vector3 localA;
+			Vector3 localB;
+			Vector3 normal;
+			float	penetration;
 		};
 		struct CollisionInfo {
-			GameObject* a = nullptr;
-			GameObject* b = nullptr;		
-			int		framesLeft = 0;
+			GameObject* a;
+			GameObject* b;		
+			int		framesLeft;
 
 			ContactPoint point;
 
 			CollisionInfo() {
-                a = nullptr;
-                b = nullptr;
-                framesLeft = 0;
+
 			}
 
 			void AddContactPoint(const Vector3& localA, const Vector3& localB, const Vector3& normal, float p) {

@@ -5,7 +5,7 @@ namespace NCL::CSC8503 {
 	class Component
 	{
 	public:
-        Component() { gameObject = nullptr; };
+		Component() { };
 		virtual ~Component() {};
 		Component(GameObject*  gameObject) { this->gameObject = gameObject;}
 

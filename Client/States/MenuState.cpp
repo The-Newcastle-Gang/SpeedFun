@@ -18,13 +18,6 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
 
 }
 
-void MenuState::SendLevelSelectPacket(int level) {
-    FunctionData data{};
-    DataHandler handler(&data);
-    handler.Pack(level);
-    baseClient->RemoteFunction(Replicated::SetLevel, &data);
-}
-
 void MenuState::InitMenuSounds() {
     soundManager->SM_AddSoundToLoad("se_select00.wav");
     soundManager->SM_AddSoundToLoad("rainer menu.ogg");
@@ -138,6 +131,7 @@ void MenuState::SetActiveTextEntry(Element& element) {
     auto& textElement = canvas->GetElementById(textId, "multiplayer");
     activeText = textElement.GetIndex();
     auto& textElementData = textElement.GetTextData();
+
     if (textElementData.text == textElementData.defaultText) {
         textElementData.text = "";
     }
@@ -197,7 +191,6 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
     } else if (id == "Disconnect") {
         element.OnMouseUp.connect<&MenuState::LeaveLobby>(this);
     } else if (id == "StartLobby") {
-
         element.OnMouseUp.connect<&MenuState::StartGame>(this);
     }
 }
@@ -389,8 +382,8 @@ void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
             auto packet = reinterpret_cast<FunctionPacket*>(payload);
             if (packet->functionId == Replicated::RemoteClientCalls::LoadGame) {
                 isGameStarted = true;
-                baseClient->RemoteFunction(Replicated::MenuToGameplay, nullptr);
             }
+
         } break;
     }
 }

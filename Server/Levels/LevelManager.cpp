@@ -1,4 +1,3 @@
-#include "LevelManager.h"
 //
 // Created by idhant on 26-02-2024.
 //
@@ -8,18 +7,9 @@ LevelManager::LevelManager() {
     std::cout << "initialize manager" << std::endl;
     levelReader = std::make_unique<LevelReader>();
     stageTimer = std::make_unique<StageTimer>();
-    totalLevels =  levelReader->GetNumberOfLevels();
     std::cout <<" level and stagetimer inits" <<std::endl;
     currentMedal = 0;
 }
-
-void LevelManager::ChangeLevel(int level){
-    Reset();
-    SetCurrentLevel(level);
-    levelReader->Clear();
-    TryReadLevel(levelReader->GetLevelName(level));
-}
-
 
 void LevelManager::UpdateTimer(float dt) {
     stageTimer->Update(dt);
@@ -28,11 +18,6 @@ void LevelManager::UpdateTimer(float dt) {
 bool LevelManager::UpdateCountdown(float dt) {
     countdownTimer -= dt;
     return countdownTimer <= 0.0f;
-}
-
-bool LevelManager::UpdateEndOfLevelTimer(float dt) {
-    endOfLevelTimer -= dt;
-    return endOfLevelTimer <= 0.0f;
 }
 
 void LevelManager::StartStageTimer() {

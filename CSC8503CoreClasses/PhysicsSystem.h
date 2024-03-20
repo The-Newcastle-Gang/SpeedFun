@@ -51,10 +51,6 @@ namespace NCL {
                 return nullptr;
             }
 
-            void ShouldClearCollisions(bool shouldClear) {
-                this->shouldClear = shouldClear;
-            }
-
 		protected:
 			void BasicCollisionDetection();
 			void NarrowPhase();
@@ -98,7 +94,6 @@ namespace NCL {
 			std::vector<CollisionDetection::CollisionInfo> broadphaseCollisionsVec;
 
 			bool useBroadPhase		    = true;
-            bool shouldClear = false;
 			int numCollisionFrames	    = 5;
             float velocityThreshold    = 8.0f;
 

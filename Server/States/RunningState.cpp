@@ -1,8 +1,5 @@
 #include "RunningState.h"
 
-#include <functional>
-
-
 using namespace NCL;
 using namespace CSC8503;
 
@@ -28,7 +25,6 @@ RunningState::~RunningState() {
 void RunningState::OnEnter() {
     //serverBase has been called before the network thread has been created.
     serverBase->CallRemoteAll(Replicated::RemoteClientCalls::LoadGame, nullptr);
-
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
     numPlayersLoaded = 0;
@@ -36,43 +32,9 @@ void RunningState::OnEnter() {
     shouldClose.store(false);
 
     CreateNetworkThread();
-    WaitUntilClientsInGameplay(); //so we dont send the Load_Level packet to MenuState
-
-    MoveToNewLevel(selectedLevel);
-}
-
-void RunningState::SendLevelToClients(int level) {
-    FunctionData data{};
-    DataHandler handler(&data);
-    handler.Pack(level);
-    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::Load_Level, &data));
-}
-
-void RunningState::WaitUntilClientsInGameplay() {
-    while (numPlayersInGameplayState < serverBase->GetPlayerInfo().size()) {
-        ReadNetworkFunctions();
-    }
-}
-
-void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as it gets rid of stuff, needs to be done after update;
-    networkData->incomingInput.Clear();
-    networkData->incomingFunctions.Clear();
-    ResetLevelInfo();
-    world->ClearAndErase(); //free the memory too so we dont leak
-    physics->Clear();
-    SendLevelToClients(level);
-    LoadLevel(level);
+    LoadLevel();
     world->StartWorld();
-}
 
-void RunningState::ResetLevelInfo() {
-    hasAllPlayersFinished = false;
-    numPlayersLoaded = 0;
-    for (std::pair<int, bool> info : playersFinished) {
-        playersFinished[info.first] = false;
-    }
-    levelManager->Reset();
-    levelManager->GetLevelReader()->Clear();
 }
 
 void RunningState::ThreadUpdate(GameServer* server, ServerNetworkData* networkData) {
@@ -117,9 +79,6 @@ void RunningState::ReadNetworkFunctions() {
                 playerMovement->ToggleDebug();
             }
         }
-        else if (data.second.functionId == Replicated::RemoteServerCalls::MenuToGameplay) {
-            numPlayersInGameplayState++;
-        }
     }
 }
 
@@ -127,9 +86,8 @@ void RunningState::ReadNetworkPackets() {
     while (!networkData->incomingInput.IsEmpty()) {
         auto data = networkData->incomingInput.Pop();
         UpdatePlayerMovement(GetPlayerObjectFromId(data.first), data.second);
-        UpdatePlayerGameInfo();
+        UpdatePlayerGameInfo(GetPlayerObjectFromId(data.first), data.second);
     }
-
 }
 
 void RunningState::OnExit() {
@@ -142,48 +100,24 @@ void RunningState::OnExit() {
     networkThread->join();
 }
 
-void RunningState::WaitForPlayersLoaded() {
+
+void RunningState::Update(float dt) {
+
     while (numPlayersLoaded < playerInfo.size()) {
         ReadNetworkFunctions();
         ReadNetworkPackets();
     }
-}
-
-void RunningState::Update(float dt) {
-    switch (state) {
-        case RunningStateEnums::COUNTDOWN: {
-            UpdateInCountdown(dt);
-            break;
-        }
-
-        case RunningStateEnums::GAMEPLAY: {
-            UpdateInGameplay(dt);
-            break;
-        }
-        
-        case RunningStateEnums::END_OF_LEVEL: {
-            UpdateInEndOfLevel(dt);
-            break;
-        }
-    }
-}
-
-void RunningState::UpdateInCountdown(float dt) {
-    WaitForPlayersLoaded();
-    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
-        Tick(dt);
-        SendMedalValues();
-        UpdatePlayerGameInfo();
-    }
-    if (levelManager->UpdateCountdown(dt)) {
-        state = RunningStateEnums::GAMEPLAY;
-    }
-}
-
-void RunningState::UpdateInGameplay(float dt) {
     ReadNetworkFunctions();
     ReadNetworkPackets();
     UpdatePlayerAnimations();
+    if (levelManager->GetCountdown() == COUNTDOWN_MAX) {//i.e only once, do this so player positions are correct.
+        Tick(dt);
+    }
+
+    if (!levelManager->UpdateCountdown(dt)) {
+        return;
+    }
+
     world->UpdateWorld(dt);
     physics->Update(dt);
     Tick(dt);
@@ -191,30 +125,13 @@ void RunningState::UpdateInGameplay(float dt) {
     levelManager->UpdateTimer(dt);
 }
 
-void RunningState::UpdateInEndOfLevel(float dt) {
-    if (levelManager->UpdateEndOfLevelTimer(dt)) {
-        shouldMoveToNewLevel = true;
-    }
-
-    if (shouldMoveToNewLevel) {
-        MoveToNewLevel(levelManager->GetAndSetNextLevel());
-        shouldMoveToNewLevel = false;
-        state = RunningStateEnums::COUNTDOWN;
-        return;
-    }
-    ReadNetworkFunctions();
-    world->UpdateWorld(dt);
-    physics->Update(dt);
-    Tick(dt);
-
-}
-
-void RunningState::LoadLevel(int level) {
-    levelManager->SetCurrentLevel(level);
-    BuildLevel(levelManager->GetLevelReader()->GetLevelName(level));
+void RunningState::LoadLevel() {
+    BuildLevel("newTest");
+    // Change the order of these functions and the program will explode.
     CreatePlayers();
     CreateGrapples();
     AddTriggersToLevel();
+
     physics->InitialiseSortAndSweepStructs();
 }
 
@@ -241,13 +158,8 @@ void RunningState::CreateGrapples() {
     for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
-        grapples[i] = g;
-    }
-}
-
-void RunningState::SetAllGrapplesInactive() {
-    for (auto& g : grapples) {
         SetNetworkActive(g, false);
+        grapples[i] = g;
     }
 }
 
@@ -293,28 +205,12 @@ void RunningState::SendPlayerAnimationCall(Replicated::PlayerAnimationStates sta
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::Player_Animation_Call, &data));
 }
 
-int GetDirectionFromPlayerNumber(int num) {
-    return (((num % 2) * 2) - 1); // 0 = -1, 1 = 1
-}
-
-int GetMagnitudeFromPlayerNumber(int num) {
-    return num < 3 ? 1 : 3; // Uses player number to adjust how far from other players.
-}
-
 void RunningState::CreatePlayers() {
     // For each player in the game create a player for them.
-    Vector3 startPos = currentLevelStartPos;
-    float playerSeperation = 2.0f;
-    int currentPlayer = 1;
-
-    Vector3 thisPlayerStartPos;
-    for(int i=0;i<Replicated::PLAYERCOUNT;i++){
-        thisPlayerStartPos = startPos + Vector3(0,0,1) * GetDirectionFromPlayerNumber(currentPlayer) * GetMagnitudeFromPlayerNumber(currentPlayer)* playerSeperation;
-        playerAnimationInfo[i] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
+    for (auto index = 0; index < Replicated::PLAYERCOUNT; index++) {
+        playerAnimationInfo[index] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
-        playerObjects[currentPlayer - 1] = player;
-        currentPlayer++;
 
         player->SetPhysicsObject(new PhysicsObject(&player->GetTransform(), player->GetBoundingVolume(), new PhysicsMaterial()));
         player->GetPhysicsObject()->SetInverseMass(2.0f);
@@ -322,29 +218,15 @@ void RunningState::CreatePlayers() {
         player->GetPhysicsObject()->SetPhysMat(physics->GetPhysMat("Player"));
         player->GetPhysicsObject()->SetLayer(PLAYER_LAYER);
         player->SetTag(Tag::PLAYER);
-        player->GetTransform().SetPosition(thisPlayerStartPos);
-
+        player->GetTransform().SetPosition(currentLevelStartPos);
         auto playerComponent = new PlayerMovement(player, world.get());
         playerComponent->GrappleStart.connect<&RunningState::GrappleStart>(this);
         playerComponent->GrappleEnd.connect<&RunningState::GrappleEnd>(this);
         playerComponent->GrappleUpdate.connect<&RunningState::GrappleUpdate>(this);
         player->AddComponent((Component*)playerComponent);
 
-        player->AddComponent(new PlayerRespawner(player, 
-            [this](int id) {this->DeathTriggerVolFunc(id); } //this was a workaround to avoid changing how the triggers work
-        ));
+        playerObjects[index] = player;
     }
-}
-
-void RunningState::ClearLevel()
-{
-    //physics->Clear();
-    currentLevelCheckPointPositions.clear();
-    currentLevelDeathPos = { 0, 0, 0 };
-    currentLevelEndPos = { 0, 0, 0 };
-    currentLevelStartPos = { 0, 0, 0 };
-    triggersVector.clear();
-    world->ClearAndErase();
 }
 
 void RunningState::StartTriggerVolFunc(int id){
@@ -356,23 +238,7 @@ void RunningState::StartTriggerVolFunc(int id){
 }
 
 void RunningState::EndTriggerVolFunc(int id){
-    ResetPlayerMoveInputs(playerObjects[id]); //reset the last input from the player so they dont keep moving
-    playersFinished[id] = true;
-    playerTimes[id] = levelManager->GetCurrentStageTime();
-    SendMedalToClient(id);
-    int numPlayersFinished = 0;
-    for (std::pair<int, bool> playerFinished : playersFinished) {
-        numPlayersFinished += playerFinished.second ? 1 : 0;
-    }
-
-    if (numPlayersFinished == numPlayersLoaded) {
-        hasAllPlayersFinished = true;
-    }
-    if (!hasAllPlayersFinished)return;
-    OnAllPlayersFinished();
-}
-
-void RunningState::SendMedalToClient(int id) {
+    levelManager->EndStageTimer();
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
     FunctionData data;
@@ -381,14 +247,6 @@ void RunningState::SendMedalToClient(int id) {
     handler.Pack(medal);
     handler.Pack(medalColour);
     networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::EndReached, &data)));
-}
-
-void RunningState::OnAllPlayersFinished()
-{
-    state = RunningStateEnums::END_OF_LEVEL;
-    levelManager->EndStageTimer();
-    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::All_Players_Finished, nullptr));
-    std::cout << "ALL PLAYERS DONE!!!!!!!\n";
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
@@ -429,7 +287,7 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
         trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
 
-        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 10.0f);
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
 
@@ -574,25 +432,13 @@ void RunningState::UpdatePlayerMovement(GameObject* player, const InputPacket& i
     }
 }
 
-void RunningState::ResetAllPlayerMoveInputs() {
-    for (auto& pair : playerObjects) {
-        ResetPlayerMoveInputs(pair.second);
-    }
+void RunningState::UpdatePlayerGameInfo(GameObject* player, const InputPacket& inputInfo) {
+    UpdateGameTimerInfo(player, inputInfo);
+    UpdatePlayerPositionsInfo(player, inputInfo);
 }
 
-void RunningState::ResetPlayerMoveInputs(GameObject* playerObject) {
-    PlayerMovement* pm = nullptr;
-    if (playerObject->TryGetComponent<PlayerMovement>(pm)) {
-        pm->ResetMovementInput();
-    }
-}
-
-void RunningState::UpdatePlayerGameInfo() {
-    UpdateGameTimerInfo();
-    UpdatePlayerPositionsInfo();
-}
-
-void RunningState::UpdateGameTimerInfo() {
+void RunningState::UpdateGameTimerInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(levelManager->GetElapsedTime());
@@ -602,10 +448,11 @@ void RunningState::UpdateGameTimerInfo() {
 
     int medalID = (int)levelManager->GetCurrentMedal();
     handler.Pack(medalID);
-    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::GameInfo_Timer, &data));
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_Timer, &data)));
 }
 
-void RunningState::UpdatePlayerPositionsInfo() {
+void RunningState::UpdatePlayerPositionsInfo(GameObject* player, const InputPacket& inputInfo) {
+    auto id = GetIdFromPlayerObject(player);
     FunctionData data;
     DataHandler handler(&data);
 
@@ -617,9 +464,8 @@ void RunningState::UpdatePlayerPositionsInfo() {
         handler.Pack(playerPosition);
     }
     handler.Pack(-999);
-    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::GameInfo_PlayerPositions, &data));
+    networkData->outgoingFunctions.Push(std::make_pair(id, FunctionPacket(Replicated::GameInfo_PlayerPositions, &data)));
 }
-
 void RunningState::ApplyPlayerMovement() {
 
 }
@@ -634,7 +480,6 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto plist = levelManager->GetLevelReader()->GetPrimitiveList();
     auto opList = levelManager->GetLevelReader()->GetOscillatorPList();
     auto harmOpList = levelManager->GetLevelReader()->GetHarmfulOscillatorPList();
-    auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
     for(auto& x: plist){
@@ -652,26 +497,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetInverseMass(0.0f);
         g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
-
-
         ObjectOscillator* oo = new ObjectOscillator(g,x->timePeriod,x->distance,x->direction,x->cooldown,x->waitDelay);
-        const CollisionVolume* vol = g->GetBoundingVolume();
-        switch (vol->type) {
-            case VolumeType::AABB: {
-                oo->SetHalfHeight( ((AABBVolume*)vol)->GetHalfDimensions().y);
-                break;
-            }
-            case VolumeType::OBB: {
-                oo->SetHalfHeight(((OBBVolume*)vol)->GetHalfDimensions().y);
-                break;
-            }
-            case VolumeType::Sphere: {
-                oo->SetHalfHeight(((SphereVolume*)vol)->GetRadius());
-                break;
-            }
-        }
-
-
         g->AddComponent(oo);
     }
 
@@ -683,7 +509,7 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
 
         ObjectOscillator* oo = new ObjectOscillator(g, x->timePeriod, x->distance, x->direction, x->cooldown, x->waitDelay);
-        DamagingObstacle* dO = new DamagingObstacle(g, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
+        DamagingObstacle* dO = new DamagingObstacle(g);
         g->AddComponent(oo);
         g->AddComponent(dO);
     }
@@ -698,27 +524,12 @@ void RunningState::BuildLevel(const std::string &levelName)
         Spring* oo = new Spring(g,x->direction * x->force,x->activeTime,x->isContinuous,x->direction * x->continuousForce);
         g->AddComponent(oo);
     }
-
-    for (auto& x : swingpList)
-    {
-        auto g = new GameObject();
-        replicated->AddBlockToLevel(g, *world, x);
-        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
-        g->GetPhysicsObject()->SetInverseMass(0.0f);
-        g->GetPhysicsObject()->SetLayer(OSCILLATOR_LAYER);
-
-        Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
-        g->AddComponent(swing);
-    }
-
-    //SetTestSprings(); 
-    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
     currentLevelStartPos = levelManager->GetLevelReader()->GetStartPosition();
     currentLevelEndPos = levelManager->GetLevelReader()->GetEndPosition();
-    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition();
+    currentLevelDeathPos = levelManager->GetLevelReader()->GetDeathBoxPosition() - Vector3(0,50,0); // Alter this if the death plane is set too high.
     currentLevelCheckPointPositions = levelManager->GetLevelReader()->GetCheckPointPositions();
 
     triggersVector = {
@@ -740,17 +551,6 @@ void RunningState::CancelGrapple(int id)
         playerMovement->grappleProjectileInfo.travelDistance = 0;
         playerMovement->LeaveGrappleState();
     }
-}
-
-void RunningState::SendMedalValues() {
-    Vector3 medals;
-    FunctionData data;
-    DataHandler handler(&data);
-    medals[0] = levelManager->GetPlatinumTime();
-    medals[1] = levelManager->GetGoldTime();
-    medals[2] = levelManager->GetSilverTime();
-    handler.Pack(medals);
-    networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SendMedalValues, &data));
 }
 
 void RunningState::SetTestSprings() {

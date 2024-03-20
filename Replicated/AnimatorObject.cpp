@@ -115,7 +115,6 @@ const Matrix4* AnimatorObject::GetCurrentFrameData() {
             break;
         }
     }
-    return nullptr;
 }
 
 const Matrix4* AnimatorObject::GetNextFrameData() {
@@ -138,5 +137,4 @@ const Matrix4* AnimatorObject::GetNextFrameData() {
             break;
         }
     }
-    return nullptr;
 }

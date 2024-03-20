@@ -29,7 +29,7 @@ public:
     void CreateNewLayer(const std::string& name, bool isBlocking = true);
     void PushActiveLayer(const std::string &layerName);
     void PopActiveLayer();
-    CanvasLayer* GetActiveLayer() { return activeLayers.back(); }
+    std::string GetActiveLayer();
 
 
     Element& GetElementByIndex(int index, const std::string &layerName = "main");
