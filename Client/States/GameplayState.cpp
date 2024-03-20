@@ -1184,6 +1184,7 @@ void GameplayState::InitLevel(int level) {
   
         temp->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
         temp->GetRenderObject()->SetColour({ 1.0f, 1.0f, 1.0f, 1.0f });
+        temp->GetRenderObject()->SetMeshOffset(Vector3(0,-1.7f,0));
 
         temp->SetAnimatorObject(new AnimatorObject(maxMesh->GetAnimationMap()));
         temp->GetAnimatorObject()->SetAnimation("Default");
