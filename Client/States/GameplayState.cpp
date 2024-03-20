@@ -323,22 +323,24 @@ void GameplayState::CreateLoadingScreenCanvas() {
 
     const int loadingScreens = 2;
     std::string loading = "LoadingScreen";
+    Vector2Int textRes = { 671,166 };
+    int textTopPadding = 200;
 
     for (int i = 1; i <= loadingScreens; i++) {
         canvas->CreateNewLayer(loading + std::to_string(i), false);
         canvas->PushActiveLayer(loading + std::to_string(i));
-        canvas->AddElement().AlignBottom().AlignLeft().SetRelativeSize({ 1,1 }).SetColor({ 0.1,0.1,0.1,1 });
+        canvas->AddElement(loading + std::to_string(i)).AlignBottom().AlignLeft().SetRelativeSize({1,1}).SetColor({0.1,0.1,0.1,1}).SetId("Background");
 
         switch (i) {
         case 1:
-            canvas->AddImageElement("LS_Text1.png", loading + std::to_string(i)).AlignLeft().AlignTop().SetAbsoluteSize({500,500});
-            canvas->AddImageElement("Solaire!.jpg", loading + "1").AlignLeft().AlignBottom().SetAbsoluteSize({100,100});
+            canvas->AddImageElement("LS_Text1.png", loading + std::to_string(i)).AlignLeft().AlignTop(textTopPadding).SetAbsoluteSize(textRes).SetId("LS_Text1");
+            //canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignLeft(100).AlignBottom(100).SetAbsoluteSize({100,100}).SetId("Sol1");
             renderer->RenderLoadingScreen();
 
             break;
         case 2:
-            canvas->AddImageElement("LS_Text2.png", loading + std::to_string(i)).AlignLeft().AlignTop().SetAbsoluteSize({500,500});
-            canvas->AddImageElement("Solaire!.jpg", loading + "2").AlignRight().AlignBottom().SetAbsoluteSize({100,100});
+            canvas->AddImageElement("LS_Text2.png", loading + std::to_string(i)).AlignLeft().AlignTop(textTopPadding).SetAbsoluteSize(textRes).SetId("LS_Text2");
+            //canvas->AddImageElement("Solaire!.jpg", loading + std::to_string(i)).AlignRight().AlignBottom().SetAbsoluteSize({100,100}).SetId("Sol2");
             renderer->RenderLoadingScreen();
 
             break;
@@ -352,7 +354,6 @@ void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
         std::cout << "LoadingScreen!\n";
         renderer->RenderLoadingScreen();
-        //renderer->Render();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }
