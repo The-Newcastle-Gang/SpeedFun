@@ -112,6 +112,7 @@ void MenuState::BeginSingleplayer(Element& _) {
 }
 
 void MenuState::ShowMultiplayerOptions(Element& _) {
+    baseClient->SetSinglePlayer(false);
     canvas->PushActiveLayer("multiplayer");
 }
 
