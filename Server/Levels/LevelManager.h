@@ -55,6 +55,11 @@ public:
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
 
+    std::string GetLevelName(int i) {
+        if (i < 0 || i >= totalLevels) return "";
+        return levelReader->GetLevelName(i);
+    }
+
     std::shared_ptr<LevelReader> GetLevelReader() const { return levelReader; }
 
 protected:
