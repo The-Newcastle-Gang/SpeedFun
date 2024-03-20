@@ -258,6 +258,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
+    handler.Pack(peerId);
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
@@ -379,7 +380,7 @@ void RunningState::SendMedalToClient(int id) {
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
     if (serverBase->GetPlayerInfo().size() > 1) {
-        numPlayerFinished = std::clamp(numPlayerFinished + 1, 0, 3);
+        numPlayerFinished = std::clamp(numPlayerFinished + 1, 0, 4);
         medal = numPlayerFinished;
         switch (medal) {
         case(Medal::Gold):
@@ -393,8 +394,13 @@ void RunningState::SendMedalToClient(int id) {
         case(Medal::Bronze):
             medalColour = Replicated::BRONZE;
             break;
+
+        case(Medal::Default):
+            medalColour = Replicated::DEFAULT;
+            break;
         }
     }
+   
 
     FunctionData data;
     DataHandler handler(&data);
