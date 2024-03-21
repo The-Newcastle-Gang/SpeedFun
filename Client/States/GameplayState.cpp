@@ -1111,6 +1111,13 @@ void GameplayState::CreateRock() {
     rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
+void GameplayState::LoadPlayerMeshMaterials() {
+    playerTextures[0] = new MeshMaterial("Player1.mat");
+    playerTextures[1] = new MeshMaterial("Player2.mat");
+    playerTextures[2] = new MeshMaterial("Player3.mat");
+    playerTextures[3] = new MeshMaterial("Player4.mat");
+}
+
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
@@ -1129,7 +1136,6 @@ void GameplayState::CreatePlayers() {
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
         player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
         player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.5f,0));
-        player->GetRenderObject()->SetColour(playerColours[currentPlayer]);
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
