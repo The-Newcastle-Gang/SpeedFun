@@ -19,7 +19,7 @@ int main() {
     if (!w->HasInitialised()) {
         return -1;
     }
-`
+
 
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
