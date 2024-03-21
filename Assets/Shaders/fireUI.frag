@@ -22,7 +22,7 @@ void main() {
 
     vec2 adjustedUV = vec2(TexCoords.x, TexCoords.y * 0.2 + uTime * 0.1);
     float noiseVal = texture(noiseTexture, adjustedUV).x;
-    float gradientVal = TexCoords.y;
+    float gradientVal = TexCoords.y + 0.25f;
     float combined = step(noiseVal, gradientVal);
 
 

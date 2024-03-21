@@ -17,13 +17,14 @@ namespace NCL {
 
             void OnEnter() override;
             void OnExit() override;
+            void SendLevelSelected(int level);
             void ReceivePacket(int type, GamePacket* payload, int source) override;
             bool CheckPlayersReady();
 
             int GetSelectedLevel() { return selectedLevel; }
 
         protected:
-            int selectedLevel = 0;
+            int selectedLevel = 2;
             GameServer* serverBase;
             bool isReady;
             void StartGame();
