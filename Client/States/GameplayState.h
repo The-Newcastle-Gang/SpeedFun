@@ -63,6 +63,7 @@ namespace NCL {
             void InitWorld();
             void InitCurrentLevel();
             void InitSounds();
+            int selfID = -1;
             void AssignPlayer(int netObject);
             void CreateNetworkThread();
 
@@ -106,7 +107,6 @@ namespace NCL {
             void UpdatePlayerCompleted(float dt);
             void UpdateEndOfLevel(float dt);
             
-
             void SetTestSprings();
             void AddPointLight(PointLightInfo light);
             void SetTestFloor();
@@ -235,6 +235,7 @@ namespace NCL {
 
             void InitPlayerBlip(int id);
             std::unordered_map<std::string, Vector3> playerPositions;
+            std::unordered_map<std::string, int> playerRankings;
 
             std::unordered_map<std::string, std::pair<int, float>> medalTimeRatios;
 
@@ -261,7 +262,9 @@ namespace NCL {
             void UpdateStartBack(Element& element, float dt);
             void UpdateStartText(Element& element, float dt);
 
+            Vector4 positionColor = Replicated::DEFAULT;
 
+            void UpdatePositionRankings();
             void InitialiseMedalNubs();
             void UpdateTimerUI(Element& element, float dt);
             void UpdateTimerBox(Element& element, float dt);
