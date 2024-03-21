@@ -152,7 +152,7 @@ namespace NCL {
 
 
             GameObject* chains[chainLinkCount * Replicated::PLAYERCOUNT];
-            std::vector<GameObject*> grapples;
+            GameObject* grapples[Replicated::PLAYERCOUNT];
 
             void SendInputData();
             void CreatePlayers();

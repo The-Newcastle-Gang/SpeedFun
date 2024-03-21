@@ -380,7 +380,6 @@ void GameplayState::OnNewLevel() {
     canvas->PopActiveLayer(); //pop end of level UI
     ResetMedalRatios();
     renderer->ClearActiveObjects();
-    grapples.clear();
     world->ClearAndErase();
     networkData->incomingState.Clear();
     particleSystems.clear();
@@ -1363,7 +1362,7 @@ void GameplayState::CreateGrapples() {
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
         g->OnActiveSet.connect<&GameplayState::OnGrappleToggle>(this);
-        grapples.push_back(g);
+        grapples[i] = g;
     }
 
 }
