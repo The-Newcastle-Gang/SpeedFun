@@ -951,7 +951,7 @@ GameObject* GameplayState::CreateChainLink() {
 }
 
 void GameplayState::CreateChains() {
-    for (int i=0; i < chainLinkCount * numberPlayersJoined; i++) {
+    for (int i=0; i < chainLinkCount * Replicated::PLAYERCOUNT; i++) {
         chains[i] = CreateChainLink();
         //chains[i]->GetTransform().SetOrientation(Quaternion::EulerAnglesToQuaternion(0, 0, 90 * (i % 2)));
     }
@@ -1307,7 +1307,7 @@ void GameplayState::InitLevel(int level) {
 }
 
 void GameplayState::OnGrappleToggle(GameObject& gameObject, bool isActive) {
-    int id = gameObject.GetNetworkObject()->GetNetworkId() % numberPlayersJoined;
+    int id = gameObject.GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
     if (!isActive) OperateOnChains(id, [](GameObject& chainLink, int chainIndex) {
         chainLink.SetActive(false);
     });
@@ -1335,8 +1335,8 @@ void GameplayState::UpdateGrapples(float dt) {
     for (GameObject* grapple: grapples) {
 
 
-        int id = grapple->GetNetworkObject()->GetNetworkId() % numberPlayersJoined;
-        auto playerObject = world->GetNetworkObject(grapple->GetNetworkObject()->GetNetworkId() - numberPlayersJoined)->GetParent();
+        int id = grapple->GetNetworkObject()->GetNetworkId() % Replicated::PLAYERCOUNT;
+        auto playerObject = world->GetNetworkObject(grapple->GetNetworkObject()->GetNetworkId() - Replicated::PLAYERCOUNT)->GetParent();
         if (!chains[id * chainLinkCount]->IsActive()) continue;
 
         const Vector3 &playerPos = playerObject->GetTransform().GetPosition() + Matrix3(playerObject->GetTransform().GetOrientation()) * Replicated::HANDOFFSET;
