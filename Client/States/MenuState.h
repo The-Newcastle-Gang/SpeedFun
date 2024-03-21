@@ -12,6 +12,7 @@
 #include "lua.hpp"
 #include "utils.h"
 #include "SoundManager.h"
+#include "Resources.h"
 
 namespace NCL {
     namespace CSC8503 {
@@ -36,10 +37,14 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+            int keyHoldBack = 0;
+            int keyHoldCharacter = 0;
+            bool KeyHeldRepeat(int k) { return (k > 20 || k == 0) && k % 3 == 0; }
             SoundManager* soundManager;
             PhysicsSystem* physics;
             GameWorld* world;
             GameClient* baseClient;
+            LevelReader* reader; //this is only used for the level name map, not to read the actual levels.
             Canvas* canvas;
             std::unique_ptr<Font> menuFont;
             std::string statusText;
@@ -59,6 +64,8 @@ namespace NCL {
             int activeText;
             int textLimit;
 
+            int currentClientLevel = 0;
+
             bool isGameStarted;
             // Bad way to manage it, but we leave it for now.
             int connectState;
@@ -71,10 +78,16 @@ namespace NCL {
             void ConnectToGame(const string &address);
             void RegisterPackets();
             void ConnectedToServer();
+            void HandleLevelInt(int level);
             void StartGame(Element& _);
             void InitCanvas();
+            void LoadLevelThumbnails();
+            void IncreaseLevel(Element& element);
+            void DecreaseLevel(Element& element);
             void OptionHover(Element &element);
             void InitLua();
+            void UpdateLevelName(std::string levelName);
+            void UpdateLevelThumbnail(std::string levelName);
             void AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const string &id);
             void AlignCanvasElement(Element &element);
             void BeginSingleplayer(Element &_);
@@ -96,6 +109,8 @@ namespace NCL {
             void LeaveLobby(Element &element);
 
             void StartSingleplayer();
+
+            std::unordered_map<std::string, TextureBase*> levelThumbnails;
         };
     }
 }

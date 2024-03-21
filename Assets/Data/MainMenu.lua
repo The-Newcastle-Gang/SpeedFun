@@ -266,7 +266,7 @@ canvas = {
     lobby = {
         {
           rSize = Vector2:new(1,1),
-          color = Vector4:new(COLORS.menuBackground.x, COLORS.menuBackground.y, COLORS.menuBackground.z, 0.8),
+          color = Vector4:new(COLORS.menuBackground.x, COLORS.menuBackground.y, COLORS.menuBackground.z, 0.5),
           aPos = Vector2:new(0,0),
         },
         {
@@ -307,6 +307,48 @@ canvas = {
             },
             tags = { "uiTextHover" },
             id = "DisconnectLobby"
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/ArrowLeft.png",
+            aSize = Vector2:new(70, 70),
+            align = {
+                AlignTo("top", 157),
+                AlignTo("left", 120)
+            },
+            id = "DecreaseLevel"
+        },
+        {
+            color = COLORS.white,
+            image = "hellMain/ArrowRight.png",
+            aSize = Vector2:new(70, 70),
+            align = {
+                AlignTo("top", 157),
+                AlignTo("left", 450)
+            },
+            id = "IncreaseLevel"
+        },
+        {
+            text = {
+            text = "Select Level",
+            color = COLORS.white,
+            size = 0.45,
+            },
+            align = {
+                AlignTo("top", 200),
+                AlignTo("left", 210)
+            },
+            id = "LevelName"
+        },
+        {
+            color = COLORS.white,
+            image = "LevelThumbnails/Level 1 - Adam Test.png",
+            aSize = Vector2:new(480, 320),
+            align = {
+                AlignTo("top", 230),
+                AlignTo("left", 100)
+            },
+            id = "LevelThumbnail"
         },
     }
 }

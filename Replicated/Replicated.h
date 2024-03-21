@@ -44,6 +44,7 @@ public:
         SetNetworkActive,
         ToggleGrapple,
         SendMedalValues,
+        SetMenuLevel
 };
 
 
@@ -92,7 +93,9 @@ public:
     void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position, bool shouldNetwork);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
-
+    void AddSwingingBlock(GameObject* g, GameWorld& world);
+    void AddSpeedUpBlockToLevel(GameObject* g, GameWorld& world);
+    
     constexpr static int PLAYERCOUNT = 4;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
