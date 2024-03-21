@@ -65,6 +65,7 @@ public:
     static constexpr Vector4 GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
     static constexpr Vector4 SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
     static constexpr Vector4 BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
+    static constexpr Vector4 DEFAULT = Vector4(0.1f,0.1f,0.1f, 1.0f);
 
 
     enum PlayerAnimationStates {
@@ -92,7 +93,9 @@ public:
     void AddTestObjectToLevel(GameObject *g, GameWorld& world,Vector3 size, Vector3 position, bool shouldNetwork);
     void AddTriggerVolumeToWorld(Vector3 dimensions, GameObject *g, GameWorld& world);
     void CreatePlayer(GameObject *g, GameWorld& world);
-
+    void AddSwingingBlock(GameObject* g, GameWorld& world);
+    void AddSpeedUpBlockToLevel(GameObject* g, GameWorld& world);
+    
     constexpr static int PLAYERCOUNT = 4;
     constexpr static float SERVERHERTZ = 1.0f / 60.0f;
     constexpr static int CHANNELCOUNT = 2;
