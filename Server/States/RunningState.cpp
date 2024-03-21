@@ -244,7 +244,7 @@ void RunningState::SendWorldToClient() {
 }
 
 void RunningState::CreateGrapples() {
-    for (int i = 0; i < numPlayersActive; i++) {
+    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         grapples[i] = g;
@@ -315,11 +315,12 @@ void RunningState::CreatePlayers() {
     int currentPlayer = 1;
 
     Vector3 thisPlayerStartPos;
-    for(int i=0;i<numPlayersActive;i++){
+    for(int i=0;i<Replicated::PLAYERCOUNT;i++){
         thisPlayerStartPos = startPos + Vector3(0,0,1) * GetDirectionFromPlayerNumber(currentPlayer) * GetMagnitudeFromPlayerNumber(currentPlayer)* playerSeperation;
         playerAnimationInfo[i] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
+        if (numPlayersActive <= 0) player->SetActive(false);
         playerObjects[currentPlayer - 1] = player;
         currentPlayer++;
 
@@ -340,6 +341,7 @@ void RunningState::CreatePlayers() {
         player->AddComponent(new PlayerRespawner(player, 
             [this](int id) {this->DeathTriggerVolFunc(id); } //this was a workaround to avoid changing how the triggers work
         ));
+        numPlayersActive--;
     }
 }
 

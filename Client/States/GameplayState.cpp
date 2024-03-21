@@ -1157,12 +1157,14 @@ void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     Vector3 startPos = levelManager->GetLevelReader()->GetStartPosition();
-    for (int i=0; i<numberPlayersJoined; i++) {
+    for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         Vector3 thisPlayerStartPos = startPos + Vector3(0, 0, 1) * CGetDirectionFromPlayerNumber(currentPlayer) * CGetMagnitudeFromPlayerNumber(currentPlayer) * playerSeperation;
+
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
   
         player->GetTransform().SetPosition(thisPlayerStartPos);
+        if (numberPlayersJoined <= 0) player->SetActive(false);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1182,6 +1184,7 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
         currentPlayer++;
+        numberPlayersJoined--;
     }
 }
 
@@ -1357,7 +1360,7 @@ void GameplayState::UpdateGrapples(float dt) {
 }
 
 void GameplayState::CreateGrapples() {
-    for (int i = 0; i < numberPlayersJoined; i++) {
+    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
