@@ -926,6 +926,7 @@ GameObject* GameplayState::CreateChainLink() {
     world->AddGameObject(g, false);
     g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
     g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->GetRenderObject()->SetShouldInstance(true);
     g->SetActive(false);
     return g;
 }

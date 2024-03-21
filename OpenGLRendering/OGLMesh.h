@@ -27,8 +27,10 @@ namespace NCL {
 			void UploadToGPU(Rendering::RendererBase* renderer = nullptr) override;
 			void UpdateGPUBuffers(unsigned int startVertex, unsigned int vertexCount);
 
+            GLuint	GetVAO()			const { return vao;	}
+
 		protected:
-			GLuint	GetVAO()			const { return vao;	}
+
 			void BindVertexAttribute(int attribSlot, int bufferID, int bindingID, int elementCount, int elementSize, int elementOffset);
 
 			int		subCount;
