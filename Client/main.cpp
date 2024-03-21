@@ -48,7 +48,7 @@ int main() {
             debugMode = !debugMode;
         }
        
-      w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
+      w->SetTitle("Hell Runners");
 
         if(!debugMode){
             client->Update(dt);
