@@ -248,7 +248,7 @@ void main() {
 //
 //    fragColor = vec4(raySphere.xyz + hdrColor.xyz * (1 - raySphere.a), raySphere.a + hdrColor.a);
 
-    fragColor = vec4(hdrColor.rgb - border, step(0.99, border) + hdrColor.a);
+    fragColor = vec4(min(hdrColor.rgb, vec3(1.0)) - border, step(0.99, border) + hdrColor.a);
 
 
 
