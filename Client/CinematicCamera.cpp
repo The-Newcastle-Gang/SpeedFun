@@ -3,17 +3,24 @@
 using namespace NCL;
 using namespace CSC8503;
 
-void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename)
-{
+void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename) {
     std::ofstream file;
-    file.open(Assets::LEVELDIR + filename, std::ios_base::app);
+    file.open(Assets::CAMERADIR + filename, std::ios_base::app);
     file << camera->GetPosition().x << "," << camera->GetPosition().y << "," << camera->GetPosition().z
         << "," << camera->GetPitch() << "," << camera->GetYaw() << "\n";
     file.close();
 }
 
-Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
-{
+void CinematicCamera::AddInitialCamera(Vector3 position) {
+    cameraPositions.emplace_back(position);
+    pitches.emplace_back(0.68f);
+    yaws.emplace_back(269.43f);
+
+    maxCameras = cameraPositions.size();
+    if (isContinuous) { maxCameras--; } // avoid overflow
+}
+
+Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p) {
     Vector3 newPos = Vector3(
         start.x + (end.x - start.x) * p,
         start.y + (end.y - start.y) * p,
@@ -22,8 +29,7 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
     return newPos;
 }
 
-float NCL::CSC8503::CinematicCamera::LerpYaw(float start, float end, float p)
-{
+float CinematicCamera::LerpYaw(float start, float end, float p) {
     float difference = end - start;
     if (difference > 180.0f) { difference -= 360.0f; }
     if (difference <= -180.0f) { difference += 360.0f; }
@@ -31,16 +37,14 @@ float NCL::CSC8503::CinematicCamera::LerpYaw(float start, float end, float p)
 }
 
 
-void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
-{
+void CinematicCamera::ReadPositionsFromFile(std::string filename) {
     cameraPositions.clear();
-    std::ifstream file(Assets::LEVELDIR + filename);
+    std::ifstream file(Assets::CAMERADIR + filename);
     if (!file.is_open()) { std::cerr << "Cannot open file"; }
 
     std::string line;
     char _; // this is used to discard the commas. Just ignore it.
-    while (std::getline(file, line))
-    {
+    while (std::getline(file, line)) {
         Vector3 tempVec;
         float tempPitch;
         float tempYaw;
@@ -54,32 +58,14 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
 
     }
     file.close();
-
-    maxCameras = cameraPositions.size();
-    if (isContinuous) { maxCameras--; } // avoid overflow
 }
 
-void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
-{
-    timer += dt;
-    float percentage = timer / MAX_TIMER;
+void CinematicCamera::UpdateCinematicCamera(Camera* camera) {
+    currentCamera = (((int)std::floor(timer)) * (isContinuous ? 1 : 2)) % (maxCameras - 1);
+    float timerRemainder = std::fmodf(timer, 1.0f);
+    float percentage = timerRemainder / MAX_TIMER;
 
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
     camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
     camera->SetYaw(LerpYaw(yaws[currentCamera], yaws[currentCamera + 1], percentage));
-
-    if (timer >= MAX_TIMER)
-    {
-        timer = 0.0f;
-        if (isContinuous)
-        {
-            currentCamera++;
-        }
-        else
-        {
-            currentCamera += 2;
-        }
-
-        if (currentCamera >= maxCameras) { currentCamera = 0; }
-    }
 }

@@ -19,6 +19,7 @@
 #include "SoundManager.h"
 #include "AnimatorObject.h"
 #include "LevelManager.h"
+#include "CinematicCamera.h"
 
 #include <thread>
 #include <iostream>
@@ -332,6 +333,7 @@ namespace NCL {
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
 
+            CinematicCamera* cinematicCamera;
             std::unordered_map<int, MeshMaterial*> playerTextures;
         };
     }
