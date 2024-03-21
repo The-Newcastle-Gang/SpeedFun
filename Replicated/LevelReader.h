@@ -81,9 +81,17 @@ public:
     [[nodiscard]] std::vector<SwingingPrimitive*> GetSwingingPList() const { return swingingPrimitives; }
     [[nodiscard]] std::vector<SpringPrimitive*> GetSpringPList() const { return springPrimitives; }
     [[nodiscard]] std::vector<PointLightInfo> GetPointLights() const { return pointLights; }
+    [[nodiscard]] Vector3 GetMedalTimes() const { return medalTimes; }
 
     [[nodiscard]] std::vector<GroundCubePrimitive*> GetGroundCubes() const { return groundCubes; }
     [[nodiscard]] std::vector<Vector3> GetCheckPointPositions() const { return checkPointPositions; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetSpeedupBlockPrimitiveList() const { return speedupBlockPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetBridgePrimitiveList() const { return bridgePrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetTrapBlockPrimitiveList() const { return trapBlockPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetRayEnemyPrimitiveList() const { return rayEnemyPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetRayTriggerPrimitiveList() const { return rayenemytriggerPrimitives; }
+    [[nodiscard]] std::vector<PrimitiveGameObject*> GetBridgeTriggerPrimitiveList() const { return bridgetriggerPrimitives; }
+
 
     int GetLevelSize() const { return primGOList.size();}
 	bool HasReadLevel(const std::string& source);
@@ -103,6 +111,15 @@ protected:
     std::vector<SwingingPrimitive*> swingingPrimitives;
     std::vector<SpringPrimitive*> springPrimitives;
     std::vector<PointLightInfo> pointLights;
+
+    std::vector<PrimitiveGameObject*> speedupBlockPrimitives;
+    std::vector<PrimitiveGameObject*> bridgePrimitives;
+    std::vector<PrimitiveGameObject*> trapBlockPrimitives;
+    std::vector<PrimitiveGameObject*> rayEnemyPrimitives;
+    std::vector<PrimitiveGameObject*> rayenemytriggerPrimitives;
+    std::vector<PrimitiveGameObject*> bridgetriggerPrimitives;
+
+    Vector3 medalTimes; //plat, gold, then silver
 
     std::vector<GroundCubePrimitive*> groundCubes;
 

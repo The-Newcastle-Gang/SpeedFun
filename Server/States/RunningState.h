@@ -13,6 +13,12 @@
 #include "PlayerRespawner.h"
 #include "Swinging.h"
 #include "Spring.h"
+#include "TestBridge.h"
+#include "BridgeTrigger.h"
+#include "TrapObject.h"
+#include "RayEnemyFollow.h"
+#include "RayEnemyShoot.h"
+#include "SpeedUpBlock.h"
 
 #include <iostream>
 #include <thread>
@@ -94,7 +100,7 @@ namespace NCL {
             std::unordered_map<int, GameObject*> playerObjects;
             std::unordered_map<int, bool> playersFinished;
             std::unordered_map<int, float> playerTimes;
-
+            int numPlayerFinished = 0;
             bool hasAllPlayersFinished = false;
 
             void ResetLevelInfo();
@@ -153,6 +159,9 @@ namespace NCL {
             void GrappleUpdate(GameObject *player, Vector3 position);
             void GrappleStart(GameObject *player, Vector3 direction);
             void CancelGrapple(int id);
+
+            RayEnemyFollow* re;
+            TestBridge* ib;
         };
     }
 }

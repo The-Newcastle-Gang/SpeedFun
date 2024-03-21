@@ -52,6 +52,8 @@ bool LevelManager::TryReadLevel(std::string levelSource) {
         std::cerr << "No file available. Check " + Assets::LEVELDIR << std::endl;
         return false;
     }
+    medalTimes = levelReader->GetMedalTimes();
+    stageTimer->SetMedalValues(medalTimes);
     return true;
 }
 

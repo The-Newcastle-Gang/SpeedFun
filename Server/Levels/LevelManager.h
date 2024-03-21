@@ -52,6 +52,8 @@ public:
     float GetSilverTime() { return stageTimer->GetSilverTime(); }
     Medal GetCurrentMedal() { return stageTimer->GetCurrentMedal(stageTimer->GetElapsedTime()); }
 
+
+    Vector3 GetMedalTimes() { return medalTimes; }
     int GetCurrentMedal() const;
     Vector4 GetCurrentMedalColour() const;
 
@@ -77,6 +79,8 @@ protected:
     } currentLevelDetails;
 
     int currentMedal;
+
+    Vector3 medalTimes;
 
     int currentLevel = 0;
     int totalLevels = 0;
