@@ -73,7 +73,7 @@ void Replicated::AddGrapplesToWorld(GameObject *g, GameWorld &world, int index) 
     g->SetBoundingVolume((CollisionVolume*)volume);
     g->GetTransform()
         .SetScale(Vector3(meshSize, meshSize, meshSize))
-        .SetPosition(Vector3(index * 10, 10, 10));
+        .SetPosition(Vector3(index * 10, -500, 10));
 
     g->SetTag(Tag::GRAPPLE);
 
