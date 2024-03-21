@@ -41,8 +41,12 @@ public:
     ~Client();
     void Update(float dt);
 
+    bool ShouldExit() { return shouldExit; }
+    void SetShouldExit(bool e) { shouldExit = e; }
+
 private:
 
+    bool shouldExit = false;
     std::unique_ptr<GameWorld> world;
     std::unique_ptr<GameTechRenderer> renderer;
     std::unique_ptr<Replicated> replicated;

@@ -37,6 +37,7 @@ namespace NCL {
 #else
             GameTechRenderer* renderer;
 #endif
+
             int keyHoldBack = 0;
             int keyHoldCharacter = 0;
             bool KeyHeldRepeat(int k) { return (k > 20 || k == 0) && k % 3 == 0; }
