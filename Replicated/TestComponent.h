@@ -19,7 +19,7 @@ namespace NCL::CSC8503 {
 		}
 
 		void PhysicsUpdate(float dt)override {
-			std::cout << "PHYS UPDATE TEST" << "\n";
+			//std::cout << "PHYS UPDATE TEST" << "\n";
 		}
 	};
 }
