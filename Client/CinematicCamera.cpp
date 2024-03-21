@@ -1,4 +1,5 @@
 #include "CinematicCamera.h"
+#include "CinematicCamera.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -10,6 +11,16 @@ void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename)
     file << camera->GetPosition().x << "," << camera->GetPosition().y << "," << camera->GetPosition().z
         << "," << camera->GetPitch() << "," << camera->GetYaw() << "\n";
     file.close();
+}
+
+void CinematicCamera::AddInitialCamera(Vector3 position)
+{
+    cameraPositions.emplace_back(position);
+    pitches.emplace_back(0.68f);
+    yaws.emplace_back(269.43f);
+
+    maxCameras = cameraPositions.size();
+    if (isContinuous) { maxCameras--; } // avoid overflow
 }
 
 Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
@@ -54,32 +65,22 @@ void CinematicCamera::ReadPositionsFromFile(std::string filename)
 
     }
     file.close();
-
-    maxCameras = cameraPositions.size();
-    if (isContinuous) { maxCameras--; } // avoid overflow
 }
 
-void CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
+void CinematicCamera::UpdateCinematicCamera(Camera* camera)
 {
-    timer += dt;
-    float percentage = timer / MAX_TIMER;
+    currentCamera = (((int)std::floor(timer)) * (isContinuous ? 1 : 2)) % (maxCameras - 1);
+    float timerRemainder = std::fmodf(timer, 1.0f);
 
+    float percentage = timerRemainder / MAX_TIMER;
+
+    std::cout << "Camera: " << currentCamera << std::endl;
+
+    
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
     camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
     camera->SetYaw(LerpYaw(yaws[currentCamera], yaws[currentCamera + 1], percentage));
 
-    if (timer >= MAX_TIMER)
-    {
-        timer = 0.0f;
-        if (isContinuous)
-        {
-            currentCamera++;
-        }
-        else
-        {
-            currentCamera += 2;
-        }
+    
 
-        if (currentCamera >= maxCameras) { currentCamera = 0; }
-    }
 }

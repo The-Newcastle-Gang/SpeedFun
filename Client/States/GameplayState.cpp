@@ -541,6 +541,7 @@ void GameplayState::Update(float dt) {
 
         case GameplayStateEnums::COUNTDOWN:{
             UpdateCountdown(dt);
+            if(dt<1.0f) cinematicCamera->UpdateTimer(dt);
             break;
         }
 
@@ -589,7 +590,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
         StrafeCamera(dt);
         if (state == GameplayStateEnums::COUNTDOWN)
         {
-            cinematicCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+            cinematicCamera->UpdateCinematicCamera(world->GetMainCamera());
         }
         else
         {
@@ -652,6 +653,8 @@ void GameplayState::UpdateEndOfLevel(float dt)
         shouldMoveToNewLevel = false;
         Window::GetWindow()->ShowOSPointer(false);
         state = GameplayStateEnums::COUNTDOWN;
+        cinematicCamera->ResetCurrentCamera();
+        cinematicCamera->ResetTimer();
     }
     UpdateAndRenderWorld(dt);
 }
@@ -1084,6 +1087,7 @@ void GameplayState::InitCamera() {
     cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
     cinematicCamera = new CinematicCamera();
     cinematicCamera->ReadPositionsFromFile("autocamera.txt");
+    cinematicCamera->AddInitialCamera(levelManager->GetLevelReader()->GetStartPosition());
 }
 
 void GameplayState::InitWorld() {

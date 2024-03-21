@@ -19,10 +19,17 @@ namespace NCL
 		{
 		public:
 			void ReadPositionsFromFile(std::string filename);
-			void UpdateCinematicCamera(Camera* camera, float dt);
+			void UpdateCinematicCamera(Camera* camera);
+			void UpdateTimer(float dt) { timer += dt; }
 			void WriteCameraInfo(Camera* camera, std::string filename);
 
 			void SetIsContinuous(bool continuous) { isContinuous = continuous; }
+
+			void AddInitialCamera(Vector3 position);
+			void ResetTimer() { timer = 0.0f; }
+			void ResetCurrentCamera() { currentCamera = 0; }
+			float GetTimer() { return timer; }
+			void SetTimer(float t) { timer = t; }
 
 		protected:
 			Vector3 LerpVector3(Vector3& start, Vector3 end, float p);
@@ -37,7 +44,7 @@ namespace NCL
 			int maxCameras;
 			bool isContinuous = false;
 
-			float timer = 0;
+			float timer = 0.0f;
 		};
 	}
 }
