@@ -813,6 +813,8 @@ void RunningState::BuildLevel(const std::string &levelName)
 
         Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
         g->AddComponent(swing);
+        DamagingObstacle* dO = new DamagingObstacle(g, [this](GameObject* player) { return GetIdFromPlayerObject(player); });
+        g->AddComponent(dO);
     }
 }
 
