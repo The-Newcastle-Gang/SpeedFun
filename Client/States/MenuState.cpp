@@ -28,9 +28,9 @@ void MenuState::SendLevelSelectPacket(int level) {
 
 void MenuState::InitMenuSounds() {
     soundManager->SM_AddSoundToLoad("se_select00.wav");
-    soundManager->SM_AddSoundToLoad("rainer menu.ogg");
+    soundManager->SM_AddSoundToLoad("the-longest-night-of-this-winter-158699.wav");
     soundManager->SM_LoadSoundList();
-    soundManager->SM_PlaySound("rainer menu.ogg");
+    soundManager->SM_PlaySound("the-longest-night-of-this-winter-158699.wav");
 }
 
 MenuState::~MenuState() {
@@ -113,6 +113,7 @@ void MenuState::BeginSingleplayer(Element& _) {
 }
 
 void MenuState::ShowMultiplayerOptions(Element& _) {
+    baseClient->SetSinglePlayer(false);
     canvas->PushActiveLayer("multiplayer");
 }
 
