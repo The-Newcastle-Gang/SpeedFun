@@ -205,9 +205,9 @@ void GameplayState::InitTimerBar(){
             .SetTexture(resources->GetTexture("firemask.jpg"))
             .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
 
-    if (isSinglePlayer) {
-        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
-    }
+    
+    timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
+    
     
     
     //this is the timer text me thinks
@@ -404,7 +404,12 @@ void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
     // guards on the PlaySound method.
 
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+    soundManager->SM_AddSongsToLoad({
+        "the-final-boss-battle-158700.wav",
+        "boss-fight-143121.wav",
+        "a-dark-desolate-world-15695.wav",
+        "the-dying-110458.wav"
+        });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundEffects.push_back(songToPlay);
@@ -587,11 +592,10 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
 
         if (firstPersonPosition) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
-
         }
         world->UpdateWorld(dt);
     }
-    
+    if(!baseClient->IsSinglePlayer())    UpdatePositionRankings();
     ResetCameraAnimation();
     ReadNetworkPackets();
 
@@ -653,6 +657,7 @@ void GameplayState::ReadNetworkFunctions() {
         switch (packet.functionId) {
             case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
+                selfID = handler.Unpack<int>();
                 AssignPlayer(networkId);
             } break;
 
@@ -802,6 +807,7 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::GameInfo_PlayerPositions): {
                 int unpackFlag = 0;
+                
                 while (unpackFlag != -999) {
                     unpackFlag = handler.Unpack<int>();
                     if (unpackFlag == -999) continue;
@@ -813,12 +819,43 @@ void GameplayState::ReadNetworkFunctions() {
                     }
                     Vector3 position = handler.Unpack<Vector3>();
                     playerPositions[unpackFlagID] = position;
+                    
                 }
+                
             }
         }
     }
 }
 
+
+void GameplayState::UpdatePositionRankings() {
+    if (playerPositions.size() == 0) return;
+    int rankPlacement = 0;
+    float selfPos = CalculateCompletion(playerPositions["blip_" + std::to_string(selfID)]);
+    for (int i = 0; i < playerPositions.size(); i++) {
+        if (i == selfID) continue;
+        if (selfPos < CalculateCompletion(playerPositions["blip_" + std::to_string(i)])) {
+            rankPlacement++;
+        }
+    }
+    switch (rankPlacement + 1) {
+    case(Medal::Gold):
+        positionColor = Replicated::GOLD;
+        break;
+
+    case(Medal::Silver):
+        positionColor = Replicated::SILVER;
+        break;
+
+    case(Medal::Bronze):
+        positionColor = Replicated::BRONZE;
+        break;
+
+    default:
+        positionColor = Replicated::DEFAULT;
+        break;
+    }
+}
 void GameplayState::OnEndReached(DataHandler& handler)
 {
     int networkId = handler.Unpack<int>();
@@ -1008,8 +1045,14 @@ void GameplayState::TogglePause() {
     isPaused = !isPaused;
     Window::GetWindow()->LockMouseToWindow(!isPaused);
     renderer->SetSpeedActive(!isPaused);
-    if (isPaused) canvas->PushActiveLayer("PauseLayer");
-    else canvas->PopActiveLayer();
+    if (isPaused) {
+        canvas->PushActiveLayer("PauseLayer");
+        soundManager->SM_PauseSound(soundManager->GetCurrentSong());
+    }
+    else {
+        canvas->PopActiveLayer();
+        soundManager->SM_ResumeSound(soundManager->GetCurrentSong());
+    }
 }
 
 void GameplayState::FinishLoading() {
@@ -1074,7 +1117,7 @@ void GameplayState::CreatePlayers() {
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-
+  
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1400,10 +1443,16 @@ void GameplayState::UpdateTimerUI(Element& element, float dt) {
 }
 
 void GameplayState::UpdateTimerBox(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-    float positionRatio = timerRatio;
-    element.AlignCenter((int)round(-400 + 30 / 2 + (800 - 30) * positionRatio))
-    .SetColor(timerBarColor);
+    if (isSinglePlayer) {
+        if (medalTimes[0] == -1.0f) return;
+        float positionRatio = timerRatio;
+        element.AlignCenter((int)round(-400 + 30 / 2 + (800 - 30) * positionRatio))
+            .SetColor(timerBarColor);
+        return;
+    }
+
+    element.SetColor(positionColor);
+
 }
 
 void GameplayState::UpdateTimerText(Element& element, float dt) {
@@ -1511,6 +1560,7 @@ void GameplayState::OnPauseHoverEnter(Element &element) {
         selectedPause = 1;
     }
 }
+
 void GameplayState::OnPauseHoverExit(Element& element) {
 
     element.textData.color = { 0.5,0.5,0.5,1 };

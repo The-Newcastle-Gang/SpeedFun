@@ -100,7 +100,7 @@ namespace NCL {
             std::unordered_map<int, GameObject*> playerObjects;
             std::unordered_map<int, bool> playersFinished;
             std::unordered_map<int, float> playerTimes;
-
+            int numPlayerFinished = 0;
             bool hasAllPlayersFinished = false;
 
             void ResetLevelInfo();

@@ -64,6 +64,7 @@ public:
     static constexpr Vector4 GOLD = Vector4(0.788f, 0.69f, 0.216f, 1.0f);
     static constexpr Vector4 SILVER = Vector4(0.843f, 0.843f, 0.843f, 1.0f);
     static constexpr Vector4 BRONZE = Vector4(0.416f, 0.22f, 0.02f, 1.0f);
+    static constexpr Vector4 DEFAULT = Vector4(0.1f,0.1f,0.1f, 1.0f);
 
 
     enum PlayerAnimationStates {
