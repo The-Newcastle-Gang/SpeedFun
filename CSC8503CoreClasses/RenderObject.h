@@ -77,6 +77,14 @@ namespace NCL {
 				return isDepthTestRendered;
 			}
 
+            bool ShouldInstance() const {
+                return shouldInstance;
+            }
+
+            void SetShouldInstance(bool b) {
+                shouldInstance = b;
+            }
+
 		protected:
 			MeshGeometry*	mesh;
             MeshMaterial* meshMaterial;
@@ -87,6 +95,7 @@ namespace NCL {
 			Vector4			colour;
             Vector3         meshScale;
             Vector3         meshOffset;
+            bool            shouldInstance;
 			bool			isDepthTestRendered;
 		};
 	}

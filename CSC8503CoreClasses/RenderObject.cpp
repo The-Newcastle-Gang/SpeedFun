@@ -16,6 +16,7 @@ RenderObject::RenderObject(Transform* parentTransform, MeshGeometry* mesh, Textu
     this->animatorObject = nullptr;
     this->meshMaterial = nullptr;
 	this->isDepthTestRendered = true;
+    this->shouldInstance = false;
 }
 
 RenderObject::~RenderObject() {
