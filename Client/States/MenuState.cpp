@@ -14,6 +14,8 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     hoverShader         = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
     titleShader         = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
     backScrollShader    = renderer->LoadShader("defaultUI.vert", "backScroll.frag");
+    UIShine             = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
+
     activeText = -1;
     textLimit = 15;
     reader = new LevelReader(); //this could be shared between states but its not big so should be okay.
@@ -212,7 +214,7 @@ void MenuState::UpdateLevelName(std::string levelName) {
 
 void MenuState::UpdateLevelThumbnail(std::string levelName) {
     auto& imageElement = canvas->GetElementById("LevelThumbnail", "lobby");
-    imageElement.SetTexture(levelThumbnails[levelName]);
+    imageElement.SetTexture(levelThumbnails[levelName]).SetShader(UIShine);
 }
 
 void MenuState::JoinLobby() {

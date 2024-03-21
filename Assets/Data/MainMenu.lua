@@ -253,16 +253,39 @@ canvas = {
     lobby = {
         {
           rSize = Vector2:new(1,1),
-          color = Vector4:new(COLORS.menuBackground.x, COLORS.menuBackground.y, COLORS.menuBackground.z, 0.5),
+          color = Vector4:new(COLORS.menuBackground.x, COLORS.menuBackground.y, COLORS.menuBackground.z, 1.0),
           aPos = Vector2:new(0,0),
+        },
+        {
+            color = COLORS.white,
+            rSize = Vector2:new(1,1),
+            tags ={
+                "menuScroll"
+            }
+        },
+        {
+          aSize = Vector2:new(540, 455),
+          color = Vector4:new(1,1,1,1.0),
+          align = {
+              AlignTo("right", 90),
+              AlignTo("middle", 0),
+          }
         },
         {
             aSize = Vector2:new(530, 450),
             color = COLORS.menuBackground,
             align = {
-                AlignTo("right", 615 - 530),
-                AlignTo("top", 117),
+                AlignTo("right", 90),
+                AlignTo("middle", 0),
             },
+        },
+        {
+            aSize = Vector2:new(530, 450),
+            color = COLORS.menuBackground,
+            align = {
+                AlignTo("left", 90),
+                AlignTo("middle", 0),
+            }
         },
         {
             color = COLORS.white,

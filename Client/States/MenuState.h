@@ -49,6 +49,7 @@ namespace NCL {
             ShaderBase* hoverShader;
             ShaderBase* titleShader;
             ShaderBase* backScrollShader;
+            ShaderBase* UIShine;
             int hoverBox;
             int mHoverBox;
             int selected;
