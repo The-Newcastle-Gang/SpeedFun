@@ -230,7 +230,6 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
 void PlayerMovement::InterruptGrapple()
 {
     SwitchToState(&air);
-    OnGrappleLeave();
 }
 
 bool PlayerMovement::GroundCheck() {
