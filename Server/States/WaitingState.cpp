@@ -9,7 +9,6 @@ WaitingPlayers::WaitingPlayers(GameServer* pServerBase) : State() {
 }
 
 WaitingPlayers::~WaitingPlayers() {
-
 }
 
 void WaitingPlayers::RegisterPackets() {
@@ -24,6 +23,7 @@ void WaitingPlayers::AddPlayer(int peerId) {
     PlayerInfo info{};
     info.peerId = peerId;
     serverBase->AddPlayerInfo(peerId, info);
+    SendLevelSelected(selectedLevel);
 }
 
 void WaitingPlayers::StartGame() {
@@ -44,10 +44,18 @@ void WaitingPlayers::ReceivePacket(int type, GamePacket *payload, int source) {
             else if (packet->functionId == Replicated::SetLevel) {
                 DataHandler handler(&packet->data);
                 selectedLevel = handler.Unpack<int>();
-                std::cout << selectedLevel<<" SELECTED!!\n";
+                std::cout << selectedLevel << " SELECTED ---SERVER!!\n";
+                SendLevelSelected(selectedLevel);
             }
         } break;
     }
+}
+
+void WaitingPlayers::SendLevelSelected(int level) {
+    FunctionData data;
+    DataHandler handler(&data);
+    handler.Pack(level);
+    serverBase->CallRemoteAll(Replicated::SetMenuLevel, &data);
 }
 
 void WaitingPlayers::OnEnter() {

@@ -374,6 +374,7 @@ void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
     displayDebugger = false;
+    playerPositions.clear();
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
     world->ClearAndErase();
@@ -571,7 +572,6 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(isPaused);
-    Window::GetWindow()->LockMouseToWindow(!isPaused);
     if (!isPaused)
     {
         UpdateGrapples(dt);
@@ -924,6 +924,7 @@ GameObject* GameplayState::CreateChainLink() {
     world->AddGameObject(g, false);
     g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
     g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->GetRenderObject()->SetShouldInstance(true);
     g->SetActive(false);
     return g;
 }
@@ -1042,6 +1043,7 @@ void GameplayState::SendInputData() {
 void GameplayState::TogglePause() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
     isPaused = !isPaused;
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
     renderer->SetSpeedActive(!isPaused);
     if (isPaused) {
         canvas->PushActiveLayer("PauseLayer");
@@ -1155,6 +1157,13 @@ void GameplayState::InitLevel(int level) {
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
     auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
+    auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
+    auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
+    auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
+    auto rayEnemyList = levelManager->GetLevelReader()->GetRayEnemyPrimitiveList();
+    auto rayenemyTriList = levelManager->GetLevelReader()->GetRayTriggerPrimitiveList();
+    auto bridgeTriList = levelManager->GetLevelReader()->GetBridgeTriggerPrimitiveList();
+
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
@@ -1164,20 +1173,20 @@ void GameplayState::InitLevel(int level) {
     }
 
     for (auto &x : opList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Oscillator");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
     }
 
     for (auto &x : harmOpList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Harmful");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
     for (auto& x : springList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Spring");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
@@ -1185,7 +1194,7 @@ void GameplayState::InitLevel(int level) {
 
     for (auto& x : swingpList)
     {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Swinging");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
@@ -1194,6 +1203,62 @@ void GameplayState::InitLevel(int level) {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
+
+    for (auto& x : speedUpList) {
+        auto temp = new GameObject("SpeedUp");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeList) {
+        auto temp = new GameObject("Bridge");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,1.0f, 1.0f });
+    }
+
+    for (auto& x : trapBlockList) {
+        auto temp = new GameObject("TrapBlock");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f, 0.0f, 1.0f });
+    }
+
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");  //this needs to be reworked as this will not be freed
+
+    for (auto& x : rayEnemyList) {
+        auto temp = new GameObject("RayEnemy");
+        MeshGeometry* maxMesh = resources->GetMesh("Rig_Maximilian.msh");
+        maxMesh->AddAnimationToMesh("Default", resources->GetAnimation("Max_Idle.anm"));
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), maxMesh, nullptr, playerShader));
+  
+        temp->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+        temp->GetRenderObject()->SetColour({ 1.0f, 1.0f, 1.0f, 1.0f });
+        temp->GetRenderObject()->SetMeshOffset(Vector3(0,-1.7f,0));
+
+        temp->SetAnimatorObject(new AnimatorObject(maxMesh->GetAnimationMap()));
+        temp->GetAnimatorObject()->SetAnimation("Default");
+
+        temp->GetRenderObject()->SetAnimatorObject(temp->GetAnimatorObject());
+
+    }
+
+    for (auto& x : rayenemyTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f, 0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f, 0.0f, 1.0f });
+    }
+
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -1550,7 +1615,7 @@ void GameplayState::RenderFlairObjects(){
 }
 
 void GameplayState::AddLava(Vector3 position){
-    auto LavaQuad = new GameObject();
+    auto LavaQuad = new GameObject("LavaQuad");
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
@@ -1560,7 +1625,7 @@ void GameplayState::AddLava(Vector3 position){
 
 void GameplayState::AddEndPortal(Vector3 position){
 
-    auto PortalQwaud = new GameObject();
+    auto PortalQwaud = new GameObject("Portal");
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));

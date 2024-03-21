@@ -92,6 +92,8 @@ namespace NCL {
             void SetDebugLineBufferSizes(size_t newVertCount);
 
             vector<const RenderObject*> activeObjects;
+            std::vector<Matrix4> chainTransforms;
+            RenderObject* chainObject;
 
 
             bool doDeferred = false;
@@ -107,6 +109,8 @@ namespace NCL {
             GLuint lightFBO;
             GLuint fxaaFBO;
 
+            GLuint instanceVBO;
+
             OGLShader* combineShader;
             OGLShader* pointLightShader;
             OGLShader* fxaaShader;
@@ -115,6 +119,7 @@ namespace NCL {
             OGLShader*  skyboxShader;
             OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
+            OGLShader* instancedShader;
             GLuint		skyboxTex;
 
             OGLTexture* noiseTexture;
@@ -207,6 +212,8 @@ namespace NCL {
             float lavaHeight = 0.0f;
 
             void ApplyFXAA();
+
+            void RenderMeshInstanced(RenderObject *object, vector<Matrix4> &transforms);
         };
     }
 }
