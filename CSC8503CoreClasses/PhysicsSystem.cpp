@@ -190,6 +190,7 @@ void PhysicsSystem::UpdateCollisionList() {
 			++i;
 		}
 	}
+    DebugMode::SetCollisionCount(allCollisions.size());
     if (shouldClear) { //we need this in case an OnCollision method needs to clear the collision list
         Clear();
     }
