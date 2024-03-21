@@ -35,7 +35,7 @@ void GameClient::UpdateDiagnostics(Diagnostics& d) {
     d.packetCount++;
     auto timeSinceLastPacket = d.gameTimer->GetTimeDeltaSeconds();
     if (timeSinceLastPacket > 0.1) {
-        std::cout << "Delay in packets recieved: " << timeSinceLastPacket << std::endl;
+        //std::cout << "Delay in packets recieved: " << timeSinceLastPacket << std::endl;
     }
 }
 
@@ -59,7 +59,7 @@ void GameClient::UpdateClient() {
     ENetEvent event;
     while (enet_host_service(netHandle, &event, 0) > 0) {
         if (event.type == ENET_EVENT_TYPE_CONNECT) {
-            std::cout << "Connected to server!" << std::endl;
+            //std::cout << "Connected to server!" << std::endl;
             serverConnected.publish();
         } else if (event.type == ENET_EVENT_TYPE_RECEIVE) {
             auto packet = (GamePacket*)event.packet->data;

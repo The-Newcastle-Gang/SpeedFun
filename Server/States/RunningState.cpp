@@ -455,8 +455,6 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
         trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
-
-        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 10.0f);
     }
 }
 

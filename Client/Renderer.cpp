@@ -302,7 +302,7 @@ GLuint GameTechRenderer::CreateHDRFramebuffer(GLuint colorBuffer, GLuint depthTe
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "Framebuffer is jover" << std::endl;
+        //std::cout << "Framebuffer isn't active" << std::endl;
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return f;
@@ -371,7 +371,7 @@ void GameTechRenderer::LoadSkybox() {
     for (int i = 0; i < 6; ++i) {
         TextureLoader::LoadTexture(filenames[i], texData[i], width[i], height[i], channels[i], flags[i]);
         if (i > 0 && (width[i] != width[0] || height[0] != height[0])) {
-            std::cout << __FUNCTION__ << " cubemap input textures don't match in size?\n";
+            //std::cout << __FUNCTION__ << " cubemap input textures don't match in size?\n";
             return;
         }
     }
@@ -561,7 +561,7 @@ void GameTechRenderer::InitRayMarching() {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rayMarchTexture, 0);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "Framebuffer is jover" << std::endl;
+        //std::cout << "Framebuffer is jover" << std::endl;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -790,6 +790,9 @@ void GameTechRenderer::RenderCamera() {
 
         if (!i->IsDepthTested()) {
             glDepthMask(GL_FALSE);
+        }
+        else {
+            glDepthMask(GL_TRUE);
         }
 
         Vector3 scale = (*i).GetMeshScale();
@@ -1226,7 +1229,7 @@ void GameTechRenderer::RenderText(std::string text, Font* font, float x, float y
 std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, int size) {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        //std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
         return nullptr;
     }
 
@@ -1234,8 +1237,8 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, in
 
     FT_Face face;
     if (FT_New_Face(ft, filePath.c_str(), 0, &face)) {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-        std::cout << filePath.c_str() << std::endl;
+        //std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        //std::cout << filePath.c_str() << std::endl;
         return nullptr;
     }
 
@@ -1243,7 +1246,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, in
 
 
     if (FT_Load_Char(face, 'X', FT_LOAD_RENDER)) {
-        std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+        //std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
         return nullptr;
     }
 
@@ -1254,7 +1257,7 @@ std::unique_ptr<Font> GameTechRenderer::LoadFont(const std::string& fontName, in
     for (unsigned char c = 0; c < 128; c++) {
 
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-            std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+            //std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
             continue;
         }
 

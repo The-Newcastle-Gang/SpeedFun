@@ -21,6 +21,13 @@ namespace NCL {
             static void StartCostClock();
             static void EndCostClock(int idx);
 
+
+            static void SetCollisionCount(int colCount) {
+                collisionCount = colCount;
+            }
+
+
+
         protected:
             static void DisplayFPSCount(float dt);
             static void DisplayCollisionInfo();
@@ -33,6 +40,8 @@ namespace NCL {
 
             static double GetCurrentCPUVal();
             static double OurCurrentUsage;
+            static int collisionCount;
+
 
             static std::chrono::steady_clock::time_point start;
             static std::chrono::steady_clock::time_point end;

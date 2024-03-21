@@ -12,7 +12,7 @@ NetworkBase::~NetworkBase()	{
 
 void NetworkBase::Initialise() {
 	if (enet_initialize() != 0) {
-        std::cout << "Error occured while intiliasing enet" << std::endl;
+        //std::cout << "Error occured while intiliasing enet" << std::endl;
     }
 }
 
@@ -33,7 +33,7 @@ bool NetworkBase::ProcessPacket(GamePacket* packet, int peerID) {
         return true;
     }
 
-    std::cout << __FUNCTION__ << " no handler for packet type " << packet->type << std::endl;
+    //std::cout << __FUNCTION__ << " no handler for packet type " << packet->type << std::endl;
 
     return false;
 

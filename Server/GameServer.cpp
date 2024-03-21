@@ -43,7 +43,7 @@ bool GameServer::Initialise() {
     netHandle = enet_host_create(&address, clientMax, Replicated::CHANNELCOUNT, 0, 0);
 
     if (!netHandle) {
-        std::cout << __FUNCTION__ << " failed to create network handle!" << std::endl;
+        //std::cout << __FUNCTION__ << " failed to create network handle!" << std::endl;
         return false;
     }
 
@@ -77,7 +77,7 @@ bool GameServer::UpdateDiagnostics(Diagnostics& d) {
     }
 
     if (timeSinceLastPacket > 0.1) {
-        std::cout << "Delay in packets sent" << std::endl;
+        //std::cout << "Delay in packets sent" << std::endl;
     }
 
     return true;
@@ -107,7 +107,7 @@ void GameServer::UpdateServer() {
         int peer = p->incomingPeerID;
 
         if (type == ENetEventType::ENET_EVENT_TYPE_CONNECT) {
-            std::cout << "Server: New client connected" << std::endl;
+            //std::cout << "Server: New client connected" << std::endl;
             PlayerInfo info{};
             AddPlayerInfo(peer, info);
             idToPeer[peer] = p;
@@ -115,7 +115,7 @@ void GameServer::UpdateServer() {
         }
 
         else if (type == ENetEventType::ENET_EVENT_TYPE_DISCONNECT) {
-            std::cout << "Server: A client has disconnected" << std::endl;
+            //std::cout << "Server: A client has disconnected" << std::endl;
             idToPeer.erase(peer);
             RemovePlayerInfo(peer);
             playerLeft.publish(peer);

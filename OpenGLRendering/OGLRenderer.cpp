@@ -101,7 +101,7 @@ void OGLRenderer::BindShader(ShaderBase*s) {
 		boundShader = oglShader;
 	}
 	else {
-		std::cout << __FUNCTION__ << " has received invalid shader?!" << std::endl;
+		//std::cout << __FUNCTION__ << " has received invalid shader?!" << std::endl;
 		boundShader = nullptr;
 	}
 }
@@ -113,14 +113,14 @@ void OGLRenderer::BindMesh(MeshGeometry*m) {
 	}
 	else if (OGLMesh* oglMesh = dynamic_cast<OGLMesh*>(m)) {
 		if (oglMesh->GetVAO() == 0) {
-			std::cout << __FUNCTION__ << " has received invalid mesh (no vao)?!" << std::endl;
+			//std::cout << __FUNCTION__ << " has received invalid mesh (no vao)?!" << std::endl;
 		}
         if (boundMesh == m)return;
 		glBindVertexArray(oglMesh->GetVAO());
 		boundMesh = oglMesh;
 	}
 	else {
-		std::cout << __FUNCTION__ << " has received invalid mesh?!" << std::endl;
+		//std::cout << __FUNCTION__ << " has received invalid mesh?!" << std::endl;
 		boundMesh = nullptr;
 	}
 }
@@ -135,11 +135,11 @@ void OGLRenderer::BindMeshMaterial(MeshMaterial* m) {
 
 void OGLRenderer::DrawBoundMesh(int subLayer, int numInstances) {
 	if (!boundMesh) {
-		std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
+		//std::cout << __FUNCTION__ << " has been called without a bound mesh!" << std::endl;
 		return;
 	}
 	if (!boundShader) {
-		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
+		//std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
 		return;
 	}
 
@@ -227,7 +227,7 @@ void OGLRenderer::BindTextureToShader(const TextureBase*t, const std::string& un
 	GLint texID = 0;
 
 	if (!boundShader) {
-		std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
+		//std::cout << __FUNCTION__ << " has been called without a bound shader!" << std::endl;
 		return;//Debug message time!
 	}
 	
@@ -274,7 +274,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	Win32Code::Win32Window* realWindow = (Win32Code::Win32Window*)&w;
 
 	if (!(deviceContext = GetDC(realWindow->GetHandle()))) {
-		std::cout << __FUNCTION__ << " Failed to create window!" << std::endl;
+		//std::cout << __FUNCTION__ << " Failed to create window!" << std::endl;
 		return;
 	}
 
@@ -293,29 +293,29 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	GLuint		PixelFormat;
 	if (!(PixelFormat = ChoosePixelFormat(deviceContext, &pfd))) {	// Did Windows Find A Matching Pixel Format for our PFD?
-		std::cout << __FUNCTION__ << " Failed to choose a pixel format!" << std::endl;
+		//std::cout << __FUNCTION__ << " Failed to choose a pixel format!" << std::endl;
 		return;
 	}
 
 	if (!SetPixelFormat(deviceContext, PixelFormat, &pfd)) {		// Are We Able To Set The Pixel Format?
-		std::cout << __FUNCTION__ << " Failed to set a pixel format!" << std::endl;
+		//std::cout << __FUNCTION__ << " Failed to set a pixel format!" << std::endl;
 		return;
 	}
 
 	HGLRC		tempContext;		//We need a temporary OpenGL context to check for OpenGL 3.2 compatibility...stupid!!!
 	if (!(tempContext = wglCreateContext(deviceContext))) {	// Are We Able To get the temporary context?
-		std::cout << __FUNCTION__ <<"  Cannot create a temporary context!" << std::endl;
+		//std::cout << __FUNCTION__ <<"  Cannot create a temporary context!" << std::endl;
 		wglDeleteContext(tempContext);
 		return;
 	}
 
 	if (!wglMakeCurrent(deviceContext, tempContext)) {	// Try To Activate The Rendering Context
-		std::cout << __FUNCTION__ << " Cannot set temporary context!" << std::endl;
+		//std::cout << __FUNCTION__ << " Cannot set temporary context!" << std::endl;
 		wglDeleteContext(tempContext);
 		return;
 	}
 	if (!gladLoaderLoadGL()) {
-		std::cout << __FUNCTION__ << " Cannot initialise GLAD!" << std::endl;	//It's all gone wrong!
+		//std::cout << __FUNCTION__ << " Cannot initialise GLAD!" << std::endl;	//It's all gone wrong!
 		return;
 	}
 	//Now we have a temporary context, we can find out if we support OGL 4.x
@@ -324,13 +324,13 @@ void OGLRenderer::InitWithWin32(Window& w) {
 	int minor = ver[2] - '0';		//casts the 'correct' minor version integer from our version string
 
 	if (major < 3) {					//Graphics hardware does not support OGL 4! Erk...
-		std::cout << __FUNCTION__ << " Device does not support OpenGL 4.x!" << std::endl;
+		//std::cout << __FUNCTION__ << " Device does not support OpenGL 4.x!" << std::endl;
 		wglDeleteContext(tempContext);
 		return;
 	}
 
 	if (major == 4 && minor < 1) {	//Graphics hardware does not support ENOUGH of OGL 4! Erk...
-		std::cout << __FUNCTION__ << " Device does not support OpenGL 4.1!" << std::endl;
+		//std::cout << __FUNCTION__ << " Device does not support OpenGL 4.1!" << std::endl;
 		wglDeleteContext(tempContext);
 		return;
 	}
@@ -354,7 +354,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	// Check for the context, and try to make it the current rendering context
 	if (!renderContext || !wglMakeCurrent(deviceContext, renderContext)) {
-		std::cout << __FUNCTION__ <<" Cannot set OpenGL 3 context!" << std::endl;	//It's all gone wrong!
+		//std::cout << __FUNCTION__ <<" Cannot set OpenGL 3 context!" << std::endl;	//It's all gone wrong!
 		wglDeleteContext(renderContext);
 		wglDeleteContext(tempContext);
 		return;
@@ -362,7 +362,7 @@ void OGLRenderer::InitWithWin32(Window& w) {
 
 	wglDeleteContext(tempContext);	//We don't need the temporary context any more!
 
-	std::cout << __FUNCTION__ << " Initialised OpenGL " << major << "." << minor << " rendering context" << std::endl;	//It's all gone wrong!
+	//std::cout << __FUNCTION__ << " Initialised OpenGL " << major << "." << minor << " rendering context" << std::endl;	//It's all gone wrong!
 
 	glEnable(GL_FRAMEBUFFER_SRGB);
 
@@ -430,6 +430,6 @@ static void APIENTRY DebugCallback(GLenum source, GLenum type, GLuint id, GLenum
 	case GL_DEBUG_SEVERITY_LOW: severityName = "Priority(Low)"; break;
 	}
 
-	std::cout << "OpenGL Debug Output: " + sourceName + ", " + typeName + ", " + severityName + ", " + string(message) << std::endl;
+	//std::cout << "OpenGL Debug Output: " + sourceName + ", " + typeName + ", " + severityName + ", " + string(message) << std::endl;
 }
 #endif
