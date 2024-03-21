@@ -365,6 +365,7 @@ void RunningState::EndTriggerVolFunc(int id){
     playersFinished[id] = true;
     playerTimes[id] = levelManager->GetCurrentStageTime();
     SendMedalToClient(id);
+    SendPlayerAnimationCall(Replicated::WIN, playerObjects[id]);
     int numPlayersFinished = 0;
     for (std::pair<int, bool> playerFinished : playersFinished) {
         numPlayersFinished += playerFinished.second ? 1 : 0;

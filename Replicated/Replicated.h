@@ -75,7 +75,8 @@ public:
         RUNNING_RIGHT,
         FALLING,
         JUMP,
-        IDLE
+        IDLE,
+        WIN
     };
 
     struct RemoteAnimationData
