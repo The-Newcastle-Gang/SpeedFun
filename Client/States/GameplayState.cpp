@@ -479,7 +479,6 @@ void GameplayState::CreateLoadingScreenCanvas() {
 
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "LoadingScreen!" << std::endl;
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
