@@ -35,7 +35,7 @@ bool NetworkObject::ReadDeltaPacket(DeltaPacket &p) {
 
 bool NetworkObject::ReadFullPacket(FullPacket &p) {
     if (p.fullState.stateID < lastFullState.stateID) {
-        std::cout << "Packet recieved out of order." << std::endl;
+        //std::cout << "Packet recieved out of order." << std::endl;
         return false;
     }
 

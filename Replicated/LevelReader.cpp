@@ -108,7 +108,7 @@ void LevelReader::LoadLevelNameMap() {
         if (last != std::string::npos) name = name.substr(0, last);
 
         levelIDToLevelNameMap[counter] = name;
-        std::cout << name << std::endl;
+        //std::cout << name << std::endl;
         counter++;
     }
 }

@@ -44,7 +44,7 @@ void WaitingPlayers::ReceivePacket(int type, GamePacket *payload, int source) {
             else if (packet->functionId == Replicated::SetLevel) {
                 DataHandler handler(&packet->data);
                 selectedLevel = handler.Unpack<int>();
-                std::cout << selectedLevel << " SELECTED ---SERVER!!\n";
+                //std::cout << selectedLevel << " SELECTED ---SERVER!!\n";
                 SendLevelSelected(selectedLevel);
             }
         } break;
@@ -59,7 +59,7 @@ void WaitingPlayers::SendLevelSelected(int level) {
 }
 
 void WaitingPlayers::OnEnter() {
-    std::cout << "Waiting for players" << std::endl;
+    //std::cout << "Waiting for players" << std::endl;
     serverBase->OnPlayerJoined.connect<&WaitingPlayers::AddPlayer>(this);
     isReady = false;
     RegisterPackets();

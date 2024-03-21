@@ -22,7 +22,7 @@ int main() {
         float dt = timer.GetTimeDeltaSeconds();
 
         if (dt > 0.1f) {
-            std::cout << "Skipping large time delta" << std::endl;
+            //std::cout << "Skipping large time delta" << std::endl;
             continue;
         }
 

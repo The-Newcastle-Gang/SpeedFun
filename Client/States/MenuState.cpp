@@ -179,18 +179,18 @@ void MenuState::CreateLobby(Element& element) {
 void MenuState::IncreaseLevel(Element& element) {
     currentClientLevel = (currentClientLevel+1) % reader->GetNumberOfLevels();
     SendLevelSelectPacket(currentClientLevel);
-    std::cout << "LEVEL INCREASED TO " <<currentClientLevel<<"\n";
+    //std::cout << "LEVEL INCREASED TO " <<currentClientLevel<<"\n";
 }
 
 void MenuState::DecreaseLevel(Element& element) {
     currentClientLevel = (currentClientLevel - 1)<0?reader->GetNumberOfLevels()-1: (currentClientLevel - 1);
     SendLevelSelectPacket(currentClientLevel);
-    std::cout << "LEVEL DECREASED TO " << currentClientLevel << "\n";
+    //std::cout << "LEVEL DECREASED TO " << currentClientLevel << "\n";
 }
 
 void MenuState::HandleLevelInt(int level) {
     currentClientLevel = level;
-    std::cout << "CLIENT RECIEVED LEVEL " << currentClientLevel << "!!\n";
+    //std::cout << "CLIENT RECIEVED LEVEL " << currentClientLevel << "!!\n";
     std::string levelName = reader->GetLevelName(level);
     UpdateLevelName(levelName);
     UpdateLevelThumbnail(levelName);

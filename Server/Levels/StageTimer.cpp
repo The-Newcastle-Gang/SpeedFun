@@ -6,7 +6,7 @@
 #include "Replicated.h"
 
 StageTimer::StageTimer() {
-    std::cout << "Timer initialized" << std::endl;
+    //std::cout << "Timer initialized" << std::endl;
     currentState = StageTimer::Paused;
     currentMedal = Medal::Default;
     elapsedTime = 0.0f;
@@ -89,7 +89,4 @@ Medal StageTimer::GetCurrentMedal(float timeValue) {
     {
         return Medal::Bronze;
     }
-}
-void StageTimer::CalculateScore() {
-    std::cout << "calcing score: ";
 }
