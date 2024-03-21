@@ -615,6 +615,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     UpdateParticleSystems(dt);
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) cinematicCamera->WriteCameraInfo(world->GetMainCamera(), "autocamera.txt");
     if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored

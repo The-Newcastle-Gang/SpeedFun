@@ -7,7 +7,7 @@ using namespace CSC8503;
 void CinematicCamera::WriteCameraInfo(Camera* camera, std::string filename)
 {
     std::ofstream file;
-    file.open(Assets::LEVELDIR + filename, std::ios_base::app);
+    file.open(Assets::CAMERADIR + filename, std::ios_base::app);
     file << camera->GetPosition().x << "," << camera->GetPosition().y << "," << camera->GetPosition().z
         << "," << camera->GetPitch() << "," << camera->GetYaw() << "\n";
     file.close();
@@ -71,16 +71,9 @@ void CinematicCamera::UpdateCinematicCamera(Camera* camera)
 {
     currentCamera = (((int)std::floor(timer)) * (isContinuous ? 1 : 2)) % (maxCameras - 1);
     float timerRemainder = std::fmodf(timer, 1.0f);
-
     float percentage = timerRemainder / MAX_TIMER;
 
-    std::cout << "Camera: " << currentCamera << std::endl;
-
-    
     camera->SetPosition(LerpVector3(cameraPositions[currentCamera], cameraPositions[currentCamera + 1], percentage));
     camera->SetPitch(std::lerp(pitches[currentCamera], pitches[currentCamera + 1], percentage));
     camera->SetYaw(LerpYaw(yaws[currentCamera], yaws[currentCamera + 1], percentage));
-
-    
-
 }
