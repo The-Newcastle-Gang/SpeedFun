@@ -58,6 +58,8 @@ GameplayState::~GameplayState() {
 
     delete medalShineShader;
     medalShineShader = nullptr;
+
+    delete cinematicCamera;
 }
 
 
@@ -565,6 +567,7 @@ void GameplayState::UpdateCountdown(float dt){
         state = GameplayStateEnums::PLAYING;
         canvas->PopActiveLayer();
         soundManager->SM_PlaySound("sfx_go.wav");
+        ResetCameraToForwards();
     }
 }
 
@@ -577,21 +580,28 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     {
         UpdateGrapples(dt);
         
-        if (firstPersonPosition) {
+        if (firstPersonPosition && state == GameplayStateEnums::PLAYING) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         WalkCamera(dt);
         if (jumpTimer > 0) JumpCamera(dt);
         if (landTimer > 0) LandCamera(dt);
         StrafeCamera(dt);
-        world->GetMainCamera()->UpdateCamera(dt);
+        if (state == GameplayStateEnums::COUNTDOWN)
+        {
+            cinematicCamera->UpdateCinematicCamera(world->GetMainCamera(), dt);
+        }
+        else
+        {
+            world->GetMainCamera()->UpdateCamera(dt);
+        }
 
         totalDTElapsed += dt;
         UpdateGrapples(dt);
 
         Window::GetWindow()->ShowOSPointer(false);
 
-        if (firstPersonPosition) {
+        if (firstPersonPosition && state == GameplayStateEnums::PLAYING) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         world->UpdateWorld(dt);
@@ -1072,6 +1082,8 @@ void GameplayState::InitCamera() {
     cam->SetYaw(315.0f);
     cam->SetPosition(Vector3(-60, 40, 60));
     cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
+    cinematicCamera = new CinematicCamera();
+    cinematicCamera->ReadPositionsFromFile("autocamera.txt");
 }
 
 void GameplayState::InitWorld() {

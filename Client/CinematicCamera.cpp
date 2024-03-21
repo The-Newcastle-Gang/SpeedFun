@@ -22,7 +22,7 @@ Vector3 CinematicCamera::LerpVector3(Vector3& start, Vector3 end, float p)
     return newPos;
 }
 
-float NCL::CSC8503::CinematicCamera::LerpYaw(float start, float end, float p)
+float CinematicCamera::LerpYaw(float start, float end, float p)
 {
     float difference = end - start;
     if (difference > 180.0f) { difference -= 360.0f; }
@@ -31,10 +31,10 @@ float NCL::CSC8503::CinematicCamera::LerpYaw(float start, float end, float p)
 }
 
 
-void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
+void CinematicCamera::ReadPositionsFromFile(std::string filename)
 {
     cameraPositions.clear();
-    std::ifstream file(Assets::LEVELDIR + filename);
+    std::ifstream file(Assets::CAMERADIR + filename);
     if (!file.is_open()) { std::cerr << "Cannot open file"; }
 
     std::string line;
@@ -59,7 +59,7 @@ void NCL::CSC8503::CinematicCamera::ReadPositionsFromFile(std::string filename)
     if (isContinuous) { maxCameras--; } // avoid overflow
 }
 
-void NCL::CSC8503::CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
+void CinematicCamera::UpdateCinematicCamera(Camera* camera, float dt)
 {
     timer += dt;
     float percentage = timer / MAX_TIMER;

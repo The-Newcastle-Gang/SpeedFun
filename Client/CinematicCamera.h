@@ -9,7 +9,7 @@
 #include <sstream>
 
 
-const float MAX_TIMER = 5.0f;
+const float MAX_TIMER = 1.0f;
 
 namespace NCL
 {
@@ -35,7 +35,7 @@ namespace NCL
 
 			int currentCamera = 0;
 			int maxCameras;
-			bool isContinuous = true;
+			bool isContinuous = false;
 
 			float timer = 0;
 		};
