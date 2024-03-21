@@ -53,7 +53,7 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
         i = nullptr;
     }
     groundCubes.clear();
-
+    
     for (auto& i : bridgePrimitives) {
         delete i;
         i = nullptr;
@@ -92,6 +92,8 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
         i = nullptr;
     }
     bridgetriggerPrimitives.clear();
+
+    medalTimes = Vector3(0, 0, 0);
 
     checkPointPositions.clear();
 }
@@ -411,6 +413,22 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
     
     for (auto& item : jData["swingingList"].items()) {
         auto temp = new SwingingPrimitive();
+
+        auto& curPosRef = item.value()["position"];
+        auto& curDimRef = item.value()["dimensions"];
+        auto& curCollExt = item.value()["colliderExtents"];
+        auto& curRot = item.value()["rotation"];
+
+
+        temp->dimensions = Vector3(curDimRef["x"], curDimRef["y"], (curDimRef["z"]));
+        temp->position = Vector3(curPosRef["x"], curPosRef["y"], (curPosRef["z"] * -1));
+        temp->colliderExtents = Vector3(curCollExt["x"], curCollExt["y"], curCollExt["z"]);
+        temp->rotation = Quaternion((float)curRot["x"], (float)curRot["y"], (float)curRot["z"], (float)curRot["w"]);
+        temp->shouldNetwork = item.value()["shouldNetwork"];
+        temp->colliderRadius = item.value()["colliderRadius"];
+        temp->inverseMass = item.value()["inverseMass"];
+        temp->physicsType = item.value()["physicType"];
+
         temp->meshName = item.value()["mesh"];
 
         temp->timePeriod = (float)item.value()["timePeriod"];
@@ -446,6 +464,18 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         pointLights.emplace_back(newLight);
     }
 
+    auto& medalItem = jData["medalInfo"];
+
+
+    try{
+        auto& plat = medalItem["platinum"];
+        auto& gold = medalItem["gold"];
+        auto& silver = medalItem["silver"];
+        medalTimes = Vector3(plat, gold, silver);
+    }
+    catch(...){
+        medalTimes = Vector3(10, 20, 30);
+    }
 
     return true;
 }

@@ -791,6 +791,9 @@ void GameTechRenderer::RenderCamera() {
         if (!i->IsDepthTested()) {
             glDepthMask(GL_FALSE);
         }
+        else {
+            glDepthMask(GL_TRUE);
+        }
 
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
