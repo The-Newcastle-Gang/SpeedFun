@@ -14,7 +14,7 @@ public:
     //void Update(float dt)override;
     void OnCollisionEnter(GameObject* other)override;
     void OnCollisionEnd(GameObject* other)override;
-    void PhysicsUpdate(float dt)override;
+    void Update(float dt)override;
 
 private:
 
