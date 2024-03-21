@@ -254,6 +254,8 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         mSelected = element.GetIndex();
     } else if (id == "Back") {
         element.OnMouseUp.connect<&MenuState::GoBack>(this);
+    }else if (id == "Exit") {
+        element.OnMouseUp.connect<&MenuState::OnExit>(this);
     } else if (id == "Disconnect") {
         element.OnMouseUp.connect<&MenuState::LeaveLobby>(this);
     } else if (id == "StartLobby") {
@@ -492,4 +494,5 @@ void MenuState::OnExit() {
     canvas->Reset();
     soundManager->SM_UnloadSoundList();
     lua_close(L);
+    baseClient->SetShouldExit(true);
 }
