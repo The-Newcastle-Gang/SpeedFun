@@ -43,6 +43,8 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
 }
 
 GameplayState::~GameplayState() {
+    delete lavaParticles;
+    particleSystems.clear();
 
     shouldShutDown.store(true);
     networkThread->join();
@@ -50,8 +52,6 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-    delete debugger;
-    debugger = nullptr;
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -62,13 +62,9 @@ GameplayState::~GameplayState() {
 
 
 void GameplayState::InitCanvas(){
-
-    //this is clearly not the best way to do the cross-heir but This will have to do for now
-    //since i wanna just use this as debug.
-    //I can bet money on the fact that this code is going to be at release
-    //if u see this owen dont kill this
-
-    // I won't kill this for now but if it is still here by 20.03.24, it is getting nuked - OT 04.03.24 21:35
+    shouldLoadScreen.store(false);
+    canvas->Reset();
+    
     InitStartScreen();
     InitEndCanvas();
     InitCrossHeir();
@@ -209,9 +205,9 @@ void GameplayState::InitTimerBar(){
             .SetTexture(resources->GetTexture("firemask.jpg"))
             .AlignTop(timerTopOffset - timerEndBoxY* timerEndBoxYoff);
 
-    if (isSinglePlayer) {
-        timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
-    }
+    
+    timeBarTimerBox->OnUpdate.connect<&GameplayState::UpdateTimerBox>(this);
+    
     
     
     //this is the timer text me thinks
@@ -222,6 +218,26 @@ void GameplayState::InitTimerBar(){
         .SetText(TextData());
     timerText->OnUpdate.connect<&GameplayState::UpdateTimerText>(this);
 
+}
+
+void GameplayState::LoadParticleSystems()
+{
+    lavaParticles = new ParticleSystem(deathPos, { -150, 0, -100 }, { 300, 1, 100 }, 50, 10.0f, 3, 0.25f, 0.25f, resources->GetTexture("ember.png"));
+    particleSystems.push_back(lavaParticles);
+
+    
+
+
+    renderer->PassParticleSystems(particleSystems);
+}
+
+void GameplayState::UpdateParticleSystems(float dt)
+{
+    for (auto &ps : particleSystems)
+    {
+        ps->CreateNewParticles(dt);
+        ps->UpdateParticles(dt, world->GetMainCamera()->GetPosition());
+    }
 }
 
 void GameplayState::UpdatePlayerBlip(Element& element, float dt) {
@@ -329,21 +345,23 @@ void GameplayState::ThreadUpdate(GameClient* client, ClientNetworkData* networkD
 }
 
 void GameplayState::OnEnter() {
+    DebugMode::StartCostClock();
 
     renderer->SetDeferred(true);
     firstPersonPosition = nullptr;
     Window::GetWindow()->ShowOSPointer(false);
     Window::GetWindow()->LockMouseToWindow(true);
     isSinglePlayer = baseClient->IsSinglePlayer();
+    CreateLoadingScreenThread();
     CreateNetworkThread();
     InitialiseAssets();
-
-    debugger = new DebugMode(world->GetMainCamera());
-    InitCanvas();
+    DebugMode::SetDebugCam(world->GetMainCamera());
+    DebugMode::InitDebugInfo();
 
     WaitForServerLevel(); //wait until server tells us what level to load
 
     renderer->SetPointLightMesh(resources->GetMesh("Sphere.msh"));
+    DebugMode::EndCostClock(0);
 }
 
 void GameplayState::WaitForServerLevel() {
@@ -361,6 +379,7 @@ void GameplayState::OnNewLevel() {
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
+    particleSystems.clear();
     levelManager->Reset();
     finishedLoading = LoadingStates::NOT_LOADED;
     worldHasLoaded = LoadingStates::NOT_LOADED;
@@ -376,6 +395,7 @@ void GameplayState::InitialiseAssets() {
 }
 
 void GameplayState::InitCurrentLevel() {
+    LoadParticleSystems();
     InitWorld();
     InitCamera();
 }
@@ -384,7 +404,12 @@ void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
     // guards on the PlaySound method.
 
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+    soundManager->SM_AddSongsToLoad({
+        "the-final-boss-battle-158700.wav",
+        "boss-fight-143121.wav",
+        "a-dark-desolate-world-15695.wav",
+        "the-dying-110458.wav"
+        });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundEffects.push_back(songToPlay);
@@ -402,6 +427,64 @@ void GameplayState::CreateNetworkThread() {
     networkThread = new std::thread(&GameplayState::ThreadUpdate, this, client, networkData.get());
 }
 
+void GameplayState::CreateLoadingScreenThread() {
+
+    CreateLoadingScreenCanvas();
+
+    shouldLoadScreen.store(true);
+    loadingScreenThread = new std::thread(&GameplayState::LoadingScreenUpdate, this);
+    loadingScreenThread->detach();
+}
+
+void GameplayState::CreateLoadingScreenCanvas() {
+    const int loadingScreens = 2;
+    Vector2Int lsTextRes = { 742, 42}; // Resolution of actual images
+    Vector2Int lsTipTextRes = { 625, 28};
+    int textBottomPadding = 35;
+    int textLeftPadding = 35;
+    int imagePadding = 75;
+
+    for (int i = 1; i <= loadingScreens; i++) {
+        std::string currentlayer = "LoadingScreen" + std::to_string(i);
+        canvas->CreateNewLayer(currentlayer, false);
+        canvas->PushActiveLayer(currentlayer);
+        canvas->AddElement(currentlayer)
+            .AlignBottom()
+            .AlignLeft()
+            .SetRelativeSize({ 1,1 })
+            .SetColor({ 0,0,0,1 });
+        canvas->AddElement(currentlayer)
+            .SetAbsoluteSize({ 920,470 })
+            .AlignMiddle(imagePadding)
+            .AlignCenter();
+        canvas->AddImageElement("ScreenShot.png", currentlayer)
+                .SetAbsoluteSize({ 904,454 })
+                .AlignMiddle(imagePadding)
+                .AlignCenter();
+        canvas->AddImageElement("TipText.png", currentlayer).AlignLeft(textLeftPadding * 8).AlignBottom(textBottomPadding * 4).SetAbsoluteSize(lsTipTextRes);
+
+        switch (i) {
+        case 1:
+            canvas->AddImageElement("LS_Text1.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        case 2:
+            canvas->AddImageElement("LS_Text2.png", currentlayer).AlignLeft(textLeftPadding).AlignBottom(textBottomPadding).SetAbsoluteSize(lsTextRes);
+            break;
+        default:
+            break;
+        }
+        renderer->RenderLoadingScreen();
+    }
+}
+
+void GameplayState::LoadingScreenUpdate() {
+    while (shouldLoadScreen) {
+        std::cout << "LoadingScreen!" << std::endl;
+        renderer->RenderLoadingScreen();
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    }
+}
+
 void GameplayState::OnExit() {
     Window::GetWindow()->LockMouseToWindow(false);
     Window::GetWindow()->ShowOSPointer(true);
@@ -416,6 +499,9 @@ void GameplayState::OnExit() {
 
     delete networkThread;
     networkThread = nullptr;
+
+    delete loadingScreenThread;
+    loadingScreenThread = nullptr;
 }
 
 void GameplayState::ManageLoading(float dt) {
@@ -487,7 +573,6 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     ReadNetworkFunctions();
 
     Window::GetWindow()->ShowOSPointer(isPaused);
-    Window::GetWindow()->LockMouseToWindow(!isPaused);
     if (!isPaused)
     {
         UpdateGrapples(dt);
@@ -508,16 +593,18 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
 
         if (firstPersonPosition) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
-
         }
         world->UpdateWorld(dt);
     }
-    
+    if(!baseClient->IsSinglePlayer())    UpdatePositionRankings();
     ResetCameraAnimation();
     ReadNetworkPackets();
 
+    // particle updates
+    UpdateParticleSystems(dt);
+
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
-    if (displayDebugger) debugger->UpdateDebugMode(dt);
+    if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
         for (int i = 0; i < 6; i++) {
@@ -571,6 +658,7 @@ void GameplayState::ReadNetworkFunctions() {
         switch (packet.functionId) {
             case(Replicated::AssignPlayer): {
                 int networkId = handler.Unpack<int>();
+                selfID = handler.Unpack<int>();
                 AssignPlayer(networkId);
             } break;
 
@@ -721,6 +809,7 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::GameInfo_PlayerPositions): {
                 int unpackFlag = 0;
+                
                 while (unpackFlag != -999) {
                     unpackFlag = handler.Unpack<int>();
                     if (unpackFlag == -999) continue;
@@ -732,12 +821,43 @@ void GameplayState::ReadNetworkFunctions() {
                     }
                     Vector3 position = handler.Unpack<Vector3>();
                     playerPositions[unpackFlagID] = position;
+                    
                 }
+                
             }
         }
     }
 }
 
+
+void GameplayState::UpdatePositionRankings() {
+    if (playerPositions.size() == 0) return;
+    int rankPlacement = 0;
+    float selfPos = CalculateCompletion(playerPositions["blip_" + std::to_string(selfID)]);
+    for (int i = 0; i < playerPositions.size(); i++) {
+        if (i == selfID) continue;
+        if (selfPos < CalculateCompletion(playerPositions["blip_" + std::to_string(i)])) {
+            rankPlacement++;
+        }
+    }
+    switch (rankPlacement + 1) {
+    case(Medal::Gold):
+        positionColor = Replicated::GOLD;
+        break;
+
+    case(Medal::Silver):
+        positionColor = Replicated::SILVER;
+        break;
+
+    case(Medal::Bronze):
+        positionColor = Replicated::BRONZE;
+        break;
+
+    default:
+        positionColor = Replicated::DEFAULT;
+        break;
+    }
+}
 void GameplayState::OnEndReached(DataHandler& handler)
 {
     int networkId = handler.Unpack<int>();
@@ -798,7 +918,7 @@ std::string GameplayState::GetMedalImage(){
 }
 
 void GameplayState::ResetCameraAnimation() {
-    currentGroundSpeed = 0.0f;
+    groundedMovementSpeed = groundedMovementSpeed * 0.95f;
     strafeSpeed = 0.0f;
 }
 
@@ -826,7 +946,8 @@ void GameplayState::OperateOnChains(int grappleIndex, const std::function<void(G
 }
 
 void GameplayState::WalkCamera(float dt) {
-
+    world->GetMainCamera()->SetOffsetPosition(Vector3(0, abs(bobFloor + bobAmount *sin(walkTimer)) * (groundedMovementSpeed / maxMoveSpeed), 0));
+    
     groundedMovementSpeed = groundedMovementSpeed * 0.95 + currentGroundSpeed * 0.05;
     if (walkSoundTimer <= 0) {
         
@@ -924,14 +1045,23 @@ void GameplayState::SendInputData() {
 void GameplayState::TogglePause() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
     isPaused = !isPaused;
+    Window::GetWindow()->LockMouseToWindow(!isPaused);
     renderer->SetSpeedActive(!isPaused);
-    if (isPaused) canvas->PushActiveLayer("PauseLayer");
-    else canvas->PopActiveLayer();
+    if (isPaused) {
+        canvas->PushActiveLayer("PauseLayer");
+        soundManager->SM_PauseSound(soundManager->GetCurrentSong());
+    }
+    else {
+        canvas->PopActiveLayer();
+        soundManager->SM_ResumeSound(soundManager->GetCurrentSong());
+    }
 }
 
 void GameplayState::FinishLoading() {
     while (worldHasLoaded != LoadingStates::LOADED && finishedLoading != LoadingStates::READY) {
     }
+    shouldLoadScreen.store(false);
+    InitCanvas();
     world->StartWorld();
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::GameLoaded, nullptr));
 }
@@ -988,7 +1118,6 @@ void GameplayState::CreatePlayers() {
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     for (int i=0; i<numberPlayersJoined; i++) {
         auto player = new GameObject();
-
         replicated->CreatePlayer(player, *world);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
@@ -1019,6 +1148,13 @@ void GameplayState::InitLevel(int level) {
     auto springList  = levelManager->GetLevelReader()->GetSpringPList();
     auto lightList  = levelManager->GetLevelReader()->GetPointLights();
 
+    auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
+    auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
+    auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
+    auto rayEnemyList = levelManager->GetLevelReader()->GetRayEnemyPrimitiveList();
+    auto rayenemyTriList = levelManager->GetLevelReader()->GetRayTriggerPrimitiveList();
+    auto bridgeTriList = levelManager->GetLevelReader()->GetBridgeTriggerPrimitiveList();
+
     for(auto &x : plist){
         auto temp = new GameObject();
         replicated->AddBlockToLevel(temp, *world, x);
@@ -1028,20 +1164,20 @@ void GameplayState::InitLevel(int level) {
     }
 
     for (auto &x : opList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Oscillator");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.5f,0.0f, 1.0f });
     }
 
     for (auto &x : harmOpList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Harmful");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 1.0f, 0.0f,0.0f, 1.0f });
     }
     for (auto& x : springList) {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Spring");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
@@ -1049,7 +1185,7 @@ void GameplayState::InitLevel(int level) {
 
     for (auto& x : swingpList)
     {
-        auto temp = new GameObject();
+        auto temp = new GameObject("Swinging");
         replicated->AddBlockToLevel(temp, *world, x);
         temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
         temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
@@ -1058,6 +1194,62 @@ void GameplayState::InitLevel(int level) {
     for (auto& l : lightList) {
         AddPointLight(l);
     }
+
+    for (auto& x : speedUpList) {
+        auto temp = new GameObject("SpeedUp");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeList) {
+        auto temp = new GameObject("Bridge");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f,1.0f, 1.0f });
+    }
+
+    for (auto& x : trapBlockList) {
+        auto temp = new GameObject("TrapBlock");
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.5f, 0.0f, 1.0f });
+    }
+
+    OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");  //this needs to be reworked as this will not be freed
+
+    for (auto& x : rayEnemyList) {
+        auto temp = new GameObject("RayEnemy");
+        MeshGeometry* maxMesh = resources->GetMesh("Rig_Maximilian.msh");
+        maxMesh->AddAnimationToMesh("Default", resources->GetAnimation("Max_Idle.anm"));
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), maxMesh, nullptr, playerShader));
+  
+        temp->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Rig_Maximilian.mat"));
+        temp->GetRenderObject()->SetColour({ 1.0f, 1.0f, 1.0f, 1.0f });
+        temp->GetRenderObject()->SetMeshOffset(Vector3(0,-1.7f,0));
+
+        temp->SetAnimatorObject(new AnimatorObject(maxMesh->GetAnimationMap()));
+        temp->GetAnimatorObject()->SetAnimation("Default");
+
+        temp->GetRenderObject()->SetAnimatorObject(temp->GetAnimatorObject());
+
+    }
+
+    for (auto& x : rayenemyTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 1.0f, 0.0f, 0.0f, 1.0f });
+    }
+
+    for (auto& x : bridgeTriList) {
+        auto temp = new GameObject();
+        replicated->AddBlockToLevel(temp, *world, x);
+        temp->SetRenderObject(new RenderObject(&temp->GetTransform(), resources->GetMesh(x->meshName), nullptr, nullptr));
+        temp->GetRenderObject()->SetColour({ 0.0f, 1.0f, 0.0f, 1.0f });
+    }
+
 
     levelLen = (levelManager->GetLevelReader()->GetEndPosition() - levelManager->GetLevelReader()->GetStartPosition()).Length();
     startPos = levelManager->GetLevelReader()->GetStartPosition();
@@ -1156,6 +1348,7 @@ void GameplayState::SetTestSprings() {
         light.lightRadius = 7.0f;
         world->AddPointLightToWorld(light);
     }
+
 }
 
 void GameplayState::AddPointLight(PointLightInfo light) {
@@ -1249,10 +1442,16 @@ void GameplayState::UpdateTimerUI(Element& element, float dt) {
 }
 
 void GameplayState::UpdateTimerBox(Element& element, float dt) {
-    if (medalTimes[0] == -1.0f) return;
-    float positionRatio = timerRatio;
-    element.AlignCenter((int)round(-400 + 30 / 2 + (800 - 30) * positionRatio))
-    .SetColor(timerBarColor);
+    if (isSinglePlayer) {
+        if (medalTimes[0] == -1.0f) return;
+        float positionRatio = timerRatio;
+        element.AlignCenter((int)round(-400 + 30 / 2 + (800 - 30) * positionRatio))
+            .SetColor(timerBarColor);
+        return;
+    }
+
+    element.SetColor(positionColor);
+
 }
 
 void GameplayState::UpdateTimerText(Element& element, float dt) {
@@ -1360,6 +1559,7 @@ void GameplayState::OnPauseHoverEnter(Element &element) {
         selectedPause = 1;
     }
 }
+
 void GameplayState::OnPauseHoverExit(Element& element) {
 
     element.textData.color = { 0.5,0.5,0.5,1 };
@@ -1405,7 +1605,7 @@ void GameplayState::RenderFlairObjects(){
 }
 
 void GameplayState::AddLava(Vector3 position){
-    auto LavaQuad = new GameObject();
+    auto LavaQuad = new GameObject("LavaQuad");
     LavaQuad->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, {1,0,0})));
     replicated->AddTestObjectToLevel(LavaQuad, *world, {1000,1000,1000}, position, false);
     LavaQuad->SetRenderObject(new RenderObject(&LavaQuad->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("lava")));
@@ -1415,7 +1615,7 @@ void GameplayState::AddLava(Vector3 position){
 
 void GameplayState::AddEndPortal(Vector3 position){
 
-    auto PortalQwaud = new GameObject();
+    auto PortalQwaud = new GameObject("Portal");
     PortalQwaud->GetTransform().SetOrientation(Quaternion(Matrix4::Rotation(90, { 0,1,0 })));
     replicated->AddTestObjectToLevel(PortalQwaud, *world, { 10,10,10 }, endPos + Vector3(0.0f,2.5f,0.0f), false);
     PortalQwaud->SetRenderObject(new RenderObject(&PortalQwaud->GetTransform(), resources->GetMesh("Quad.msh"), resources->GetTexture("VorDef.png"), resources->GetShader("portal")));

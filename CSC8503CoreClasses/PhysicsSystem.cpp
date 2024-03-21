@@ -93,6 +93,7 @@ float realDT	= idealDT;
 
 void PhysicsSystem::Update(float dt) {
 
+    DebugMode::StartCostClock();
 	dTOffset += dt; //We accumulate time delta here - there might be remainders from previous frame!
 
 	GameTimer t;
@@ -153,6 +154,7 @@ void PhysicsSystem::Update(float dt) {
 			std::cout << "Raising iteration count due to short physics time...(now " << realHZ << ")\n";
 		}
 	}
+    DebugMode::EndCostClock(1);
 }
 
 void PhysicsSystem::UpdateCollisionList() {

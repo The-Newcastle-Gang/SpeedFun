@@ -1,5 +1,4 @@
 #include "Renderer.h"
-#include "Renderer.h"
 #include "RenderObject.h"
 #include "TextureLoader.h"
 #include "Resources.h"
@@ -23,6 +22,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     textShader = std::make_shared<OGLShader>("text.vert", "text.frag");
     defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
+    particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticle.frag");
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
@@ -141,8 +141,8 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     // move to own function.
     InitUIQuad();
     u_time = 0.0f;
-
     //InitRayMarching();
+
     CreatePostProcessQuad();
     // SpeedLines
     uTime = 0.0f;
@@ -165,8 +165,60 @@ GameTechRenderer::~GameTechRenderer()	{
     delete combineShader;
     delete pointLightShader;
     delete skyboxShader;
+    delete particleShader;
+    particleSystems.clear();
 }
 
+
+
+void GameTechRenderer::RenderParticles()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    BindShader(particleShader);
+
+    float screenAspect = (float)windowWidth / (float)windowHeight;
+    Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+    Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+
+    int projLocation = glGetUniformLocation(particleShader->GetProgramID(), "projMatrix");
+    int viewLocation = glGetUniformLocation(particleShader->GetProgramID(), "viewMatrix");
+
+    glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
+    glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
+
+    for (auto &ps : particleSystems)
+    {
+        BindTextureToShader(ps->GetTexture(), "particleTex", 0);
+        ps->DrawParticles();
+    }
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+}
+
+void GameTechRenderer::InitUIQuad() {
+    glGenVertexArrays(1, &uiVAO);
+    glGenBuffers(1, &uiVBO);
+    glBindVertexArray(uiVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
+
+    float vertices[6][4] = {
+            { 0,  1,0.0f,0.0f },
+            { 0,  0,0.0f,1.0f },
+            { 1 , 0,1.0f,1.0f },
+
+            { 0, 1,0.0f,0.0f },
+            { 1, 0,1.0f,1.0f },
+            { 1, 1,1.0f,0.0f }
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
 GLuint GameTechRenderer::CreateHDRTexture() {
     GLuint t;
     glGenTextures(1, &t);
@@ -234,28 +286,6 @@ void GameTechRenderer::CreatePostProcessQuad() {
     glBindVertexArray(0);
 }
 
-void GameTechRenderer::InitUIQuad() {
-    glGenVertexArrays(1, &uiVAO);
-    glGenBuffers(1, &uiVBO);
-    glBindVertexArray(uiVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, uiVBO);
-
-    float vertices[6][4] = {
-            { 0,  1,0.0f,0.0f },
-            { 0,  0,0.0f,1.0f },
-            { 1 , 0,1.0f,1.0f },
-
-            { 0, 1,0.0f,0.0f },
-            { 1, 0,1.0f,1.0f },
-            { 1, 1,1.0f,0.0f }
-    };
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
 
 void GameTechRenderer::LoadSkybox() {
     // THE TEMP SKYBOX IS FROM HERE: https://assetstore.unity.com/packages/2d/textures-materials/sky/8k-skybox-pack-free-150926
@@ -325,6 +355,21 @@ void GameTechRenderer::RenderFrame() {
     RenderUI();
 }
 
+void GameTechRenderer::RenderLSFrame() {
+    uTime += 0.01f;
+    uiOrthoView = Matrix4::Orthographic(0.0, windowWidth, 0, windowHeight, -1.0f, 1.0f);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glClearColor(1, 1, 1, 1);
+    glDisable(GL_CULL_FACE); //Todo - text indices are going the wrong way...
+    glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    RenderUI();
+}
+
+
 void GameTechRenderer::FillDiffuseBuffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, bufferFBO);
     glDepthFunc(GL_LEQUAL);
@@ -332,6 +377,7 @@ void GameTechRenderer::FillDiffuseBuffer() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
+    RenderParticles();
 }
 
 void GameTechRenderer::RenderDeferredLighting() {
@@ -617,8 +663,8 @@ void GameTechRenderer::RenderSkybox() {
     glUniformMatrix4fv(projLocation, 1, false, (float*)&projMatrix);
     glUniformMatrix4fv(viewLocation, 1, false, (float*)&viewMatrix);
 
-    glUniform1i(texLocation, 0);
-    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(texLocation, 5);
+    glActiveTexture(GL_TEXTURE5);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
 
     BindMesh(skyboxMesh);
@@ -674,7 +720,7 @@ void GameTechRenderer::RenderCamera() {
         }
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
-        //if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
+        if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
 
         OGLShader *shader = (OGLShader *) (*i).GetShader();
         if (!shader) {
@@ -773,6 +819,7 @@ void GameTechRenderer::RenderCamera() {
     //test if ogl error
     glDisable(GL_BLEND);
 }
+
 
 void NCL::CSC8503::GameTechRenderer::ApplyPostProcessing()
 {

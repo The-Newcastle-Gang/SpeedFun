@@ -11,7 +11,14 @@ add_library(server
         Components/Spring.cpp
         Components/ObjectOscillator.cpp
         Components/DamagingObstacle.cpp
+        Components/BridgeTrigger.cpp
+        Components/TestBridge.cpp
+        Components/RayEnemyFollow.cpp
+        Components/RayEnemyShoot.cpp
+        Components/TrapObject.cpp
+        Components/SpeedUpBlock.cpp
         Components/Swinging.cpp
+
         Levels/StageTimer.cpp
         Levels/LevelManager.cpp
         Components/PlayerRespawner.h)

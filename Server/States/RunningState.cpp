@@ -30,7 +30,7 @@ void RunningState::OnEnter() {
     playerInfo = serverBase->GetPlayerInfo();
     sceneSnapshotId = 0;
     numPlayersLoaded = 0;
-
+    numPlayerFinished = 0;
     shouldClose.store(false);
 
     CreateNetworkThread();
@@ -67,6 +67,7 @@ void RunningState::MoveToNewLevel(int level) { //we cant call this mid-update as
 void RunningState::ResetLevelInfo() {
     hasAllPlayersFinished = false;
     numPlayersLoaded = 0;
+    numPlayerFinished = 0;
     for (std::pair<int, bool> info : playersFinished) {
         playersFinished[info.first] = false;
     }
@@ -260,6 +261,7 @@ void RunningState::AssignPlayer(int peerId, GameObject* object) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(object->GetNetworkObject()->GetNetworkId());
+    handler.Pack(peerId);
     networkData->outgoingFunctions.Push(std::make_pair(peerId, FunctionPacket(Replicated::AssignPlayer, &data)));
 }
 
@@ -380,6 +382,29 @@ void RunningState::EndTriggerVolFunc(int id){
 void RunningState::SendMedalToClient(int id) {
     int medal = levelManager->GetCurrentMedal();
     Vector4 medalColour = levelManager->GetCurrentMedalColour();
+    if (serverBase->GetPlayerInfo().size() > 1) {
+        numPlayerFinished = std::clamp(numPlayerFinished + 1, 0, 4);
+        medal = numPlayerFinished;
+        switch (medal) {
+        case(Medal::Gold):
+            medalColour = Replicated::GOLD;
+            break;
+
+        case(Medal::Silver):
+            medalColour = Replicated::SILVER;
+            break;
+
+        case(Medal::Bronze):
+            medalColour = Replicated::BRONZE;
+            break;
+
+        case(Medal::Default):
+            medalColour = Replicated::DEFAULT;
+            break;
+        }
+    }
+   
+
     FunctionData data;
     DataHandler handler(&data);
     handler.Pack(id);
@@ -643,6 +668,13 @@ void RunningState::BuildLevel(const std::string &levelName)
     auto swingpList = levelManager->GetLevelReader()->GetSwingingPList();
     auto springList = levelManager->GetLevelReader()->GetSpringPList();
 
+    auto speedUpList = levelManager->GetLevelReader()->GetSpeedupBlockPrimitiveList();
+    auto bridgeList = levelManager->GetLevelReader()->GetBridgePrimitiveList();
+    auto trapBlockList = levelManager->GetLevelReader()->GetTrapBlockPrimitiveList();
+    auto rayEnemyList = levelManager->GetLevelReader()->GetRayEnemyPrimitiveList();
+    auto rayenemyTriList = levelManager->GetLevelReader()->GetRayTriggerPrimitiveList();
+    auto bridgeTriList = levelManager->GetLevelReader()->GetBridgeTriggerPrimitiveList();
+
     for(auto& x: plist){
         auto g = new GameObject();
         replicated->AddBlockToLevel(g, *world, x);
@@ -706,6 +738,75 @@ void RunningState::BuildLevel(const std::string &levelName)
         g->AddComponent(oo);
     }
 
+    for (auto& x : speedUpList) {
+        auto g = new GameObject();
+
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        TestSpeedUpBlock* spd = new TestSpeedUpBlock(g);
+        g->AddComponent(spd);
+    }
+
+    for (auto& x : bridgeList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        ib = new TestBridge(g);
+        g->AddComponent(ib);
+    }
+
+    for (auto& x : trapBlockList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        TrapBlock* tbs = new TrapBlock(g);
+        g->AddComponent(tbs);
+    }
+    
+
+    for (auto& x : rayEnemyList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        re = new RayEnemyFollow(g);
+        g->AddComponent(re);
+    }
+
+    for (auto& x : rayenemyTriList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+
+        RayEnemyShoot* ret = new RayEnemyShoot(g);
+        g->AddComponent(ret);
+        ret->SetFollowComponent(re);
+    }
+
+    for (auto& x : bridgeTriList) {
+        auto g = new GameObject();
+        replicated->AddBlockToLevel(g, *world, x);
+        g->SetPhysicsObject(new PhysicsObject(&g->GetTransform(), g->GetBoundingVolume(), new PhysicsMaterial()));
+        g->GetPhysicsObject()->SetInverseMass(0.0f);
+        g->GetPhysicsObject()->SetLayer(STATIC_LAYER);
+        BridgeTrigger* bt = new BridgeTrigger(g);
+        g->AddComponent(bt);
+        bt->SetBridgeTrigger(ib);
+    }
+
     for (auto& x : swingpList)
     {
         auto g = new GameObject();
@@ -717,9 +818,6 @@ void RunningState::BuildLevel(const std::string &levelName)
         Swinging* swing = new Swinging(g, x->timePeriod, x->cooldown, x->waitDelay, x->radius, x->changeAxis, x->changeDirection);
         g->AddComponent(swing);
     }
-
-    //SetTestSprings(); 
-    //SetTestFloor();
 }
 
 void RunningState::SetTriggerTypePositions(){
@@ -803,3 +901,4 @@ void RunningState::SetNetworkActive(GameObject *g, bool isActive) {
 
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::SetNetworkActive, &data));
 }
+

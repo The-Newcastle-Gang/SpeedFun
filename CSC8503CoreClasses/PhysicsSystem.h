@@ -1,7 +1,7 @@
 #pragma once
 #include "GameWorld.h"
 #include "PhysicsObject.h"
-
+#include "../Client/DebugMode.h"
 
 namespace NCL {
 	namespace CSC8503 {
