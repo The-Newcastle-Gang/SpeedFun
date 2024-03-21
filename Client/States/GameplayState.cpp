@@ -404,7 +404,12 @@ void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
     // guards on the PlaySound method.
 
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+    soundManager->SM_AddSongsToLoad({
+        "the-final-boss-battle-158700.wav",
+        "boss-fight-143121.wav",
+        "a-dark-desolate-world-15695.wav",
+        "the-dying-110458.wav"
+        });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundEffects.push_back(songToPlay);
@@ -1040,8 +1045,14 @@ void GameplayState::TogglePause() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
     isPaused = !isPaused;
     renderer->SetSpeedActive(!isPaused);
-    if (isPaused) canvas->PushActiveLayer("PauseLayer");
-    else canvas->PopActiveLayer();
+    if (isPaused) {
+        canvas->PushActiveLayer("PauseLayer");
+        soundManager->SM_PauseSound(soundManager->GetCurrentSong());
+    }
+    else {
+        canvas->PopActiveLayer();
+        soundManager->SM_ResumeSound(soundManager->GetCurrentSong());
+    }
 }
 
 void GameplayState::FinishLoading() {
