@@ -18,6 +18,7 @@ std::chrono::steady_clock::time_point DebugMode::end;
 
 static ULARGE_INTEGER lastCPU, lastSysCPU, lastUserCPU;
 static int ProcessorsNum;
+int DebugMode::collisionCount = 0;
 
 static HANDLE self;
 
@@ -118,7 +119,7 @@ void DebugMode::DisplayCameraInfo(){
 
 //display COllision volumes
 void DebugMode::DisplayCollisionInfo(){
-
+    Debug::Print("Collision Count:" + std::to_string(collisionCount), Vector2(0, 30), Debug::WHITE);
 }
 
 void DebugMode::StartCostClock(){
