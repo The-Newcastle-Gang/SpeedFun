@@ -11,6 +11,7 @@ using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
 
+
 int main() {  
     Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1920, 1200,true);
    
@@ -47,13 +48,13 @@ int main() {
             debugMode = !debugMode;
         }
        
-      w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
+      w->SetTitle("Hell Runners");
 
         if(!debugMode){
             client->Update(dt);
         }
         
     }
-    Window::DestroyGameWindow();
     delete soundManager;
+    Window::DestroyGameWindow();
 }
