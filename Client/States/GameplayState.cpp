@@ -405,10 +405,10 @@ void GameplayState::InitSounds() {
     // guards on the PlaySound method.
 
     soundManager->SM_AddSongsToLoad({
-        "the-final-boss-battle-158700.WAV",
-        "boss-fight-143121.WAV",
-        "a-dark-desolate-world-15695.WAV",
-        "the-dying-110458.WAV"
+        "the-final-boss-battle-158700.wav",
+        "boss-fight-143121.wav",
+        "a-dark-desolate-world-15695.wav",
+        "the-dying-110458.wav"
         });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
