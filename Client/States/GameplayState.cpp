@@ -581,7 +581,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     {
         UpdateGrapples(dt);
         
-        if (firstPersonPosition && state == GameplayStateEnums::PLAYING) {
+        if (firstPersonPosition && state != GameplayStateEnums::COUNTDOWN) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         WalkCamera(dt);
@@ -602,7 +602,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
 
         Window::GetWindow()->ShowOSPointer(false);
 
-        if (firstPersonPosition && state == GameplayStateEnums::PLAYING) {
+        if (firstPersonPosition && state != GameplayStateEnums::COUNTDOWN) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         world->UpdateWorld(dt);
