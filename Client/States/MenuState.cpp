@@ -15,6 +15,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     titleShader         = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
     backScrollShader    = renderer->LoadShader("defaultUI.vert", "backScroll.frag");
     UIShine             = renderer->LoadShader("defaultUI.vert", "medalShine.frag");
+    backFrameShader     = renderer->LoadShader("defaultUI.vert", "backFrameBurn.frag");
 
     activeText = -1;
     textLimit = 15;
@@ -247,6 +248,8 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
     } if (tags.find("arrow") !=tags.end()){
         element.OnMouseEnter.connect<&MenuState::ArrowHoverEnter>(this);
         element.OnMouseExit.connect<&MenuState::ArrowHoverExit>(this);
+    } if (tags.find("backFrame") != tags.end()){
+        element.SetShader(backFrameShader);
     }
 
     if (id == "Singleplayer") {

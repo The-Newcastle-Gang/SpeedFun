@@ -81,6 +81,7 @@ local COLORS = {
     lightgray = Vector4:newRGB(100, 100, 100, 255),
     black = Vector4:new(0.0, 0.0, 0.0, 1.0);
     menuBackground = Vector4:new(0.01, 0.01, 0.01, 1.0);
+    frameBackground = Vector4:new(1.0,0.0,0.0,1.0);
 }
 
 local elementBase = {
@@ -265,22 +266,28 @@ canvas = {
         },
         {
           aSize = Vector2:new(540, 455),
-          color = Vector4:new(1,1,1,1.0),
+          color = COLORS.white,
           align = {
               AlignTo("right", 85),
               AlignTo("middle", 0),
-          }
+          },
+          --tags = {
+          --    "backFrame"
+          --}
         },
         {
             aSize = Vector2:new(540, 455),
-            color = Vector4:new(1,1,1,1.0),
+            color = COLORS.white,
             align = {
                 AlignTo("left", 85),
                 AlignTo("middle", 0),
-            }
+            },
+            --tags ={
+            --    "backFrame"
+            --}
         },
         {
-            aSize = Vector2:new(530, 450),
+            aSize = Vector2:new(525, 450),
             color = COLORS.menuBackground,
             align = {
                 AlignTo("right", 90),
@@ -288,7 +295,7 @@ canvas = {
             },
         },
         {
-            aSize = Vector2:new(530, 450),
+            aSize = Vector2:new(525, 450),
             color = COLORS.menuBackground,
             align = {
                 AlignTo("left", 90),
@@ -343,7 +350,7 @@ canvas = {
             aSize = Vector2:new(70, 70),
             align = {
                 AlignTo("top", 157),
-                AlignTo("left", 450)
+                AlignTo("left", 500)
             },
             tags = { "arrow" },
             id = "IncreaseLevel"
