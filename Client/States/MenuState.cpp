@@ -17,6 +17,7 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     textLimit = 15;
     reader = new LevelReader(); //this could be shared between states but its not big so should be okay.
     reader->LoadLevelNameMap();
+    LoadLevelThumbnails();
 }
 
 void MenuState::SendLevelSelectPacket(int level) {
@@ -36,6 +37,24 @@ void MenuState::InitMenuSounds() {
 MenuState::~MenuState() {
     delete hoverShader;
     delete reader;
+    for (auto& pair : levelThumbnails) {
+        delete pair.second; //free the textures
+    }
+}
+
+void MenuState::LoadLevelThumbnails() {
+    for (const auto& entry : std::filesystem::directory_iterator(Assets::LEVELDIR)) {
+        std::string name {entry.path().filename().string()};
+
+        //remove filename
+        size_t last = name.find_last_of(".");
+        if (last != std::string::npos) name = name.substr(0, last);
+
+        std::string texName = Assets::THUMBNAILDIR + name + ".png";
+        TextureBase* thumbnail = renderer->LoadTexture(texName);
+
+        levelThumbnails[name] = thumbnail;
+    }
 }
 
 void MenuState::OptionHover(Element& element) {
@@ -146,11 +165,7 @@ void MenuState::SetActiveTextEntry(Element& element) {
     }
 }
 
-void MenuState::UpdateLevelName(std::string levelName) {
-    auto& textElement = canvas->GetElementById("LevelName", "lobby");
-    auto& textElementData = textElement.GetTextData();
-    textElementData.text = levelName;
-}
+
 
 void MenuState::CreateLobby(Element& element) {
     shouldServerStart.store(true);
@@ -177,6 +192,18 @@ void MenuState::HandleLevelInt(int level) {
     std::cout << "CLIENT RECIEVED LEVEL " << currentClientLevel << "!!\n";
     std::string levelName = reader->GetLevelName(level);
     UpdateLevelName(levelName);
+    UpdateLevelThumbnail(levelName);
+}
+
+void MenuState::UpdateLevelName(std::string levelName) {
+    auto& textElement = canvas->GetElementById("LevelName", "lobby");
+    auto& textElementData = textElement.GetTextData();
+    textElementData.text = levelName;
+}
+
+void MenuState::UpdateLevelThumbnail(std::string levelName) {
+    auto& imageElement = canvas->GetElementById("LevelThumbnail", "lobby");
+    imageElement.SetTexture(levelThumbnails[levelName]);
 }
 
 void MenuState::JoinLobby() {

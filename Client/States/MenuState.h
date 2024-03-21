@@ -77,11 +77,13 @@ namespace NCL {
             void HandleLevelInt(int level);
             void StartGame(Element& _);
             void InitCanvas();
+            void LoadLevelThumbnails();
             void IncreaseLevel(Element& element);
             void DecreaseLevel(Element& element);
             void OptionHover(Element &element);
             void InitLua();
             void UpdateLevelName(std::string levelName);
+            void UpdateLevelThumbnail(std::string levelName);
             void AttachSignals(Element& element, const std::unordered_set<std::string>& tags, const string &id);
             void AlignCanvasElement(Element &element);
             void BeginSingleplayer(Element &_);
@@ -103,6 +105,8 @@ namespace NCL {
             void LeaveLobby(Element &element);
 
             void StartSingleplayer();
+
+            std::unordered_map<std::string, TextureBase*> levelThumbnails;
         };
     }
 }

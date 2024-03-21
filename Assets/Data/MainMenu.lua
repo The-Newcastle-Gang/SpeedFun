@@ -306,6 +306,16 @@ canvas = {
             },
             id = "LevelName"
         },
+        {
+            color = COLORS.white,
+            image = "LevelThumbnails/Level 1 - Adam Test.png",
+            aSize = Vector2:new(480, 320),
+            align = {
+                AlignTo("top", 230),
+                AlignTo("left", 100)
+            },
+            id = "LevelThumbnail"
+        },
     }
 }
 

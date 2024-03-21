@@ -23,6 +23,7 @@ void WaitingPlayers::AddPlayer(int peerId) {
     PlayerInfo info{};
     info.peerId = peerId;
     serverBase->AddPlayerInfo(peerId, info);
+    SendLevelSelected(selectedLevel);
 }
 
 void WaitingPlayers::StartGame() {
