@@ -1150,13 +1150,11 @@ void GameplayState::LoadPlayerMeshMaterials() {
 
 void GameplayState::CreatePlayers() {
     float playerSeperation = 2.0f;
-    int currentPlayer = 1;
+    int currentPlayer = 0;
 
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     Vector3 startPos = levelManager->GetLevelReader()->GetStartPosition();
-
-    int currentPlayer = 0;
 
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         Vector3 thisPlayerStartPos = startPos + Vector3(0, 0, 1) * CGetDirectionFromPlayerNumber(currentPlayer) * CGetMagnitudeFromPlayerNumber(currentPlayer) * playerSeperation;
