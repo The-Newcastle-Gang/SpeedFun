@@ -16,7 +16,9 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     backScrollShader    = renderer->LoadShader("defaultUI.vert", "backScroll.frag");
     activeText = -1;
     textLimit = 15;
-
+    reader = new LevelReader(); //this could be shared between states but its not big so should be okay.
+    reader->LoadLevelNameMap();
+    LoadLevelThumbnails();
 }
 
 void MenuState::SendLevelSelectPacket(int level) {
@@ -35,6 +37,25 @@ void MenuState::InitMenuSounds() {
 
 MenuState::~MenuState() {
     delete hoverShader;
+    delete reader;
+    for (auto& pair : levelThumbnails) {
+        delete pair.second; //free the textures
+    }
+}
+
+void MenuState::LoadLevelThumbnails() {
+    for (const auto& entry : std::filesystem::directory_iterator(Assets::LEVELDIR)) {
+        std::string name {entry.path().filename().string()};
+
+        //remove filename
+        size_t last = name.find_last_of(".");
+        if (last != std::string::npos) name = name.substr(0, last);
+
+        std::string texName = Assets::THUMBNAILDIR + name + ".png";
+        TextureBase* thumbnail = renderer->LoadTexture(texName);
+
+        levelThumbnails[name] = thumbnail;
+    }
 }
 
 void MenuState::OptionHover(Element& element) {
@@ -145,10 +166,45 @@ void MenuState::SetActiveTextEntry(Element& element) {
     }
 }
 
+
+
 void MenuState::CreateLobby(Element& element) {
     shouldServerStart.store(true);
     canvas->PushActiveLayer("lobby");
+    HandleLevelInt(0);
     ConnectToGame("127.0.0.1");
+}
+
+
+void MenuState::IncreaseLevel(Element& element) {
+    currentClientLevel = (currentClientLevel+1) % reader->GetNumberOfLevels();
+    SendLevelSelectPacket(currentClientLevel);
+    std::cout << "LEVEL INCREASED TO " <<currentClientLevel<<"\n";
+}
+
+void MenuState::DecreaseLevel(Element& element) {
+    currentClientLevel = (currentClientLevel - 1)<0?reader->GetNumberOfLevels()-1: (currentClientLevel - 1);
+    SendLevelSelectPacket(currentClientLevel);
+    std::cout << "LEVEL DECREASED TO " << currentClientLevel << "\n";
+}
+
+void MenuState::HandleLevelInt(int level) {
+    currentClientLevel = level;
+    std::cout << "CLIENT RECIEVED LEVEL " << currentClientLevel << "!!\n";
+    std::string levelName = reader->GetLevelName(level);
+    UpdateLevelName(levelName);
+    UpdateLevelThumbnail(levelName);
+}
+
+void MenuState::UpdateLevelName(std::string levelName) {
+    auto& textElement = canvas->GetElementById("LevelName", "lobby");
+    auto& textElementData = textElement.GetTextData();
+    textElementData.text = levelName;
+}
+
+void MenuState::UpdateLevelThumbnail(std::string levelName) {
+    auto& imageElement = canvas->GetElementById("LevelThumbnail", "lobby");
+    imageElement.SetTexture(levelThumbnails[levelName]);
 }
 
 void MenuState::JoinLobby() {
@@ -204,6 +260,13 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
 
         element.OnMouseUp.connect<&MenuState::StartGame>(this);
     }
+    else if (id == "IncreaseLevel") {
+        element.OnMouseUp.connect<&MenuState::IncreaseLevel>(this);
+    }
+    else if (id == "DecreaseLevel") {
+        element.OnMouseUp.connect<&MenuState::DecreaseLevel>(this);
+    }
+
 }
 
 void MenuState::AlignCanvasElement(Element& element) {
@@ -394,6 +457,10 @@ void MenuState::ReceivePacket(int type, GamePacket *payload, int source) {
             if (packet->functionId == Replicated::RemoteClientCalls::LoadGame) {
                 isGameStarted = true;
                 baseClient->RemoteFunction(Replicated::MenuToGameplay, nullptr);
+            }
+            else if (packet->functionId == Replicated::SetMenuLevel) {
+                DataHandler handler(&packet->data);
+                HandleLevelInt(handler.Unpack<int>());
             }
         } break;
     }
