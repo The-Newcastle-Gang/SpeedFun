@@ -28,8 +28,7 @@ void SoundManager::SM_StopSound(std::string soundName) {
 	StopSound(*sounds[soundName]);
 }
 
-void SoundManager::SM_PauseSound(std::string soundName)
-{
+void SoundManager::SM_PauseSound(std::string soundName) {
 	if (!SM_IsSoundReady(soundName)) return;
 	PauseSound(*sounds[soundName]);
 }
