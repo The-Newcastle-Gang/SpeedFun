@@ -404,7 +404,12 @@ void GameplayState::InitSounds() {
     // Believe this could be thread unsafe, as sounds can be accessed while this theoretically is still loading, with no
     // guards on the PlaySound method.
 
-    soundManager->SM_AddSongsToLoad({ "goodegg.ogg", "koppen.ogg", "neon.ogg", "scouttf2.ogg", "skeleton.ogg", "peakGO.ogg" });
+    soundManager->SM_AddSongsToLoad({
+        "the-final-boss-battle-158700.WAV",
+        "boss-fight-143121.WAV",
+        "a-dark-desolate-world-15695.WAV",
+        "the-dying-110458.WAV"
+        });
 
     std::string songToPlay = soundManager->SM_SelectRandomSong();
     soundEffects.push_back(songToPlay);
