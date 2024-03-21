@@ -11,8 +11,9 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
-    hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
-    titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    hoverShader         = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
+    titleShader         = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    backScrollShader    = renderer->LoadShader("defaultUI.vert", "backScroll.frag");
     activeText = -1;
     textLimit = 15;
     reader = new LevelReader(); //this could be shared between states but its not big so should be okay.
@@ -29,9 +30,9 @@ void MenuState::SendLevelSelectPacket(int level) {
 
 void MenuState::InitMenuSounds() {
     soundManager->SM_AddSoundToLoad("se_select00.wav");
-    soundManager->SM_AddSoundToLoad("rainer menu.ogg");
+    soundManager->SM_AddSoundToLoad("the-longest-night-of-this-winter-158699.wav");
     soundManager->SM_LoadSoundList();
-    soundManager->SM_PlaySound("rainer menu.ogg");
+    soundManager->SM_PlaySound("the-longest-night-of-this-winter-158699.wav");
 }
 
 MenuState::~MenuState() {
@@ -231,6 +232,8 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
     } if (tags.find("fireEffect") != tags.end()) {
         element.SetShader(titleShader);
+    } if(tags.find("menuScroll") != tags.end()){
+        element.SetShader(backScrollShader);
     }
 
     if (id == "Singleplayer") {
