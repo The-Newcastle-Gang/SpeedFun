@@ -19,7 +19,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
-
+    LoadPlayerMeshMaterials();
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
@@ -52,12 +52,13 @@ GameplayState::~GameplayState() {
     delete networkThread;
     networkThread = nullptr;
 
-
     delete loadSoundThread;
     loadSoundThread = nullptr;
 
     delete medalShineShader;
     medalShineShader = nullptr;
+
+    delete cinematicCamera;
 }
 
 
@@ -377,6 +378,7 @@ void GameplayState::OnNewLevel() {
     displayDebugger = false;
     playerPositions.clear();
     canvas->PopActiveLayer(); //pop end of level UI
+    ResetMedalRatios();
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
@@ -388,6 +390,12 @@ void GameplayState::OnNewLevel() {
     FinishLoading();
     ResetCameraToForwards();
 
+}
+
+void GameplayState::ResetMedalRatios() {
+    for (auto& pair : medalTimeRatios) {
+        pair.second.second = -1.0f;
+    }
 }
 
 void GameplayState::InitialiseAssets() {
@@ -480,7 +488,6 @@ void GameplayState::CreateLoadingScreenCanvas() {
 
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "LoadingScreen!" << std::endl;
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
@@ -513,7 +520,6 @@ void GameplayState::ManageLoading(float dt) {
     loadingTime += dt;
 
     if (soundHasLoaded == LoadingStates::LOADED) {
-        std::cout << "\n\nSounds Have Loaded!\n\n";
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -540,6 +546,7 @@ void GameplayState::Update(float dt) {
 
         case GameplayStateEnums::COUNTDOWN:{
             UpdateCountdown(dt);
+            if(dt<1.0f) cinematicCamera->UpdateTimer(dt);
             break;
         }
 
@@ -566,6 +573,7 @@ void GameplayState::UpdateCountdown(float dt){
         state = GameplayStateEnums::PLAYING;
         canvas->PopActiveLayer();
         soundManager->SM_PlaySound("sfx_go.wav");
+        ResetCameraToForwards();
     }
 }
 
@@ -577,21 +585,28 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     {
         UpdateGrapples(dt);
         
-        if (firstPersonPosition) {
+        if (firstPersonPosition && state != GameplayStateEnums::COUNTDOWN) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         WalkCamera(dt);
         if (jumpTimer > 0) JumpCamera(dt);
         if (landTimer > 0) LandCamera(dt);
         StrafeCamera(dt);
-        world->GetMainCamera()->UpdateCamera(dt);
+        if (state == GameplayStateEnums::COUNTDOWN)
+        {
+            cinematicCamera->UpdateCinematicCamera(world->GetMainCamera());
+        }
+        else
+        {
+            world->GetMainCamera()->UpdateCamera(dt);
+        }
 
         totalDTElapsed += dt;
         UpdateGrapples(dt);
 
         Window::GetWindow()->ShowOSPointer(false);
 
-        if (firstPersonPosition) {
+        if (firstPersonPosition && state != GameplayStateEnums::COUNTDOWN) {
             world->GetMainCamera()->SetPosition(firstPersonPosition->GetPosition());
         }
         world->UpdateWorld(dt);
@@ -604,6 +619,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
     UpdateParticleSystems(dt);
 
     if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::P)) displayDebugger = !displayDebugger;
+    if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::I)) cinematicCamera->WriteCameraInfo(world->GetMainCamera(), "autocamera.txt");
     if (displayDebugger) DebugMode::UpdateDebugMode(dt);
     if (debugMovementEnabled) {
         // idk i got bored
@@ -642,6 +658,8 @@ void GameplayState::UpdateEndOfLevel(float dt)
         shouldMoveToNewLevel = false;
         Window::GetWindow()->ShowOSPointer(false);
         state = GameplayStateEnums::COUNTDOWN;
+        cinematicCamera->ResetCurrentCamera();
+        cinematicCamera->ResetTimer();
     }
     UpdateAndRenderWorld(dt);
 }
@@ -692,7 +710,6 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Stage_Start): {
                 // Enable player controls
-
             } break;
 
             case(Replicated::EndReached): {
@@ -1078,6 +1095,9 @@ void GameplayState::InitCamera() {
     cam->SetYaw(315.0f);
     cam->SetPosition(Vector3(-60, 40, 60));
     cam->SetCameraOffset(Vector3(0, 0.5f,0 )); //to get the camera to the player's head
+
+    cinematicCamera = new CinematicCamera();
+    cinematicCamera->ReadPositionsFromFile("autocamera.txt");
 }
 
 void GameplayState::InitWorld() {
@@ -1117,12 +1137,34 @@ void GameplayState::CreateRock() {
     rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
+int CGetDirectionFromPlayerNumber(int num) {
+    return (((num % 2) * 2) - 1); // 0 = -1, 1 = 1
+}
+
+int CGetMagnitudeFromPlayerNumber(int num) {
+    return num < 3 ? 1 : 3; // Uses player number to adjust how far from other players.
+}
+
+void GameplayState::LoadPlayerMeshMaterials() {
+    playerTextures[0] = resources->GetMeshMaterial("Player1.mat");
+    playerTextures[1] = resources->GetMeshMaterial("Player2.mat");
+    playerTextures[2] = resources->GetMeshMaterial("Player3.mat");
+    playerTextures[3] = resources->GetMeshMaterial("Player4.mat");
+}
+
 void GameplayState::CreatePlayers() {
+    float playerSeperation = 2.0f;
+    int currentPlayer = 0;
+
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
+    Vector3 startPos = levelManager->GetLevelReader()->GetStartPosition();
+
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
+        Vector3 thisPlayerStartPos = startPos + Vector3(0, 0, 1) * CGetDirectionFromPlayerNumber(currentPlayer) * CGetMagnitudeFromPlayerNumber(currentPlayer) * playerSeperation;
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
+        player->GetTransform().SetPosition(thisPlayerStartPos);
   
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
@@ -1141,9 +1183,9 @@ void GameplayState::CreatePlayers() {
         newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
-
+        currentPlayer++;
     }
 }
 
@@ -1387,7 +1429,9 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
-    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
+    
+    //cinematicCamera->AddInitialCamera(levelManager->GetLevelReader()->GetStartPosition());
+    cinematicCamera->AddInitialCamera(firstPersonPosition->GetPosition() + world->GetMainCamera()->GetOffsetPosition());
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
