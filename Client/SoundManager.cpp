@@ -1,4 +1,5 @@
 #include "SoundManager.h"
+#include "SoundManager.h"
 #include "Assets.h"
 
 using namespace NCL;
@@ -26,6 +27,12 @@ void SoundManager::SM_PlaySound(std::string soundName) {
 void SoundManager::SM_StopSound(std::string soundName) {
 	if (!SM_IsSoundReady(soundName)) return;
 	StopSound(*sounds[soundName]);
+}
+
+void NCL::CSC8503::SoundManager::SM_PauseSound(std::string soundName)
+{
+	if (!SM_IsSoundReady(soundName)) return;
+	PauseSound(*sounds[soundName]);
 }
 
 void SoundManager::SM_ResumeSound(std::string soundName) {
