@@ -19,7 +19,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
-
+    LoadPlayerMeshMaterials();
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
@@ -51,7 +51,6 @@ GameplayState::~GameplayState() {
 
     delete networkThread;
     networkThread = nullptr;
-
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -375,7 +374,9 @@ void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
     displayDebugger = false;
+    playerPositions.clear();
     canvas->PopActiveLayer(); //pop end of level UI
+    ResetMedalRatios();
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
@@ -387,6 +388,12 @@ void GameplayState::OnNewLevel() {
     FinishLoading();
     ResetCameraToForwards();
 
+}
+
+void GameplayState::ResetMedalRatios() {
+    for (auto& pair : medalTimeRatios) {
+        pair.second.second = -1.0f;
+    }
 }
 
 void GameplayState::InitialiseAssets() {
@@ -479,7 +486,6 @@ void GameplayState::CreateLoadingScreenCanvas() {
 
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "LoadingScreen!" << std::endl;
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
@@ -512,7 +518,6 @@ void GameplayState::ManageLoading(float dt) {
     loadingTime += dt;
 
     if (soundHasLoaded == LoadingStates::LOADED) {
-        std::cout << "\n\nSounds Have Loaded!\n\n";
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -691,7 +696,6 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Stage_Start): {
                 // Enable player controls
-
             } break;
 
             case(Replicated::EndReached): {
@@ -925,6 +929,7 @@ GameObject* GameplayState::CreateChainLink() {
     world->AddGameObject(g, false);
     g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
     g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->GetRenderObject()->SetShouldInstance(true);
     g->SetActive(false);
     return g;
 }
@@ -1111,9 +1116,17 @@ void GameplayState::CreateRock() {
     rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
+void GameplayState::LoadPlayerMeshMaterials() {
+    playerTextures[0] = resources->GetMeshMaterial("Player1.mat");
+    playerTextures[1] = resources->GetMeshMaterial("Player2.mat");
+    playerTextures[2] = resources->GetMeshMaterial("Player3.mat");
+    playerTextures[3] = resources->GetMeshMaterial("Player4.mat");
+}
+
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
+    int currentPlayer = 0;
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
@@ -1134,9 +1147,9 @@ void GameplayState::CreatePlayers() {
         newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
-
+        currentPlayer++;
     }
 }
 
@@ -1380,7 +1393,6 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
-    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){

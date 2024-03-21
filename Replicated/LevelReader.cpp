@@ -53,7 +53,7 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
         i = nullptr;
     }
     groundCubes.clear();
-
+    
     for (auto& i : bridgePrimitives) {
         delete i;
         i = nullptr;
@@ -92,6 +92,8 @@ void LevelReader::Clear() { //we need to free all the memory so we dont leak
         i = nullptr;
     }
     bridgetriggerPrimitives.clear();
+
+    medalTimes = Vector3(0, 0, 0);
 
     checkPointPositions.clear();
 }
@@ -446,6 +448,18 @@ bool LevelReader::HasReadLevel(const std::string &levelSource) {
         pointLights.emplace_back(newLight);
     }
 
+    auto& medalItem = jData["medalInfo"];
+
+
+    try{
+        auto& plat = medalItem["platinum"];
+        auto& gold = medalItem["gold"];
+        auto& silver = medalItem["silver"];
+        medalTimes = Vector3(plat, gold, silver);
+    }
+    catch(...){
+        medalTimes = Vector3(10, 20, 30);
+    }
 
     return true;
 }

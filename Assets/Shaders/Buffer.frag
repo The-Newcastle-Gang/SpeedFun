@@ -1,7 +1,6 @@
 #version 330 core
 
 uniform sampler2D 	mainTex;
-uniform sampler2DShadow shadowTex;
 uniform sampler2D bumpTex;
 uniform bool isLit;
 
@@ -39,9 +38,6 @@ void main(void)	{
 	fragColour[1] = vec4(bumpNormal.xyz * 0.5 + 0.5, 1.0);
 	fragColour[1].w = isLit?1.0:0.0;
 
-	if( IN . shadowProj . w > 0.0) { // New !
-		shadow = textureProj ( shadowTex , IN . shadowProj ) * 0.5f;
-	}
 
 	vec3  incident = normalize ( lightPos - IN.worldPos );
 	float lambert  = max (0.0 , dot ( incident , IN.normal )) * 0.9; 
@@ -63,12 +59,10 @@ void main(void)	{
 	}
 	
 	albedo.rgb = pow(albedo.rgb, vec3(2.2));
-
-	
 	
 	fragColour[0].rgb = albedo.rgb * 0.05f; //ambientw
 	
-	fragColour[0].rgb += albedo.rgb * lightColour.rgb * toonLambert * shadow; //diffuse light
+	fragColour[0].rgb += albedo.rgb * lightColour.rgb * toonLambert; //diffuse light
 	
 	//fragColour[0].rgb += lightColour.rgb * toonSpecular * shadow; //specular light
 	
