@@ -1013,13 +1013,11 @@ void GameplayState::TogglePause() {
     networkData->outgoingFunctions.Push(FunctionPacket(Replicated::RemoteServerCalls::Pause, nullptr));
     isPaused = !isPaused;
     renderer->SetSpeedActive(!isPaused);
-    if (isPaused)
-    {
+    if (isPaused) {
         canvas->PushActiveLayer("PauseLayer");
         soundManager->SM_PauseSound(soundManager->GetCurrentSong());
     }
-    else
-    {
+    else {
         canvas->PopActiveLayer();
         soundManager->SM_ResumeSound(soundManager->GetCurrentSong());
     }
