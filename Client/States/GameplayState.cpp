@@ -1114,6 +1114,7 @@ void GameplayState::CreateRock() {
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
+    int currentPlayer = 0;
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
@@ -1128,6 +1129,7 @@ void GameplayState::CreatePlayers() {
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
         player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
         player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.5f,0));
+        player->GetRenderObject()->SetColour(playerColours[currentPlayer]);
 
         AnimatorObject* newAnimator = new AnimatorObject(playerMesh->GetAnimationMap());
         newAnimator->SetAnimation(playerMesh->GetAnimation("Idle"));
@@ -1136,6 +1138,7 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
+        currentPlayer++;
 
     }
 }
