@@ -19,7 +19,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
-
+    LoadPlayerMeshMaterials();
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
@@ -51,7 +51,6 @@ GameplayState::~GameplayState() {
 
     delete networkThread;
     networkThread = nullptr;
-
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -692,7 +691,6 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Stage_Start): {
                 // Enable player controls
-
             } break;
 
             case(Replicated::EndReached): {
@@ -1112,10 +1110,10 @@ void GameplayState::CreateRock() {
 }
 
 void GameplayState::LoadPlayerMeshMaterials() {
-    playerTextures[0] = new MeshMaterial("Player1.mat");
-    playerTextures[1] = new MeshMaterial("Player2.mat");
-    playerTextures[2] = new MeshMaterial("Player3.mat");
-    playerTextures[3] = new MeshMaterial("Player4.mat");
+    playerTextures[0] = resources->GetMeshMaterial("Player1.mat");
+    playerTextures[1] = resources->GetMeshMaterial("Player2.mat");
+    playerTextures[2] = resources->GetMeshMaterial("Player3.mat");
+    playerTextures[3] = resources->GetMeshMaterial("Player4.mat");
 }
 
 void GameplayState::CreatePlayers() {
@@ -1142,7 +1140,7 @@ void GameplayState::CreatePlayers() {
         newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
         currentPlayer++;
 
