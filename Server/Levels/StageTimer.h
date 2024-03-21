@@ -6,6 +6,7 @@
 #define SPEEDFUN_STAGESCORER_H
 #include <iostream>
 #include "Vector4.h"
+#include "Vector3.h"
 
 enum Medal {
     Platinum = 0,
@@ -39,6 +40,12 @@ public:
     float GetPlatinumTime() { return platinumTime; }
     float GetGoldTime() { return goldTime; }
     float GetSilverTime() { return silverTime; }
+
+    void SetMedalValues(NCL::Maths::Vector3 medals) {
+        platinumTime = medals.x;
+        goldTime = medals.y;
+        silverTime = medals.z;
+    }
 
     Medal GetCurrentMedal(float timeValue);
 protected:

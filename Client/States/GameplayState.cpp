@@ -376,6 +376,7 @@ void GameplayState::OnNewLevel() {
     displayDebugger = false;
     playerPositions.clear();
     canvas->PopActiveLayer(); //pop end of level UI
+    ResetMedalRatios();
     renderer->ClearActiveObjects();
     world->ClearAndErase();
     networkData->incomingState.Clear();
@@ -387,6 +388,12 @@ void GameplayState::OnNewLevel() {
     FinishLoading();
     ResetCameraToForwards();
 
+}
+
+void GameplayState::ResetMedalRatios() {
+    for (auto& pair : medalTimeRatios) {
+        pair.second.second = -1.0f;
+    }
 }
 
 void GameplayState::InitialiseAssets() {
