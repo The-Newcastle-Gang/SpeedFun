@@ -391,7 +391,6 @@ void RunningState::OnAllPlayersFinished()
     state = RunningStateEnums::END_OF_LEVEL;
     levelManager->EndStageTimer();
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::All_Players_Finished, nullptr));
-    std::cout << "ALL PLAYERS DONE!!!!!!!\n";
 }
 
 void RunningState::DeathTriggerVolFunc(int id){
@@ -630,7 +629,6 @@ void RunningState::ApplyPlayerMovement() {
 void RunningState::BuildLevel(const std::string &levelName)
 {
     //TODO: REDO THIS FUNCTION WITH LEVELMANAGER
-    std::cout << "Level: " << levelName << " being built\n";
     levelManager->TryReadLevel(levelName);
 
     SetTriggerTypePositions();

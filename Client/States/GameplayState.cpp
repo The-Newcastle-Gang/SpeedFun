@@ -511,7 +511,6 @@ void GameplayState::ManageLoading(float dt) {
     loadingTime += dt;
 
     if (soundHasLoaded == LoadingStates::LOADED) {
-        std::cout << "\n\nSounds Have Loaded!\n\n";
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -1102,7 +1101,6 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
-        std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
 
     }
 }
@@ -1284,7 +1282,6 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
-    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){

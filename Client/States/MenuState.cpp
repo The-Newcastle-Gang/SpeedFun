@@ -324,7 +324,6 @@ bool MenuState::CheckConnected() const {
 }
 
 void MenuState::ConnectedToServer() {
-    std::cout << "Connected to server" << std::endl;
     JoinLobby();
 }
 
