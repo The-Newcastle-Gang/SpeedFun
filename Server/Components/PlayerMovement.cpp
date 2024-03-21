@@ -1,3 +1,4 @@
+#include "PlayerMovement.h"
 //
 // Created by jdhyd on 2/19/2024.
 //
@@ -224,6 +225,12 @@ void PlayerMovement::PhysicsUpdate(float fixedTime) {
     if (verticalVel > maxVerticalVelocity) {
         gameObject->GetPhysicsObject()->SetLinearVelocity(Vector3(linearVel.x, maxVerticalVelocity, linearVel.z));
     }
+}
+
+void PlayerMovement::InterruptGrapple()
+{
+    SwitchToState(&air);
+    OnGrappleLeave();
 }
 
 bool PlayerMovement::GroundCheck() {

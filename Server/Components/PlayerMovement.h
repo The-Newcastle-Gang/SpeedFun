@@ -87,7 +87,7 @@ public:
         bool isActive;
     } grappleProjectileInfo;
 
-    void InterruptGrapple() { OnGrappleLeave(); }
+    void InterruptGrapple();
 
 private:
     GameWorld* world;
