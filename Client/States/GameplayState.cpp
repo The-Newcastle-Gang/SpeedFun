@@ -986,11 +986,10 @@ void GameplayState::CreateRock() {
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
-    for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
+    for (int i=0; i<numberPlayersJoined; i++) {
         auto player = new GameObject();
 
         replicated->CreatePlayer(player, *world);
-        if (numberPlayersJoined <= 0) player->SetActive(false);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1009,7 +1008,6 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
-        numberPlayersJoined--;
     }
 }
 
@@ -1122,7 +1120,7 @@ void GameplayState::UpdateGrapples(float dt) {
 }
 
 void GameplayState::CreateGrapples() {
-    for (int i = 0; i < Replicated::PLAYERCOUNT; i++) {
+    for (int i = 0; i < numberPlayersJoined; i++) {
         auto g = new GameObject();
         replicated->AddGrapplesToWorld(g, *world, i);
         g->SetRenderObject(new RenderObject(&g->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
