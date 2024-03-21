@@ -211,6 +211,7 @@ void PhysicsSystem::BasicCollisionDetection() {
                 continue;
             }
 
+            if (!layerMatrix[(*i)->GetPhysicsObject()->GetLayer() | (*j)->GetPhysicsObject()->GetLayer()])continue;
 
             CollisionDetection::CollisionInfo info;
 

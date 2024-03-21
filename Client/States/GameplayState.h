@@ -19,6 +19,7 @@
 #include "SoundManager.h"
 #include "AnimatorObject.h"
 #include "LevelManager.h"
+#include "CinematicCamera.h"
 
 #include <thread>
 #include <iostream>
@@ -272,6 +273,7 @@ namespace NCL {
             void UpdateTimerBox(Element& element, float dt);
             void UpdateTimerText(Element& element, float dt);
             void UpdateTimerNub(Element& element, float dt);
+            void ResetMedalRatios();
 
             ParticleSystem* lavaParticles;
             vector<ParticleSystem*> particleSystems;
@@ -328,10 +330,13 @@ namespace NCL {
                 finaltimeShrink = 1.0f;
                 finalTimeShake = 0.0f;
             }
-
+            void LoadPlayerMeshMaterials();
             void CreateChains();
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
+
+            CinematicCamera* cinematicCamera;
+            std::unordered_map<int, MeshMaterial*> playerTextures;
         };
     }
 }

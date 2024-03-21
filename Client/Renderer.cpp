@@ -23,6 +23,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     defaultShader = new OGLShader("scene.vert", "Buffer.frag");
     defaultUIShader = new OGLShader("defaultUi.vert", "defaultUi.frag");
     particleShader = new OGLShader("InstancedParticle.vert", "InstancedParticle.frag");
+    instancedShader = new OGLShader("instancedScene.vert", "Buffer.frag");
     combineShader = new OGLShader("screenQuad.vert", "CombineFrag.frag");
     pointLightShader = new OGLShader("PointLightVertex.vert", "PointLightFragment.frag");
     noiseTexture = (OGLTexture*)LoadTexture("noise.png");
@@ -149,6 +150,10 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
     isSpeedLinesActive = true;
     speedLineDir = 0;
 
+    glGenBuffers(1, &instanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, 2000 * sizeof(Matrix4), nullptr, GL_DYNAMIC_DRAW);
+
 }
 
 GameTechRenderer::~GameTechRenderer()	{
@@ -195,6 +200,63 @@ void GameTechRenderer::RenderParticles()
     }
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
+}
+
+void GameTechRenderer::RenderMeshInstanced(RenderObject* object, std::vector<Matrix4>& transforms) {
+    glEnable(GL_DEPTH_TEST);
+
+    float screenAspect = (float)windowWidth / (float)windowHeight;
+    Matrix4 viewMatrix = gameWorld.GetMainCamera()->BuildViewMatrix();
+    Matrix4 projMatrix = gameWorld.GetMainCamera()->BuildProjectionMatrix(screenAspect);
+
+    int lightPosLocation	= 0;
+    int lightColourLocation = 0;
+    int lightRadiusLocation = 0;
+
+    int hasTexLocation  = 0;
+
+    int projLocation	= 0;
+    int viewLocation	= 0;
+
+    BindShader(instancedShader);
+
+    projLocation    = glGetUniformLocation(instancedShader->GetProgramID(), "projMatrix");
+    viewLocation    = glGetUniformLocation(instancedShader->GetProgramID(), "viewMatrix");
+    lightPosLocation    = glGetUniformLocation(instancedShader->GetProgramID(), "lightPos");
+    lightColourLocation = glGetUniformLocation(instancedShader->GetProgramID(), "lightColour");
+    lightRadiusLocation = glGetUniformLocation(instancedShader->GetProgramID(), "lightRadius");
+    hasTexLocation  = glGetUniformLocation(instancedShader->GetProgramID(), "hasTexture");
+
+    glUniform3fv(lightPosLocation	, 1, (float*)&sunlight.lightPosition);
+    glUniform4fv(lightColourLocation, 1, (float*)&sunlight.lightColour);
+    glUniform1f(lightRadiusLocation, sunlight.lightRadius);
+
+    glUniformMatrix4fv(projLocation, 1, false, (float *) &projMatrix);
+    glUniformMatrix4fv(viewLocation, 1, false, (float *) &viewMatrix);
+    glUniform1i(hasTexLocation, (OGLTexture *) (*object).GetDefaultTexture() || (*object).GetMeshMaterial() ? 1 : 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, transforms.size() * sizeof(Matrix4), transforms.data());
+    unsigned int VAO = ((OGLMesh*)object->GetMesh())->GetVAO();
+    glBindVertexArray(VAO);
+    // set attribute pointers for matrix (4 times vec4)
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix4), (void*)0);
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix4), (void*)(sizeof(Vector4)));
+    glEnableVertexAttribArray(6);
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix4), (void*)(2 * sizeof(Vector4)));
+    glEnableVertexAttribArray(7);
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(Matrix4), (void*)(3 * sizeof(Vector4)));
+
+    glVertexAttribDivisor(4, 1);
+    glVertexAttribDivisor(5, 1);
+    glVertexAttribDivisor(6, 1);
+    glVertexAttribDivisor(7, 1);
+
+    glDrawElementsInstanced(GL_TRIANGLES, object->GetMesh()->GetIndexCount(), GL_UNSIGNED_INT, 0, transforms.size());
+
+    glBindVertexArray(0);
 }
 
 void GameTechRenderer::InitUIQuad() {
@@ -377,6 +439,9 @@ void GameTechRenderer::FillDiffuseBuffer() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
+    if (chainObject && !chainTransforms.empty()) {
+        RenderMeshInstanced(chainObject, chainTransforms);
+    }
     RenderParticles();
 }
 
@@ -590,16 +655,24 @@ void GameTechRenderer::RenderUI() {
 
 void GameTechRenderer::ClearActiveObjects() {
     activeObjects.clear();
+    chainTransforms.clear();
+    chainObject = nullptr;
 }
 
 void GameTechRenderer::BuildObjectList() {
-    activeObjects.clear();
+    ClearActiveObjects();
 
     gameWorld.OperateOnContents([&](GameObject* o) {
         if (o->IsActive()) {
-            const RenderObject* g = o->GetRenderObject();
+            RenderObject* g = o->GetRenderObject();
             if (g) {
-                activeObjects.emplace_back(g);
+                if (g->ShouldInstance()) {
+                    o->GetTransformPointer()->UpdateMatrix();
+                    chainTransforms.emplace_back(o->GetTransformPointer()->GetMatrix());
+                    chainObject = g;
+                } else {
+                    activeObjects.emplace_back(g);
+                }
             }
         }
     });
@@ -718,6 +791,7 @@ void GameTechRenderer::RenderCamera() {
         if (!i->IsDepthTested()) {
             glDepthMask(GL_FALSE);
         }
+
         Vector3 scale = (*i).GetMeshScale();
         float maxTransform = std::max(std::max(scale.x, scale.y), scale.z);
         if (!frameFrustum.SphereInsideFrustum(i->GetTransform()->GetPosition(), maxTransform * 0.5)) continue;
