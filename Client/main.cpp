@@ -11,6 +11,7 @@ using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
 
+
 int main() {  
     Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1920, 1200,true);
    
@@ -18,7 +19,7 @@ int main() {
     if (!w->HasInitialised()) {
         return -1;
     }
-
+`
 
     // Clear timer so there's no large dt. Get time delta doesn't work.
     w->UpdateWindow();
@@ -54,6 +55,6 @@ int main() {
         }
         
     }
-    Window::DestroyGameWindow();
     delete soundManager;
+    Window::DestroyGameWindow();
 }
