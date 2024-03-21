@@ -327,10 +327,12 @@ namespace NCL {
                 finaltimeShrink = 1.0f;
                 finalTimeShake = 0.0f;
             }
-
+            void LoadPlayerMeshMaterials();
             void CreateChains();
             void OperateOnChains(int grappleIndex, const std::function<void(GameObject &, int)>& opFunction);
             void OnGrappleToggle(GameObject &gameObject, bool isActive);
+
+            std::unordered_map<int, MeshMaterial*> playerTextures;
         };
     }
 }

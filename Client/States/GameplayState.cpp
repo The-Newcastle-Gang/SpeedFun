@@ -19,7 +19,7 @@ GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld,
     levelManager = std::make_unique<LevelManager>();
     medalImage = "medal.png";
     crosshairImage = "crosshair.png";
-
+    LoadPlayerMeshMaterials();
     playerblipImage = "playerBlip.png";
 
     timerBarShader      = resources->GetShader("timerBar");
@@ -51,7 +51,6 @@ GameplayState::~GameplayState() {
 
     delete networkThread;
     networkThread = nullptr;
-
 
     delete loadSoundThread;
     loadSoundThread = nullptr;
@@ -375,6 +374,7 @@ void GameplayState::OnNewLevel() {
     firstPersonPosition = nullptr;
     hasReachedEnd = false;
     displayDebugger = false;
+    playerPositions.clear();
     canvas->PopActiveLayer(); //pop end of level UI
     ResetMedalRatios();
     renderer->ClearActiveObjects();
@@ -698,7 +698,6 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Stage_Start): {
                 // Enable player controls
-
             } break;
 
             case(Replicated::EndReached): {
@@ -932,6 +931,7 @@ GameObject* GameplayState::CreateChainLink() {
     world->AddGameObject(g, false);
     g->GetTransform().SetPosition({0,0,0}).SetScale({chainSize, chainSize, chainSize});
     g->SetRenderObject(new RenderObject(g->GetTransformPointer(), resources->GetMesh("chainLink.obj"), resources->GetTexture("FlatColors.png"), nullptr));
+    g->GetRenderObject()->SetShouldInstance(true);
     g->SetActive(false);
     return g;
 }
@@ -1118,9 +1118,17 @@ void GameplayState::CreateRock() {
     rock->SetRenderObject(new RenderObject(&rock->GetTransform(), resources->GetMesh("trident.obj"), resources->GetTexture("FlatColors.png"), nullptr));
 }
 
+void GameplayState::LoadPlayerMeshMaterials() {
+    playerTextures[0] = resources->GetMeshMaterial("Player1.mat");
+    playerTextures[1] = resources->GetMeshMaterial("Player2.mat");
+    playerTextures[2] = resources->GetMeshMaterial("Player3.mat");
+    playerTextures[3] = resources->GetMeshMaterial("Player4.mat");
+}
+
 void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
+    int currentPlayer = 0;
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
@@ -1141,8 +1149,9 @@ void GameplayState::CreatePlayers() {
         newAnimator->SetMidPose("Idle");
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
-        player->GetRenderObject()->SetMeshMaterial(resources->GetMeshMaterial("Player.mat"));
+        player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
+        currentPlayer++;
 
     }
 }
