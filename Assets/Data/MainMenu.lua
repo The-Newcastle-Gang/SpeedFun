@@ -267,9 +267,17 @@ canvas = {
           aSize = Vector2:new(540, 455),
           color = Vector4:new(1,1,1,1.0),
           align = {
-              AlignTo("right", 90),
+              AlignTo("right", 85),
               AlignTo("middle", 0),
           }
+        },
+        {
+            aSize = Vector2:new(540, 455),
+            color = Vector4:new(1,1,1,1.0),
+            align = {
+                AlignTo("left", 85),
+                AlignTo("middle", 0),
+            }
         },
         {
             aSize = Vector2:new(530, 450),
@@ -358,7 +366,7 @@ canvas = {
             aSize = Vector2:new(480, 320),
             align = {
                 AlignTo("top", 230),
-                AlignTo("left", 100)
+                AlignTo("left", 110)
             },
             id = "LevelThumbnail"
         },
