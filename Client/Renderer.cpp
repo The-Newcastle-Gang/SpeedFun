@@ -100,7 +100,7 @@ GameTechRenderer::GameTechRenderer(GameWorld& world, Canvas& canvas) : OGLRender
 	lineCount = 0;
 
 	//Set up the light properties
-    sunlight.lightColour = Vector4(0.8f, 0.8f, 0.5f, 1.0f);
+    sunlight.lightColour = Vector4(0.6f, 0.6f, 0.4f, 1.0f);
     sunlight.lightRadius = 1000.0f;
     sunlight.lightPosition = Vector3(-200.0f, 60.0f, -200.0f);
 

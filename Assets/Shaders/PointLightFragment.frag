@@ -22,7 +22,7 @@ void main(void)	{
 	vec3 worldPos = invClipPos.xyz/invClipPos.w;
 
 	float dist = length(lightPos - worldPos);
-	float atten = 1 - step(0.0, dist - lightRadius);
+	float atten = 1.0 - (clamp(dist/lightRadius,0.0,1.0));
 
 	if(atten==0.0)discard;
 
