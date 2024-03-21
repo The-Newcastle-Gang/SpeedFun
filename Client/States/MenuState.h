@@ -108,6 +108,10 @@ namespace NCL {
             void StartSingleplayer();
 
             std::unordered_map<std::string, TextureBase*> levelThumbnails;
+
+            void ArrowHoverEnter(Element &element);
+
+            void ArrowHoverExit(Element &element);
         };
     }
 }

@@ -58,6 +58,14 @@ void MenuState::LoadLevelThumbnails() {
     }
 }
 
+void MenuState::ArrowHoverEnter(Element& element) {
+    element.SetColor(activeMenuText);
+}
+
+void MenuState::ArrowHoverExit(Element& element){
+    element.SetColor(inactiveMenuText);
+}
+
 void MenuState::OptionHover(Element& element) {
 
     if (selected == element.GetIndex()) return;
@@ -234,6 +242,9 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.SetShader(titleShader);
     } if(tags.find("menuScroll") != tags.end()){
         element.SetShader(backScrollShader);
+    } if (tags.find("arrow") !=tags.end()){
+        element.OnMouseEnter.connect<&MenuState::ArrowHoverEnter>(this);
+        element.OnMouseExit.connect<&MenuState::ArrowHoverExit>(this);
     }
 
     if (id == "Singleplayer") {

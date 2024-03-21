@@ -199,19 +199,6 @@ canvas = {
             },
             id = "Multiplayer",
         },
-        --{
-        --    image = "hellMain/Options.png",
-        --    color = COLORS.inactive,
-        --    aSize = Vector2:new(99, 25),
-        --    align = {
-        --        AlignTo("top", 285 + mainSpace * 2),
-        --        AlignTo("center", 0),
-        --    },
-        --    tags = {
-        --        "option",
-        --    },
-        --    id = "Options",
-        --},
         {
             image = "hellMain/Exit.png",
             color = COLORS.inactive,
@@ -316,6 +303,7 @@ canvas = {
                 AlignTo("top", 157),
                 AlignTo("left", 120)
             },
+            tags ={ "arrow" },
             id = "DecreaseLevel"
         },
         {
@@ -326,6 +314,7 @@ canvas = {
                 AlignTo("top", 157),
                 AlignTo("left", 450)
             },
+            tags = { "arrow" },
             id = "IncreaseLevel"
         },
         {
