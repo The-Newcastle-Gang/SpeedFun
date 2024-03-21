@@ -486,7 +486,6 @@ void GameplayState::CreateLoadingScreenCanvas() {
 
 void GameplayState::LoadingScreenUpdate() {
     while (shouldLoadScreen) {
-        std::cout << "LoadingScreen!" << std::endl;
         renderer->RenderLoadingScreen();
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
@@ -519,7 +518,6 @@ void GameplayState::ManageLoading(float dt) {
     loadingTime += dt;
 
     if (soundHasLoaded == LoadingStates::LOADED) {
-        std::cout << "\n\nSounds Have Loaded!\n\n";
         soundHasLoaded = LoadingStates::READY;
     }
 
@@ -1152,7 +1150,6 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
         currentPlayer++;
-
     }
 }
 
@@ -1396,7 +1393,6 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
-    std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 }
 
 float GameplayState::CalculateCompletion(Vector3 playerCurPos){
