@@ -24,6 +24,10 @@ namespace NCL {
 				return position;
 			}
 
+            Vector3* GetPositionPointer() {
+                return &position;
+            }
+
 			Vector3 GetScale() const {
 				return scale;
 			}

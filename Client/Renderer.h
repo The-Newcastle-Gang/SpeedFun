@@ -48,8 +48,12 @@ namespace NCL {
             void RenderQuad();
             void SetDeferred(bool shouldUseDeferred) { doDeferred = shouldUseDeferred; }
 
+            Vector3* GetSunlightPosPointer() { return &sunlight.lightPosition; }
+
             void SetSpeedLines(bool isActive) { isSpeedLinesActive = isActive; }
             void SetSpeedLineAmount(float percent) { speedLinePercent = percent; }
+
+            void SetPlayerPosition(Vector3* pos) { playerPosition = pos; }
 
             void ClearActiveObjects();
 
@@ -116,6 +120,8 @@ namespace NCL {
             OGLShader*  postProcessBase;
             OGLMesh*	skyboxMesh;
             GLuint		skyboxTex;
+
+            Vector3* playerPosition = nullptr;
 
             OGLTexture* noiseTexture;
             OGLTexture* cheeseTexture;

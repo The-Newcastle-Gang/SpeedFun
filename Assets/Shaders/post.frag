@@ -227,8 +227,8 @@ void main() {
     float threshold = 0.003;
     float thickness = 0.001;
     float tighten = 30;
-    float strength = 1.0;
-    float depthThreshold = 0.8;
+    float strength = 5.0;
+    float depthThreshold = 0.4;
 
 //    vec2 uv = IN.texCoord.xy * 2.0 - 1.0;
 

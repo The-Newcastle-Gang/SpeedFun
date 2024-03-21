@@ -340,7 +340,7 @@ void GameTechRenderer::RenderFrame() {
 
 	BuildObjectList();
 	SortObjectList();
-	//RenderShadowMap();
+	RenderShadowMap();
     FillDiffuseBuffer();
     RenderDeferredLighting();
     CombineBuffers();
@@ -619,7 +619,14 @@ void GameTechRenderer::RenderShadowMap() {
     BindShader(shadowShader);
     int mvpLocation = glGetUniformLocation(shadowShader->GetProgramID(), "mvpMatrix");
 
-    Matrix4 shadowViewMatrix = Matrix4::BuildViewMatrix(sunlight.lightPosition, Vector3(0, 0, 0), Vector3(0,1,0));
+    Matrix4 shadowViewMatrix;
+    if (playerPosition) {
+        shadowViewMatrix = Matrix4::BuildViewMatrix(sunlight.lightPosition, *playerPosition, Vector3(0, 1, 0));
+    }
+    else {
+        shadowViewMatrix = Matrix4::BuildViewMatrix(sunlight.lightPosition, Vector3(0,0,0), Vector3(0, 1, 0));
+    }
+
     Matrix4 shadowProjMatrix = Matrix4::Perspective(100.0f, 500.0f, 1, 45.0f);
 
     Matrix4 mvMatrix = shadowProjMatrix * shadowViewMatrix;

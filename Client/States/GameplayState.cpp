@@ -7,6 +7,7 @@ using namespace CSC8503;
 
 GameplayState::GameplayState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameClient* pClient, Resources* pResources, Canvas* pCanvas, SoundManager* pSoundManager) : State() {
     renderer = pRenderer;
+    sunPointer = renderer->GetSunlightPosPointer();
     world = pGameworld;
     soundManager = pSoundManager;
     // Don't touch base client in here, need some way to protect this.
@@ -377,6 +378,7 @@ void GameplayState::OnNewLevel() {
     displayDebugger = false;
     canvas->PopActiveLayer(); //pop end of level UI
     renderer->ClearActiveObjects();
+    renderer->SetPlayerPosition(nullptr);
     world->ClearAndErase();
     networkData->incomingState.Clear();
     particleSystems.clear();
@@ -619,6 +621,7 @@ void GameplayState::UpdateAndRenderWorld(float dt) {
         Debug::Print("Debug Movement!", Vector2(2, 94), Debug::WHITE);
     }
 
+    if(firstPersonPosition)*sunPointer = firstPersonPosition->GetPosition() + Vector3(-170.0f, 50.0f, -170.0f); // move the sun, powerful
     renderer->Render();
     Debug::UpdateRenderables(dt);
 }
@@ -1380,6 +1383,8 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
+    renderer->SetPlayerPosition(player->GetTransform().GetPositionPointer()); //let the renderer know where the player will be
+
     std::cout << "Assigning player to network object: " << player->GetNetworkObject()->GetNetworkId() << std::endl;
 }
 

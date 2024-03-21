@@ -319,6 +319,8 @@ namespace NCL {
             float grappleContVolume = 0.0f;
             GameObject *CreateChainLink();
 
+            Vector3* sunPointer = nullptr;
+
             void ResetEndScreenAnimTimers() {
                 medalTimer = 0.0f;
                 finalTime = 0.0f;
