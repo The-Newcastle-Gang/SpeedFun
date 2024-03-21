@@ -19,6 +19,7 @@ namespace NCL::Assets {
 	const std::string DATADIR(ASSETROOT + "Data/");
 	const std::string LEVELDIR(ASSETROOT + "Levels/");
 	const std::string CAMERADIR(ASSETROOT + "CinematicCameras/");
+	const std::string THUMBNAILDIR("LevelThumbnails/");
 
 	extern bool ReadTextFile(const std::string& filepath, std::string& result);
 	extern bool ReadBinaryFile(const std::string& filepath, char** into, size_t& size);
