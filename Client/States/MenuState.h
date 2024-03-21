@@ -46,6 +46,7 @@ namespace NCL {
             std::unique_ptr<TweenManager> tweenManager;
             ShaderBase* hoverShader;
             ShaderBase* titleShader;
+            ShaderBase* backScrollShader;
             int hoverBox;
             int mHoverBox;
             int selected;
@@ -62,8 +63,8 @@ namespace NCL {
             // Bad way to manage it, but we leave it for now.
             int connectState;
 
-            static constexpr Vector4 inactiveMenuText = {0.2, 0.2, 0.2, 1.0};
-            static constexpr Vector4 activeMenuText = {1.0, 1.0, 1.0, 1.0};
+            static constexpr Vector4 inactiveMenuText = {1.0, 1.0, 1.0, 1.0};
+            static constexpr Vector4 activeMenuText = {1.0, 0.0, 0.0, 1.0};
 
             lua_State* L;
 

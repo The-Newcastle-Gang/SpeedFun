@@ -11,8 +11,9 @@ MenuState::MenuState(GameTechRenderer* pRenderer, GameWorld* pGameworld, GameCli
     baseClient = pClient;
     tweenManager = std::make_unique<TweenManager>();
     canvas = pCanvas;
-    hoverShader = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
-    titleShader = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    hoverShader         = renderer->LoadShader("defaultUI.vert", "hoverUI.frag");
+    titleShader         = renderer->LoadShader("defaultUI.vert", "fireUI.frag");
+    backScrollShader    = renderer->LoadShader("defaultUI.vert", "backScroll.frag");
     activeText = -1;
     textLimit = 15;
 
@@ -175,6 +176,8 @@ void MenuState::AttachSignals(Element& element, const std::unordered_set<std::st
         element.OnFocus.connect<&MenuState::SetActiveTextEntry>(this);
     } if (tags.find("fireEffect") != tags.end()) {
         element.SetShader(titleShader);
+    } if(tags.find("menuScroll") != tags.end()){
+        element.SetShader(backScrollShader);
     }
 
     if (id == "Singleplayer") {
