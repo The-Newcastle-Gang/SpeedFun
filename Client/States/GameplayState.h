@@ -270,6 +270,7 @@ namespace NCL {
             void UpdateTimerBox(Element& element, float dt);
             void UpdateTimerText(Element& element, float dt);
             void UpdateTimerNub(Element& element, float dt);
+            void ResetMedalRatios();
 
             ParticleSystem* lavaParticles;
             vector<ParticleSystem*> particleSystems;
