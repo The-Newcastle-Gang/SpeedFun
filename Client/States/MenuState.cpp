@@ -413,31 +413,52 @@ void MenuState::TextEntry() {
 
 
     if (w->KeyHeld(KeyboardKeys::BACK)) {
-        if (!textElement.GetTextData().text.empty()) {
+        if (!textElement.GetTextData().text.empty() && KeyHeldRepeat(keyHoldBack)) {
             textElement.GetTextData().text.pop_back();
         }
+        keyHoldBack++;
+    }
+    else {
+        keyHoldBack = 0;
     }
 
     if (textElement.GetTextData().text.size() >= textLimit) return;
 
+    bool isCharacterPressed = false;
     for (auto keyValue = (int)KeyboardKeys::A; keyValue <= (int)KeyboardKeys::Z; keyValue++) {
-        if (w->KeyPressed((KeyboardKeys)keyValue)) {
-            textElement.GetTextData().text += w->KeyDown(KeyboardKeys::SHIFT) ? (char)keyValue : (char)(keyValue + 32);
+        if (w->KeyHeld((KeyboardKeys)keyValue) || w->KeyPressed((KeyboardKeys)keyValue)) {
+            if (w->KeyPressed((KeyboardKeys)keyValue) || KeyHeldRepeat(keyHoldCharacter)) {
+                textElement.GetTextData().text += w->KeyDown(KeyboardKeys::SHIFT) ? (char)keyValue : (char)(keyValue + 32);
+            }
+            isCharacterPressed = true;
         }
     }
 
     for (auto keyValue = (int)KeyboardKeys::NUM0; keyValue <= (int)KeyboardKeys::NUM9; keyValue++) {
-        if (!w->KeyPressed((KeyboardKeys)keyValue)) continue;
-        textElement.GetTextData().text += (char)keyValue;
+        if (w->KeyHeld((KeyboardKeys)keyValue) || w->KeyPressed((KeyboardKeys)keyValue))
+        {
+            if (w->KeyPressed((KeyboardKeys)keyValue) || KeyHeldRepeat(keyHoldCharacter)) {
+                textElement.GetTextData().text += (char)keyValue;
+            }
+            isCharacterPressed = true;
+        }
     }
 
-    if (w->KeyPressed(KeyboardKeys::PERIOD)) {
-        textElement.GetTextData().text += ".";
+    if (w->KeyHeld(KeyboardKeys::PERIOD) || w->KeyPressed(KeyboardKeys::PERIOD)) {
+        if (w->KeyPressed(KeyboardKeys::PERIOD) || KeyHeldRepeat(keyHoldCharacter)) {
+            textElement.GetTextData().text += ".";
+        }
+        isCharacterPressed = true;
     }
 
-    if (w->KeyPressed(KeyboardKeys::SPACE)) {
-        textElement.GetTextData().text += " ";
+    if (w->KeyHeld(KeyboardKeys::SPACE) || w->KeyPressed(KeyboardKeys::SPACE)) {
+        if (w->KeyPressed(KeyboardKeys::SPACE) || KeyHeldRepeat(keyHoldCharacter)) {
+            textElement.GetTextData().text += " ";
+        }
+        isCharacterPressed = true;
     }
+    if (isCharacterPressed) keyHoldCharacter++;
+    else keyHoldCharacter = 0;
 }
 
 void MenuState::Update(float dt) {
