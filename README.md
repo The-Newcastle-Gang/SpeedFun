@@ -31,14 +31,17 @@ This section lists the work done by each people involved in this project
 - to be added
 
 ## Odycious
-- Took ownership of version control
-- Created Trigger Volumes - Start, End, Checkpoint, Death
-- Functionality for Win/Lose conditions
-- Made the build level function work between client and server
-- Multithreaded loading screen
-- Bug fixing
-- Made death sound using rFGX
-- Physics testing
+- Took ownership of version control; managed the pull requests, merge conflicts and ensured main wasn't broken. 
+- Created Trigger Volumes - Start, End, Checkpoint, Death.
+- Altered the physics system to accommodate trigger volumes - allowed for collision detection but not resolution.
+- Functionality for Win/Lose conditions.
+- Made the build level function work between client and server.
+- Multithreaded loading screen.
+- Bug fixing.
+- Made death sound using rFGX.
+- Physics testing.
+- Altered grappling to be sent through signals.
+- Checkpoint system.
 
 ## Joerseven
 
