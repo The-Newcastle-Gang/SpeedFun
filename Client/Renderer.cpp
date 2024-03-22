@@ -439,9 +439,9 @@ void GameTechRenderer::FillDiffuseBuffer() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     RenderSkybox();
     RenderCamera();
-    if (chainObject && !chainTransforms.empty()) {
-        RenderMeshInstanced(chainObject, chainTransforms);
-    }
+//    if (chainObject && !chainTransforms.empty()) {
+//        RenderMeshInstanced(chainObject, chainTransforms);
+//    }
     RenderParticles();
 }
 
@@ -666,13 +666,7 @@ void GameTechRenderer::BuildObjectList() {
         if (o->IsActive()) {
             RenderObject* g = o->GetRenderObject();
             if (g) {
-                if (g->ShouldInstance()) {
-                    o->GetTransformPointer()->UpdateMatrix();
-                    chainTransforms.emplace_back(o->GetTransformPointer()->GetMatrix());
-                    chainObject = g;
-                } else {
-                    activeObjects.emplace_back(g);
-                }
+                activeObjects.emplace_back(g);
             }
         }
     });
