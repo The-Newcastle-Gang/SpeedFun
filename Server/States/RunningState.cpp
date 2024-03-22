@@ -218,6 +218,7 @@ void RunningState::LoadLevel(int level) {
     levelManager->SetCurrentLevel(level);
     BuildLevel(levelManager->GetLevelReader()->GetLevelName(level));
     numPlayersActive = numPlayersInGameplayState;
+    playerAnimationInfo.clear();
     CreatePlayers();
     CreateGrapples();
     AddTriggersToLevel();
@@ -459,6 +460,8 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
         trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
+
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
 
