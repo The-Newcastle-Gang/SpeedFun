@@ -43,6 +43,7 @@ void RunningState::SendLevelToClients(int level) {
     FunctionData data{};
     DataHandler handler(&data);
     handler.Pack(level);
+    handler.Pack(serverBase->GetPlayerInfo().size());
     networkData->outgoingGlobalFunctions.Push(FunctionPacket(Replicated::RemoteClientCalls::Load_Level, &data));
 }
 
@@ -216,6 +217,8 @@ void RunningState::UpdateInEndOfLevel(float dt) {
 void RunningState::LoadLevel(int level) {
     levelManager->SetCurrentLevel(level);
     BuildLevel(levelManager->GetLevelReader()->GetLevelName(level));
+    numPlayersActive = numPlayersInGameplayState;
+    playerAnimationInfo.clear();
     CreatePlayers();
     CreateGrapples();
     AddTriggersToLevel();
@@ -318,6 +321,7 @@ void RunningState::CreatePlayers() {
         playerAnimationInfo[i] = Replicated::PlayerAnimationStates::IDLE; //players start as idle
         auto player = new GameObject("player");
         replicated->CreatePlayer(player, *world);
+        if (numPlayersActive <= 0) player->SetActive(false);
         playerObjects[currentPlayer - 1] = player;
         currentPlayer++;
 
@@ -338,6 +342,7 @@ void RunningState::CreatePlayers() {
         player->AddComponent(new PlayerRespawner(player, 
             [this](int id) {this->DeathTriggerVolFunc(id); } //this was a workaround to avoid changing how the triggers work
         ));
+        numPlayersActive--;
     }
 }
 
@@ -455,6 +460,8 @@ void RunningState::AddTriggersToLevel(){
         trigger->TriggerSinkDeathVol.connect<&RunningState::DeathTriggerVolFunc>(this);
         trigger->TriggerSinkDeathVolEnd.connect<&RunningState::DeathTriggerVolEndFunc>(this);
         trigger->TriggerSinkStartVol.connect<&RunningState::StartTriggerVolFunc>(this);
+
+        Debug::DrawAABBLines(triggerVec.second, tempSize, colour, 1000.0f);
     }
 }
 

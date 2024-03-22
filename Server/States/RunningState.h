@@ -91,6 +91,7 @@ namespace NCL {
 
             void WaitUntilClientsInGameplay();
             int numPlayersInGameplayState = 0;
+            int numPlayersActive = 0;
 
             void WaitForPlayersLoaded();
             int numPlayersLoaded = 0;
