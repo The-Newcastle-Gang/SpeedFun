@@ -14,13 +14,11 @@ Swinging::Swinging(GameObject * go, float period, float cooldown, float waitDela
 
 void Swinging::OnCollisionEnter(GameObject* other) {
     if (other->GetTag() == PLAYER) {
-        std::cout << "HIT THE SWINGING BLOCK\n";
     }
 }
 
 void Swinging::OnCollisionEnd(GameObject* other) {
     if (other->GetTag() == PLAYER) {
-        std::cout << "LEFT THE SWINGING BLOCK\n";
     }
 }
 

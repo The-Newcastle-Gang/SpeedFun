@@ -1182,7 +1182,7 @@ void GameplayState::CreatePlayers() {
         player->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetAnimatorObject(newAnimator);
         player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
-        std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
+        //std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
         currentPlayer++;
         numberPlayersJoined--;
     }

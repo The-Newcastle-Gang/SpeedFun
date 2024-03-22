@@ -11,6 +11,7 @@ using namespace NCL;
 using namespace CSC8503;
 bool debugMode =false;
 
+
 int main() {  
     Window *w = Window::CreateGameWindow("CSC8508 SpeedFun!", 1920, 1200,true);
    
@@ -31,7 +32,7 @@ int main() {
     while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
         float dt = w->GetTimer()->GetTimeDeltaSeconds();
         if (dt > 0.1f) {
-            std::cout << "Skipping large time delta" << std::endl;
+            //std::cout << "Skipping large time delta" << std::endl;
             continue;
         }
         if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
@@ -47,13 +48,13 @@ int main() {
             debugMode = !debugMode;
         }
        
-      w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
+      w->SetTitle("Hell Runners");
 
         if(!debugMode){
             client->Update(dt);
         }
         
     }
-    Window::DestroyGameWindow();
     delete soundManager;
+    Window::DestroyGameWindow();
 }

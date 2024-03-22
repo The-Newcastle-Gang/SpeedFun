@@ -19,10 +19,8 @@ void TestBridge::TriggerOn() {
 	
 	bridgeFall = !bridgeFall;
 	if (bridgeFall) {
-		std::cout << "Bridge fall!\n";
 	}
 	else {
-		std::cout << "Bridge stop!\n";
 	}
 }
 

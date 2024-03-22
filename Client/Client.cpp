@@ -19,7 +19,7 @@ Client::Client(std::atomic<bool> &shouldStart) : serverStart(shouldStart), baseC
 }
 
 Client::~Client() {
-    std::cout << "Client shutting down" << std::endl;
+    //std::cout << "Client shutting down" << std::endl;
 }
 
 void Client::InitStateManager() {
@@ -51,7 +51,7 @@ void Client::Update(float dt) {
     canvas->Update(dt);
 
     if (dt > 0.04) {
-        std::cout << "Overly large dt" << std::endl;
+        //std::cout << "Overly large dt" << std::endl;
     }
 }
 

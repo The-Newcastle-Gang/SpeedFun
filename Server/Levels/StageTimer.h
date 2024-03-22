@@ -51,7 +51,6 @@ public:
 protected:
 
     void CalculateMedal();
-    void CalculateScore();
 
     float platinumTime = 15.0f;
     float goldTime = 20.0f;
