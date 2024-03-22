@@ -30,8 +30,12 @@ void MenuState::SendLevelSelectPacket(int level) {
 
 void MenuState::InitMenuSounds() {
     soundManager->SM_AddSoundToLoad("se_select00.wav");
+    soundManager->SM_AddSoundToLoad("fireUISound.wav");
     soundManager->SM_AddSoundToLoad("the-longest-night-of-this-winter-158699.wav");
     soundManager->SM_LoadSoundList();
+    soundManager->SM_SetSoundVolume("se_select00.wav", 0.7f);
+    soundManager->SM_SetSoundPitch("se_select00.wav", 0.6f);
+    soundManager->SM_SetSoundVolume("fireUISound.wav", 0.7f);
     soundManager->SM_PlaySound("the-longest-night-of-this-winter-158699.wav");
 }
 
@@ -103,6 +107,8 @@ void MenuState::MultiplayerOptionHover(Element& element) {
 }
 
 void MenuState::GoBack(Element& element) {
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     canvas->PopActiveLayer();
 }
 
@@ -128,6 +134,8 @@ void MenuState::StartSingleplayer() {
 
 void MenuState::BeginSingleplayer(Element& _) {
     shouldServerStart.store(true);
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     baseClient->SetSinglePlayer(true);
     baseClient->OnServerConnected.connect<&MenuState::StartSingleplayer>(this);
     baseClient->Connect("127.0.0.1", NetworkBase::GetDefaultPort());
@@ -135,10 +143,14 @@ void MenuState::BeginSingleplayer(Element& _) {
 
 void MenuState::ShowMultiplayerOptions(Element& _) {
     baseClient->SetSinglePlayer(false);
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     canvas->PushActiveLayer("multiplayer");
 }
 
 void MenuState::JoinGame(Element& _) {
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     canvas->PushActiveLayer("joinGame");
 }
 
@@ -169,6 +181,8 @@ void MenuState::SetActiveTextEntry(Element& element) {
 
 
 void MenuState::CreateLobby(Element& element) {
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     shouldServerStart.store(true);
     canvas->PushActiveLayer("lobby");
     HandleLevelInt(0);
@@ -177,12 +191,16 @@ void MenuState::CreateLobby(Element& element) {
 
 
 void MenuState::IncreaseLevel(Element& element) {
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     currentClientLevel = (currentClientLevel+1) % reader->GetNumberOfLevels();
     SendLevelSelectPacket(currentClientLevel);
     //std::cout << "LEVEL INCREASED TO " <<currentClientLevel<<"\n";
 }
 
 void MenuState::DecreaseLevel(Element& element) {
+    soundManager->SM_PlaySound("fireUISound.wav");
+
     currentClientLevel = (currentClientLevel - 1)<0?reader->GetNumberOfLevels()-1: (currentClientLevel - 1);
     SendLevelSelectPacket(currentClientLevel);
     //std::cout << "LEVEL DECREASED TO " << currentClientLevel << "\n";
@@ -209,10 +227,13 @@ void MenuState::UpdateLevelThumbnail(std::string levelName) {
 
 void MenuState::JoinLobby() {
     canvas->PushActiveLayer("lobby");
+    soundManager->SM_PlaySound("fireUISound.wav");
+
 }
 
 void MenuState::LeaveLobby(Element& element) {
     canvas->PopActiveLayer();
+
 }
 
 void MenuState::ConnectWithIp(Element& element) {
