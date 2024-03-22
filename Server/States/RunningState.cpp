@@ -471,7 +471,7 @@ void RunningState::SortTriggerInfoByType(TriggerVolumeObject::TriggerType &trigg
             break;
         case TriggerVolumeObject::TriggerType::Death:
             colour = {1, 0, 0, 1};
-            dimensions = Vector3(5000, 10, 5000);
+            dimensions = Vector3(5000, 30, 5000);
             break;
         case TriggerVolumeObject::TriggerType::CheckPoint:
             colour = {1, 0.4f, 1, 1};
