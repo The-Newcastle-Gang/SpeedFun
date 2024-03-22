@@ -28,17 +28,39 @@ This section lists the work done by each people involved in this project
 - UI programming - lua
 
 ## HeavyMetalGameDev
-- to be added
+- Component system
+- Physics broadphase rewrite using Sort & Sweep.
+- Collision layer matrix for objects and raycasts.
+- Physics materials.
+- Deferred rendering implementation.
+- Animation system including frame interpolation, animation transitions and transitioning through midposes. This builds upon Joe's networking system to make sure all player animations are consistent between clients.
+- Level transitioning. This involved a large amount of code rewriting, as most of the code up to that point did not consider what would happen when the game should go to a new level. Includes networking level loading i.e server tells clients what level to load, waiting for all clients to load into the game etc. Managing memory for this, making sure all memory is freed.
+- Disabling of player's controls at end of level and in countdown.
+- Camera FOV changing based on speed and grappling.
+- Gameplay components like moving platforms including being able to stand on them, grapple them.
+- Level editor tools in Unity for visualising moving platforms and spikes, selecting meshes for objects.
+- Level select on lobby screen that is consistent between clients.
+- Hooking up some functionality to networking: speed lines, grappling sway.
+- Rework of game flow of both server & client, to have a countdown, playing state, and an end timer before the next level is loaded. Includes networking these details.
+- Player texturing including different textures per client.
+- Made a few levels.
+- Changes to grapple functionality: disabling grappling of damaging objects.
+- Debug screen collision count.
+- Improvement to Adam's cinematic camera: made it transition to the correct player at the end of the camera track.
+- Various bugfixes
 
 ## Odycious
-- Took ownership of version control
-- Created Trigger Volumes - Start, End, Checkpoint, Death
-- Functionality for Win/Lose conditions
-- Made the build level function work between client and server
-- Multithreaded loading screen
-- Bug fixing
-- Made death sound using rFGX
-- Physics testing
+- Took ownership of version control; managed the pull requests, merge conflicts and ensured main wasn't broken. 
+- Created Trigger Volumes - Start, End, Checkpoint, Death.
+- Altered the physics system to accommodate trigger volumes - allowed for collision detection but not resolution.
+- Functionality for Win/Lose conditions.
+- Made the build level function work between client and server.
+- Multithreaded loading screen.
+- Bug fixing.
+- Made death sound using rFGX.
+- Physics testing.
+- Altered grappling to be sent through signals.
+- Checkpoint system.
 
 ## Joerseven
 
