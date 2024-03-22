@@ -13,23 +13,49 @@ https://pixabay.com/music/beats-the-longest-night-of-this-winter-158699/
 # General Work Credits
 This section lists the work done by each people involved in this project
 ## St4rman
-- Core Physics, core gameplay loop
-- Core Level loading tool development on unity, Mesh loading with level reader
-- Level Manager, Input Manager, Player component, Medal system in level Manager
-- Post processing speedlines shader
-- lava shader, UI fire shaders, Lava Quad
-- Core Player cam animations, Core UI system integration 
-- shine shader on medal , noise shader on timer bar
-- Timer class for stage timer
-- Debug Class time
-- main menu rewrite
-- UI programming
+- Core Physics all the collisions OBBBs, Capsules, core gameplay loop
+- Core tech Game flow - syncing client and server across levels and making sure theyre syncing well
+- Core player input class wrapper
+- Core Level loading tool development on unity, Mesh loading with level reader - Takes data from unity to json and then puts it in the game itself
+- Level Manager, Input Manager, Player component, Medal system in level Manager - Static class singleton patterns allowing anywhere
+- Post processing speedlines shader - Generative noise glsl 4 directional
+- lava shader, UI fire shaders, Lava Quad - noise and shader animation
+- Shine shader on medal , Noise shader on timer bar
+- Core Player cam animations, Core UI system integration  - Set up with player input
+- Timer class for stage timer 
+- Debug Class - time costs of functionalities and memory
+- main menu rewrite 
+- UI programming - lua
 
 ## HeavyMetalGameDev
+- to be added
 
 ## Odycious
+- Took ownership of version control
+- Created Trigger Volumes - Start, End, Checkpoint, Death
+- Functionality for Win/Lose conditions
+- Made the build level function work between client and server
+- Multithreaded loading screen
+- Bug fixing
+- Made death sound using rFGX
+- Physics testing
 
 ## Joerseven
+
+- Multi-threaded networking / created the server-client architecture that the game uses.
+- Structured the project and created the base cmake files for the project, adding the libraries used like RAudio, Freetype and more through CMake.
+- Used the freetype library with opengl to make a text renderer
+- Added entt to add signal powered code throughout the repo.
+- Created the UI framework for the game, a main canvas with layers that act as a pushdown automata system,
+- a custom position system that lets the users specify position and size relative to the screen or in pixels. Added events that can be hooked into for each of the UI elements
+- Embedded Lua to use with the UI if people wanted to.
+- Created a TweenManager class for easy UI animations.
+- Fixed the broken Matrix3 class.
+- Created the Visual side of the grapple, modelling the chains and the trident in maya, adding them into the game, using instanced rendering for the chains.
+- Created a smaller state-based system for the player movement.
+- Created the toon outlines using sobel edge detection on the depth texture.
+- Used 'tinyobj' along with a custom function to load OBJ files into OpenGL, to give use more flexibility over just .MSH files.
+- Implemented Fast Approximate Anti Aliaiasing as a post process pass to remove the nasty jaggies.
 
 ## JunkyX1122
 
@@ -58,4 +84,8 @@ Mainly polish stuff.
 - Music manager, Music pausing on pause menu
 - Grapple, Deactivates when hitting lava in grapple state
 
-  ## ikozoom & bruceshi
+## ikozoom & bruceshi
+- stage timer
+- components (raycast enemy, breaking block, bridge)
+- live ops testing
+- level design
