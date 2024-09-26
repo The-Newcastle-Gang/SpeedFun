@@ -200,7 +200,7 @@ void PlayerMovement::UpdateOnGround(float dt) {
 void PlayerMovement::LeaveGround() {}
 
 
-void PlayerMovement::PhysicsUpdate(float fixedTime) {
+void PlayerMovement::GrappleSwinging(float fixedTime) {
 
     // Add horizontal drag
 
@@ -262,6 +262,8 @@ void PlayerMovement::Update(float dt) {
 
     activeState->UpdateState(dt);
     UpdateGrapple(dt);
+
+    GrappleSwinging(dt);
 
     auto fwdAxis = Vector3::Cross(Vector3(0,1,0), rightAxis);
     gameObject->GetPhysicsObject()->AddForce(fwdAxis * inputDirection.y * runSpeed * dt);

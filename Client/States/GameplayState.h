@@ -156,6 +156,8 @@ namespace NCL {
 
             void SendInputData();
             void CreatePlayers();
+            int numberPlayersJoined = 0;
+            int numberPlayersLoaded = 0;
 
             void UpdatePlayerAnimation(int networkID, Replicated::PlayerAnimationStates state);
 

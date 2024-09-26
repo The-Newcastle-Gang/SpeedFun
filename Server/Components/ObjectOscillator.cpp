@@ -35,7 +35,7 @@ void ObjectOscillator::OnCollisionEnd(GameObject* other) {
     }
 }
 
-void ObjectOscillator::PhysicsUpdate(float dt) {
+void ObjectOscillator::Update(float dt) {
     timer += dt;
     switch (state)
     {

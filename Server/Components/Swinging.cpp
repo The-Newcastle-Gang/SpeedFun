@@ -22,7 +22,7 @@ void Swinging::OnCollisionEnd(GameObject* other) {
     }
 }
 
-void Swinging::PhysicsUpdate(float dt) {
+void Swinging::Update(float dt) {
     timer += dt;
     switch (state)
     {

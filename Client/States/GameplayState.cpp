@@ -559,6 +559,7 @@ void GameplayState::Update(float dt) {
 }
 
 void GameplayState::UpdateCountdown(float dt){
+
     if (finishedLoading != LoadingStates::READY) {
         ManageLoading(dt);
         return;
@@ -793,6 +794,7 @@ void GameplayState::ReadNetworkFunctions() {
 
             case(Replicated::Load_Level): {
                 int level = handler.Unpack<int>();
+                numberPlayersJoined = handler.Unpack<int>();
                 levelManager->SetHasReceivedLevel(true);
                 levelManager->ChangeLevel(level);
                 shouldMoveToNewLevel = true;
@@ -1155,13 +1157,14 @@ void GameplayState::CreatePlayers() {
     OGLShader* playerShader = new OGLShader("SkinningVert.vert", "Player.frag");
     MeshGeometry* playerMesh = resources->GetMesh("Player.msh");
     Vector3 startPos = levelManager->GetLevelReader()->GetStartPosition();
-
     for (int i=0; i<Replicated::PLAYERCOUNT; i++) {
         Vector3 thisPlayerStartPos = startPos + Vector3(0, 0, 1) * CGetDirectionFromPlayerNumber(currentPlayer) * CGetMagnitudeFromPlayerNumber(currentPlayer) * playerSeperation;
+
         auto player = new GameObject();
         replicated->CreatePlayer(player, *world);
-        player->GetTransform().SetPosition(thisPlayerStartPos);
   
+        player->GetTransform().SetPosition(thisPlayerStartPos);
+        if (numberPlayersJoined <= 0) player->SetActive(false);
         playerMesh->AddAnimationToMesh("Run", resources->GetAnimation("Player_FastRun.anm"));
         playerMesh->AddAnimationToMesh("LeftStrafe", resources->GetAnimation("Player_RightStrafe.anm")); //this is just how the animations were exported
         playerMesh->AddAnimationToMesh("RightStrafe", resources->GetAnimation("Player_LeftStrafe.anm"));
@@ -1181,6 +1184,7 @@ void GameplayState::CreatePlayers() {
         player->GetRenderObject()->SetMeshMaterial(playerTextures[currentPlayer]);
         //std::cout << player->GetNetworkObject()->GetNetworkId() << std::endl;
         currentPlayer++;
+        numberPlayersJoined--;
     }
 }
 
@@ -1416,7 +1420,6 @@ bool GameplayState::IsDisconnected() {
 
 void GameplayState::AssignPlayer(int netObject) {
     auto player = world->GetObjectByNetworkId(netObject);
-
     delete player->GetRenderObject();
     player->SetRenderObject(nullptr);
 
@@ -1424,7 +1427,7 @@ void GameplayState::AssignPlayer(int netObject) {
     player->SetAnimatorObject(nullptr);
 
     firstPersonPosition = &player->GetTransform();
-    
+
     //cinematicCamera->AddInitialCamera(levelManager->GetLevelReader()->GetStartPosition());
     cinematicCamera->AddInitialCamera(firstPersonPosition->GetPosition() + world->GetMainCamera()->GetOffsetPosition());
 }

@@ -36,7 +36,7 @@ bool CollisionDetection::RayIntersection(const Ray& r,GameObject& object, RayCol
 	if (!volume) {
 		return false;
 	}
-
+	if (!object.IsActive()) return false;
 	switch (volume->type) {
 		case VolumeType::AABB:		hasCollided = RayAABBIntersection(r, worldTransform, (const AABBVolume&)*volume	, collision); break;
 		case VolumeType::OBB:		hasCollided = RayOBBIntersection(r, worldTransform, (const OBBVolume&)*volume	, collision); break;
@@ -176,7 +176,7 @@ bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, Collis
 	if (!volA || !volB) {
 		return false;
 	}
-
+	if (!a->IsActive() || !b->IsActive()) return false;
 	collisionInfo.a = a;
 	collisionInfo.b = b;
 

@@ -381,7 +381,6 @@ void PhysicsSystem::SortAndSweep() {
         if (!currentBound.isUpper) {
             for (GameObject* other : currentValidObjects) {
                 if (!layerMatrix[other->GetPhysicsObject()->GetLayer() | currentBoundObject->GetPhysicsObject()->GetLayer()])continue;
-
                 CollisionDetection::CollisionInfo info;
                 info.a = Tmin(currentBoundObject, other);
                 info.b = Tmax(currentBoundObject, other);
@@ -451,7 +450,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 	gameWorld.GetObjectIterators(first, last);          //setting our constructors to the first and last game objects in the scene
 
 	for (auto& i = first; i != last; i++) {
-
+		if (!(*i)->IsActive()) continue;
 		PhysicsObject* object = (*i)->GetPhysicsObject();     //Get the physics object from the game obj
 
 		if (object == nullptr) {                                //if it's not physical then we go to the next one
@@ -502,6 +501,7 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 	gameWorld.GetObjectIterators(first, last);
 
 	for (auto& i = first; i != last; ++i) {
+		if (!(*i)->IsActive()) continue;
 		PhysicsObject* object = (*i)->GetPhysicsObject();
 
 		if (object == nullptr) {
