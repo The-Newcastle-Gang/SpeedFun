@@ -45,6 +45,7 @@ void Client::InitStateManager() {
 }
 
 void Client::Update(float dt) {
+    shouldExit = baseClient->GetShouldExit();
 
     stateManager->Update(dt);
 

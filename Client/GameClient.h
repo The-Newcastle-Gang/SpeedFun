@@ -37,7 +37,11 @@ namespace NCL {
             void SetSinglePlayer(bool b) { isSinglePlayer = b; }
             bool IsSinglePlayer() { return isSinglePlayer; }
 
+            void SetShouldExit(bool e) { shouldExit = e; }
+            bool GetShouldExit() { return shouldExit; }
+
         protected:
+            bool shouldExit = false;
             _ENetPeer*	netPeer;
             ConnectionH serverConnected;
             bool isSinglePlayer = true;
