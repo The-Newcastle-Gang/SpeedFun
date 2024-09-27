@@ -925,6 +925,10 @@ void GameplayState::UpdatePlayerAnimation(int networkID, Replicated::PlayerAnima
             playerAnimator->TransitionAnimationWithMidPose("RightStrafe", 0.15f);
             break;
         }
+        case Replicated::WIN: {
+            playerAnimator->TransitionAnimation("Win", 0.10f);
+            break;
+        }
     }
 }
 
@@ -1169,6 +1173,7 @@ void GameplayState::CreatePlayers() {
         playerMesh->AddAnimationToMesh("Idle", resources->GetAnimation("Player_Idle.anm"));
         playerMesh->AddAnimationToMesh("Fall", resources->GetAnimation("Player_Fall.anm"));
         playerMesh->AddAnimationToMesh("Jump", resources->GetAnimation("Player_Grapple.anm"));
+        playerMesh->AddAnimationToMesh("Win", resources->GetAnimation("Player_Win.anm"));
         player->SetRenderObject(new RenderObject(&player->GetTransform(), playerMesh, nullptr, playerShader));
         player->GetRenderObject()->SetMeshScale(player->GetTransform().GetScale() * 1.0f);
         player->GetRenderObject()->SetMeshOffset(Vector3(0,-0.5f,0));
